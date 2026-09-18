@@ -1,13 +1,12 @@
 import { useState } from "react";
-import "../../../src/css/auth.css";
+import { Link } from "react-router-dom";
+import "../../css/auth.css";
 
 function Login() {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
     <div className="login-page">
-
-      {/* ================= LEFT SIDE ================= */}
       <section className="login-left">
 
         <div className="left-content">
@@ -19,7 +18,7 @@ function Login() {
           <h1>
             Smart <span>Apartment</span>
           </h1>
-
+            
           <h3>Manage Better. Live Better.</h3>
 
           <p className="left-description">
@@ -27,15 +26,10 @@ function Login() {
             residents, visitors, maintenance and amenities in one place.
           </p>
 
-
-          {/* Features */}
-
           <div className="features">
 
             <div className="feature">
-              <div className="feature-icon">
-                👥
-              </div>
+              <div className="feature-icon">👥</div>
 
               <div>
                 <h4>Easy Society Management</h4>
@@ -43,11 +37,8 @@ function Login() {
               </div>
             </div>
 
-
             <div className="feature">
-              <div className="feature-icon">
-                🛡️
-              </div>
+              <div className="feature-icon">🛡️</div>
 
               <div>
                 <h4>Secure Visitor Management</h4>
@@ -55,11 +46,8 @@ function Login() {
               </div>
             </div>
 
-
             <div className="feature">
-              <div className="feature-icon">
-                💳
-              </div>
+              <div className="feature-icon">💳</div>
 
               <div>
                 <h4>Maintenance & Payment Tracking</h4>
@@ -67,11 +55,8 @@ function Login() {
               </div>
             </div>
 
-
             <div className="feature">
-              <div className="feature-icon">
-                📅
-              </div>
+              <div className="feature-icon">📅</div>
 
               <div>
                 <h4>Amenity Booking</h4>
@@ -85,16 +70,12 @@ function Login() {
 
       </section>
 
-
-      {/* ================= RIGHT SIDE ================= */}
-
       <section className="login-right">
 
         <div className="login-card">
 
-          {/* Logo */}
-
           <div className="login-logo">
+
             <div className="logo-building">
               🏢
             </div>
@@ -102,10 +83,8 @@ function Login() {
             <h2>
               Smart <span>Apartment</span>
             </h2>
+
           </div>
-
-
-          {/* Heading */}
 
           <div className="login-heading">
 
@@ -119,10 +98,7 @@ function Login() {
 
           </div>
 
-
           <form>
-
-            {/* ================= ROLE ================= */}
 
             <div className="form-group">
 
@@ -164,9 +140,6 @@ function Login() {
 
             </div>
 
-
-            {/* ================= EMAIL ================= */}
-
             <div className="form-group">
 
               <label>
@@ -188,9 +161,6 @@ function Login() {
 
             </div>
 
-
-            {/* ================= PASSWORD ================= */}
-
             <div className="form-group">
 
               <div className="password-top">
@@ -204,7 +174,6 @@ function Login() {
                 </a>
 
               </div>
-
 
               <div className="input-wrapper">
 
@@ -231,9 +200,6 @@ function Login() {
 
             </div>
 
-
-            {/* ================= REMEMBER ================= */}
-
             <div className="remember-row">
 
               <label className="remember">
@@ -247,9 +213,6 @@ function Login() {
               </label>
 
             </div>
-
-
-            {/* ================= LOGIN BUTTON ================= */}
 
             <button
               type="submit"
@@ -267,21 +230,17 @@ function Login() {
 
           </form>
 
-
-          {/* ================= REGISTER ================= */}
-
           <div className="register-text">
 
-            Don't have an account?
+            <span>
+              Don't have an account?
+            </span>
 
-            <a href="#">
+            <Link to="/register">
               Create an account
-            </a>
+            </Link>
 
           </div>
-
-
-          {/* ================= SECURITY ================= */}
 
           <div className="security">
 
