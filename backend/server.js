@@ -4,16 +4,25 @@ require("dotenv").config();
 
 const { testConnection } = require("./config/db");
 const residentRoutes = require("./routes/residentRoutes");
+const adminRoutes = require("./routes/adminRoutes");
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
+
 app.get("/", (req, res) => {
   res.json({
     message: "Smart Apartment API",
     status: "active"
+  });
+});
+
+app.use("/api/admin", adminRoutes);
+app.get("/api/admin/test", (req, res) => {
+  res.json({
+    message: "Admin route is working"
   });
 });
 

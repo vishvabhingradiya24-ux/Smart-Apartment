@@ -14,6 +14,8 @@ const Register = () => {
     email: "",
     phone: "",
     user_type: "",
+    block_wing: "",
+    flat_number: "",
     password: "",
     confirm_password: "",
     terms: false
@@ -51,13 +53,22 @@ const Register = () => {
       return;
     }
 
+    if (formData.user_type === "resident") {
+      if (!formData.block_wing || !formData.flat_number) {
+        setError("Please fill Block/Wing and Flat Number.");
+        return;
+      }
+    }
+
     if (formData.password !== formData.confirm_password) {
       setError("Passwords do not match.");
       return;
     }
 
     if (!formData.terms) {
-      setError("Please agree to the Terms & Conditions and Privacy Policy.");
+      setError(
+        "Please agree to the Terms & Conditions and Privacy Policy."
+      );
       return;
     }
 
@@ -76,9 +87,21 @@ const Register = () => {
             last_name: formData.last_name,
             email: formData.email,
             phone: formData.phone,
+
             user_type:
               formData.user_type.charAt(0).toUpperCase() +
               formData.user_type.slice(1),
+
+            block_wing:
+              formData.user_type === "resident"
+                ? formData.block_wing
+                : null,
+
+            flat_number:
+              formData.user_type === "resident"
+                ? formData.flat_number
+                : null,
+
             password: formData.password
           })
         }
@@ -96,6 +119,7 @@ const Register = () => {
       setTimeout(() => {
         navigate("/login");
       }, 1500);
+
     } catch (error) {
       setError(
         "Unable to connect to server. Please make sure backend is running."
@@ -169,19 +193,19 @@ const Register = () => {
 
       </div>
 
-
       <div className="register-right">
 
         <div className="register-card">
 
           <div className="register-heading">
+
             <h1>Create Account</h1>
 
             <p>
               Register to access your Smart Apartment account
             </p>
-          </div>
 
+          </div>
 
           <form onSubmit={handleSubmit}>
 
@@ -201,7 +225,6 @@ const Register = () => {
 
               </div>
 
-
               <div className="register-form-group">
 
                 <label>Last Name</label>
@@ -218,7 +241,6 @@ const Register = () => {
 
             </div>
 
-
             <div className="register-form-group">
 
               <label>Email Address</label>
@@ -233,7 +255,6 @@ const Register = () => {
 
             </div>
 
-
             <div className="register-form-group">
 
               <label>Phone Number</label>
@@ -247,7 +268,6 @@ const Register = () => {
               />
 
             </div>
-
 
             <div className="register-form-group">
 
@@ -280,6 +300,62 @@ const Register = () => {
 
             </div>
 
+            {formData.user_type === "resident" && (
+
+              <div className="register-row">
+
+                <div className="register-form-group">
+
+                  <label>Block / Wing</label>
+
+                  <select
+                    className="register-select"
+                    name="block_wing"
+                    value={formData.block_wing}
+                    onChange={handleChange}
+                  >
+
+                    <option value="" disabled>
+                      Select block / wing
+                    </option>
+
+                    <option value="A Wing">
+                      A Wing
+                    </option>
+
+                    <option value="B Wing">
+                      B Wing
+                    </option>
+
+                    <option value="C Wing">
+                      C Wing
+                    </option>
+
+                    <option value="D Wing">
+                      D Wing
+                    </option>
+
+                  </select>
+
+                </div>
+
+                <div className="register-form-group">
+
+                  <label>Flat Number</label>
+
+                  <input
+                    type="text"
+                    name="flat_number"
+                    placeholder="e.g. A-101"
+                    value={formData.flat_number}
+                    onChange={handleChange}
+                  />
+
+                </div>
+
+              </div>
+
+            )}
 
             <div className="register-form-group">
 
@@ -308,7 +384,6 @@ const Register = () => {
 
             </div>
 
-
             <div className="register-form-group">
 
               <label>Confirm Password</label>
@@ -316,7 +391,11 @@ const Register = () => {
               <div className="register-password">
 
                 <input
-                  type={showConfirmPassword ? "text" : "password"}
+                  type={
+                    showConfirmPassword
+                      ? "text"
+                      : "password"
+                  }
                   name="confirm_password"
                   placeholder="Confirm password"
                   value={formData.confirm_password}
@@ -326,7 +405,9 @@ const Register = () => {
                 <button
                   type="button"
                   onClick={() =>
-                    setShowConfirmPassword(!showConfirmPassword)
+                    setShowConfirmPassword(
+                      !showConfirmPassword
+                    )
                   }
                 >
                   {showConfirmPassword ? "Hide" : "Show"}
@@ -335,7 +416,6 @@ const Register = () => {
               </div>
 
             </div>
-
 
             <label className="register-terms">
 
@@ -352,30 +432,39 @@ const Register = () => {
 
             </label>
 
-
             {error && (
-              <div style={{ color: "red", marginTop: "10px" }}>
+              <div
+                style={{
+                  color: "red",
+                  marginTop: "10px"
+                }}
+              >
                 {error}
               </div>
             )}
 
             {message && (
-              <div style={{ color: "green", marginTop: "10px" }}>
+              <div
+                style={{
+                  color: "green",
+                  marginTop: "10px"
+                }}
+              >
                 {message}
               </div>
             )}
-
 
             <button
               type="submit"
               className="register-button"
               disabled={loading}
             >
-              {loading ? "Creating Account..." : "Create Account"}
+              {loading
+                ? "Creating Account..."
+                : "Create Account"}
             </button>
 
           </form>
-
 
           <div className="register-login">
 

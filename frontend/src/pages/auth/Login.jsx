@@ -1,12 +1,126 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "../../css/auth.css";
 
 function Login() {
+  const navigate = useNavigate();
+
   const [showPassword, setShowPassword] = useState(false);
+
+  const [formData, setFormData] = useState({
+    user_type: "",
+    email: "",
+    password: ""
+  });
+
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+
+    setMessage("");
+    setError("");
+
+    if (!formData.user_type || !formData.email || !formData.password) {
+      setError("Please fill all required fields.");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const isAdmin = formData.user_type === "admin";
+
+      const loginURL = isAdmin
+        ? "http://localhost:5000/api/admin/login"
+        : "http://localhost:5000/api/resident/login";
+
+      const requestBody = isAdmin
+        ? {
+            email: formData.email,
+            password: formData.password
+          }
+        : {
+            user_type:
+              formData.user_type.charAt(0).toUpperCase() +
+              formData.user_type.slice(1),
+            email: formData.email,
+            password: formData.password
+          };
+
+      const response = await fetch(loginURL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(requestBody)
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.message || "Login failed.");
+        setLoading(false);
+        return;
+      }
+
+      localStorage.setItem("token", data.token);
+
+      if (isAdmin) {
+        localStorage.setItem(
+          "user",
+          JSON.stringify({
+            ...data.admin,
+            user_type: "Admin"
+          })
+        );
+
+        setMessage("Admin login successful!");
+
+        setTimeout(() => {
+          navigate("/admin");
+        }, 1000);
+
+        return;
+      }
+
+      localStorage.setItem("user", JSON.stringify(data.user));
+
+      setMessage("Login successful!");
+
+      setTimeout(() => {
+        if (data.user.user_type === "Resident") {
+          navigate("/resident");
+        } else if (data.user.user_type === "Security") {
+          navigate("/security");
+        } else if (data.user.user_type === "Staff") {
+          navigate("/staff");
+        }
+      }, 1000);
+
+    } catch (error) {
+      console.error("Login Error:", error);
+
+      setError(
+        "Unable to connect to server. Please make sure backend is running."
+      );
+    }
+
+    setLoading(false);
+  };
 
   return (
     <div className="login-page">
+
       <section className="login-left">
 
         <div className="left-content">
@@ -18,7 +132,7 @@ function Login() {
           <h1>
             Smart <span>Apartment</span>
           </h1>
-            
+
           <h3>Manage Better. Live Better.</h3>
 
           <p className="left-description">
@@ -98,7 +212,7 @@ function Login() {
 
           </div>
 
-          <form>
+          <form onSubmit={handleLogin}>
 
             <div className="form-group">
 
@@ -112,7 +226,11 @@ function Login() {
                   👤
                 </span>
 
-                <select defaultValue="">
+                <select
+                  name="user_type"
+                  value={formData.user_type}
+                  onChange={handleChange}
+                >
 
                   <option value="" disabled>
                     Select your role
@@ -122,16 +240,16 @@ function Login() {
                     Resident
                   </option>
 
-                  <option value="admin">
-                    Admin / Committee
-                  </option>
-
                   <option value="security">
                     Security
                   </option>
 
                   <option value="staff">
                     Staff
+                  </option>
+
+                  <option value="admin">
+                    Admin
                   </option>
 
                 </select>
@@ -154,6 +272,9 @@ function Login() {
 
                 <input
                   type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
                   placeholder="Enter your email"
                 />
 
@@ -169,9 +290,9 @@ function Login() {
                   Password
                 </label>
 
-                <a href="#">
+                <Link to="/forgot-password">
                   Forgot Password?
-                </a>
+                </Link>
 
               </div>
 
@@ -183,6 +304,9 @@ function Login() {
 
                 <input
                   type={showPassword ? "text" : "password"}
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
                   placeholder="Enter your password"
                 />
 
@@ -214,12 +338,26 @@ function Login() {
 
             </div>
 
+            {error && (
+              <p className="auth-error">
+                {error}
+              </p>
+            )}
+
+            {message && (
+              <p className="auth-success">
+                {message}
+              </p>
+            )}
+
             <button
               type="submit"
               className="login-button"
+              disabled={loading}
             >
+
               <span>
-                Login
+                {loading ? "Logging in..." : "Login"}
               </span>
 
               <span className="arrow">
