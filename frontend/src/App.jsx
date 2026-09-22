@@ -6,9 +6,10 @@ import Register from "./pages/auth/Register";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import VerifyOTP from "./pages/auth/VerifyOTP";
 import ResetPassword from "./pages/auth/ResetPassword";
-
 import ResidentDashboard from "./pages/resident/ResidentDashboard";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import StaffDashboard from "./pages/staff/StaffDashboard";
+import Complaints from "./pages/resident/Complaints";
 
 function App() {
   return (
@@ -21,30 +22,19 @@ function App() {
 
         <Route path="/register" element={<Register />} />
 
-        <Route
-          path="/forgot-password"
-          element={<ForgotPassword />}
-        />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
 
-        <Route
-          path="/verify-otp"
-          element={<VerifyOTP />}
-        />
+        <Route path="/verify-otp" element={<VerifyOTP />} />
 
-        <Route
-          path="/reset-password"
-          element={<ResetPassword />}
-        />
+        <Route path="/reset-password" element={<ResetPassword />} />
 
-        <Route
-          path="/resident"
-          element={<ResidentDashboard />}
-        />
+        <Route path="/resident" element={<ResidentDashboard />} />
 
-        <Route
-          path="/admin"
-          element={<AdminDashboard />}
-        />
+        <Route path="/admin" element={<AdminDashboard />} />
+
+        <Route path="/staff" element={<StaffDashboard />} />
+
+        <Route path="/resident/complaints" element={<Complaints />} />
 
       </Routes>
     </BrowserRouter>

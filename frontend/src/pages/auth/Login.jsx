@@ -38,24 +38,35 @@ function Login() {
     setLoading(true);
 
     try {
-      const isAdmin = formData.user_type === "admin";
+      let loginURL = "";
+      let requestBody = {};
 
-      const loginURL = isAdmin
-        ? "http://localhost:5000/api/admin/login"
-        : "http://localhost:5000/api/resident/login";
+      if (formData.user_type === "resident") {
+        loginURL = "http://localhost:5000/api/resident/login";
 
-      const requestBody = isAdmin
-        ? {
-            email: formData.email,
-            password: formData.password
-          }
-        : {
-            user_type:
-              formData.user_type.charAt(0).toUpperCase() +
-              formData.user_type.slice(1),
-            email: formData.email,
-            password: formData.password
-          };
+        requestBody = {
+          email: formData.email,
+          password: formData.password
+        };
+      }
+
+      if (formData.user_type === "staff") {
+        loginURL = "http://localhost:5000/api/staff/login";
+
+        requestBody = {
+          email: formData.email,
+          password: formData.password
+        };
+      }
+
+      if (formData.user_type === "admin") {
+        loginURL = "http://localhost:5000/api/admin/login";
+
+        requestBody = {
+          email: formData.email,
+          password: formData.password
+        };
+      }
 
       const response = await fetch(loginURL, {
         method: "POST",
@@ -75,13 +86,55 @@ function Login() {
 
       localStorage.setItem("token", data.token);
 
-      if (isAdmin) {
+      if (formData.user_type === "resident") {
+        const residentUser = {
+          ...data.user,
+          user_type: "Resident"
+        };
+
         localStorage.setItem(
           "user",
-          JSON.stringify({
-            ...data.admin,
-            user_type: "Admin"
-          })
+          JSON.stringify(residentUser)
+        );
+
+        setMessage("Resident login successful!");
+
+        setTimeout(() => {
+          navigate("/resident");
+        }, 1000);
+
+        return;
+      }
+
+      if (formData.user_type === "staff") {
+        const staffUser = {
+          ...data.staff,
+          user_type: "Staff"
+        };
+
+        localStorage.setItem(
+          "user",
+          JSON.stringify(staffUser)
+        );
+
+        setMessage("Staff login successful!");
+
+        setTimeout(() => {
+          navigate("/staff");
+        }, 1000);
+
+        return;
+      }
+
+      if (formData.user_type === "admin") {
+        const adminUser = {
+          ...data.admin,
+          user_type: "Admin"
+        };
+
+        localStorage.setItem(
+          "user",
+          JSON.stringify(adminUser)
         );
 
         setMessage("Admin login successful!");
@@ -92,20 +145,6 @@ function Login() {
 
         return;
       }
-
-      localStorage.setItem("user", JSON.stringify(data.user));
-
-      setMessage("Login successful!");
-
-      setTimeout(() => {
-        if (data.user.user_type === "Resident") {
-          navigate("/resident");
-        } else if (data.user.user_type === "Security") {
-          navigate("/security");
-        } else if (data.user.user_type === "Staff") {
-          navigate("/staff");
-        }
-      }, 1000);
 
     } catch (error) {
       console.error("Login Error:", error);
@@ -230,6 +269,7 @@ function Login() {
                   name="user_type"
                   value={formData.user_type}
                   onChange={handleChange}
+                  required
                 >
 
                   <option value="" disabled>
@@ -238,10 +278,6 @@ function Login() {
 
                   <option value="resident">
                     Resident
-                  </option>
-
-                  <option value="security">
-                    Security
                   </option>
 
                   <option value="staff">
@@ -276,6 +312,7 @@ function Login() {
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="Enter your email"
+                  required
                 />
 
               </div>
@@ -308,6 +345,7 @@ function Login() {
                   value={formData.password}
                   onChange={handleChange}
                   placeholder="Enter your password"
+                  required
                 />
 
                 <button

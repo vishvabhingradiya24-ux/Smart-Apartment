@@ -16,6 +16,7 @@ const Register = () => {
     user_type: "",
     block_wing: "",
     flat_number: "",
+    staff_type: "",
     password: "",
     confirm_password: "",
     terms: false
@@ -28,10 +29,22 @@ const Register = () => {
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
 
-    setFormData({
-      ...formData,
+    setFormData((prev) => ({
+      ...prev,
       [name]: type === "checkbox" ? checked : value
-    });
+    }));
+  };
+
+  const handleUserTypeChange = (e) => {
+    const userType = e.target.value;
+
+    setFormData((prev) => ({
+      ...prev,
+      user_type: userType,
+      block_wing: "",
+      flat_number: "",
+      staff_type: ""
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -40,32 +53,89 @@ const Register = () => {
     setMessage("");
     setError("");
 
+    const form = e.currentTarget;
+    const formValues = new FormData(form);
+
+    const first_name = String(
+      formValues.get("first_name") || ""
+    ).trim();
+
+    const last_name = String(
+      formValues.get("last_name") || ""
+    ).trim();
+
+    const email = String(
+      formValues.get("email") || ""
+    ).trim();
+
+    const phone = String(
+      formValues.get("phone") || ""
+    ).trim();
+
+    const user_type = String(
+      formValues.get("user_type") || ""
+    ).trim();
+
+    const block_wing = String(
+      formValues.get("block_wing") || ""
+    ).trim();
+
+    const flat_number = String(
+      formValues.get("flat_number") || ""
+    ).trim();
+
+    const staff_type = String(
+      formValues.get("staff_type") || ""
+    ).trim();
+
+    const password = String(
+      formValues.get("password") || ""
+    );
+
+    const confirm_password = String(
+      formValues.get("confirm_password") || ""
+    );
+
+    const terms = form.elements.terms.checked;
+
     if (
-      !formData.first_name ||
-      !formData.last_name ||
-      !formData.email ||
-      !formData.phone ||
-      !formData.user_type ||
-      !formData.password ||
-      !formData.confirm_password
+      !first_name ||
+      !last_name ||
+      !email ||
+      !phone ||
+      !user_type ||
+      !password ||
+      !confirm_password
     ) {
       setError("Please fill all required fields.");
       return;
     }
 
-    if (formData.user_type === "resident") {
-      if (!formData.block_wing || !formData.flat_number) {
+    if (user_type === "Resident") {
+      if (!block_wing || !flat_number) {
         setError("Please fill Block/Wing and Flat Number.");
         return;
       }
     }
 
-    if (formData.password !== formData.confirm_password) {
+    if (user_type === "Staff") {
+      if (!staff_type) {
+        setError("Please select Staff Type.");
+        return;
+      }
+    }
+
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters.");
+      return;
+    }
+
+    if (password !== confirm_password) {
       setError("Passwords do not match.");
       return;
     }
 
-    if (!formData.terms) {
+    if (!terms) {
       setError(
         "Please agree to the Terms & Conditions and Privacy Policy."
       );
@@ -75,37 +145,42 @@ const Register = () => {
     try {
       setLoading(true);
 
-      const response = await fetch(
-        "http://localhost:5000/api/resident/register",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            first_name: formData.first_name,
-            last_name: formData.last_name,
-            email: formData.email,
-            phone: formData.phone,
+      const isResident = user_type === "Resident";
 
-            user_type:
-              formData.user_type.charAt(0).toUpperCase() +
-              formData.user_type.slice(1),
+      const registerURL = isResident
+        ? "http://localhost:5000/api/resident/register"
+        : "http://localhost:5000/api/staff/register";
 
-            block_wing:
-              formData.user_type === "resident"
-                ? formData.block_wing
-                : null,
+      const requestBody = isResident
+        ? {
+            first_name,
+            last_name,
+            email,
+            phone,
+            user_type,
+            block_wing,
+            flat_number,
+            password
+          }
+        : {
+            first_name,
+            last_name,
+            email,
+            phone,
+            user_type,
+            staff_type,
+            password
+          };
 
-            flat_number:
-              formData.user_type === "resident"
-                ? formData.flat_number
-                : null,
+      console.log("Registration Request:", requestBody);
 
-            password: formData.password
-          })
-        }
-      );
+      const response = await fetch(registerURL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(requestBody)
+      });
 
       const data = await response.json();
 
@@ -114,13 +189,17 @@ const Register = () => {
         return;
       }
 
-      setMessage("Account created successfully!");
+      setMessage(
+        data.message || "Account created successfully!"
+      );
 
       setTimeout(() => {
         navigate("/login");
       }, 1500);
 
     } catch (error) {
+      console.error("Registration Error:", error);
+
       setError(
         "Unable to connect to server. Please make sure backend is running."
       );
@@ -152,39 +231,83 @@ const Register = () => {
           <div className="register-features">
 
             <div className="register-feature">
-              <div className="register-feature-icon">✓</div>
+
+              <div className="register-feature-icon">
+                ✓
+              </div>
 
               <div className="register-feature-text">
-                <strong>Easy Maintenance & Payments</strong>
-                <span>Manage your society payments easily.</span>
+
+                <strong>
+                  Easy Maintenance & Payments
+                </strong>
+
+                <span>
+                  Manage your society payments easily.
+                </span>
+
               </div>
+
             </div>
 
             <div className="register-feature">
-              <div className="register-feature-icon">✓</div>
+
+              <div className="register-feature-icon">
+                ✓
+              </div>
 
               <div className="register-feature-text">
-                <strong>Quick Visitor Management</strong>
-                <span>Manage visitors and approvals securely.</span>
+
+                <strong>
+                  Quick Visitor Management
+                </strong>
+
+                <span>
+                  Manage visitors and approvals securely.
+                </span>
+
               </div>
+
             </div>
 
             <div className="register-feature">
-              <div className="register-feature-icon">✓</div>
+
+              <div className="register-feature-icon">
+                ✓
+              </div>
 
               <div className="register-feature-text">
-                <strong>Complaints & Service Requests</strong>
-                <span>Raise and track your requests easily.</span>
+
+                <strong>
+                  Complaints & Service Requests
+                </strong>
+
+                <span>
+                  Raise and track your requests easily.
+                </span>
+
               </div>
+
             </div>
 
             <div className="register-feature">
-              <div className="register-feature-icon">✓</div>
+
+              <div className="register-feature-icon">
+                ✓
+              </div>
 
               <div className="register-feature-text">
-                <strong>Community Notices & Events</strong>
-                <span>Stay updated with society activities.</span>
+
+                <strong>
+                  Community Notices & Events
+                </strong>
+
+                <span>
+                  Stay updated with society activities.
+                </span>
+
               </div>
+
             </div>
 
           </div>
@@ -221,6 +344,7 @@ const Register = () => {
                   placeholder="Enter first name"
                   value={formData.first_name}
                   onChange={handleChange}
+                  required
                 />
 
               </div>
@@ -235,6 +359,7 @@ const Register = () => {
                   placeholder="Enter last name"
                   value={formData.last_name}
                   onChange={handleChange}
+                  required
                 />
 
               </div>
@@ -251,6 +376,7 @@ const Register = () => {
                 placeholder="Enter your email"
                 value={formData.email}
                 onChange={handleChange}
+                required
               />
 
             </div>
@@ -265,34 +391,32 @@ const Register = () => {
                 placeholder="Enter phone number"
                 value={formData.phone}
                 onChange={handleChange}
+                required
               />
 
             </div>
 
             <div className="register-form-group">
 
-              <label>User Type</label>
+              <label>Register As</label>
 
               <select
                 className="register-select"
                 name="user_type"
                 value={formData.user_type}
-                onChange={handleChange}
+                onChange={handleUserTypeChange}
+                required
               >
 
                 <option value="" disabled>
-                  Select user type
+                  Select role
                 </option>
 
-                <option value="resident">
+                <option value="Resident">
                   Resident
                 </option>
 
-                <option value="security">
-                  Security
-                </option>
-
-                <option value="staff">
+                <option value="Staff">
                   Staff
                 </option>
 
@@ -300,7 +424,7 @@ const Register = () => {
 
             </div>
 
-            {formData.user_type === "resident" && (
+            {formData.user_type === "Resident" && (
 
               <div className="register-row">
 
@@ -313,6 +437,7 @@ const Register = () => {
                     name="block_wing"
                     value={formData.block_wing}
                     onChange={handleChange}
+                    required
                   >
 
                     <option value="" disabled>
@@ -349,9 +474,54 @@ const Register = () => {
                     placeholder="e.g. A-101"
                     value={formData.flat_number}
                     onChange={handleChange}
+                    required
                   />
 
                 </div>
+
+              </div>
+
+            )}
+
+            {formData.user_type === "Staff" && (
+
+              <div className="register-form-group">
+
+                <label>Staff Type</label>
+
+                <select
+                  className="register-select"
+                  name="staff_type"
+                  value={formData.staff_type}
+                  onChange={handleChange}
+                  required
+                >
+
+                  <option value="" disabled>
+                    Select staff type
+                  </option>
+
+                  <option value="Security Staff">
+                    Security Staff
+                  </option>
+
+                  <option value="Maintenance Staff">
+                    Maintenance Staff
+                  </option>
+
+                  <option value="Housekeeping Staff">
+                    Housekeeping Staff
+                  </option>
+
+                  <option value="Reception Staff">
+                    Reception Staff
+                  </option>
+
+                  <option value="Other">
+                    Other
+                  </option>
+
+                </select>
 
               </div>
 
@@ -364,11 +534,16 @@ const Register = () => {
               <div className="register-password">
 
                 <input
-                  type={showPassword ? "text" : "password"}
+                  type={
+                    showPassword
+                      ? "text"
+                      : "password"
+                  }
                   name="password"
                   placeholder="Create password"
                   value={formData.password}
                   onChange={handleChange}
+                  required
                 />
 
                 <button
@@ -400,6 +575,7 @@ const Register = () => {
                   placeholder="Confirm password"
                   value={formData.confirm_password}
                   onChange={handleChange}
+                  required
                 />
 
                 <button
@@ -410,7 +586,9 @@ const Register = () => {
                     )
                   }
                 >
-                  {showConfirmPassword ? "Hide" : "Show"}
+                  {showConfirmPassword
+                    ? "Hide"
+                    : "Show"}
                 </button>
 
               </div>
@@ -433,6 +611,7 @@ const Register = () => {
             </label>
 
             {error && (
+
               <div
                 style={{
                   color: "red",
@@ -441,9 +620,11 @@ const Register = () => {
               >
                 {error}
               </div>
+
             )}
 
             {message && (
+
               <div
                 style={{
                   color: "green",
@@ -452,6 +633,7 @@ const Register = () => {
               >
                 {message}
               </div>
+
             )}
 
             <button

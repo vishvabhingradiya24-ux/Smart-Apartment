@@ -5,11 +5,15 @@ require("dotenv").config();
 const { testConnection } = require("./config/db");
 const residentRoutes = require("./routes/residentRoutes");
 const adminRoutes = require("./routes/adminRoutes");
+const staffRoutes = require("./routes/staffRoutes");
+const complaintRoutes = require("./routes/complaintRoutes");
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use("/api/staff", staffRoutes);
+app.use("/api/complaints", complaintRoutes);
 
 
 app.get("/", (req, res) => {

@@ -599,6 +599,53 @@ const getResidents = async (req, res) => {
 
 
 // ==============================
+// GET MY PROFILE
+// ==============================
+
+const getMyProfile = async (req, res) => {
+  try {
+    const residentId = req.user.id;
+
+    const [residents] = await pool.query(
+      `SELECT
+        id,
+        first_name,
+        last_name,
+        email,
+        phone,
+        block_wing,
+        flat_number,
+        created_at
+      FROM residents
+      WHERE id = ?`,
+      [residentId]
+    );
+
+    if (residents.length === 0) {
+      return res.status(404).json({
+        message: "Resident not found"
+      });
+    }
+
+    res.status(200).json({
+      ...residents[0],
+      user_type: "Resident"
+    });
+
+  } catch (error) {
+    console.error(
+      "Get Profile Error:",
+      error
+    );
+
+    res.status(500).json({
+      message: "Unable to fetch profile"
+    });
+  }
+};
+
+
+// ==============================
 // EXPORTS
 // ==============================
 
@@ -608,5 +655,6 @@ module.exports = {
   forgotPassword,
   verifyOTP,
   resetPassword,
-  getResidents
+  getResidents,
+  getMyProfile
 };
