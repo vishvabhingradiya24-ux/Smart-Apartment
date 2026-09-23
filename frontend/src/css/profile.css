@@ -1,0 +1,138 @@
+.profile-page {
+  background: #f5f7f8;
+  color: #17252b;
+}
+
+.profile-overline {
+  color: #00a88f;
+}
+
+.profile-dashboard-btn {
+  color: #17252b;
+  border-color: #dce5e4;
+}
+
+.profile-dashboard-btn:hover {
+  border-color: #00a88f;
+  color: #00a88f;
+}
+
+.profile-cover {
+  background: linear-gradient(
+    135deg,
+    #0b2f2b,
+    #123f3a 55%,
+    #00a88f
+  );
+}
+
+.profile-avatar {
+  color: #008f7a;
+  background: #ffffff;
+}
+
+.resident-badge {
+  background: #e7f8f4;
+  color: #007d6c;
+}
+
+.badge-dot {
+  background: #00a88f;
+}
+
+.profile-divider {
+  background: #e4ecea;
+}
+
+.profile-stat span {
+  color: #81908f;
+}
+
+.profile-stat strong {
+  color: #17252b;
+}
+
+.stat-separator {
+  background: #dfe8e6;
+}
+
+.info-card {
+  border-color: #e1e9e7;
+}
+
+.info-card-header {
+  border-bottom-color: #e5eceb;
+}
+
+.info-icon.blue {
+  background: #e5f7f3;
+  color: #008f7a;
+}
+
+.info-icon.green {
+  background: #e5f7f3;
+  color: #008f7a;
+}
+
+.info-card-header span {
+  color: #81908f;
+}
+
+.info-field {
+  border-color: #e2e9e8;
+  background: #f8faf9;
+}
+
+.info-field label {
+  color: #81908f;
+}
+
+.info-field div {
+  background: #f8faf9;
+  border-color: #e2e9e8;
+  color: #26383c;
+}
+
+.residence-symbol {
+  background: #e8f7f4;
+  color: #008f7a;
+}
+
+.residence-row {
+  border-bottom-color: #e5eceb;
+}
+
+.residence-row span {
+  color: #81908f;
+}
+
+.residence-row strong {
+  color: #26383c;
+}
+
+.profile-security-card {
+  border-color: #e1e9e7;
+}
+
+.security-icon {
+  background: #e5f7f3;
+  color: #008f7a;
+}
+
+.profile-security-card span {
+  color: #81908f;
+}
+
+.active-pill {
+  background: #e5f7f3;
+  color: #007d6c;
+}
+
+.profile-back-btn {
+  background: #00a88f;
+}
+
+.profile-loader {
+  border-color: #d9eeea;
+  border-top-color: #00a88f;
+}
