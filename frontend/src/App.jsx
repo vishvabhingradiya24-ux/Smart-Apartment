@@ -1,6 +1,15 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
+// ==========================================
+// MAIN PAGES
+// ==========================================
+
 import Home from "./pages/Home";
+
+// ==========================================
+// AUTH PAGES
+// ==========================================
+
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import ForgotPassword from "./pages/auth/ForgotPassword";
@@ -27,15 +36,28 @@ import Settings from "./pages/admin/Settings";
 
 function App() {
   return (
+
     <BrowserRouter>
+
       <Routes>
 
         {/* Public Pages */}
         <Route path="/" element={<Home />} />
 
-        <Route path="/login" element={<Login />} />
+        {/* ==================================
+            AUTH
+        =================================== */}
 
-        <Route path="/register" element={<Register />} />
+        <Route
+          path="/login"
+          element={<Login />}
+        />
+
+        <Route
+          path="/register"
+          element={<Register />}
+        />
+
 
         <Route
           path="/forgot-password"
@@ -170,6 +192,7 @@ function App() {
         />
 
       </Routes>
+
     </BrowserRouter>
   );
 }

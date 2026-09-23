@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "razorpay": "^2.9.8",
+    "web-push": "^3.6.7"
+  }
+}
