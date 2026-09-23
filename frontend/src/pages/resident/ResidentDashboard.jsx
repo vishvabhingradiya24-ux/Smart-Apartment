@@ -2,188 +2,266 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "../../css/resident.css";
 
-function ResidentDashboard() {
+const ResidentDashboard = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState({});
 
+  const [user, setUser] = useState(null);
+  const [greeting, setGreeting] = useState("Good Morning");
+  const [loading, setLoading] = useState(true);
+
+  // ==========================================
+  // GET USER FROM LOCAL STORAGE
+  // ==========================================
   useEffect(() => {
-    try {
-      const storedUser = localStorage.getItem("user");
+    const storedUser = localStorage.getItem("user");
 
-      if (storedUser) {
-        const parsedUser = JSON.parse(storedUser);
-
-        if (parsedUser?.user) {
-          setUser(parsedUser.user);
-        } else if (parsedUser?.data?.user) {
-          setUser(parsedUser.data.user);
-        } else {
-          setUser(parsedUser);
-        }
+    if (storedUser) {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (error) {
+        console.error("User data error:", error);
       }
-    } catch (error) {
-      console.error("User data error:", error);
-      setUser({});
     }
-  }, []);
 
-  const firstName = user?.first_name || "";
-  const lastName = user?.last_name || "";
-
-  const fullName =
-    `${firstName} ${lastName}`.trim() || "Resident";
-
-  const initials =
-    `${firstName.charAt(0)}${lastName.charAt(0)}`
-      .toUpperCase() || "R";
-
-  const blockWing = user?.block_wing || "";
-  const flatNumber = user?.flat_number || "";
-  const userType = user?.user_type || "Resident";
-
-  const getGreeting = () => {
-    const parts = new Intl.DateTimeFormat("en-IN", {
-      timeZone: "Asia/Kolkata",
-      hour: "numeric",
-      hour12: false
-    }).formatToParts(new Date());
-
-    const hour = Number(
-      parts.find((part) => part.type === "hour")?.value || 0
-    );
+    const hour = new Date().getHours();
 
     if (hour >= 5 && hour < 12) {
-      return "Good Morning";
+      setGreeting("Good Morning");
+    } else if (hour >= 12 && hour < 17) {
+      setGreeting("Good Afternoon");
+    } else {
+      setGreeting("Good Evening");
     }
 
-    if (hour >= 12 && hour < 17) {
-      return "Good Afternoon";
-    }
-
-    return "Good Evening";
-  };
-
-  const [greeting, setGreeting] = useState(getGreeting());
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setGreeting(getGreeting());
-    }, 60000);
-
-    return () => clearInterval(timer);
+    setLoading(false);
   }, []);
 
+  // ==========================================
+  // USER DETAILS
+  // ==========================================
+  const firstName =
+    user?.first_name ||
+    user?.firstName ||
+    user?.name?.split(" ")[0] ||
+    "Resident";
+
+  const lastName =
+    user?.last_name ||
+    user?.lastName ||
+    "";
+
+  const fullName = `${firstName} ${lastName}`.trim();
+
+  const flatNumber =
+    user?.flat_number ||
+    user?.flatNumber ||
+    "Not Available";
+
+  const blockWing =
+    user?.block_wing ||
+    user?.blockWing ||
+    "Not Available";
+
+  // ==========================================
+  // LOGOUT
+  // ==========================================
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-    localStorage.removeItem("loggedInUser");
-    localStorage.removeItem("authUser");
-    localStorage.removeItem("currentUser");
-
     navigate("/login");
   };
+
+  // ==========================================
+  // LOADING
+  // ==========================================
+  if (loading) {
+    return (
+      <div
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        Loading dashboard...
+      </div>
+    );
+  }
 
   return (
     <div className="resident-dashboard">
 
+      {/* =========================================
+          SIDEBAR
+      ========================================= */}
+
       <aside className="resident-sidebar">
 
+        {/* BRAND */}
+
         <div className="sidebar-brand">
-          <div className="brand-mark">⌂</div>
+
+          <div className="brand-mark">
+            SA
+          </div>
 
           <div className="brand-text">
-            <h2>Smart Apartment</h2>
-            <span>Resident Portal</span>
+            <h2>SmartApartment</h2>
+            <span>Society Management</span>
           </div>
+
         </div>
+
+
+        {/* SECTION LABEL */}
 
         <div className="sidebar-section-label">
           MAIN MENU
         </div>
 
+
+        {/* NAVIGATION */}
+
         <nav className="resident-nav">
 
-          <Link to="/resident" className="nav-item active">
-            <span className="nav-icon">⌂</span>
+          <Link
+            to="/resident"
+            className="nav-item active"
+          >
+            <span className="nav-icon">▦</span>
             <span>Dashboard</span>
           </Link>
 
-          <Link to="/resident/profile" className="nav-item">
-            <span className="nav-icon">◯</span>
+
+          <Link
+            to="/resident/profile"
+            className="nav-item"
+          >
+            <span className="nav-icon">◉</span>
             <span>My Profile</span>
           </Link>
 
-          <Link to="/resident/flat" className="nav-item">
-            <span className="nav-icon">▦</span>
+
+          <Link
+            to="/resident/flat-details"
+            className="nav-item"
+          >
+            <span className="nav-icon">⌂</span>
             <span>Flat Details</span>
           </Link>
 
-          <Link to="/resident/payments" className="nav-item">
+
+          <Link
+            to="/resident/payment"
+            className="nav-item"
+          >
             <span className="nav-icon">₹</span>
             <span>Payments</span>
           </Link>
 
-          <Link to="/resident/complaints" className="nav-item">
-            <span className="nav-icon">⚒</span>
+
+          <Link
+            to="/resident/complaints"
+            className="nav-item"
+          >
+            <span className="nav-icon">!</span>
             <span>Complaints</span>
           </Link>
 
-          <Link to="/resident/requests" className="nav-item">
-            <span className="nav-icon">≡</span>
+
+          <Link
+            to="/resident/requests"
+            className="nav-item"
+          >
+            <span className="nav-icon">☷</span>
             <span>Service Requests</span>
           </Link>
 
-          <Link to="/resident/visitors" className="nav-item">
-            <span className="nav-icon">◉</span>
+
+          <Link
+            to="/resident/visitors"
+            className="nav-item"
+          >
+            <span className="nav-icon">♙</span>
             <span>Visitors</span>
           </Link>
 
-          <Link to="/resident/amenities" className="nav-item">
-            <span className="nav-icon">□</span>
-            <span>Amenity Booking</span>
+
+          <Link
+            to="/resident/facilities"
+            className="nav-item"
+          >
+            <span className="nav-icon">▣</span>
+            <span>Facilities</span>
           </Link>
 
-          <Link to="/resident/notices" className="nav-item">
-            <span className="nav-icon">!</span>
-            <span>Notices & Events</span>
+
+          <Link
+            to="/resident/notices"
+            className="nav-item"
+          >
+            <span className="nav-icon">▤</span>
+            <span>Notices</span>
           </Link>
 
-          <Link to="/resident/polls" className="nav-item">
+
+          <Link
+            to="/resident/polls"
+            className="nav-item"
+          >
             <span className="nav-icon">✓</span>
             <span>Polls & Voting</span>
           </Link>
 
-          <Link to="/resident/notifications" className="nav-item">
-            <span className="nav-icon">○</span>
+
+          <Link
+            to="/resident/notifications"
+            className="nav-item"
+          >
+            <span className="nav-icon">🔔</span>
             <span>Notifications</span>
           </Link>
+
 
           <Link
             to="/resident/emergency"
             className="nav-item emergency-nav"
           >
             <span className="nav-icon">!</span>
-            <span>Emergency Contacts</span>
+            <span>Emergency & Help</span>
           </Link>
 
         </nav>
+
+
+        {/* SIDEBAR BOTTOM */}
 
         <div className="sidebar-bottom">
 
           <div className="sidebar-user">
 
             <div className="sidebar-avatar">
-              {initials}
+              {firstName.charAt(0).toUpperCase()}
             </div>
 
             <div className="sidebar-user-info">
-              <strong>{fullName}</strong>
-              <span>{userType}</span>
+
+              <strong>
+                {fullName}
+              </strong>
+
+              <span>
+                Resident
+              </span>
+
             </div>
 
           </div>
 
+
           <button
+            type="button"
             className="logout-button"
             onClick={handleLogout}
           >
@@ -195,35 +273,46 @@ function ResidentDashboard() {
 
       </aside>
 
+
+      {/* =========================================
+          MAIN CONTENT
+      ========================================= */}
+
       <main className="resident-main">
+
+        {/* =========================================
+            HEADER
+        ========================================= */}
 
         <header className="resident-header">
 
           <div className="header-left">
 
             <span className="header-overline">
-              RESIDENT SPACE
+              RESIDENT PORTAL
             </span>
 
             <h1>
-              {greeting}, {fullName}
+              {greeting}, {firstName}!
             </h1>
 
             <p>
-              Everything you need for a smarter,
-              more connected residential experience.
+              Welcome back to your SmartApartment dashboard.
             </p>
 
           </div>
+
 
           <div className="header-right">
 
             <Link
               to="/resident/notifications"
               className="header-notification"
+              title="Notifications"
             >
-              <span>○</span>
+              <span>🔔</span>
             </Link>
+
 
             <Link
               to="/resident/profile"
@@ -231,17 +320,17 @@ function ResidentDashboard() {
             >
 
               <div className="header-avatar">
-                {initials}
+                {firstName.charAt(0).toUpperCase()}
               </div>
 
               <div className="header-profile-info">
 
-                <strong>{fullName}</strong>
+                <strong>
+                  {fullName}
+                </strong>
 
                 <span>
-                  {blockWing && flatNumber
-                    ? `${blockWing} • ${flatNumber}`
-                    : userType}
+                  Resident
                 </span>
 
               </div>
@@ -252,32 +341,41 @@ function ResidentDashboard() {
 
         </header>
 
+
+        {/* =========================================
+            RESIDENCE HERO
+        ========================================= */}
+
         <section className="residence-hero">
+
+          {/* Background Image */}
 
           <div className="residence-photo"></div>
 
           <div className="residence-photo-overlay"></div>
 
+
+          {/* LEFT CONTENT */}
+
           <div className="residence-content">
 
             <span className="section-eyebrow">
-              MY RESIDENCE
+              YOUR RESIDENCE
             </span>
 
             <h2>
-              Your home,
-              <br />
-              your community.
+              Welcome to SmartApartment
             </h2>
 
             <p className="residence-description">
-              Keep your apartment services,
-              community activities and residential
-              information together in one place.
+              Manage your apartment services, payments,
+              complaints, visitors and facility bookings
+              from one place.
             </p>
 
+
             <Link
-              to="/resident/flat"
+              to="/resident/flat-details"
               className="residence-button"
             >
               View Flat Details
@@ -286,40 +384,70 @@ function ResidentDashboard() {
 
           </div>
 
+
+          {/* RIGHT INFORMATION CARD */}
+
           <div className="residence-info">
 
             <div className="residence-user">
 
               <div className="large-avatar">
-                {initials}
+                {firstName.charAt(0).toUpperCase()}
               </div>
 
               <div>
-                <span>RESIDENT</span>
-                <h3>{fullName}</h3>
+
+                <span>
+                  RESIDENT
+                </span>
+
+                <h3>
+                  {fullName}
+                </h3>
+
               </div>
 
             </div>
 
+
             <div className="residence-details">
 
               <div className="residence-detail">
-                <span>BLOCK / WING</span>
+
+                <span>
+                  FLAT NUMBER
+                </span>
+
                 <strong>
-                  {blockWing || "Not available"}
+                  {flatNumber}
                 </strong>
+
               </div>
 
-              <div className="residence-detail">
-                <span>FLAT NUMBER</span>
-                <strong>
-                  {flatNumber || "Not available"}
-                </strong>
-              </div>
 
               <div className="residence-detail">
-                <span>USER TYPE</span>
-                <strong>{userType}</strong>
+
+                <span>
+                  BLOCK / WING
+                </span>
+
+                <strong>
+                  {blockWing}
+                </strong>
+
+              </div>
+
+
+              <div className="residence-detail">
+
+                <span>
+                  ROLE
+                </span>
+
+                <strong>
+                  Resident
+                </strong>
+
               </div>
 
             </div>
@@ -327,6 +455,11 @@ function ResidentDashboard() {
           </div>
 
         </section>
+
+
+        {/* =========================================
+            SERVICES
+        ========================================= */}
 
         <section className="services-section">
 
@@ -339,170 +472,380 @@ function ResidentDashboard() {
               </span>
 
               <h2>
-                What would you like to manage?
+                What would you like to do?
               </h2>
 
             </div>
 
             <p>
-              Quick access to your most-used
-              apartment services.
+              Access your apartment services
+              quickly from one place.
             </p>
 
           </div>
 
+
           <div className="services-grid">
 
+            {/* PAYMENT */}
+
             <Link
-              to="/resident/payments"
+              to="/resident/payment"
               className="service-card service-primary"
             >
+
               <div className="service-top">
-                <div className="service-icon">₹</div>
-                <span className="service-arrow">↗</span>
+
+                <div className="service-icon">
+                  ₹
+                </div>
+
+                <span className="service-arrow">
+                  ↗
+                </span>
+
               </div>
 
               <div className="service-content">
-                <h3>Payments</h3>
+
+                <h3>
+                  Maintenance & Payments
+                </h3>
+
                 <p>
-                  Manage maintenance payments
+                  View dues, payment status
                   and payment history.
                 </p>
+
               </div>
+
             </Link>
+
+
+            {/* COMPLAINTS */}
 
             <Link
               to="/resident/complaints"
               className="service-card"
             >
+
               <div className="service-top">
-                <div className="service-icon">⚒</div>
-                <span className="service-arrow">↗</span>
+
+                <div className="service-icon">
+                  !
+                </div>
+
+                <span className="service-arrow">
+                  ↗
+                </span>
+
               </div>
 
               <div className="service-content">
-                <h3>Complaints</h3>
+
+                <h3>
+                  Complaints
+                </h3>
+
                 <p>
-                  Report and track apartment
-                  issues.
+                  Submit complaints and
+                  track their status.
                 </p>
+
               </div>
+
             </Link>
+
+
+            {/* SERVICE REQUESTS */}
 
             <Link
               to="/resident/requests"
               className="service-card"
             >
+
               <div className="service-top">
-                <div className="service-icon">≡</div>
-                <span className="service-arrow">↗</span>
+
+                <div className="service-icon">
+                  ☷
+                </div>
+
+                <span className="service-arrow">
+                  ↗
+                </span>
+
               </div>
 
               <div className="service-content">
-                <h3>Service Requests</h3>
+
+                <h3>
+                  Service Requests
+                </h3>
+
                 <p>
-                  Request and track residential
-                  services.
+                  Request electrician, plumber,
+                  cleaning and other services.
                 </p>
+
               </div>
+
             </Link>
+
+
+            {/* VISITORS */}
 
             <Link
               to="/resident/visitors"
               className="service-card"
             >
+
               <div className="service-top">
-                <div className="service-icon">◉</div>
-                <span className="service-arrow">↗</span>
+
+                <div className="service-icon">
+                  ♙
+                </div>
+
+                <span className="service-arrow">
+                  ↗
+                </span>
+
               </div>
 
               <div className="service-content">
-                <h3>Visitors</h3>
+
+                <h3>
+                  Visitors
+                </h3>
+
                 <p>
-                  Manage visitor approvals
-                  and entries.
+                  Pre-approve visitors and
+                  view visitor history.
                 </p>
+
               </div>
+
             </Link>
 
+
+            {/* FACILITIES */}
+
             <Link
-              to="/resident/amenities"
+              to="/resident/facilities"
               className="service-card"
             >
+
               <div className="service-top">
-                <div className="service-icon">□</div>
-                <span className="service-arrow">↗</span>
+
+                <div className="service-icon">
+                  ▣
+                </div>
+
+                <span className="service-arrow">
+                  ↗
+                </span>
+
               </div>
 
               <div className="service-content">
-                <h3>Amenity Booking</h3>
+
+                <h3>
+                  Facilities Booking
+                </h3>
+
                 <p>
-                  Reserve community facilities
-                  and amenities.
+                  View available facilities
+                  and submit booking requests.
                 </p>
+
               </div>
+
+            </Link>
+
+
+            {/* NOTICES */}
+
+            <Link
+              to="/resident/notices"
+              className="service-card"
+            >
+
+              <div className="service-top">
+
+                <div className="service-icon">
+                  ▤
+                </div>
+
+                <span className="service-arrow">
+                  ↗
+                </span>
+
+              </div>
+
+              <div className="service-content">
+
+                <h3>
+                  Notices & Events
+                </h3>
+
+                <p>
+                  View society notices
+                  and upcoming events.
+                </p>
+
+              </div>
+
+            </Link>
+
+
+            {/* POLLS */}
+
+            <Link
+              to="/resident/polls"
+              className="service-card"
+            >
+
+              <div className="service-top">
+
+                <div className="service-icon">
+                  ✓
+                </div>
+
+                <span className="service-arrow">
+                  ↗
+                </span>
+
+              </div>
+
+              <div className="service-content">
+
+                <h3>
+                  Polls & Voting
+                </h3>
+
+                <p>
+                  Participate in society
+                  polls and voting.
+                </p>
+
+              </div>
+
+            </Link>
+
+
+            {/* PROFILE */}
+
+            <Link
+              to="/resident/profile"
+              className="service-card"
+            >
+
+              <div className="service-top">
+
+                <div className="service-icon">
+                  ◉
+                </div>
+
+                <span className="service-arrow">
+                  ↗
+                </span>
+
+              </div>
+
+              <div className="service-content">
+
+                <h3>
+                  My Profile
+                </h3>
+
+                <p>
+                  View your personal and
+                  apartment information.
+                </p>
+
+              </div>
+
             </Link>
 
           </div>
 
         </section>
 
+
+        {/* =========================================
+            LOWER GRID
+        ========================================= */}
+
         <section className="dashboard-lower-grid">
+
+          {/* COMMUNITY / NOTICES */}
 
           <div className="dashboard-section-panel">
 
             <div className="panel-heading">
 
               <div>
+
                 <span className="section-eyebrow">
                   COMMUNITY
                 </span>
 
-                <h2>Community Pulse</h2>
+                <h2>
+                  Notices & Events
+                </h2>
+
               </div>
 
               <Link to="/resident/notices">
-                View All →
+                View all →
               </Link>
 
             </div>
 
+
             <div className="empty-community">
 
-              <div className="empty-icon">+</div>
+              <div className="empty-icon">
+                ▤
+              </div>
 
               <h3>
-                No community updates yet
+                No community updates
               </h3>
 
               <p>
-                Notices, events and community
-                announcements will appear here.
+                New society notices and events
+                will appear here.
               </p>
 
             </div>
 
           </div>
 
+
+          {/* PAYMENT */}
+
           <div className="dashboard-section-panel">
 
             <div className="panel-heading">
 
               <div>
+
                 <span className="section-eyebrow">
                   FINANCE
                 </span>
 
                 <h2>
-                  Maintenance & Payments
+                  Maintenance Payment
                 </h2>
+
               </div>
 
-              <Link to="/resident/payments">
+              <Link to="/resident/payment">
                 Open →
               </Link>
 
             </div>
+
 
             <div className="payment-empty">
 
@@ -513,12 +856,12 @@ function ResidentDashboard() {
               <div>
 
                 <h3>
-                  No payment information
+                  Payment information
                 </h3>
 
                 <p>
-                  Your maintenance and payment
-                  information will appear here.
+                  View your maintenance dues,
+                  payment status and history.
                 </p>
 
               </div>
@@ -529,6 +872,11 @@ function ResidentDashboard() {
 
         </section>
 
+
+        {/* =========================================
+            ACTIVITY
+        ========================================= */}
+
         <section className="activity-section">
 
           <div className="panel-heading">
@@ -536,14 +884,17 @@ function ResidentDashboard() {
             <div>
 
               <span className="section-eyebrow">
-                YOUR SPACE
+                RECENT ACTIVITY
               </span>
 
-              <h2>Recent Activity</h2>
+              <h2>
+                Your Activity
+              </h2>
 
             </div>
 
           </div>
+
 
           <div className="activity-empty">
 
@@ -552,7 +903,7 @@ function ResidentDashboard() {
             <div className="activity-empty-content">
 
               <div className="activity-empty-icon">
-                •
+                ✓
               </div>
 
               <div>
@@ -562,8 +913,8 @@ function ResidentDashboard() {
                 </h3>
 
                 <p>
-                  Your apartment activities will
-                  appear here as you use the system.
+                  Your latest requests, payments
+                  and bookings will appear here.
                 </p>
 
               </div>
@@ -574,14 +925,19 @@ function ResidentDashboard() {
 
         </section>
 
+
+        {/* =========================================
+            FOOTER
+        ========================================= */}
+
         <footer className="resident-footer">
 
           <span>
-            Smart Apartment
+            © 2026 SmartApartment
           </span>
 
           <span>
-            Residential Management System
+            Society Management System
           </span>
 
         </footer>
@@ -590,6 +946,6 @@ function ResidentDashboard() {
 
     </div>
   );
-}
+};
 
 export default ResidentDashboard;
