@@ -1,56 +1,83 @@
 /* =========================================
-   COMPLAINT MANAGEMENT
+   SECURITY MANAGEMENT
    ========================================= */
 
-.complaints-page {
+.security-page {
   width: 100%;
   min-height: 100%;
   padding: 32px;
   background: #f7f8fc;
 }
 
-/* =========================================
-   HEADER
-   ========================================= */
+/* Header */
 
-.complaints-header {
+.security-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
   margin-bottom: 28px;
 }
 
-.complaints-overline {
+.security-overline {
   display: block;
   margin-bottom: 7px;
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 1.5px;
-  color: #dc2626;
+  color: #7c3aed;
 }
 
-.complaints-header h1 {
+.security-header h1 {
   margin: 0;
   font-size: 30px;
   font-weight: 750;
   color: #1f2937;
 }
 
-.complaints-header p {
+.security-header p {
   margin: 7px 0 0;
   color: #6b7280;
   font-size: 14px;
 }
 
+.security-add-btn {
+  border: none;
+  border-radius: 10px;
+  padding: 12px 18px;
+  background: #7c3aed;
+  color: white;
+  font-size: 14px;
+  font-weight: 650;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: 0.2s ease;
+}
+
+.security-add-btn:hover {
+  transform: translateY(-1px);
+  opacity: 0.92;
+}
+
+.security-add-btn span {
+  font-size: 20px;
+  line-height: 1;
+}
+
 /* =========================================
-   STATS
+   SUMMARY CARDS
    ========================================= */
 
-.complaints-stats {
+.security-stats {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 18px;
   margin-bottom: 24px;
 }
 
-.complaint-stat-card {
+.security-stat-card {
   background: white;
   border: 1px solid #e8eaf0;
   border-radius: 14px;
@@ -61,25 +88,25 @@
   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
 }
 
-.complaint-stat-icon {
+.security-stat-icon {
   width: 48px;
   height: 48px;
   border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #fef2f2;
+  background: #f3e8ff;
   font-size: 23px;
 }
 
-.complaint-stat-card span {
+.security-stat-card span {
   display: block;
   margin-bottom: 5px;
   font-size: 12px;
   color: #6b7280;
 }
 
-.complaint-stat-card strong {
+.security-stat-card strong {
   font-size: 25px;
   color: #1f2937;
 }
@@ -88,14 +115,14 @@
    TOOLBAR
    ========================================= */
 
-.complaints-toolbar {
+.security-toolbar {
   display: flex;
   align-items: center;
   gap: 12px;
   margin-bottom: 20px;
 }
 
-.complaints-search {
+.security-search {
   flex: 1;
   height: 44px;
   display: flex;
@@ -107,11 +134,11 @@
   border-radius: 9px;
 }
 
-.complaints-search span {
+.security-search span {
   font-size: 16px;
 }
 
-.complaints-search input {
+.security-search input {
   width: 100%;
   border: none;
   outline: none;
@@ -120,13 +147,13 @@
   background: transparent;
 }
 
-.complaints-search input::placeholder {
+.security-search input::placeholder {
   color: #9ca3af;
 }
 
-.complaints-toolbar select {
+.security-toolbar select {
   height: 44px;
-  min-width: 150px;
+  min-width: 145px;
   padding: 0 12px;
   border: 1px solid #e2e5eb;
   border-radius: 9px;
@@ -138,10 +165,10 @@
 }
 
 /* =========================================
-   TABLE
+   TABLE CARD
    ========================================= */
 
-.complaints-table-card {
+.security-table-card {
   background: white;
   border: 1px solid #e7e9ef;
   border-radius: 14px;
@@ -149,35 +176,35 @@
   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
 }
 
-.complaints-table-header {
+.security-table-header {
   padding: 20px 22px;
   border-bottom: 1px solid #eceef3;
 }
 
-.complaints-table-header h2 {
+.security-table-header h2 {
   margin: 0 0 4px;
   font-size: 17px;
   color: #1f2937;
 }
 
-.complaints-table-header p {
+.security-table-header p {
   margin: 0;
   font-size: 12px;
   color: #8b93a1;
 }
 
-.complaints-table-wrapper {
+.security-table-wrapper {
   width: 100%;
   overflow-x: auto;
 }
 
-.complaints-table {
+.security-table {
   width: 100%;
-  min-width: 1350px;
+  min-width: 1100px;
   border-collapse: collapse;
 }
 
-.complaints-table th {
+.security-table th {
   padding: 13px 15px;
   text-align: left;
   background: #fafafa;
@@ -189,7 +216,7 @@
   letter-spacing: 0.5px;
 }
 
-.complaints-table td {
+.security-table td {
   padding: 15px;
   border-bottom: 1px solid #f0f1f4;
   color: #374151;
@@ -197,197 +224,145 @@
   vertical-align: middle;
 }
 
-.complaints-table tbody tr:hover {
-  background: #fffafa;
+.security-table tbody tr:hover {
+  background: #fafaff;
 }
 
-.complaints-table tbody tr:last-child td {
+.security-table tbody tr:last-child td {
   border-bottom: none;
 }
 
 /* =========================================
-   COMPLAINT ID
+   GUARD DETAILS
    ========================================= */
 
-.complaint-id {
+.guard-id {
   display: inline-block;
   padding: 5px 8px;
   border-radius: 6px;
-  background: #fef2f2;
-  color: #dc2626;
+  background: #f5f3ff;
+  color: #6d28d9;
   font-size: 12px;
   font-weight: 700;
 }
 
-/* =========================================
-   RESIDENT DETAILS
-   ========================================= */
-
-.resident-complaint-details {
+.guard-details {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-.resident-complaint-avatar {
+.guard-avatar {
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  background: #fee2e2;
-  color: #dc2626;
+  background: #ede9fe;
+  color: #6d28d9;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 750;
 }
 
-.resident-complaint-details strong {
+.guard-details strong {
   display: block;
   color: #1f2937;
   font-size: 13px;
   margin-bottom: 3px;
 }
 
-.resident-complaint-details small {
-  display: block;
+.guard-details small {
   color: #8b93a1;
-  font-size: 10px;
-  margin-top: 2px;
+  font-size: 11px;
 }
 
 /* =========================================
-   COMPLAINT TITLE
+   SHIFT BADGES
    ========================================= */
 
-.complaint-title-cell {
-  max-width: 220px;
-}
-
-.complaint-title-cell strong {
-  display: block;
-  color: #374151;
-  font-size: 12px;
-  margin-bottom: 4px;
-}
-
-.complaint-title-cell small {
-  display: block;
-  color: #9ca3af;
-  font-size: 10px;
-  line-height: 1.4;
-}
-
-/* =========================================
-   CATEGORY
-   ========================================= */
-
-.category-badge {
+.shift-badge {
   display: inline-flex;
   padding: 6px 9px;
   border-radius: 7px;
-  background: #eff6ff;
-  color: #1d4ed8;
   font-size: 11px;
   font-weight: 650;
 }
 
-/* =========================================
-   PRIORITY
-   ========================================= */
-
-.priority-badge {
-  display: inline-flex;
-  padding: 6px 9px;
-  border-radius: 7px;
-  font-size: 11px;
-  font-weight: 700;
-}
-
-.priority-badge.high {
-  background: #fef2f2;
-  color: #dc2626;
-}
-
-.priority-badge.medium {
+.shift-badge.morning {
   background: #fff7ed;
   color: #c2410c;
 }
 
-.priority-badge.low {
-  background: #f0fdf4;
-  color: #15803d;
+.shift-badge.evening {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.shift-badge.night {
+  background: #eef2ff;
+  color: #4338ca;
+}
+
+.gate-badge {
+  white-space: nowrap;
+  font-size: 12px;
+  color: #4b5563;
 }
 
 /* =========================================
-   ASSIGNED STAFF
+   CONTACT
    ========================================= */
 
-.assigned-staff {
+.contact-info span,
+.contact-info small {
+  display: block;
+}
+
+.contact-info span {
   color: #4b5563;
+  margin-bottom: 4px;
   font-size: 11px;
-  font-weight: 600;
+}
+
+.contact-info small {
+  color: #9ca3af;
+  font-size: 10px;
 }
 
 /* =========================================
    STATUS
    ========================================= */
 
-.complaint-status {
+.security-status {
   display: inline-flex;
   align-items: center;
   padding: 6px 10px;
   border-radius: 20px;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
-  white-space: nowrap;
 }
 
-.complaint-status.pending {
-  background: #fff7ed;
-  color: #c2410c;
-}
-
-.complaint-status.assigned {
-  background: #eff6ff;
-  color: #1d4ed8;
-}
-
-.complaint-status.in-progress {
-  background: #f5f3ff;
-  color: #6d28d9;
-}
-
-.complaint-status.resolved {
+.security-status.active {
   background: #ecfdf3;
   color: #15803d;
 }
 
-.complaint-status.closed {
+.security-status.inactive {
   background: #f3f4f6;
   color: #6b7280;
 }
 
 /* =========================================
-   DATE
+   ACTION BUTTONS
    ========================================= */
 
-.complaint-date {
-  color: #6b7280;
-  font-size: 11px;
-  white-space: nowrap;
-}
-
-/* =========================================
-   ACTIONS
-   ========================================= */
-
-.complaint-actions {
+.security-actions {
   display: flex;
   align-items: center;
   gap: 6px;
 }
 
-.complaint-actions button {
+.security-actions button {
   width: 31px;
   height: 31px;
   border: 1px solid #e5e7eb;
@@ -398,53 +373,53 @@
   transition: 0.2s ease;
 }
 
-.complaint-actions button:hover {
+.security-actions button:hover {
   transform: translateY(-1px);
 }
 
-.complaint-action-view:hover {
+.action-view:hover {
   background: #eff6ff;
 }
 
-.complaint-action-assign:hover {
-  background: #f0fdf4;
-}
-
-.complaint-action-edit:hover {
+.action-edit:hover {
   background: #fff7ed;
 }
 
+.action-delete:hover {
+  background: #fef2f2;
+}
+
 /* =========================================
-   EMPTY
+   EMPTY STATE
    ========================================= */
 
-.complaints-empty {
+.security-empty {
   padding: 55px 20px;
   text-align: center;
 }
 
-.complaints-empty > div {
+.security-empty > div {
   font-size: 35px;
   margin-bottom: 10px;
 }
 
-.complaints-empty h3 {
+.security-empty h3 {
   margin: 0 0 6px;
   font-size: 16px;
   color: #374151;
 }
 
-.complaints-empty p {
+.security-empty p {
   margin: 0;
   font-size: 13px;
   color: #9ca3af;
 }
 
 /* =========================================
-   WORKFLOW
+   GATE ACTIVITY
    ========================================= */
 
-.complaint-workflow-card {
+.gate-activity-card {
   margin-top: 22px;
   padding: 20px;
   background: white;
@@ -455,32 +430,47 @@
   gap: 15px;
 }
 
-.workflow-icon {
+.gate-activity-icon {
   width: 48px;
   height: 48px;
   border-radius: 12px;
-  background: #fef2f2;
+  background: #f3e8ff;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 22px;
 }
 
-.workflow-content {
+.gate-activity-content {
   flex: 1;
 }
 
-.workflow-content h3 {
+.gate-activity-content h3 {
   margin: 0 0 5px;
   font-size: 15px;
   color: #1f2937;
 }
 
-.workflow-content p {
+.gate-activity-content p {
   margin: 0;
   color: #7b8492;
   font-size: 12px;
-  line-height: 1.6;
+  line-height: 1.5;
+}
+
+.gate-activity-btn {
+  border: 1px solid #ddd6fe;
+  border-radius: 8px;
+  padding: 9px 14px;
+  background: #faf5ff;
+  color: #6d28d9;
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.gate-activity-btn:hover {
+  background: #f3e8ff;
 }
 
 /* =========================================
@@ -488,43 +478,53 @@
    ========================================= */
 
 @media (max-width: 1100px) {
-  .complaints-stats {
+  .security-stats {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
 @media (max-width: 800px) {
-  .complaints-page {
+  .security-page {
     padding: 22px;
   }
 
-  .complaints-toolbar {
+  .security-header {
+    flex-direction: column;
+  }
+
+  .security-toolbar {
     flex-wrap: wrap;
   }
 
-  .complaints-search {
+  .security-search {
     flex-basis: 100%;
   }
 
-  .complaints-toolbar select {
+  .security-toolbar select {
     flex: 1;
+  }
+
+  .gate-activity-card {
+    align-items: flex-start;
+    flex-wrap: wrap;
   }
 }
 
 @media (max-width: 550px) {
-  .complaints-stats {
+  .security-stats {
     grid-template-columns: 1fr;
   }
 
-  .complaints-header h1 {
+  .security-header h1 {
     font-size: 25px;
   }
 
-  .complaints-toolbar select {
+  .security-add-btn {
     width: 100%;
+    justify-content: center;
   }
 
-  .complaint-workflow-card {
-    align-items: flex-start;
+  .security-toolbar select {
+    width: 100%;
   }
 }

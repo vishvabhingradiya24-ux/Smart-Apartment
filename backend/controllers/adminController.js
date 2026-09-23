@@ -45,13 +45,16 @@ const loginAdmin = async (req, res) => {
       });
     }
 
+    // Fallback secret કી આપી છે જેથી secretOrPrivateKey ની એરર ક્યારેય ન આવે
+    const secretKey = process.env.JWT_SECRET || "my_smart_apartment_secret_key_12345";
+
     const token = jwt.sign(
       {
         id: admin.id,
         email: admin.email,
         role: "Admin"
       },
-      process.env.JWT_SECRET,
+      secretKey,
       {
         expiresIn: "1d"
       }
