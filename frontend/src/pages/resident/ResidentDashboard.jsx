@@ -1,40 +1,44 @@
-import React, { useEffect, useState } from "react";
+// import { useState } from "react";
+
 import { Link, useNavigate } from "react-router-dom";
-import "../../css/resident.css";
+import "../../css/resident/resident_dashboard.css";
 
 const ResidentDashboard = () => {
   const navigate = useNavigate();
 
-  const [user, setUser] = useState(null);
-  const [greeting, setGreeting] = useState("Good Morning");
-  const [loading, setLoading] = useState(true);
+  // const [user, setUser] = useState(null);
+  // const [greeting, setGreeting] = useState("Good Morning");
+  // const [loading] = useState(true);
 
   // ==========================================
   // GET USER FROM LOCAL STORAGE
   // ==========================================
-  useEffect(() => {
-    const storedUser = localStorage.getItem("user");
+ const storedUser = localStorage.getItem("user");
 
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch (error) {
-        console.error("User data error:", error);
-      }
-    }
+let parsedUser = null;
 
-    const hour = new Date().getHours();
+if (storedUser) {
+  try {
+    parsedUser = JSON.parse(storedUser);
+  } catch (error) {
+    console.error("User data error:", error);
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    navigate("/login");
+  }
+}
 
-    if (hour >= 5 && hour < 12) {
-      setGreeting("Good Morning");
-    } else if (hour >= 12 && hour < 17) {
-      setGreeting("Good Afternoon");
-    } else {
-      setGreeting("Good Evening");
-    }
+const user = parsedUser;
 
-    setLoading(false);
-  }, []);
+const hour = new Date().getHours();
+
+let greeting = "Good Evening";
+
+if (hour >= 5 && hour < 12) {
+  greeting = "Good Morning";
+} else if (hour >= 12 && hour < 17) {
+  greeting = "Good Afternoon";
+}
 
   // ==========================================
   // USER DETAILS
@@ -74,20 +78,20 @@ const ResidentDashboard = () => {
   // ==========================================
   // LOADING
   // ==========================================
-  if (loading) {
-    return (
-      <div
-        style={{
-          minHeight: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        Loading dashboard...
-      </div>
-    );
-  }
+  // if (loading) {
+  //   return (
+  //     <div
+  //       style={{
+  //         minHeight: "100vh",
+  //         display: "flex",
+  //         alignItems: "center",
+  //         justifyContent: "center",
+  //       }}
+  //     >
+  //       Loading dashboard...
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="resident-dashboard">
