@@ -16,26 +16,23 @@ import ForgotPassword from "./pages/auth/ForgotPassword";
 import VerifyOTP from "./pages/auth/VerifyOTP";
 import ResetPassword from "./pages/auth/ResetPassword";
 
-// ==========================================
-// DASHBOARDS
-// ==========================================
-
 import ResidentDashboard from "./pages/resident/ResidentDashboard";
+
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import Residents from "./pages/admin/Residents";
+import "./css/global.css";
 import StaffDashboard from "./pages/staff/StaffDashboard";
+import Security from "./pages/admin/Security";
 
-// ==========================================
-// RESIDENT PAGES
-// ==========================================
-
-import Complaints from "./pages/resident/Complaints";
-import MyProfile from "./pages/resident/MyProfile";
-import FlatDetails from "./pages/resident/FlatDetails";
-import Payment from "./pages/resident/Payment";
-import ServiceRequests from "./pages/resident/ServiceRequests";
-import Visitors from "./pages/resident/Visitors";
-import Facilities from "./pages/resident/Facilities";
-
+import AdminLayout from "./pages/admin/AdminLayout";
+import Staff from "./pages/admin/Staff";
+import Complaints from "./pages/admin/Complaints";
+import Payments from "./pages/admin/Payments";
+import Visitors from "./pages/admin/Visitors";
+import Amenities from "./pages/admin/Amenities";
+import Notices from "./pages/admin/Notices";
+import Notifications from "./pages/admin/Notifications";
+import Settings from "./pages/admin/Settings";
 
 function App() {
   return (
@@ -44,15 +41,8 @@ function App() {
 
       <Routes>
 
-        {/* ==================================
-            HOME
-        =================================== */}
-
-        <Route
-          path="/"
-          element={<Home />}
-        />
-
+        {/* Public Pages */}
+        <Route path="/" element={<Home />} />
 
         {/* ==================================
             AUTH
@@ -67,6 +57,7 @@ function App() {
           path="/register"
           element={<Register />}
         />
+
 
         <Route
           path="/forgot-password"
@@ -83,64 +74,121 @@ function App() {
           element={<ResetPassword />}
         />
 
-
-        {/* ==================================
-            DASHBOARDS
-        =================================== */}
-
+        {/* Resident Pages */}
         <Route
           path="/resident"
           element={<ResidentDashboard />}
         />
 
         <Route
-          path="/admin"
-          element={<AdminDashboard />}
+          path="/resident/complaints"
+          element={<Complaints />}
         />
 
+        {/* Staff Pages */}
         <Route
           path="/staff"
           element={<StaffDashboard />}
         />
 
-
-        {/* ==================================
-            RESIDENT
-        =================================== */}
-
+        {/* Admin Dashboard */}
         <Route
-          path="/resident/complaints"
-          element={<Complaints />}
+          path="/admin"
+          element={
+            <AdminLayout>
+              <AdminDashboard />
+            </AdminLayout>
+          }
+        />
+
+        {/* Admin Residents */}
+        <Route
+          path="/admin/residents"
+          element={
+            <AdminLayout>
+              <Residents />
+            </AdminLayout>
+          }
         />
 
         <Route
-          path="/resident/profile"
-          element={<MyProfile />}
+          path="/admin/security"
+          element={
+            <AdminLayout>
+              <Security />
+            </AdminLayout>
+          }
         />
 
         <Route
-          path="/resident/flat-details"
-          element={<FlatDetails />}
+          path="/admin/staff"
+          element={
+            <AdminLayout>
+              <Staff />
+            </AdminLayout>
+          }
         />
 
         <Route
-          path="/resident/payment"
-          element={<Payment />}
+          path="/admin/complaints"
+          element={
+            <AdminLayout>
+              <Complaints />
+            </AdminLayout>
+          }
         />
 
         <Route
-          path="/resident/requests"
-          element={<ServiceRequests />}
+          path="/admin/payments"
+          element={
+            <AdminLayout>
+              <Payments />
+            </AdminLayout>
+          }
         />
 
         <Route
-          path="/resident/visitors"
-          element={<Visitors />}
+          path="/admin/visitors"
+          element={
+            <AdminLayout>
+              <Visitors />
+            </AdminLayout>
+          }
         />
 
         <Route
-          path="/resident/facilities"
-          element={<Facilities />}
+          path="/admin/amenities"
+          element={
+            <AdminLayout>
+              <Amenities />
+            </AdminLayout>
+          }
+        />
+
+        <Route
+          path="/admin/notices"
+          element={
+            <AdminLayout>
+              <Notices />
+            </AdminLayout>
+          }
+        />
+
+        <Route
+          path="/admin/notifications"
+          element={
+            <AdminLayout>
+              <Notifications />
+            </AdminLayout>
+          }
+        />
+        <Route
+          path="/admin/settings"
+          element={
+            <AdminLayout>
+              <Settings />
+            </AdminLayout>
+          }
         />
 
       </Routes>

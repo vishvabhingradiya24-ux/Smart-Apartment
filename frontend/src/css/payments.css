@@ -1,8 +1,8 @@
 /* =========================================
-   VISITORS MANAGEMENT
+   PAYMENTS MANAGEMENT
    ========================================= */
 
-.visitors-page {
+.payments-page {
   width: 100%;
   min-height: 100%;
   padding: 32px;
@@ -13,7 +13,7 @@
    HEADER
    ========================================= */
 
-.visitors-header {
+.payments-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -21,40 +21,40 @@
   margin-bottom: 28px;
 }
 
-.visitors-overline {
+.payments-overline {
   margin: 0 0 6px;
-  color: #64748b;
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 1.5px;
+  color: #64748b;
 }
 
-.visitors-header h1 {
+.payments-header h1 {
   margin: 0;
-  color: #172033;
   font-size: 30px;
   font-weight: 750;
+  color: #172033;
 }
 
-.visitors-subtitle {
+.payments-subtitle {
   margin: 7px 0 0;
   color: #718096;
   font-size: 14px;
 }
 
-.visitor-add-btn {
+.payments-report-btn {
   border: none;
-  border-radius: 9px;
-  padding: 12px 18px;
   background: #172033;
   color: #ffffff;
+  padding: 12px 18px;
+  border-radius: 9px;
   font-size: 13px;
-  font-weight: 650;
+  font-weight: 600;
   cursor: pointer;
   transition: 0.2s ease;
 }
 
-.visitor-add-btn:hover {
+.payments-report-btn:hover {
   background: #27344d;
   transform: translateY(-1px);
 }
@@ -63,14 +63,14 @@
    STATISTICS
    ========================================= */
 
-.visitor-stats-grid {
+.payment-stats-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 18px;
   margin-bottom: 22px;
 }
 
-.visitor-stat-card {
+.payment-stat-card {
   display: flex;
   align-items: center;
   gap: 15px;
@@ -81,7 +81,7 @@
   box-shadow: 0 4px 16px rgba(25, 35, 55, 0.04);
 }
 
-.visitor-stat-icon {
+.payment-stat-icon {
   width: 48px;
   height: 48px;
   flex-shrink: 0;
@@ -89,45 +89,45 @@
   align-items: center;
   justify-content: center;
   border-radius: 12px;
-  font-size: 20px;
+  font-size: 21px;
   font-weight: 800;
 }
 
-.visitor-stat-icon.blue {
+.payment-stat-icon.blue {
   background: #eaf2ff;
   color: #2563eb;
 }
 
-.visitor-stat-icon.green {
+.payment-stat-icon.green {
   background: #e9f9ef;
   color: #16a34a;
 }
 
-.visitor-stat-icon.orange {
+.payment-stat-icon.orange {
   background: #fff4e5;
   color: #ea8a00;
 }
 
-.visitor-stat-icon.purple {
+.payment-stat-icon.purple {
   background: #f1eaff;
   color: #7c3aed;
 }
 
-.visitor-stat-card p {
+.payment-stat-card p {
   margin: 0 0 4px;
   color: #718096;
   font-size: 12px;
   font-weight: 600;
 }
 
-.visitor-stat-card h2 {
+.payment-stat-card h2 {
   margin: 0;
   color: #172033;
   font-size: 22px;
   font-weight: 750;
 }
 
-.visitor-stat-card span {
+.payment-stat-card span {
   display: block;
   margin-top: 4px;
   color: #9aa5b5;
@@ -135,109 +135,70 @@
 }
 
 /* =========================================
-   GATE ACTIVITY
+   PAYMENT OVERVIEW
    ========================================= */
 
-.gate-activity-section {
-  margin-bottom: 24px;
-  padding: 21px 23px;
-  background: #ffffff;
-  border: 1px solid #e7ebf2;
-  border-radius: 14px;
-  box-shadow: 0 4px 16px rgba(25, 35, 55, 0.04);
-}
-
-.gate-activity-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 17px;
-}
-
-.gate-activity-header h2 {
-  margin: 0;
-  color: #172033;
-  font-size: 17px;
-}
-
-.gate-activity-header p {
-  margin: 5px 0 0;
-  color: #7b8798;
-  font-size: 12px;
-}
-
-.gate-live {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  padding: 7px 10px;
-  background: #ecfdf3;
-  color: #16803c;
-  border-radius: 20px;
-  font-size: 10px;
-  font-weight: 700;
-}
-
-.live-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #22c55e;
-}
-
-.gate-activity-grid {
+.payment-overview {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
+  gap: 18px;
+  margin-bottom: 25px;
 }
 
-.gate-activity-card {
+.payment-overview-card {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 14px;
-  border: 1px solid #edf0f4;
-  border-radius: 10px;
-  background: #fafbfd;
+  gap: 15px;
+  padding: 18px 20px;
+  background: #ffffff;
+  border: 1px solid #e7ebf2;
+  border-radius: 12px;
 }
 
-.gate-activity-icon {
-  width: 40px;
-  height: 40px;
+.overview-icon {
+  width: 42px;
+  height: 42px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #ffffff;
-  border-radius: 9px;
-  font-size: 18px;
-}
-
-.gate-activity-card span {
-  display: block;
-  color: #7b8798;
-  font-size: 11px;
-}
-
-.gate-activity-card strong {
-  display: block;
-  margin-top: 3px;
-  color: #172033;
+  border-radius: 10px;
+  background: #eef6ff;
   font-size: 19px;
 }
 
+.pending-icon {
+  background: #fff7e8;
+}
+
+.receipt-icon {
+  background: #f3edff;
+}
+
+.payment-overview-card p {
+  margin: 0 0 3px;
+  color: #718096;
+  font-size: 12px;
+}
+
+.payment-overview-card h3 {
+  margin: 0;
+  color: #172033;
+  font-size: 20px;
+}
+
 /* =========================================
-   VISITOR SECTION
+   MAIN SECTION
    ========================================= */
 
-.visitors-section {
-  overflow: hidden;
+.payments-section {
   background: #ffffff;
   border: 1px solid #e7ebf2;
   border-radius: 14px;
+  overflow: hidden;
   box-shadow: 0 4px 16px rgba(25, 35, 55, 0.04);
 }
 
-.visitors-section-header {
+.payments-section-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -245,19 +206,19 @@
   border-bottom: 1px solid #edf0f4;
 }
 
-.visitors-section-header h2 {
+.payments-section-header h2 {
   margin: 0;
-  color: #172033;
   font-size: 18px;
+  color: #172033;
 }
 
-.visitors-section-header p {
+.payments-section-header p {
   margin: 5px 0 0;
-  color: #7b8798;
   font-size: 12px;
+  color: #7b8798;
 }
 
-.visitor-record-count {
+.record-count {
   padding: 7px 11px;
   background: #f1f4f8;
   color: #596579;
@@ -270,7 +231,7 @@
    TOOLBAR
    ========================================= */
 
-.visitors-toolbar {
+.payments-toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -280,7 +241,7 @@
   border-bottom: 1px solid #edf0f4;
 }
 
-.visitor-search {
+.payment-search {
   width: 450px;
   height: 42px;
   display: flex;
@@ -292,44 +253,44 @@
   border-radius: 8px;
 }
 
-.visitor-search span {
+.payment-search span {
   font-size: 14px;
 }
 
-.visitor-search input {
+.payment-search input {
   width: 100%;
   border: none;
   outline: none;
-  background: transparent;
-  color: #27344d;
   font-size: 13px;
+  color: #27344d;
+  background: transparent;
 }
 
-.visitor-search input::placeholder {
+.payment-search input::placeholder {
   color: #a0a9b7;
 }
 
-.visitor-filter {
+.payment-filter {
   display: flex;
   align-items: center;
   gap: 9px;
 }
 
-.visitor-filter label {
-  color: #68758a;
+.payment-filter label {
   font-size: 12px;
   font-weight: 600;
+  color: #68758a;
 }
 
-.visitor-filter select {
-  min-width: 140px;
+.payment-filter select {
+  min-width: 135px;
   height: 40px;
   padding: 0 10px;
   border: 1px solid #dfe4eb;
   border-radius: 8px;
-  outline: none;
   background: #ffffff;
   color: #27344d;
+  outline: none;
   cursor: pointer;
   font-size: 12px;
 }
@@ -338,18 +299,18 @@
    TABLE
    ========================================= */
 
-.visitors-table-wrapper {
+.payments-table-wrapper {
   width: 100%;
   overflow-x: auto;
 }
 
-.visitors-table {
+.payments-table {
   width: 100%;
-  min-width: 1200px;
+  min-width: 1150px;
   border-collapse: collapse;
 }
 
-.visitors-table th {
+.payments-table th {
   padding: 14px 15px;
   background: #f8fafc;
   color: #69768a;
@@ -361,7 +322,7 @@
   border-bottom: 1px solid #e9edf2;
 }
 
-.visitors-table td {
+.payments-table td {
   padding: 15px;
   color: #4e5a6d;
   font-size: 12px;
@@ -369,27 +330,27 @@
   vertical-align: middle;
 }
 
-.visitors-table tbody tr:hover {
+.payments-table tbody tr:hover {
   background: #fbfcfe;
 }
 
-/* =========================================
-   VISITOR PERSON
-   ========================================= */
+.payment-id {
+  color: #2563eb;
+  font-size: 12px;
+}
 
-.visitor-person {
+.resident-payment-info {
   display: flex;
   align-items: center;
   gap: 9px;
 }
 
-.visitor-avatar {
-  width: 35px;
-  height: 35px;
+.resident-payment-avatar {
+  width: 34px;
+  height: 34px;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
   border-radius: 50%;
   background: #eaf2ff;
   color: #2563eb;
@@ -397,92 +358,44 @@
   font-weight: 750;
 }
 
-.visitor-person strong {
+.resident-payment-info strong {
   display: block;
   color: #263248;
   font-size: 12px;
 }
 
-.visitor-person small {
+.resident-payment-info small {
   display: block;
-  margin-top: 3px;
+  margin-top: 2px;
   color: #99a3b2;
-  font-size: 9px;
+  font-size: 10px;
 }
 
-/* =========================================
-   RESIDENT / FLAT
-   ========================================= */
-
-.resident-flat strong {
-  display: block;
-  color: #263248;
+.flat-badge {
+  display: inline-block;
+  padding: 5px 8px;
+  background: #f1f4f8;
+  border-radius: 5px;
+  color: #536074;
+  font-weight: 650;
   font-size: 11px;
 }
 
-.resident-flat span {
-  display: inline-block;
-  margin-top: 3px;
-  padding: 3px 6px;
-  background: #f1f4f8;
-  border-radius: 4px;
-  color: #68758a;
+.payment-amount {
+  color: #172033;
+}
+
+.transaction-id {
+  font-family: monospace;
+  color: #69768a;
   font-size: 10px;
-  font-weight: 650;
-}
-
-.purpose-text {
-  color: #596579;
 }
 
 /* =========================================
-   VISITOR TYPE
+   STATUS
    ========================================= */
 
-.visitor-type {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 5px 8px;
-  border-radius: 6px;
-  font-size: 10px;
-  font-weight: 650;
-}
-
-.type-visitor {
-  background: #eef5ff;
-  color: #2563eb;
-}
-
-.type-delivery {
-  background: #fff5e7;
-  color: #c77900;
-}
-
-.type-service {
-  background: #f3edff;
-  color: #7c3aed;
-}
-
-/* =========================================
-   TIME
-   ========================================= */
-
-.time-text {
-  color: #596579;
-  white-space: nowrap;
-}
-
-.exit-pending {
-  color: #c87900;
-  font-weight: 650;
-}
-
-/* =========================================
-   APPROVAL STATUS
-   ========================================= */
-
-.approval-status {
+.payment-status {
   display: inline-flex;
   align-items: center;
   gap: 5px;
@@ -490,91 +403,80 @@
   border-radius: 20px;
   font-size: 10px;
   font-weight: 700;
-  white-space: nowrap;
 }
 
-.approval-approved {
+.status-success {
   background: #e9f9ef;
   color: #15803d;
 }
 
-.approval-pending {
+.status-pending {
   background: #fff4df;
   color: #c87900;
-}
-
-.approval-rejected {
-  background: #ffeded;
-  color: #dc2626;
 }
 
 /* =========================================
    ACTIONS
    ========================================= */
 
-.visitor-actions {
+.payment-actions {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
 }
 
-.visitor-action {
+.payment-action {
   width: 30px;
   height: 30px;
   border: 1px solid #e2e7ee;
   border-radius: 7px;
   background: #ffffff;
   cursor: pointer;
-  font-size: 11px;
+  font-size: 12px;
   transition: 0.2s ease;
 }
 
-.visitor-action:hover {
+.payment-action:hover {
   transform: translateY(-1px);
 }
 
-.visitor-action.view:hover {
+.payment-action.view:hover {
   background: #eef5ff;
   border-color: #bcd5ff;
 }
 
-.visitor-action.verify:hover {
-  background: #ecfdf3;
-  border-color: #bce9cb;
-}
-
-.visitor-action.exit:hover {
-  background: #fff5e7;
-  border-color: #f4d49f;
+.payment-action.receipt:hover {
+  background: #f5efff;
+  border-color: #d9c5ff;
 }
 
 /* =========================================
    NO DATA
    ========================================= */
 
-.no-visitor-data {
+.no-payment-data {
   height: 220px;
   text-align: center !important;
 }
 
-.no-visitor-data div {
+.no-payment-data div {
   display: flex;
   align-items: center;
-  justify-content: center;
   flex-direction: column;
+  justify-content: center;
 }
 
-.no-visitor-data span {
+.no-payment-data span {
   font-size: 28px;
 }
 
-.no-visitor-data h3 {
+.no-payment-data h3 {
   margin: 8px 0 3px;
   color: #4c596d;
   font-size: 15px;
 }
 
-.no-visitor-data p {
+.no-payment-data p {
   margin: 0;
   color: #98a2b1;
   font-size: 11px;
@@ -584,7 +486,7 @@
    INFORMATION CARD
    ========================================= */
 
-.visitor-info-card {
+.payment-info-card {
   display: flex;
   align-items: flex-start;
   gap: 14px;
@@ -595,17 +497,17 @@
   border-radius: 12px;
 }
 
-.visitor-info-icon {
+.payment-info-icon {
   font-size: 20px;
 }
 
-.visitor-info-card h3 {
+.payment-info-card h3 {
   margin: 0 0 5px;
   color: #27344d;
   font-size: 14px;
 }
 
-.visitor-info-card p {
+.payment-info-card p {
   margin: 0;
   color: #69768a;
   font-size: 12px;
@@ -617,56 +519,46 @@
    ========================================= */
 
 @media (max-width: 1200px) {
-  .visitor-stats-grid {
+  .payment-stats-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .payment-overview {
+    grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 768px) {
-  .visitors-page {
+  .payments-page {
     padding: 20px;
   }
 
-  .visitors-header {
+  .payments-header {
     flex-direction: column;
   }
 
-  .visitors-header h1 {
+  .payments-header h1 {
     font-size: 25px;
   }
 
-  .visitor-add-btn {
-    width: 100%;
-  }
-
-  .visitor-stats-grid {
+  .payment-stats-grid {
     grid-template-columns: 1fr;
   }
 
-  .gate-activity-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .gate-activity-header {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .visitors-toolbar {
+  .payments-toolbar {
     align-items: stretch;
     flex-direction: column;
   }
 
-  .visitor-search {
+  .payment-search {
     width: 100%;
   }
 
-  .visitor-filter {
+  .payment-filter {
     justify-content: space-between;
   }
 
-  .visitors-section-header {
+  .payments-section-header {
     align-items: flex-start;
     flex-direction: column;
     gap: 10px;
@@ -674,11 +566,19 @@
 }
 
 @media (max-width: 480px) {
-  .visitors-page {
+  .payments-page {
     padding: 14px;
   }
 
-  .visitor-info-card {
+  .payments-report-btn {
+    width: 100%;
+  }
+
+  .payment-stat-card {
+    padding: 16px;
+  }
+
+  .payment-info-card {
     padding: 15px;
   }
 }

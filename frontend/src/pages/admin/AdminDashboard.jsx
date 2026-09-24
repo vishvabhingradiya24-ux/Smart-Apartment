@@ -1,547 +1,479 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../../css/admin.css";
 
-function AdminDashboard() {
+const AdminDashboard = () => {
   const navigate = useNavigate();
 
-  const [admin, setAdmin] = useState(null);
-  const [checkingAuth, setCheckingAuth] = useState(true);
+  const [admin] = useState({
+    name: "Admin",
+  });
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    const userData = localStorage.getItem("user");
+  const adminName = admin.name;
 
-    if (!token || !userData) {
-      navigate("/login", { replace: true });
-      return;
-    }
+  const stats = [
+    {
+      title: "Total Residents",
+      value: "128",
+      icon: "👥",
+      change: "+8 this month",
+      path: "/admin/residents",
+    },
+    {
+      title: "Complaints",
+      value: "12",
+      icon: "📋",
+      change: "4 pending",
+      path: "/admin/complaints",
+    },
+    {
+      title: "Payments",
+      value: "₹45,600",
+      icon: "💳",
+      change: "8 pending",
+      path: "/admin/payments",
+    },
+    {
+      title: "Visitors Today",
+      value: "24",
+      icon: "🚪",
+      change: "18 checked in",
+      path: "/admin/visitors",
+    },
+  ];
 
-    try {
-      const user = JSON.parse(userData);
+  const quickAccess = [
+    {
+      title: "Residents",
+      description: "Manage society residents",
+      icon: "👥",
+      path: "/admin/residents",
+    },
+    {
+      title: "Security",
+      description: "Manage security activities",
+      icon: "🛡️",
+      path: "/admin/security",
+    },
+    {
+      title: "Staff",
+      description: "Manage staff and tasks",
+      icon: "👨‍🔧",
+      path: "/admin/staff",
+    },
+    {
+      title: "Complaints",
+      description: "Review resident complaints",
+      icon: "📋",
+      path: "/admin/complaints",
+    },
+    {
+      title: "Payments",
+      description: "Track maintenance payments",
+      icon: "💳",
+      path: "/admin/payments",
+    },
+    {
+      title: "Visitors",
+      description: "Monitor visitor activity",
+      icon: "🚪",
+      path: "/admin/visitors",
+    },
+    {
+      title: "Amenities",
+      description: "Manage society amenities",
+      icon: "🏊",
+      path: "/admin/amenities",
+    },
+    {
+      title: "Notices",
+      description: "Manage notices and events",
+      icon: "📢",
+      path: "/admin/notices",
+    },
+  ];
 
-      if (user.user_type !== "Admin") {
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-        navigate("/login", { replace: true });
-        return;
-      }
-
-      setAdmin(user);
-      setCheckingAuth(false);
-    } catch (error) {
-      console.error("Admin authentication error:", error);
-
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-
-      navigate("/login", { replace: true });
-    }
-  }, [navigate]);
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    navigate("/login", { replace: true });
-  };
-
-  if (checkingAuth) {
-    return (
-      <div className="admin-loading">
-        <div className="admin-spinner"></div>
-        <p>Loading Dashboard...</p>
-      </div>
-    );
-  }
-
-  if (!admin) {
-    return null;
-  }
-
-  const adminName = admin.name || "Admin";
-
-  const initials =
-    adminName
-      .split(" ")
-      .filter(Boolean)
-      .map((word) => word.charAt(0))
-      .join("")
-      .slice(0, 2)
-      .toUpperCase() || "A";
+  const recentActivities = [
+    {
+      type: "Complaint",
+      description: "New complaint submitted by Flat A-203",
+      time: "10 minutes ago",
+      status: "Pending",
+      icon: "📋",
+    },
+    {
+      type: "Payment",
+      description: "Maintenance payment received from Flat B-102",
+      time: "35 minutes ago",
+      status: "Paid",
+      icon: "💳",
+    },
+    {
+      type: "Visitor",
+      description: "Visitor checked in for Flat C-301",
+      time: "1 hour ago",
+      status: "Checked In",
+      icon: "🚪",
+    },
+    {
+      type: "Resident",
+      description: "New resident profile added",
+      time: "2 hours ago",
+      status: "New",
+      icon: "👤",
+    },
+    {
+      type: "Staff",
+      description: "Maintenance task assigned to electrician",
+      time: "3 hours ago",
+      status: "Assigned",
+      icon: "🔧",
+    },
+  ];
 
   return (
-    <div className="admin-page">
+    <div className="admin-dashboard-content">
 
-      <aside className="admin-sidebar">
+      {/* ================= HEADER ================= */}
+      <header className="admin-header">
+        <div className="admin-header-content">
+          <span className="admin-overline">
+            ADMIN PANEL
+          </span>
 
-        <div className="admin-brand">
+          <h1>Dashboard</h1>
 
-          <div className="admin-brand-icon">
-            🏢
-          </div>
-
-          <div>
-            <h2>Smart Apartment</h2>
-            <span>Management System</span>
-          </div>
-
+          <p>
+            Welcome back, {adminName}. Manage your society from one place.
+          </p>
         </div>
 
-        <div className="admin-menu-label">
-          MAIN MENU
-        </div>
-
-        <nav className="admin-nav">
+        <div className="admin-header-actions">
 
           <button
-            className="admin-nav-item active"
-            onClick={() => navigate("/admin")}
-          >
-            <span>⌂</span>
-            <span>Dashboard</span>
-          </button>
-
-          <button
-            className="admin-nav-item"
-            onClick={() => navigate("/admin/residents")}
-          >
-            <span>👥</span>
-            <span>Residents</span>
-          </button>
-
-          <button
-            className="admin-nav-item"
-            onClick={() => navigate("/admin/security")}
-          >
-            <span>🛡</span>
-            <span>Security</span>
-          </button>
-
-          <button
-            className="admin-nav-item"
-            onClick={() => navigate("/admin/staff")}
-          >
-            <span>🔧</span>
-            <span>Staff</span>
-          </button>
-
-          <button
-            className="admin-nav-item"
-            onClick={() => navigate("/admin/complaints")}
-          >
-            <span>📋</span>
-            <span>Complaints</span>
-          </button>
-
-          <button
-            className="admin-nav-item"
-            onClick={() => navigate("/admin/payments")}
-          >
-            <span>💳</span>
-            <span>Payments</span>
-          </button>
-
-          <button
-            className="admin-nav-item"
-            onClick={() => navigate("/admin/visitors")}
-          >
-            <span>🚪</span>
-            <span>Visitors</span>
-          </button>
-
-          <button
-            className="admin-nav-item"
-            onClick={() => navigate("/admin/amenities")}
-          >
-            <span>📅</span>
-            <span>Amenities</span>
-          </button>
-
-          <button
-            className="admin-nav-item"
-            onClick={() => navigate("/admin/notices")}
-          >
-            <span>📢</span>
-            <span>Notices</span>
-          </button>
-
-        </nav>
-
-        <div className="admin-menu-label system-label">
-          SYSTEM
-        </div>
-
-        <nav className="admin-nav">
-
-          <button
-            className="admin-nav-item"
-            onClick={() => navigate("/admin/settings")}
-          >
-            <span>⚙</span>
-            <span>Settings</span>
-          </button>
-
-          <button
-            className="admin-nav-item"
+            className="admin-notification"
             onClick={() => navigate("/admin/notifications")}
+            title="Notifications"
           >
-            <span>🔔</span>
-            <span>Notifications</span>
+            🔔
+            <span className="notification-dot"></span>
           </button>
 
-        </nav>
-
-        <div className="admin-sidebar-bottom">
-
-          <div className="admin-user">
-
-            <div className="admin-user-avatar">
-              {initials}
+          <div className="admin-header-profile">
+            <div className="admin-header-avatar">
+              A
             </div>
 
             <div>
               <strong>{adminName}</strong>
               <span>Administrator</span>
             </div>
+          </div>
+
+        </div>
+      </header>
+
+      {/* ================= WELCOME ================= */}
+      <section className="admin-welcome-card">
+
+        <div className="welcome-text">
+
+          <span>
+            SMART APARTMENT MANAGEMENT
+          </span>
+
+          <h2>
+            Manage your society
+            <br />
+            efficiently and securely.
+          </h2>
+
+          <p>
+            Manage residents, security, complaints, payments,
+            visitors and community services from your dashboard.
+          </p>
+
+        </div>
+
+        <div className="welcome-building">
+
+          <div className="building-roof"></div>
+
+          <div className="building-structure">
+
+            <div className="building-row">
+              <i></i>
+              <i></i>
+              <i></i>
+            </div>
+
+            <div className="building-row">
+              <i></i>
+              <i></i>
+              <i></i>
+            </div>
+
+            <div className="building-row">
+              <i></i>
+              <i></i>
+              <i></i>
+            </div>
+
+            <div className="building-row">
+              <i></i>
+              <i></i>
+              <i></i>
+            </div>
+
+            <div className="building-entry"></div>
 
           </div>
 
+        </div>
+
+      </section>
+
+      {/* ================= STATISTICS ================= */}
+      <section className="admin-section">
+
+        <div className="admin-section-header">
+
+          <div>
+            <span>OVERVIEW</span>
+            <h2>Society Statistics</h2>
+          </div>
+
+        </div>
+
+        <div className="stats-grid">
+
+          {stats.map((stat, index) => (
+            <button
+              className="stat-card"
+              key={index}
+              onClick={() => navigate(stat.path)}
+            >
+
+              <div className="stat-card-top">
+
+                <div className="stat-icon">
+                  {stat.icon}
+                </div>
+
+                <span className="stat-arrow">
+                  →
+                </span>
+
+              </div>
+
+              <div className="stat-content">
+
+                <span className="stat-title">
+                  {stat.title}
+                </span>
+
+                <h3>
+                  {stat.value}
+                </h3>
+
+                <span className="stat-change">
+                  {stat.change}
+                </span>
+
+              </div>
+
+            </button>
+          ))}
+
+        </div>
+
+      </section>
+
+      {/* ================= QUICK ACCESS ================= */}
+      <section className="admin-section">
+
+        <div className="admin-section-header">
+
+          <div>
+            <span>SHORTCUTS</span>
+            <h2>Quick Access</h2>
+          </div>
+
+        </div>
+
+        <div className="admin-card-grid">
+
+          {quickAccess.map((item, index) => (
+            <button
+              className="admin-management-card"
+              key={index}
+              onClick={() => navigate(item.path)}
+            >
+
+              <div className="management-icon">
+                {item.icon}
+              </div>
+
+              <div className="management-content">
+
+                <h3>
+                  {item.title}
+                </h3>
+
+                <p>
+                  {item.description}
+                </p>
+
+              </div>
+
+              <span className="management-arrow">
+                →
+              </span>
+
+            </button>
+          ))}
+
+        </div>
+
+      </section>
+
+      {/* ================= RECENT ACTIVITY ================= */}
+      <section className="admin-section">
+
+        <div className="admin-section-header activity-header">
+
+          <div>
+            <span>ACTIVITY</span>
+            <h2>Recent Activity</h2>
+          </div>
+
           <button
-            className="admin-logout"
-            onClick={handleLogout}
+            className="view-all-button"
+            onClick={() => navigate("/admin/notifications")}
           >
-            <span>↪</span>
-            Logout
+            View All →
           </button>
 
         </div>
 
-      </aside>
+        <div className="activity-card">
 
-      <main className="admin-main">
-
-        <header className="admin-header">
-
-          <div className="admin-header-content">
-
-            <span className="admin-overline">
-              ADMIN PANEL
-            </span>
-
-            <h1>
-              Dashboard
-            </h1>
-
-            <p>
-              Welcome back, {adminName}. Manage your society from one place.
-            </p>
-
-          </div>
-
-          <div className="admin-header-actions">
-
-            <button
-              className="admin-notification"
-              onClick={() => navigate("/admin/notifications")}
+          {recentActivities.map((activity, index) => (
+            <div
+              className="activity-row"
+              key={index}
             >
-              🔔
-            </button>
 
-            <div className="admin-header-profile">
-
-              <div className="admin-header-avatar">
-                {initials}
+              <div className="activity-icon">
+                {activity.icon}
               </div>
 
-              <div>
-                <strong>{adminName}</strong>
-                <span>Administrator</span>
+              <div className="activity-details">
+
+                <strong>
+                  {activity.type}
+                </strong>
+
+                <p>
+                  {activity.description}
+                </p>
+
+                <span>
+                  {activity.time}
+                </span>
+
+              </div>
+
+              <div
+                className={`activity-status status-${activity.status
+                  .toLowerCase()
+                  .replace(/\s+/g, "-")}`}
+              >
+                {activity.status}
               </div>
 
             </div>
+          ))}
 
+        </div>
+
+      </section>
+
+      {/* ================= COMMUNITY OVERVIEW ================= */}
+      <section className="admin-overview">
+
+        <div className="overview-header">
+
+          <div>
+            <span>COMMUNITY</span>
+            <h2>Community Overview</h2>
           </div>
 
-        </header>
+          <button
+            onClick={() => navigate("/admin/residents")}
+          >
+            View Residents →
+          </button>
 
-        <section className="admin-welcome-card">
+        </div>
 
-          <div className="welcome-text">
+        <div className="community-grid">
 
-            <span>
-              SMART APARTMENT MANAGEMENT
-            </span>
-
-            <h2>
-              Manage your society
-              <br />
-              efficiently and securely.
-            </h2>
-
-            <p>
-              Manage residents, security, complaints, payments,
-              visitors and community services from your dashboard.
-            </p>
-
-          </div>
-
-          <div className="welcome-building">
-
-            <div className="building-roof"></div>
-
-            <div className="building-structure">
-
-              <div className="building-row">
-                <i></i>
-                <i></i>
-                <i></i>
-              </div>
-
-              <div className="building-row">
-                <i></i>
-                <i></i>
-                <i></i>
-              </div>
-
-              <div className="building-row">
-                <i></i>
-                <i></i>
-                <i></i>
-              </div>
-
-              <div className="building-row">
-                <i></i>
-                <i></i>
-                <i></i>
-              </div>
-
-              <div className="building-entry"></div>
-
-            </div>
-
-          </div>
-
-        </section>
-
-        <section className="admin-section">
-
-          <div className="admin-section-header">
+          <div className="community-item">
+            <span className="community-icon">🏠</span>
 
             <div>
-              <span>MANAGEMENT</span>
-              <h2>Quick Access</h2>
-              <p>
-                Manage the important areas of your apartment community.
-              </p>
+              <strong>128</strong>
+              <p>Total Residents</p>
             </div>
-
           </div>
 
-          <div className="admin-card-grid">
-
-            <button
-              className="admin-management-card"
-              onClick={() => navigate("/admin/residents")}
-            >
-              <div className="management-icon">
-                👥
-              </div>
-
-              <div className="management-content">
-                <h3>Residents</h3>
-                <p>Manage registered residents</p>
-              </div>
-
-              <span className="management-arrow">
-                →
-              </span>
-            </button>
-
-            <button
-              className="admin-management-card"
-              onClick={() => navigate("/admin/security")}
-            >
-              <div className="management-icon">
-                🛡
-              </div>
-
-              <div className="management-content">
-                <h3>Security</h3>
-                <p>Manage security operations</p>
-              </div>
-
-              <span className="management-arrow">
-                →
-              </span>
-            </button>
-
-            <button
-              className="admin-management-card"
-              onClick={() => navigate("/admin/staff")}
-            >
-              <div className="management-icon">
-                🔧
-              </div>
-
-              <div className="management-content">
-                <h3>Staff</h3>
-                <p>Manage apartment staff</p>
-              </div>
-
-              <span className="management-arrow">
-                →
-              </span>
-            </button>
-
-            <button
-              className="admin-management-card"
-              onClick={() => navigate("/admin/complaints")}
-            >
-              <div className="management-icon">
-                📋
-              </div>
-
-              <div className="management-content">
-                <h3>Complaints</h3>
-                <p>Review resident complaints</p>
-              </div>
-
-              <span className="management-arrow">
-                →
-              </span>
-            </button>
-
-            <button
-              className="admin-management-card"
-              onClick={() => navigate("/admin/payments")}
-            >
-              <div className="management-icon">
-                💳
-              </div>
-
-              <div className="management-content">
-                <h3>Payments</h3>
-                <p>Manage maintenance payments</p>
-              </div>
-
-              <span className="management-arrow">
-                →
-              </span>
-            </button>
-
-            <button
-              className="admin-management-card"
-              onClick={() => navigate("/admin/visitors")}
-            >
-              <div className="management-icon">
-                🚪
-              </div>
-
-              <div className="management-content">
-                <h3>Visitors</h3>
-                <p>Monitor visitor activities</p>
-              </div>
-
-              <span className="management-arrow">
-                →
-              </span>
-            </button>
-
-            <button
-              className="admin-management-card"
-              onClick={() => navigate("/admin/amenities")}
-            >
-              <div className="management-icon">
-                📅
-              </div>
-
-              <div className="management-content">
-                <h3>Amenities</h3>
-                <p>Manage facilities and bookings</p>
-              </div>
-
-              <span className="management-arrow">
-                →
-              </span>
-            </button>
-
-            <button
-              className="admin-management-card"
-              onClick={() => navigate("/admin/notices")}
-            >
-              <div className="management-icon">
-                📢
-              </div>
-
-              <div className="management-content">
-                <h3>Notices</h3>
-                <p>Publish community notices</p>
-              </div>
-
-              <span className="management-arrow">
-                →
-              </span>
-            </button>
-
-          </div>
-
-        </section>
-
-        <section className="admin-overview">
-
-          <div className="overview-header">
+          <div className="community-item">
+            <span className="community-icon">🏢</span>
 
             <div>
-              <span>OVERVIEW</span>
-              <h2>Community Overview</h2>
+              <strong>64</strong>
+              <p>Total Flats</p>
             </div>
-
-            <button
-              onClick={() => navigate("/admin")}
-            >
-              View Dashboard
-            </button>
-
           </div>
 
-          <div className="overview-placeholder">
-
-            <div className="overview-icon">
-              ◫
-            </div>
+          <div className="community-item">
+            <span className="community-icon">👨‍🔧</span>
 
             <div>
-              <h3>
-                Community information will appear here
-              </h3>
-
-              <p>
-                Real-time information from residents, payments,
-                complaints, visitors and other modules will be
-                displayed here when those modules are connected.
-              </p>
+              <strong>18</strong>
+              <p>Active Staff</p>
             </div>
-
           </div>
 
-        </section>
+          <div className="community-item">
+            <span className="community-icon">🎯</span>
 
-        <footer className="admin-footer">
+            <div>
+              <strong>6</strong>
+              <p>Active Amenities</p>
+            </div>
+          </div>
 
-          <span>
-            © 2026 Smart Apartment Management System
-          </span>
+        </div>
 
-          <span>
-            Admin Panel
-          </span>
+      </section>
 
-        </footer>
+      {/* ================= FOOTER ================= */}
+      <footer className="admin-footer">
 
-      </main>
+        <span>
+          © 2026 Smart Apartment Management System
+        </span>
+
+        <span>
+          Admin Panel
+        </span>
+
+      </footer>
 
     </div>
   );
-}
+};
 
 export default AdminDashboard;
