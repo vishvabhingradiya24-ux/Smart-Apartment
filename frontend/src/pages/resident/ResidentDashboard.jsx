@@ -2,126 +2,110 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "../../css/resident.css";
 
-const ResidentDashboard = () => {
+function ResidentDashboard() {
   const navigate = useNavigate();
 
-  const [user, setUser] = useState(null);
-  const [greeting, setGreeting] = useState("Good Morning");
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState({});
+  const [greeting, setGreeting] = useState("Good Evening");
 
-  // ==========================================
-  // GET USER FROM LOCAL STORAGE
-  // ==========================================
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
+    try {
+      const storedUser = localStorage.getItem("user");
 
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch (error) {
-        console.error("User data error:", error);
+      if (storedUser) {
+        const parsedUser = JSON.parse(storedUser);
+
+        if (parsedUser?.user) {
+          setUser(parsedUser.user);
+        } else if (parsedUser?.data?.user) {
+          setUser(parsedUser.data.user);
+        } else {
+          setUser(parsedUser);
+        }
       }
+    } catch (error) {
+      console.error("User data error:", error);
+      setUser({});
     }
-
-    const hour = new Date().getHours();
-
-    if (hour >= 5 && hour < 12) {
-      setGreeting("Good Morning");
-    } else if (hour >= 12 && hour < 17) {
-      setGreeting("Good Afternoon");
-    } else {
-      setGreeting("Good Evening");
-    }
-
-    setLoading(false);
   }, []);
 
-  // ==========================================
-  // USER DETAILS
-  // ==========================================
-  const firstName =
-    user?.first_name ||
-    user?.firstName ||
-    user?.name?.split(" ")[0] ||
-    "Resident";
+  const firstName = user?.first_name || "";
+  const lastName = user?.last_name || "";
 
-  const lastName =
-    user?.last_name ||
-    user?.lastName ||
-    "";
+  const fullName =
+    `${firstName} ${lastName}`.trim() || "Resident";
 
-  const fullName = `${firstName} ${lastName}`.trim();
+  const initials =
+    `${firstName.charAt(0)}${lastName.charAt(0)}`
+      .toUpperCase() || "R";
 
-  const flatNumber =
-    user?.flat_number ||
-    user?.flatNumber ||
-    "Not Available";
+  const blockWing = user?.block_wing || "";
+  const flatNumber = user?.flat_number || "";
+  const userType = user?.user_type || "Resident";
 
-  const blockWing =
-    user?.block_wing ||
-    user?.blockWing ||
-    "Not Available";
+  const getGreeting = () => {
+    const parts = new Intl.DateTimeFormat("en-IN", {
+      timeZone: "Asia/Kolkata",
+      hour: "numeric",
+      hour12: false,
+    }).formatToParts(new Date());
 
-  // ==========================================
-  // LOGOUT
-  // ==========================================
+    const hour = Number(
+      parts.find((part) => part.type === "hour")?.value || 0
+    );
+
+    if (hour >= 5 && hour < 12) {
+      return "Good Morning";
+    }
+
+    if (hour >= 12 && hour < 17) {
+      return "Good Afternoon";
+    }
+
+    return "Good Evening";
+  };
+
+  useEffect(() => {
+    setGreeting(getGreeting());
+
+    const timer = setInterval(() => {
+      setGreeting(getGreeting());
+    }, 60000);
+
+    return () => clearInterval(timer);
+  }, []);
+
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    localStorage.removeItem("loggedInUser");
+    localStorage.removeItem("authUser");
+    localStorage.removeItem("currentUser");
+
     navigate("/login");
   };
-
-  // ==========================================
-  // LOADING
-  // ==========================================
-  if (loading) {
-    return (
-      <div
-        style={{
-          minHeight: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        Loading dashboard...
-      </div>
-    );
-  }
 
   return (
     <div className="resident-dashboard">
 
-      {/* =========================================
-          SIDEBAR
-      ========================================= */}
-
       <aside className="resident-sidebar">
-
-        {/* BRAND */}
 
         <div className="sidebar-brand">
 
           <div className="brand-mark">
-            SA
+            ⌂
           </div>
 
           <div className="brand-text">
-            <h2>SmartApartment</h2>
-            <span>Society Management</span>
+            <h2>Smart Apartment</h2>
+            <span>Resident Portal</span>
           </div>
 
         </div>
-
-
-        {/* SECTION LABEL */}
 
         <div className="sidebar-section-label">
           MAIN MENU
         </div>
-
-
-        {/* NAVIGATION */}
 
         <nav className="resident-nav">
 
@@ -129,28 +113,25 @@ const ResidentDashboard = () => {
             to="/resident"
             className="nav-item active"
           >
-            <span className="nav-icon">▦</span>
+            <span className="nav-icon">⌂</span>
             <span>Dashboard</span>
           </Link>
-
 
           <Link
             to="/resident/profile"
             className="nav-item"
           >
-            <span className="nav-icon">◉</span>
+            <span className="nav-icon">◯</span>
             <span>My Profile</span>
           </Link>
-
 
           <Link
             to="/resident/flat-details"
             className="nav-item"
           >
-            <span className="nav-icon">⌂</span>
+            <span className="nav-icon">▦</span>
             <span>Flat Details</span>
           </Link>
-
 
           <Link
             to="/resident/payment"
@@ -160,51 +141,45 @@ const ResidentDashboard = () => {
             <span>Payments</span>
           </Link>
 
-
           <Link
             to="/resident/complaints"
             className="nav-item"
           >
-            <span className="nav-icon">!</span>
+            <span className="nav-icon">⚒</span>
             <span>Complaints</span>
           </Link>
-
 
           <Link
             to="/resident/requests"
             className="nav-item"
           >
-            <span className="nav-icon">☷</span>
+            <span className="nav-icon">≡</span>
             <span>Service Requests</span>
           </Link>
-
 
           <Link
             to="/resident/visitors"
             className="nav-item"
           >
-            <span className="nav-icon">♙</span>
+            <span className="nav-icon">◉</span>
             <span>Visitors</span>
           </Link>
-
 
           <Link
             to="/resident/facilities"
             className="nav-item"
           >
-            <span className="nav-icon">▣</span>
-            <span>Facilities</span>
+            <span className="nav-icon">□</span>
+            <span>Amenity Booking</span>
           </Link>
-
 
           <Link
             to="/resident/notices"
             className="nav-item"
           >
-            <span className="nav-icon">▤</span>
-            <span>Notices</span>
+            <span className="nav-icon">!</span>
+            <span>Notices & Events</span>
           </Link>
-
 
           <Link
             to="/resident/polls"
@@ -214,54 +189,40 @@ const ResidentDashboard = () => {
             <span>Polls & Voting</span>
           </Link>
 
-
           <Link
             to="/resident/notifications"
             className="nav-item"
           >
-            <span className="nav-icon">🔔</span>
+            <span className="nav-icon">○</span>
             <span>Notifications</span>
           </Link>
-
 
           <Link
             to="/resident/emergency"
             className="nav-item emergency-nav"
           >
             <span className="nav-icon">!</span>
-            <span>Emergency & Help</span>
+            <span>Emergency Contacts</span>
           </Link>
 
         </nav>
-
-
-        {/* SIDEBAR BOTTOM */}
 
         <div className="sidebar-bottom">
 
           <div className="sidebar-user">
 
             <div className="sidebar-avatar">
-              {firstName.charAt(0).toUpperCase()}
+              {initials}
             </div>
 
             <div className="sidebar-user-info">
-
-              <strong>
-                {fullName}
-              </strong>
-
-              <span>
-                Resident
-              </span>
-
+              <strong>{fullName}</strong>
+              <span>{userType}</span>
             </div>
 
           </div>
 
-
           <button
-            type="button"
             className="logout-button"
             onClick={handleLogout}
           >
@@ -274,30 +235,23 @@ const ResidentDashboard = () => {
       </aside>
 
 
-      {/* =========================================
-          MAIN CONTENT
-      ========================================= */}
-
       <main className="resident-main">
-
-        {/* =========================================
-            HEADER
-        ========================================= */}
 
         <header className="resident-header">
 
           <div className="header-left">
 
             <span className="header-overline">
-              RESIDENT PORTAL
+              RESIDENT SPACE
             </span>
 
             <h1>
-              {greeting}, {firstName}!
+              {greeting}, {fullName}
             </h1>
 
             <p>
-              Welcome back to your SmartApartment dashboard.
+              Everything you need for a smarter,
+              more connected residential experience.
             </p>
 
           </div>
@@ -308,9 +262,8 @@ const ResidentDashboard = () => {
             <Link
               to="/resident/notifications"
               className="header-notification"
-              title="Notifications"
             >
-              <span>🔔</span>
+              <span>○</span>
             </Link>
 
 
@@ -320,17 +273,17 @@ const ResidentDashboard = () => {
             >
 
               <div className="header-avatar">
-                {firstName.charAt(0).toUpperCase()}
+                {initials}
               </div>
 
               <div className="header-profile-info">
 
-                <strong>
-                  {fullName}
-                </strong>
+                <strong>{fullName}</strong>
 
                 <span>
-                  Resident
+                  {blockWing && flatNumber
+                    ? `${blockWing} • ${flatNumber}`
+                    : userType}
                 </span>
 
               </div>
@@ -342,37 +295,29 @@ const ResidentDashboard = () => {
         </header>
 
 
-        {/* =========================================
-            RESIDENCE HERO
-        ========================================= */}
-
         <section className="residence-hero">
-
-          {/* Background Image */}
 
           <div className="residence-photo"></div>
 
           <div className="residence-photo-overlay"></div>
 
-
-          {/* LEFT CONTENT */}
-
           <div className="residence-content">
 
             <span className="section-eyebrow">
-              YOUR RESIDENCE
+              MY RESIDENCE
             </span>
 
             <h2>
-              Welcome to SmartApartment
+              Your home,
+              <br />
+              your community.
             </h2>
 
             <p className="residence-description">
-              Manage your apartment services, payments,
-              complaints, visitors and facility bookings
-              from one place.
+              Keep your apartment services,
+              community activities and residential
+              information together in one place.
             </p>
-
 
             <Link
               to="/resident/flat-details"
@@ -385,26 +330,17 @@ const ResidentDashboard = () => {
           </div>
 
 
-          {/* RIGHT INFORMATION CARD */}
-
           <div className="residence-info">
 
             <div className="residence-user">
 
               <div className="large-avatar">
-                {firstName.charAt(0).toUpperCase()}
+                {initials}
               </div>
 
               <div>
-
-                <span>
-                  RESIDENT
-                </span>
-
-                <h3>
-                  {fullName}
-                </h3>
-
+                <span>RESIDENT</span>
+                <h3>{fullName}</h3>
               </div>
 
             </div>
@@ -414,12 +350,10 @@ const ResidentDashboard = () => {
 
               <div className="residence-detail">
 
-                <span>
-                  FLAT NUMBER
-                </span>
+                <span>BLOCK / WING</span>
 
                 <strong>
-                  {flatNumber}
+                  {blockWing || "Not available"}
                 </strong>
 
               </div>
@@ -427,12 +361,10 @@ const ResidentDashboard = () => {
 
               <div className="residence-detail">
 
-                <span>
-                  BLOCK / WING
-                </span>
+                <span>FLAT NUMBER</span>
 
                 <strong>
-                  {blockWing}
+                  {flatNumber || "Not available"}
                 </strong>
 
               </div>
@@ -440,12 +372,10 @@ const ResidentDashboard = () => {
 
               <div className="residence-detail">
 
-                <span>
-                  ROLE
-                </span>
+                <span>USER TYPE</span>
 
                 <strong>
-                  Resident
+                  {userType}
                 </strong>
 
               </div>
@@ -456,10 +386,6 @@ const ResidentDashboard = () => {
 
         </section>
 
-
-        {/* =========================================
-            SERVICES
-        ========================================= */}
 
         <section className="services-section">
 
@@ -472,22 +398,20 @@ const ResidentDashboard = () => {
               </span>
 
               <h2>
-                What would you like to do?
+                What would you like to manage?
               </h2>
 
             </div>
 
             <p>
-              Access your apartment services
-              quickly from one place.
+              Quick access to your most-used
+              apartment services.
             </p>
 
           </div>
 
 
           <div className="services-grid">
-
-            {/* PAYMENT */}
 
             <Link
               to="/resident/payment"
@@ -508,12 +432,10 @@ const ResidentDashboard = () => {
 
               <div className="service-content">
 
-                <h3>
-                  Maintenance & Payments
-                </h3>
+                <h3>Payments</h3>
 
                 <p>
-                  View dues, payment status
+                  Manage maintenance payments
                   and payment history.
                 </p>
 
@@ -521,8 +443,6 @@ const ResidentDashboard = () => {
 
             </Link>
 
-
-            {/* COMPLAINTS */}
 
             <Link
               to="/resident/complaints"
@@ -532,7 +452,7 @@ const ResidentDashboard = () => {
               <div className="service-top">
 
                 <div className="service-icon">
-                  !
+                  ⚒
                 </div>
 
                 <span className="service-arrow">
@@ -543,21 +463,17 @@ const ResidentDashboard = () => {
 
               <div className="service-content">
 
-                <h3>
-                  Complaints
-                </h3>
+                <h3>Complaints</h3>
 
                 <p>
-                  Submit complaints and
-                  track their status.
+                  Report and track apartment
+                  issues.
                 </p>
 
               </div>
 
             </Link>
 
-
-            {/* SERVICE REQUESTS */}
 
             <Link
               to="/resident/requests"
@@ -567,7 +483,7 @@ const ResidentDashboard = () => {
               <div className="service-top">
 
                 <div className="service-icon">
-                  ☷
+                  ≡
                 </div>
 
                 <span className="service-arrow">
@@ -578,164 +494,20 @@ const ResidentDashboard = () => {
 
               <div className="service-content">
 
-                <h3>
-                  Service Requests
-                </h3>
+                <h3>Service Requests</h3>
 
                 <p>
-                  Request electrician, plumber,
-                  cleaning and other services.
+                  Request and track residential
+                  services.
                 </p>
 
               </div>
 
             </Link>
 
-
-            {/* VISITORS */}
 
             <Link
               to="/resident/visitors"
-              className="service-card"
-            >
-
-              <div className="service-top">
-
-                <div className="service-icon">
-                  ♙
-                </div>
-
-                <span className="service-arrow">
-                  ↗
-                </span>
-
-              </div>
-
-              <div className="service-content">
-
-                <h3>
-                  Visitors
-                </h3>
-
-                <p>
-                  Pre-approve visitors and
-                  view visitor history.
-                </p>
-
-              </div>
-
-            </Link>
-
-
-            {/* FACILITIES */}
-
-            <Link
-              to="/resident/facilities"
-              className="service-card"
-            >
-
-              <div className="service-top">
-
-                <div className="service-icon">
-                  ▣
-                </div>
-
-                <span className="service-arrow">
-                  ↗
-                </span>
-
-              </div>
-
-              <div className="service-content">
-
-                <h3>
-                  Facilities Booking
-                </h3>
-
-                <p>
-                  View available facilities
-                  and submit booking requests.
-                </p>
-
-              </div>
-
-            </Link>
-
-
-            {/* NOTICES */}
-
-            <Link
-              to="/resident/notices"
-              className="service-card"
-            >
-
-              <div className="service-top">
-
-                <div className="service-icon">
-                  ▤
-                </div>
-
-                <span className="service-arrow">
-                  ↗
-                </span>
-
-              </div>
-
-              <div className="service-content">
-
-                <h3>
-                  Notices & Events
-                </h3>
-
-                <p>
-                  View society notices
-                  and upcoming events.
-                </p>
-
-              </div>
-
-            </Link>
-
-
-            {/* POLLS */}
-
-            <Link
-              to="/resident/polls"
-              className="service-card"
-            >
-
-              <div className="service-top">
-
-                <div className="service-icon">
-                  ✓
-                </div>
-
-                <span className="service-arrow">
-                  ↗
-                </span>
-
-              </div>
-
-              <div className="service-content">
-
-                <h3>
-                  Polls & Voting
-                </h3>
-
-                <p>
-                  Participate in society
-                  polls and voting.
-                </p>
-
-              </div>
-
-            </Link>
-
-
-            {/* PROFILE */}
-
-            <Link
-              to="/resident/profile"
               className="service-card"
             >
 
@@ -753,13 +525,42 @@ const ResidentDashboard = () => {
 
               <div className="service-content">
 
-                <h3>
-                  My Profile
-                </h3>
+                <h3>Visitors</h3>
 
                 <p>
-                  View your personal and
-                  apartment information.
+                  Manage visitor approvals
+                  and entries.
+                </p>
+
+              </div>
+
+            </Link>
+
+
+            <Link
+              to="/resident/facilities"
+              className="service-card"
+            >
+
+              <div className="service-top">
+
+                <div className="service-icon">
+                  □
+                </div>
+
+                <span className="service-arrow">
+                  ↗
+                </span>
+
+              </div>
+
+              <div className="service-content">
+
+                <h3>Amenity Booking</h3>
+
+                <p>
+                  Reserve community facilities
+                  and amenities.
                 </p>
 
               </div>
@@ -771,13 +572,7 @@ const ResidentDashboard = () => {
         </section>
 
 
-        {/* =========================================
-            LOWER GRID
-        ========================================= */}
-
         <section className="dashboard-lower-grid">
-
-          {/* COMMUNITY / NOTICES */}
 
           <div className="dashboard-section-panel">
 
@@ -790,13 +585,13 @@ const ResidentDashboard = () => {
                 </span>
 
                 <h2>
-                  Notices & Events
+                  Community Pulse
                 </h2>
 
               </div>
 
               <Link to="/resident/notices">
-                View all →
+                View All →
               </Link>
 
             </div>
@@ -805,24 +600,22 @@ const ResidentDashboard = () => {
             <div className="empty-community">
 
               <div className="empty-icon">
-                ▤
+                +
               </div>
 
               <h3>
-                No community updates
+                No community updates yet
               </h3>
 
               <p>
-                New society notices and events
-                will appear here.
+                Notices, events and community
+                announcements will appear here.
               </p>
 
             </div>
 
           </div>
 
-
-          {/* PAYMENT */}
 
           <div className="dashboard-section-panel">
 
@@ -835,7 +628,7 @@ const ResidentDashboard = () => {
                 </span>
 
                 <h2>
-                  Maintenance Payment
+                  Maintenance & Payments
                 </h2>
 
               </div>
@@ -856,12 +649,12 @@ const ResidentDashboard = () => {
               <div>
 
                 <h3>
-                  Payment information
+                  No payment information
                 </h3>
 
                 <p>
-                  View your maintenance dues,
-                  payment status and history.
+                  Your maintenance and payment
+                  information will appear here.
                 </p>
 
               </div>
@@ -873,10 +666,6 @@ const ResidentDashboard = () => {
         </section>
 
 
-        {/* =========================================
-            ACTIVITY
-        ========================================= */}
-
         <section className="activity-section">
 
           <div className="panel-heading">
@@ -884,11 +673,11 @@ const ResidentDashboard = () => {
             <div>
 
               <span className="section-eyebrow">
-                RECENT ACTIVITY
+                YOUR SPACE
               </span>
 
               <h2>
-                Your Activity
+                Recent Activity
               </h2>
 
             </div>
@@ -903,7 +692,7 @@ const ResidentDashboard = () => {
             <div className="activity-empty-content">
 
               <div className="activity-empty-icon">
-                ✓
+                •
               </div>
 
               <div>
@@ -913,8 +702,8 @@ const ResidentDashboard = () => {
                 </h3>
 
                 <p>
-                  Your latest requests, payments
-                  and bookings will appear here.
+                  Your apartment activities will
+                  appear here as you use the system.
                 </p>
 
               </div>
@@ -926,18 +715,14 @@ const ResidentDashboard = () => {
         </section>
 
 
-        {/* =========================================
-            FOOTER
-        ========================================= */}
-
         <footer className="resident-footer">
 
           <span>
-            © 2026 SmartApartment
+            Smart Apartment
           </span>
 
           <span>
-            Society Management System
+            Residential Management System
           </span>
 
         </footer>
@@ -946,6 +731,6 @@ const ResidentDashboard = () => {
 
     </div>
   );
-};
+}
 
 export default ResidentDashboard;

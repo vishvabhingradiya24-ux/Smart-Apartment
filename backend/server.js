@@ -33,6 +33,7 @@ const residentRoutes = require("./routes/residentRoutes");
 const serviceRequestRoutes = require("./routes/serviceRequestRoutes");
 const staffRoutes = require("./routes/staffRoutes");
 const visitorRoutes = require("./routes/visitorRoutes");
+const noticeRoutes = require("./routes/noticeRoutes");
 
 
 // ==========================================
@@ -78,6 +79,12 @@ app.use(
   facilityRoutes
 );
 
+// Notices
+app.use(
+  "/api/notices",
+  noticeRoutes
+);
+
 
 // ==========================================
 // HOME ROUTE
@@ -115,7 +122,7 @@ app.use((err, req, res, next) => {
 
 
 // ==========================================
-// SERVER
+// SERVERs
 // ==========================================
 
 const PORT = process.env.PORT || 5000;

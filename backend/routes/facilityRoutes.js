@@ -3,13 +3,13 @@ const express = require("express");
 const {
   getFacilities,
   getMyBookings,
+  checkAvailability,
   createBooking,
 } = require("../controllers/facilityController");
 
 const authMiddleware = require("../middleware/authMiddleware");
 
 const router = express.Router();
-
 
 // Get all facilities
 router.get(
@@ -18,6 +18,12 @@ router.get(
   getFacilities
 );
 
+// Check facility availability
+router.post(
+  "/check-availability",
+  authMiddleware,
+  checkAvailability
+);
 
 // Get logged-in resident bookings
 router.get(
@@ -26,13 +32,11 @@ router.get(
   getMyBookings
 );
 
-
 // Create booking request
 router.post(
   "/bookings",
   authMiddleware,
   createBooking
 );
-
 
 module.exports = router;
