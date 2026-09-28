@@ -1,12 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import "../../css/resident.css";
+import { Link } from "react-router-dom";
+import "../../css/resident/resident_Dashboard.css";
 
 function ResidentDashboard() {
-  const navigate = useNavigate();
-
   const [user, setUser] = useState({});
-  const [greeting, setGreeting] = useState("Good Evening");
 
   useEffect(() => {
     try {
@@ -43,693 +40,421 @@ function ResidentDashboard() {
   const flatNumber = user?.flat_number || "";
   const userType = user?.user_type || "Resident";
 
-  const getGreeting = () => {
-    const parts = new Intl.DateTimeFormat("en-IN", {
-      timeZone: "Asia/Kolkata",
-      hour: "numeric",
-      hour12: false,
-    }).formatToParts(new Date());
-
-    const hour = Number(
-      parts.find((part) => part.type === "hour")?.value || 0
-    );
-
-    if (hour >= 5 && hour < 12) {
-      return "Good Morning";
-    }
-
-    if (hour >= 12 && hour < 17) {
-      return "Good Afternoon";
-    }
-
-    return "Good Evening";
-  };
-
-  useEffect(() => {
-    setGreeting(getGreeting());
-
-    const timer = setInterval(() => {
-      setGreeting(getGreeting());
-    }, 60000);
-
-    return () => clearInterval(timer);
-  }, []);
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    localStorage.removeItem("loggedInUser");
-    localStorage.removeItem("authUser");
-    localStorage.removeItem("currentUser");
-
-    navigate("/login");
-  };
-
   return (
-    <div className="resident-dashboard">
+    <>
+      <section className="residence-hero">
 
-      <aside className="resident-sidebar">
+        <div className="residence-photo"></div>
 
-        <div className="sidebar-brand">
+        <div className="residence-photo-overlay"></div>
 
-          <div className="brand-mark">
-            ⌂
-          </div>
+        <div className="residence-content">
 
-          <div className="brand-text">
-            <h2>Smart Apartment</h2>
-            <span>Resident Portal</span>
-          </div>
+          <span className="section-eyebrow">
+            MY RESIDENCE
+          </span>
 
-        </div>
+          <h2>
+            Your home,
+            <br />
+            your community.
+          </h2>
 
-        <div className="sidebar-section-label">
-          MAIN MENU
-        </div>
-
-        <nav className="resident-nav">
-
-          <Link
-            to="/resident"
-            className="nav-item active"
-          >
-            <span className="nav-icon">⌂</span>
-            <span>Dashboard</span>
-          </Link>
-
-          <Link
-            to="/resident/profile"
-            className="nav-item"
-          >
-            <span className="nav-icon">◯</span>
-            <span>My Profile</span>
-          </Link>
+          <p className="residence-description">
+            Keep your apartment services,
+            community activities and residential
+            information together in one place.
+          </p>
 
           <Link
             to="/resident/flat-details"
-            className="nav-item"
+            className="residence-button"
           >
-            <span className="nav-icon">▦</span>
-            <span>Flat Details</span>
+            View Flat Details
+            <span>→</span>
           </Link>
-
-          <Link
-            to="/resident/payment"
-            className="nav-item"
-          >
-            <span className="nav-icon">₹</span>
-            <span>Payments</span>
-          </Link>
-
-          <Link
-            to="/resident/complaints"
-            className="nav-item"
-          >
-            <span className="nav-icon">⚒</span>
-            <span>Complaints</span>
-          </Link>
-
-          <Link
-            to="/resident/requests"
-            className="nav-item"
-          >
-            <span className="nav-icon">≡</span>
-            <span>Service Requests</span>
-          </Link>
-
-          <Link
-            to="/resident/visitors"
-            className="nav-item"
-          >
-            <span className="nav-icon">◉</span>
-            <span>Visitors</span>
-          </Link>
-
-          <Link
-            to="/resident/facilities"
-            className="nav-item"
-          >
-            <span className="nav-icon">□</span>
-            <span>Amenity Booking</span>
-          </Link>
-
-          <Link
-            to="/resident/notices"
-            className="nav-item"
-          >
-            <span className="nav-icon">!</span>
-            <span>Notices & Events</span>
-          </Link>
-
-          <Link
-            to="/resident/polls"
-            className="nav-item"
-          >
-            <span className="nav-icon">✓</span>
-            <span>Polls & Voting</span>
-          </Link>
-
-          <Link
-            to="/resident/notifications"
-            className="nav-item"
-          >
-            <span className="nav-icon">○</span>
-            <span>Notifications</span>
-          </Link>
-
-          <Link
-            to="/resident/emergency"
-            className="nav-item emergency-nav"
-          >
-            <span className="nav-icon">!</span>
-            <span>Emergency Contacts</span>
-          </Link>
-
-        </nav>
-
-        <div className="sidebar-bottom">
-
-          <div className="sidebar-user">
-
-            <div className="sidebar-avatar">
-              {initials}
-            </div>
-
-            <div className="sidebar-user-info">
-              <strong>{fullName}</strong>
-              <span>{userType}</span>
-            </div>
-
-          </div>
-
-          <button
-            className="logout-button"
-            onClick={handleLogout}
-          >
-            <span>↪</span>
-            Logout
-          </button>
 
         </div>
 
-      </aside>
+        <div className="residence-info">
 
+          <div className="residence-user">
 
-      <main className="resident-main">
+            <div className="large-avatar">
+              {initials}
+            </div>
 
-        <header className="resident-header">
-
-          <div className="header-left">
-
-            <span className="header-overline">
-              RESIDENT SPACE
-            </span>
-
-            <h1>
-              {greeting}, {fullName}
-            </h1>
-
-            <p>
-              Everything you need for a smarter,
-              more connected residential experience.
-            </p>
+            <div>
+              <span>RESIDENT</span>
+              <h3>{fullName}</h3>
+            </div>
 
           </div>
 
+          <div className="residence-details">
 
-          <div className="header-right">
+            <div className="residence-detail">
 
-            <Link
-              to="/resident/notifications"
-              className="header-notification"
-            >
-              <span>○</span>
-            </Link>
+              <span>BLOCK / WING</span>
 
+              <strong>
+                {blockWing || "Not available"}
+              </strong>
 
-            <Link
-              to="/resident/profile"
-              className="header-profile"
-            >
+            </div>
 
-              <div className="header-avatar">
-                {initials}
-              </div>
+            <div className="residence-detail">
 
-              <div className="header-profile-info">
+              <span>FLAT NUMBER</span>
 
-                <strong>{fullName}</strong>
+              <strong>
+                {flatNumber || "Not available"}
+              </strong>
 
-                <span>
-                  {blockWing && flatNumber
-                    ? `${blockWing} • ${flatNumber}`
-                    : userType}
-                </span>
+            </div>
 
-              </div>
+            <div className="residence-detail">
 
-            </Link>
+              <span>USER TYPE</span>
+
+              <strong>
+                {userType}
+              </strong>
+
+            </div>
 
           </div>
 
-        </header>
+        </div>
 
+      </section>
 
-        <section className="residence-hero">
+      <section className="services-section">
 
-          <div className="residence-photo"></div>
+        <div className="section-heading">
 
-          <div className="residence-photo-overlay"></div>
-
-          <div className="residence-content">
+          <div>
 
             <span className="section-eyebrow">
-              MY RESIDENCE
+              RESIDENT SERVICES
             </span>
 
             <h2>
-              Your home,
-              <br />
-              your community.
+              What would you like to manage?
             </h2>
 
-            <p className="residence-description">
-              Keep your apartment services,
-              community activities and residential
-              information together in one place.
-            </p>
-
-            <Link
-              to="/resident/flat-details"
-              className="residence-button"
-            >
-              View Flat Details
-              <span>→</span>
-            </Link>
-
           </div>
 
+          <p>
+            Quick access to your most-used
+            apartment services.
+          </p>
 
-          <div className="residence-info">
+        </div>
 
-            <div className="residence-user">
+        <div className="services-grid">
 
-              <div className="large-avatar">
-                {initials}
+          <Link
+            to="/resident/payment"
+            className="service-card service-primary"
+          >
+
+            <div className="service-top">
+
+              <div className="service-icon">
+                ₹
               </div>
 
-              <div>
-                <span>RESIDENT</span>
-                <h3>{fullName}</h3>
-              </div>
-
-            </div>
-
-
-            <div className="residence-details">
-
-              <div className="residence-detail">
-
-                <span>BLOCK / WING</span>
-
-                <strong>
-                  {blockWing || "Not available"}
-                </strong>
-
-              </div>
-
-
-              <div className="residence-detail">
-
-                <span>FLAT NUMBER</span>
-
-                <strong>
-                  {flatNumber || "Not available"}
-                </strong>
-
-              </div>
-
-
-              <div className="residence-detail">
-
-                <span>USER TYPE</span>
-
-                <strong>
-                  {userType}
-                </strong>
-
-              </div>
-
-            </div>
-
-          </div>
-
-        </section>
-
-
-        <section className="services-section">
-
-          <div className="section-heading">
-
-            <div>
-
-              <span className="section-eyebrow">
-                RESIDENT SERVICES
+              <span className="service-arrow">
+                ↗
               </span>
 
-              <h2>
-                What would you like to manage?
-              </h2>
-
             </div>
 
-            <p>
-              Quick access to your most-used
-              apartment services.
-            </p>
-
-          </div>
-
-
-          <div className="services-grid">
-
-            <Link
-              to="/resident/payment"
-              className="service-card service-primary"
-            >
-
-              <div className="service-top">
-
-                <div className="service-icon">
-                  ₹
-                </div>
-
-                <span className="service-arrow">
-                  ↗
-                </span>
-
-              </div>
-
-              <div className="service-content">
-
-                <h3>Payments</h3>
-
-                <p>
-                  Manage maintenance payments
-                  and payment history.
-                </p>
-
-              </div>
-
-            </Link>
-
-
-            <Link
-              to="/resident/complaints"
-              className="service-card"
-            >
-
-              <div className="service-top">
-
-                <div className="service-icon">
-                  ⚒
-                </div>
-
-                <span className="service-arrow">
-                  ↗
-                </span>
-
-              </div>
-
-              <div className="service-content">
-
-                <h3>Complaints</h3>
-
-                <p>
-                  Report and track apartment
-                  issues.
-                </p>
-
-              </div>
-
-            </Link>
-
-
-            <Link
-              to="/resident/requests"
-              className="service-card"
-            >
-
-              <div className="service-top">
-
-                <div className="service-icon">
-                  ≡
-                </div>
-
-                <span className="service-arrow">
-                  ↗
-                </span>
-
-              </div>
-
-              <div className="service-content">
-
-                <h3>Service Requests</h3>
-
-                <p>
-                  Request and track residential
-                  services.
-                </p>
-
-              </div>
-
-            </Link>
-
-
-            <Link
-              to="/resident/visitors"
-              className="service-card"
-            >
-
-              <div className="service-top">
-
-                <div className="service-icon">
-                  ◉
-                </div>
-
-                <span className="service-arrow">
-                  ↗
-                </span>
-
-              </div>
-
-              <div className="service-content">
-
-                <h3>Visitors</h3>
-
-                <p>
-                  Manage visitor approvals
-                  and entries.
-                </p>
-
-              </div>
-
-            </Link>
-
-
-            <Link
-              to="/resident/facilities"
-              className="service-card"
-            >
-
-              <div className="service-top">
-
-                <div className="service-icon">
-                  □
-                </div>
-
-                <span className="service-arrow">
-                  ↗
-                </span>
-
-              </div>
-
-              <div className="service-content">
-
-                <h3>Amenity Booking</h3>
-
-                <p>
-                  Reserve community facilities
-                  and amenities.
-                </p>
-
-              </div>
-
-            </Link>
-
-          </div>
-
-        </section>
-
-
-        <section className="dashboard-lower-grid">
-
-          <div className="dashboard-section-panel">
-
-            <div className="panel-heading">
-
-              <div>
-
-                <span className="section-eyebrow">
-                  COMMUNITY
-                </span>
-
-                <h2>
-                  Community Pulse
-                </h2>
-
-              </div>
-
-              <Link to="/resident/notices">
-                View All →
-              </Link>
-
-            </div>
-
-
-            <div className="empty-community">
-
-              <div className="empty-icon">
-                +
-              </div>
+            <div className="service-content">
 
               <h3>
-                No community updates yet
+                Payments
               </h3>
 
               <p>
-                Notices, events and community
-                announcements will appear here.
+                Manage maintenance payments
+                and payment history.
               </p>
 
             </div>
 
-          </div>
+          </Link>
 
+          <Link
+            to="/resident/complaints"
+            className="service-card"
+          >
 
-          <div className="dashboard-section-panel">
+            <div className="service-top">
 
-            <div className="panel-heading">
-
-              <div>
-
-                <span className="section-eyebrow">
-                  FINANCE
-                </span>
-
-                <h2>
-                  Maintenance & Payments
-                </h2>
-
+              <div className="service-icon">
+                ⚒
               </div>
 
-              <Link to="/resident/payment">
-                Open →
-              </Link>
+              <span className="service-arrow">
+                ↗
+              </span>
 
             </div>
 
+            <div className="service-content">
 
-            <div className="payment-empty">
+              <h3>
+                Complaints
+              </h3>
 
-              <div className="payment-symbol">
-                ₹
-              </div>
-
-              <div>
-
-                <h3>
-                  No payment information
-                </h3>
-
-                <p>
-                  Your maintenance and payment
-                  information will appear here.
-                </p>
-
-              </div>
+              <p>
+                Report and track apartment
+                issues.
+              </p>
 
             </div>
 
-          </div>
+          </Link>
 
-        </section>
+          <Link
+            to="/resident/requests"
+            className="service-card"
+          >
 
+            <div className="service-top">
 
-        <section className="activity-section">
+              <div className="service-icon">
+                ≡
+              </div>
+
+              <span className="service-arrow">
+                ↗
+              </span>
+
+            </div>
+
+            <div className="service-content">
+
+              <h3>
+                Service Requests
+              </h3>
+
+              <p>
+                Request and track residential
+                services.
+              </p>
+
+            </div>
+
+          </Link>
+
+          <Link
+            to="/resident/visitors"
+            className="service-card"
+          >
+
+            <div className="service-top">
+
+              <div className="service-icon">
+                ◉
+              </div>
+
+              <span className="service-arrow">
+                ↗
+              </span>
+
+            </div>
+
+            <div className="service-content">
+
+              <h3>
+                Visitors
+              </h3>
+
+              <p>
+                Manage visitor approvals
+                and entries.
+              </p>
+
+            </div>
+
+          </Link>
+
+          <Link
+            to="/resident/facilities"
+            className="service-card"
+          >
+
+            <div className="service-top">
+
+              <div className="service-icon">
+                □
+              </div>
+
+              <span className="service-arrow">
+                ↗
+              </span>
+
+            </div>
+
+            <div className="service-content">
+
+              <h3>
+                Amenity Booking
+              </h3>
+
+              <p>
+                Reserve community facilities
+                and amenities.
+              </p>
+
+            </div>
+
+          </Link>
+
+        </div>
+
+      </section>
+
+      <section className="dashboard-lower-grid">
+
+        <div className="dashboard-section-panel">
 
           <div className="panel-heading">
 
             <div>
 
               <span className="section-eyebrow">
-                YOUR SPACE
+                COMMUNITY
               </span>
 
               <h2>
-                Recent Activity
+                Community Pulse
               </h2>
 
             </div>
 
+            <Link to="/resident/notices">
+              View All →
+            </Link>
+
           </div>
 
+          <div className="empty-community">
 
-          <div className="activity-empty">
+            <div className="empty-icon">
+              +
+            </div>
 
-            <div className="activity-line"></div>
+            <h3>
+              No community updates yet
+            </h3>
 
-            <div className="activity-empty-content">
+            <p>
+              Notices, events and community
+              announcements will appear here.
+            </p>
 
-              <div className="activity-empty-icon">
-                •
-              </div>
+          </div>
 
-              <div>
+        </div>
 
-                <h3>
-                  No recent activity
-                </h3>
+        <div className="dashboard-section-panel">
 
-                <p>
-                  Your apartment activities will
-                  appear here as you use the system.
-                </p>
+          <div className="panel-heading">
 
-              </div>
+            <div>
+
+              <span className="section-eyebrow">
+                FINANCE
+              </span>
+
+              <h2>
+                Maintenance & Payments
+              </h2>
+
+            </div>
+
+            <Link to="/resident/payment">
+              Open →
+            </Link>
+
+          </div>
+
+          <div className="payment-empty">
+
+            <div className="payment-symbol">
+              ₹
+            </div>
+
+            <div>
+
+              <h3>
+                No payment information
+              </h3>
+
+              <p>
+                Your maintenance and payment
+                information will appear here.
+              </p>
 
             </div>
 
           </div>
 
-        </section>
+        </div>
 
+      </section>
 
-        <footer className="resident-footer">
+      <section className="activity-section">
 
-          <span>
-            Smart Apartment
-          </span>
+        <div className="panel-heading">
 
-          <span>
-            Residential Management System
-          </span>
+          <div>
 
-        </footer>
+            <span className="section-eyebrow">
+              YOUR SPACE
+            </span>
 
-      </main>
+            <h2>
+              Recent Activity
+            </h2>
 
-    </div>
+          </div>
+
+        </div>
+
+        <div className="activity-empty">
+
+          <div className="activity-line"></div>
+
+          <div className="activity-empty-content">
+
+            <div className="activity-empty-icon">
+              •
+            </div>
+
+            <div>
+
+              <h3>
+                No recent activity
+              </h3>
+
+              <p>
+                Your apartment activities will
+                appear here as you use the system.
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+    </>
   );
 }
 

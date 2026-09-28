@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import "../../css/serviceRequests.css";
+import "../../css/resident/serviceRequests.css";
 
 const ServiceRequests = () => {
   const [requests, setRequests] = useState([]);
@@ -155,18 +155,9 @@ const ServiceRequests = () => {
   return (
     <div className="service-requests-page">
 
-      {/* TOP HEADER */}
-      <header className="sr-header">
-
-        <div className="sr-header-left">
-
-          <Link to="/resident" className="sr-back-link">
-            ← Dashboard
-          </Link>
-
-          <span className="sr-eyebrow">
-            RESIDENT SERVICES
-          </span>
+      <section className="sr-page-header">
+        <div className="sr-header-content">
+          <span className="sr-eyebrow">RESIDENT SERVICES</span>
 
           <h1>Service Requests</h1>
 
@@ -174,28 +165,18 @@ const ServiceRequests = () => {
             Request apartment services and track their progress
             from one place.
           </p>
-
         </div>
 
-        <div className="sr-header-badge">
-          <div className="sr-header-badge-icon">
-            SR
-          </div>
+        <Link to="/resident" className="sr-dashboard-btn">
+          <span>←</span>
+          Dashboard
+        </Link>
+      </section>
 
-          <div>
-            <span>MY REQUESTS</span>
-            <strong>{totalRequests}</strong>
-          </div>
-        </div>
-
-      </header>
-
-
-      {/* ALERTS */}
 
       {successMessage && (
         <div className="sr-alert success">
-          <div className="alert-icon">✓</div>
+          <div className="sr-alert-icon">✓</div>
 
           <div>
             <strong>Request Submitted</strong>
@@ -203,6 +184,7 @@ const ServiceRequests = () => {
           </div>
 
           <button
+            type="button"
             onClick={() => setSuccessMessage("")}
           >
             ×
@@ -210,9 +192,10 @@ const ServiceRequests = () => {
         </div>
       )}
 
+
       {errorMessage && (
         <div className="sr-alert error">
-          <div className="alert-icon">!</div>
+          <div className="sr-alert-icon">!</div>
 
           <div>
             <strong>Something went wrong</strong>
@@ -220,6 +203,7 @@ const ServiceRequests = () => {
           </div>
 
           <button
+            type="button"
             onClick={() => setErrorMessage("")}
           >
             ×
@@ -228,64 +212,57 @@ const ServiceRequests = () => {
       )}
 
 
-      {/* SUMMARY */}
+      <section className="sr-overview">
 
-      <section className="sr-summary-grid">
+        <div className="sr-overview-title">
+          <span>REQUEST OVERVIEW</span>
+          <h2>Your service activity</h2>
+        </div>
 
-        <div className="sr-summary-card">
+        <div className="sr-stat-list">
 
-          <div className="summary-icon blue">
-            ≡
+          <div className="sr-stat">
+            <div className="sr-stat-icon mint">
+              ≡
+            </div>
+
+            <div>
+              <span>Total Requests</span>
+              <strong>{totalRequests}</strong>
+            </div>
           </div>
 
-          <div>
-            <span>Total Requests</span>
-            <strong>{totalRequests}</strong>
+          <div className="sr-stat">
+            <div className="sr-stat-icon orange">
+              ◷
+            </div>
+
+            <div>
+              <span>Pending</span>
+              <strong>{pendingRequests}</strong>
+            </div>
+          </div>
+
+          <div className="sr-stat">
+            <div className="sr-stat-icon green">
+              ✓
+            </div>
+
+            <div>
+              <span>Completed</span>
+              <strong>{completedRequests}</strong>
+            </div>
           </div>
 
         </div>
-
-
-        <div className="sr-summary-card">
-
-          <div className="summary-icon orange">
-            ◷
-          </div>
-
-          <div>
-            <span>Pending</span>
-            <strong>{pendingRequests}</strong>
-          </div>
-
-        </div>
-
-
-        <div className="sr-summary-card">
-
-          <div className="summary-icon green">
-            ✓
-          </div>
-
-          <div>
-            <span>Completed</span>
-            <strong>{completedRequests}</strong>
-          </div>
-
-        </div>
-
       </section>
 
 
-      {/* MAIN GRID */}
-
-      <section className="sr-main-grid">
-
-        {/* NEW REQUEST */}
+      <section className="sr-request-area">
 
         <div className="sr-form-card">
 
-          <div className="sr-card-heading">
-
+          <div className="sr-section-heading">
             <div className="sr-heading-icon">
               +
             </div>
@@ -294,12 +271,11 @@ const ServiceRequests = () => {
               <span>NEW REQUEST</span>
               <h2>Request a Service</h2>
             </div>
-
           </div>
 
           <p className="sr-form-intro">
-            Need assistance with your apartment?
-            Submit a service request below.
+            Need assistance with your apartment? Tell us what
+            service you need and our staff can take it forward.
           </p>
 
 
@@ -307,15 +283,14 @@ const ServiceRequests = () => {
 
             <div className="sr-form-group">
 
-              <label>
+              <label htmlFor="serviceType">
                 Service Type
               </label>
 
               <select
+                id="serviceType"
                 value={serviceType}
-                onChange={(e) =>
-                  setServiceType(e.target.value)
-                }
+                onChange={(e) => setServiceType(e.target.value)}
               >
                 <option value="">
                   Select a service
@@ -347,15 +322,14 @@ const ServiceRequests = () => {
 
             <div className="sr-form-group">
 
-              <label>
+              <label htmlFor="description">
                 Description
               </label>
 
               <textarea
+                id="description"
                 value={description}
-                onChange={(e) =>
-                  setDescription(e.target.value)
-                }
+                onChange={(e) => setDescription(e.target.value)}
                 placeholder="Describe the service you need..."
                 rows="5"
               />
@@ -387,28 +361,24 @@ const ServiceRequests = () => {
         </div>
 
 
-        {/* INFORMATION CARD */}
+        <div className="sr-process-card">
 
-        <div className="sr-info-card">
-
-          <div className="sr-info-top">
-
+          <div className="sr-process-header">
             <span>HOW IT WORKS</span>
 
             <h2>
-              Get your request
+              Simple process,
               <br />
-              handled smoothly.
+              clear progress.
             </h2>
-
           </div>
 
 
-          <div className="sr-steps">
+          <div className="sr-process-list">
 
-            <div className="sr-step">
+            <div className="sr-process-item">
 
-              <div className="step-number">
+              <div className="sr-process-number">
                 01
               </div>
 
@@ -423,9 +393,9 @@ const ServiceRequests = () => {
             </div>
 
 
-            <div className="sr-step">
+            <div className="sr-process-item">
 
-              <div className="step-number">
+              <div className="sr-process-number">
                 02
               </div>
 
@@ -440,16 +410,16 @@ const ServiceRequests = () => {
             </div>
 
 
-            <div className="sr-step">
+            <div className="sr-process-item">
 
-              <div className="step-number">
+              <div className="sr-process-number">
                 03
               </div>
 
               <div>
                 <h3>Track Progress</h3>
                 <p>
-                  Follow the request status until
+                  Follow the request until
                   the service is completed.
                 </p>
               </div>
@@ -463,28 +433,23 @@ const ServiceRequests = () => {
       </section>
 
 
-      {/* REQUEST LIST */}
+      <section className="sr-history-card">
 
-      <section className="sr-list-card">
-
-        <div className="sr-list-header">
+        <div className="sr-history-header">
 
           <div>
-
             <span>REQUEST HISTORY</span>
 
-            <h2>
-              My Service Requests
-            </h2>
+            <h2>My Service Requests</h2>
 
             <p>
-              View your submitted service requests
-              and their current status.
+              View your submitted requests and their
+              current status.
             </p>
-
           </div>
 
           <button
+            type="button"
             className="sr-refresh-btn"
             onClick={fetchRequests}
             disabled={loading}
@@ -499,10 +464,7 @@ const ServiceRequests = () => {
 
           <div className="sr-loading">
             <div className="sr-loader"></div>
-
-            <p>
-              Loading your service requests...
-            </p>
+            <p>Loading your service requests...</p>
           </div>
 
         ) : requests.length === 0 ? (
@@ -608,21 +570,6 @@ const ServiceRequests = () => {
         )}
 
       </section>
-
-
-      {/* FOOTER */}
-
-      <footer className="sr-footer">
-
-        <span>
-          Smart Apartment
-        </span>
-
-        <span>
-          Service Request Management
-        </span>
-
-      </footer>
 
     </div>
   );

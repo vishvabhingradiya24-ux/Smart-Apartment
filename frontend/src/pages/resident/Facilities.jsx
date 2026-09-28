@@ -1,8 +1,9 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import "../../css/facilities.css";
+import "../../css/resident/facilities.css";
 
-const API_URL = "http://localhost:5000/api/resident/facilities";
+const API_URL =
+  "http://localhost:5000/api/resident/facilities";
 
 const facilityIcons = {
   "Swimming Pool": "🏊",
@@ -17,83 +18,147 @@ const Facilities = () => {
   const [addons, setAddons] = useState([]);
   const [bookings, setBookings] = useState([]);
 
-  const [selectedFacility, setSelectedFacility] = useState(null);
-  const [selectedAddons, setSelectedAddons] = useState([]);
+  const [selectedFacility, setSelectedFacility] =
+    useState(null);
 
-  const [bookingDate, setBookingDate] = useState("");
-  const [fromTime, setFromTime] = useState("");
-  const [toTime, setToTime] = useState("");
+  const [selectedAddons, setSelectedAddons] =
+    useState([]);
 
-  const [purpose, setPurpose] = useState("");
-  const [numberOfPeople, setNumberOfPeople] = useState("");
-  const [additionalRequirements, setAdditionalRequirements] =
+  const [bookingDate, setBookingDate] =
     useState("");
+
+  const [fromTime, setFromTime] =
+    useState("");
+
+  const [toTime, setToTime] =
+    useState("");
+
+  const [purpose, setPurpose] =
+    useState("");
+
+  const [numberOfPeople, setNumberOfPeople] =
+    useState("");
+
+  const [
+    additionalRequirements,
+    setAdditionalRequirements,
+  ] = useState("");
 
   const [step, setStep] = useState(1);
 
-  const [availability, setAvailability] = useState(null);
-  const [availabilityMessage, setAvailabilityMessage] = useState("");
-  const [availabilityCharge, setAvailabilityCharge] = useState(0);
+  const [availability, setAvailability] =
+    useState(null);
 
-  const [loadingFacilities, setLoadingFacilities] = useState(true);
-  const [loadingBookings, setLoadingBookings] = useState(true);
+  const [
+    availabilityMessage,
+    setAvailabilityMessage,
+  ] = useState("");
 
-  const [checking, setChecking] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
+  const [
+    availabilityCharge,
+    setAvailabilityCharge,
+  ] = useState(0);
 
-  const [pageError, setPageError] = useState("");
-  const [formMessage, setFormMessage] = useState("");
-  const [formError, setFormError] = useState("");
+  const [loadingFacilities, setLoadingFacilities] =
+    useState(true);
+
+  const [loadingBookings, setLoadingBookings] =
+    useState(true);
+
+  const [checking, setChecking] =
+    useState(false);
+
+  const [submitting, setSubmitting] =
+    useState(false);
+
+  const [pageError, setPageError] =
+    useState("");
+
+  const [formMessage, setFormMessage] =
+    useState("");
+
+  const [formError, setFormError] =
+    useState("");
 
   const token = localStorage.getItem("token");
 
-  const today = new Date().toISOString().split("T")[0];
+  const today = new Date()
+    .toISOString()
+    .split("T")[0];
 
   const selectedFacilityBookingCharge =
-    selectedFacility?.charge_period === "Per Booking"
-      ? Number(selectedFacility?.base_charge || 0)
+    selectedFacility?.charge_period ===
+    "Per Booking"
+      ? Number(
+          selectedFacility?.base_charge || 0
+        )
       : 0;
 
   const selectedAddonTotal = useMemo(() => {
-    return selectedAddons.reduce((total, selected) => {
-      const addon = addons.find(
-        (item) =>
-          Number(item.addon_id) === Number(selected.addon_id)
-      );
+    return selectedAddons.reduce(
+      (total, selected) => {
+        const addon = addons.find(
+          (item) =>
+            Number(item.addon_id) ===
+            Number(selected.addon_id)
+        );
 
-      if (!addon) {
-        return total;
-      }
+        if (!addon) {
+          return total;
+        }
 
-      const quantity = Number(selected.quantity || 1);
+        const quantity = Number(
+          selected.quantity || 1
+        );
 
-      if (addon.charge_type === "Fixed") {
-        return total + Number(addon.price);
-      }
+        if (
+          addon.charge_type === "Fixed"
+        ) {
+          return (
+            total + Number(addon.price || 0)
+          );
+        }
 
-      if (addon.charge_type === "Per Person") {
+        if (
+          addon.charge_type === "Per Person"
+        ) {
+          return (
+            total +
+            Number(addon.price || 0) *
+              Number(numberOfPeople || 0)
+          );
+        }
+
         return (
           total +
-          Number(addon.price) *
-            Number(numberOfPeople || 0)
+          Number(addon.price || 0) *
+            quantity
         );
-      }
-
-      return total + Number(addon.price) * quantity;
-    }, 0);
-  }, [selectedAddons, addons, numberOfPeople]);
+      },
+      0
+    );
+  }, [
+    selectedAddons,
+    addons,
+    numberOfPeople,
+  ]);
 
   const estimatedTotal =
-    selectedFacilityBookingCharge + selectedAddonTotal;
+    selectedFacilityBookingCharge +
+    selectedAddonTotal;
 
   const fetchFacilities = async () => {
     try {
+      setLoadingFacilities(true);
+      setPageError("");
+
       if (!token) {
         setPageError("Please login again.");
         return;
       }
 
       const response = await fetch(API_URL, {
+        method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -103,15 +168,32 @@ const Facilities = () => {
 
       if (!response.ok) {
         throw new Error(
-          data.message || "Unable to fetch facilities"
+          data.message ||
+            "Unable to fetch facilities"
         );
       }
 
-      setFacilities(data.facilities || []);
-      setAddons(data.addons || []);
+      setFacilities(
+        Array.isArray(data.facilities)
+          ? data.facilities
+          : []
+      );
+
+      setAddons(
+        Array.isArray(data.addons)
+          ? data.addons
+          : []
+      );
     } catch (error) {
-      console.error("Facilities Error:", error);
-      setPageError(error.message);
+      console.error(
+        "Facilities Error:",
+        error
+      );
+
+      setPageError(
+        error.message ||
+          "Unable to fetch facilities."
+      );
     } finally {
       setLoadingFacilities(false);
     }
@@ -119,6 +201,8 @@ const Facilities = () => {
 
   const fetchBookings = async () => {
     try {
+      setLoadingBookings(true);
+
       if (!token) {
         return;
       }
@@ -126,6 +210,7 @@ const Facilities = () => {
       const response = await fetch(
         `${API_URL}/bookings`,
         {
+          method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -141,7 +226,11 @@ const Facilities = () => {
         );
       }
 
-      setBookings(data.bookings || []);
+      setBookings(
+        Array.isArray(data.bookings)
+          ? data.bookings
+          : []
+      );
     } catch (error) {
       console.error(
         "Booking History Error:",
@@ -161,9 +250,11 @@ const Facilities = () => {
     setBookingDate("");
     setFromTime("");
     setToTime("");
+
     setPurpose("");
     setNumberOfPeople("");
     setAdditionalRequirements("");
+
     setSelectedAddons([]);
 
     setStep(1);
@@ -193,91 +284,166 @@ const Facilities = () => {
     setAvailability(null);
     setAvailabilityMessage("");
     setAvailabilityCharge(0);
+
     setFormMessage("");
     setFormError("");
   };
 
-  const handleCheckAvailability = async () => {
-    setFormMessage("");
-    setFormError("");
-    setAvailability(null);
-    setAvailabilityMessage("");
+  const handleCheckAvailability =
+    async () => {
+      setFormMessage("");
+      setFormError("");
 
-    if (!bookingDate) {
-      setFormMessage(
-        "Please select a booking date."
-      );
-      return;
-    }
+      setAvailability(null);
+      setAvailabilityMessage("");
+      setAvailabilityCharge(0);
 
-    if (!fromTime || !toTime) {
-      setFormMessage(
-        "Please select From Time and To Time."
-      );
-      return;
-    }
-
-    if (fromTime >= toTime) {
-      setFormMessage(
-        "To time must be after From time."
-      );
-      return;
-    }
-
-    try {
-      if (!token) {
-        setFormError("Please login again.");
+      if (!selectedFacility) {
+        setFormError(
+          "Please select a facility first."
+        );
         return;
       }
 
-      setChecking(true);
+      if (!bookingDate) {
+        setFormError(
+          "Please select a booking date."
+        );
+        return;
+      }
 
-      const response = await fetch(
-        `${API_URL}/check-availability`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
+      if (!fromTime || !toTime) {
+        setFormError(
+          "Please select From Time and To Time."
+        );
+        return;
+      }
+
+      if (fromTime >= toTime) {
+        setFormError(
+          "To time must be after From time."
+        );
+        return;
+      }
+
+      if (!token) {
+        setFormError(
+          "Session expired. Please login again."
+        );
+        return;
+      }
+
+      try {
+        setChecking(true);
+
+        console.log(
+          "Checking availability:",
+          {
             facility_id:
               selectedFacility.facility_id,
             booking_date: bookingDate,
             start_time: fromTime,
             end_time: toTime,
-          }),
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(
-          data.message ||
-            "Unable to check availability"
+          }
         );
+
+        const response = await fetch(
+          `${API_URL}/check-availability`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type":
+                "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              facility_id:
+                selectedFacility.facility_id,
+              booking_date: bookingDate,
+              start_time: fromTime,
+              end_time: toTime,
+            }),
+          }
+        );
+
+        const responseText =
+          await response.text();
+
+        let data = {};
+
+        try {
+          data = responseText
+            ? JSON.parse(responseText)
+            : {};
+        } catch (jsonError) {
+          console.error(
+            "Invalid JSON response:",
+            responseText
+          );
+
+          throw new Error(
+            "Server returned an invalid response."
+          );
+        }
+
+        console.log(
+          "Availability Response:",
+          data
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            data.message ||
+              data.error ||
+              `Availability check failed (${response.status})`
+          );
+        }
+
+        const isAvailable =
+          data.available === true ||
+          data.available === "true" ||
+          data.isAvailable === true ||
+          data.isAvailable === "true";
+
+        setAvailability(isAvailable);
+
+        setAvailabilityMessage(
+          data.message ||
+            (isAvailable
+              ? "The selected time slot is available."
+              : "The selected time slot is not available.")
+        );
+
+        setAvailabilityCharge(
+          Number(
+            data.facility_charge ??
+              data.facilityCharge ??
+              0
+          )
+        );
+
+        if (!isAvailable) {
+          setFormMessage(
+            data.message ||
+              "This time slot is not available. Please select another time."
+          );
+        }
+      } catch (error) {
+        console.error(
+          "Availability Error:",
+          error
+        );
+
+        setAvailability(null);
+
+        setFormError(
+          error.message ||
+            "Unable to check availability. Please try again."
+        );
+      } finally {
+        setChecking(false);
       }
-
-      setAvailability(data.available);
-      setAvailabilityMessage(
-        data.message || ""
-      );
-
-      setAvailabilityCharge(
-        Number(data.facility_charge || 0)
-      );
-    } catch (error) {
-      console.error(
-        "Availability Error:",
-        error
-      );
-
-      setFormError(error.message);
-    } finally {
-      setChecking(false);
-    }
-  };
+    };
 
   const continueBooking = () => {
     if (availability !== true) {
@@ -286,6 +452,7 @@ const Facilities = () => {
 
     setFormMessage("");
     setFormError("");
+
     setStep(2);
   };
 
@@ -294,20 +461,23 @@ const Facilities = () => {
     checked
   ) => {
     if (checked) {
-      setSelectedAddons((previous) => [
-        ...previous,
-        {
-          addon_id: addonId,
-          quantity: 1,
-        },
-      ]);
+      setSelectedAddons(
+        (previous) => [
+          ...previous,
+          {
+            addon_id: addonId,
+            quantity: 1,
+          },
+        ]
+      );
     } else {
-      setSelectedAddons((previous) =>
-        previous.filter(
-          (item) =>
-            Number(item.addon_id) !==
-            Number(addonId)
-        )
+      setSelectedAddons(
+        (previous) =>
+          previous.filter(
+            (item) =>
+              Number(item.addon_id) !==
+              Number(addonId)
+          )
       );
     }
   };
@@ -316,19 +486,20 @@ const Facilities = () => {
     addonId,
     quantity
   ) => {
-    setSelectedAddons((previous) =>
-      previous.map((item) =>
-        Number(item.addon_id) ===
-        Number(addonId)
-          ? {
-              ...item,
-              quantity: Math.max(
-                1,
-                Number(quantity) || 1
-              ),
-            }
-          : item
-      )
+    setSelectedAddons(
+      (previous) =>
+        previous.map((item) =>
+          Number(item.addon_id) ===
+          Number(addonId)
+            ? {
+                ...item,
+                quantity: Math.max(
+                  1,
+                  Number(quantity) || 1
+                ),
+              }
+            : item
+        )
     );
   };
 
@@ -341,23 +512,26 @@ const Facilities = () => {
   };
 
   const getAddonQuantity = (addonId) => {
-    const selected = selectedAddons.find(
-      (item) =>
-        Number(item.addon_id) ===
-        Number(addonId)
-    );
+    const selected =
+      selectedAddons.find(
+        (item) =>
+          Number(item.addon_id) ===
+          Number(addonId)
+      );
 
     return selected?.quantity || 1;
   };
 
-  const handleBooking = async (event) => {
+  const handleBooking = async (
+    event
+  ) => {
     event.preventDefault();
 
     setFormMessage("");
     setFormError("");
 
     if (!purpose.trim()) {
-      setFormMessage(
+      setFormError(
         "Please enter the purpose or function."
       );
       return;
@@ -367,26 +541,29 @@ const Facilities = () => {
       !numberOfPeople ||
       Number(numberOfPeople) <= 0
     ) {
-      setFormMessage(
+      setFormError(
         "Please enter a valid number of people."
       );
       return;
     }
 
     if (availability !== true) {
-      setFormMessage(
+      setFormError(
         "Please check availability first."
       );
+
       setStep(1);
       return;
     }
 
-    try {
-      if (!token) {
-        setFormError("Please login again.");
-        return;
-      }
+    if (!token) {
+      setFormError(
+        "Please login again."
+      );
+      return;
+    }
 
+    try {
       setSubmitting(true);
 
       const response = await fetch(
@@ -394,7 +571,8 @@ const Facilities = () => {
         {
           method: "POST",
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type":
+              "application/json",
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
@@ -424,7 +602,8 @@ const Facilities = () => {
       }
 
       setFormMessage(
-        "Booking request submitted successfully."
+        data.message ||
+          "Booking request submitted successfully."
       );
 
       await fetchBookings();
@@ -438,7 +617,10 @@ const Facilities = () => {
         error
       );
 
-      setFormError(error.message);
+      setFormError(
+        error.message ||
+          "Unable to submit booking."
+      );
     } finally {
       setSubmitting(false);
     }
@@ -449,7 +631,15 @@ const Facilities = () => {
       return "-";
     }
 
-    return new Date(date).toLocaleDateString(
+    const parsedDate = new Date(date);
+
+    if (
+      Number.isNaN(parsedDate.getTime())
+    ) {
+      return date;
+    }
+
+    return parsedDate.toLocaleDateString(
       "en-IN",
       {
         day: "2-digit",
@@ -464,13 +654,21 @@ const Facilities = () => {
       return "-";
     }
 
-    const [hours, minutes] =
-      time.split(":").map(Number);
+    const parts =
+      time.split(":");
+
+    if (parts.length < 2) {
+      return time;
+    }
+
+    const hours = Number(parts[0]);
+    const minutes = Number(parts[1]);
 
     const date = new Date();
 
     date.setHours(hours);
     date.setMinutes(minutes);
+    date.setSeconds(0);
 
     return date.toLocaleTimeString(
       "en-IN",
@@ -482,7 +680,9 @@ const Facilities = () => {
     );
   };
 
-  const getStatusClass = (status) => {
+  const getStatusClass = (
+    status
+  ) => {
     switch (status) {
       case "Approved":
         return "status-approved";
@@ -498,13 +698,16 @@ const Facilities = () => {
     }
   };
 
-  const getChargeText = (facility) => {
+  const getChargeText = (
+    facility
+  ) => {
     const charge = Number(
-      facility.base_charge || 0
+      facility?.base_charge || 0
     );
 
     if (
-      facility.charge_period === "Free" ||
+      facility?.charge_period ===
+        "Free" ||
       charge === 0
     ) {
       return "Free";
@@ -690,7 +893,9 @@ const Facilities = () => {
                             facility
                           )
                         }
-                        disabled={!isAvailable}
+                        disabled={
+                          !isAvailable
+                        }
                       >
                         Book Now
                         <span>→</span>
@@ -1042,7 +1247,6 @@ const Facilities = () => {
                 <div className="selected-facility-charge">
 
                   <div>
-
                     <span>
                       Facility charge
                     </span>
@@ -1052,7 +1256,6 @@ const Facilities = () => {
                         selectedFacility
                       )}
                     </strong>
-
                   </div>
 
                   {selectedFacility.charge_period ===
@@ -1449,7 +1652,6 @@ const Facilities = () => {
                 <div className="booking-price-summary">
 
                   <div>
-
                     <span>
                       Facility charge
                     </span>
@@ -1460,11 +1662,9 @@ const Facilities = () => {
                         "en-IN"
                       )}
                     </strong>
-
                   </div>
 
                   <div>
-
                     <span>
                       Additional extras
                     </span>
@@ -1475,7 +1675,6 @@ const Facilities = () => {
                         "en-IN"
                       )}
                     </strong>
-
                   </div>
 
                   <div className="price-total">

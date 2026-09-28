@@ -16,14 +16,41 @@ import ForgotPassword from "./pages/auth/ForgotPassword";
 import VerifyOTP from "./pages/auth/VerifyOTP";
 import ResetPassword from "./pages/auth/ResetPassword";
 
+// ==========================================
+// RESIDENT PAGES
+// ==========================================
+
 import ResidentDashboard from "./pages/resident/ResidentDashboard";
+import MyProfile from "./pages/resident/MyProfile";
+import FlatDetails from "./pages/resident/FlatDetails";
+import ResidentComplaints from "./pages/resident/ResidentComplaints";
+import Payment from "./pages/resident/Payment";
+import ServiceRequests from "./pages/resident/ServiceRequests";
+import ResidentVisitors from "./pages/resident/ResidentVisitors";
+import Facilities from "./pages/resident/Facilities";
+import ResidentNotices from "./pages/resident/Notices";
+import ResidentPolls from "./pages/resident/residentPolls";
+import ResidentLayout from "./pages/resident/ResidentLayout";
+
+// ==========================================
+// GLOBAL CSS
+// ==========================================
+
+import "./css/global.css";
+
+// ==========================================
+// STAFF
+// ==========================================
+
+import StaffDashboard from "./pages/staff/StaffDashboard";
+
+// ==========================================
+// ADMIN PAGES
+// ==========================================
 
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import Residents from "./pages/admin/Residents";
-import "./css/global.css";
-import StaffDashboard from "./pages/staff/StaffDashboard";
 import Security from "./pages/admin/Security";
-
 import AdminLayout from "./pages/admin/AdminLayout";
 import Staff from "./pages/admin/Staff";
 import Complaints from "./pages/admin/Complaints";
@@ -36,17 +63,22 @@ import Settings from "./pages/admin/Settings";
 
 function App() {
   return (
-
     <BrowserRouter>
 
       <Routes>
 
-        {/* Public Pages */}
-        <Route path="/" element={<Home />} />
+        {/* ==========================================
+            PUBLIC
+        ========================================== */}
 
-        {/* ==================================
+        <Route
+          path="/"
+          element={<Home />}
+        />
+
+        {/* ==========================================
             AUTH
-        =================================== */}
+        ========================================== */}
 
         <Route
           path="/login"
@@ -57,7 +89,6 @@ function App() {
           path="/register"
           element={<Register />}
         />
-
 
         <Route
           path="/forgot-password"
@@ -74,24 +105,92 @@ function App() {
           element={<ResetPassword />}
         />
 
-        {/* Resident Pages */}
+        {/* ==========================================
+            RESIDENT
+            Common Sidebar + Header + Footer
+            Only middle content changes
+        ========================================== */}
+
         <Route
           path="/resident"
-          element={<ResidentDashboard />}
-        />
+          element={<ResidentLayout />}
+        >
 
-        <Route
-          path="/resident/complaints"
-          element={<Complaints />}
-        />
+          {/* Dashboard */}
+          <Route
+            index
+            element={<ResidentDashboard />}
+          />
 
-        {/* Staff Pages */}
+          {/* My Profile */}
+          <Route
+            path="profile"
+            element={<MyProfile />}
+          />
+
+          {/* Flat Details */}
+          <Route
+            path="flat-details"
+            element={<FlatDetails />}
+          />
+
+          {/* Complaints */}
+          <Route
+            path="complaints"
+            element={<ResidentComplaints />}
+          />
+
+          {/* Payments */}
+          <Route
+            path="payment"
+            element={<Payment />}
+          />
+
+          {/* Service Requests */}
+          <Route
+            path="requests"
+            element={<ServiceRequests />}
+          />
+
+          {/* Visitors */}
+          <Route
+            path="visitors"
+            element={<ResidentVisitors />}
+          />
+
+          {/* Amenity Booking */}
+          <Route
+            path="facilities"
+            element={<Facilities />}
+          />
+
+          {/* Notices & Events */}
+          <Route
+            path="notices"
+            element={<ResidentNotices />}
+          />
+
+          {/* Polls & Voting */}
+          <Route
+            path="polls"
+            element={<ResidentPolls />}
+          />
+
+        </Route>
+
+        {/* ==========================================
+            STAFF
+        ========================================== */}
+
         <Route
           path="/staff"
           element={<StaffDashboard />}
         />
 
-        {/* Admin Dashboard */}
+        {/* ==========================================
+            ADMIN DASHBOARD
+        ========================================== */}
+
         <Route
           path="/admin"
           element={
@@ -101,7 +200,10 @@ function App() {
           }
         />
 
-        {/* Admin Residents */}
+        {/* ==========================================
+            ADMIN RESIDENTS
+        ========================================== */}
+
         <Route
           path="/admin/residents"
           element={
@@ -110,6 +212,10 @@ function App() {
             </AdminLayout>
           }
         />
+
+        {/* ==========================================
+            ADMIN SECURITY
+        ========================================== */}
 
         <Route
           path="/admin/security"
@@ -120,6 +226,10 @@ function App() {
           }
         />
 
+        {/* ==========================================
+            ADMIN STAFF
+        ========================================== */}
+
         <Route
           path="/admin/staff"
           element={
@@ -128,6 +238,10 @@ function App() {
             </AdminLayout>
           }
         />
+
+        {/* ==========================================
+            ADMIN COMPLAINTS
+        ========================================== */}
 
         <Route
           path="/admin/complaints"
@@ -138,6 +252,10 @@ function App() {
           }
         />
 
+        {/* ==========================================
+            ADMIN PAYMENTS
+        ========================================== */}
+
         <Route
           path="/admin/payments"
           element={
@@ -146,6 +264,10 @@ function App() {
             </AdminLayout>
           }
         />
+
+        {/* ==========================================
+            ADMIN VISITORS
+        ========================================== */}
 
         <Route
           path="/admin/visitors"
@@ -156,6 +278,10 @@ function App() {
           }
         />
 
+        {/* ==========================================
+            ADMIN AMENITIES
+        ========================================== */}
+
         <Route
           path="/admin/amenities"
           element={
@@ -164,6 +290,10 @@ function App() {
             </AdminLayout>
           }
         />
+
+        {/* ==========================================
+            ADMIN NOTICES
+        ========================================== */}
 
         <Route
           path="/admin/notices"
@@ -174,6 +304,10 @@ function App() {
           }
         />
 
+        {/* ==========================================
+            ADMIN NOTIFICATIONS
+        ========================================== */}
+
         <Route
           path="/admin/notifications"
           element={
@@ -182,6 +316,11 @@ function App() {
             </AdminLayout>
           }
         />
+
+        {/* ==========================================
+            ADMIN SETTINGS
+        ========================================== */}
+
         <Route
           path="/admin/settings"
           element={

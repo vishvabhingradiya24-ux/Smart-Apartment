@@ -77,7 +77,7 @@ const AdminLayout = ({ children }) => {
           <div className="admin-logo-icon">🏢</div>
 
           <div>
-            <h2>Society360</h2>
+            <h2>Smart Apartment</h2>
             <span>Admin Panel</span>
           </div>
         </div>
