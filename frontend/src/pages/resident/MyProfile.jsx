@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import "../../css/profile.css";
+import "../../css/resident/profile.css";
 
 function MyProfile() {
   const [user, setUser] = useState(null);
@@ -63,10 +63,15 @@ function MyProfile() {
       <div className="profile-page">
         <div className="profile-error">
           <div className="error-icon">!</div>
+
           <h2>Unable to Load Profile</h2>
+
           <p>{error}</p>
 
-          <Link to="/resident" className="profile-back-btn">
+          <Link
+            to="/resident"
+            className="profile-back-btn"
+          >
             Back to Dashboard
           </Link>
         </div>
@@ -85,19 +90,33 @@ function MyProfile() {
       .toUpperCase() || "R";
 
   const formatDate = (date) => {
-    if (!date) return "Not available";
+    if (!date) {
+      return "Not available";
+    }
 
-    return new Date(date).toLocaleDateString("en-IN", {
-      day: "2-digit",
-      month: "long",
-      year: "numeric",
-    });
+    const formattedDate = new Date(date);
+
+    if (Number.isNaN(formattedDate.getTime())) {
+      return "Not available";
+    }
+
+    return formattedDate.toLocaleDateString(
+      "en-IN",
+      {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      }
+    );
   };
 
   return (
     <div className="profile-page">
 
+      {/* PROFILE HEADER */}
+
       <div className="profile-topbar">
+
         <div>
           <span className="profile-overline">
             RESIDENT SPACE
@@ -116,7 +135,11 @@ function MyProfile() {
         >
           ← Dashboard
         </Link>
+
       </div>
+
+
+      {/* PROFILE MAIN CARD */}
 
       <div className="profile-container">
 
@@ -137,11 +160,14 @@ function MyProfile() {
               <div>
                 <h2>{fullName}</h2>
 
-                <p>{user?.email}</p>
+                <p>
+                  {user?.email || "Not available"}
+                </p>
               </div>
 
               <span className="resident-badge">
                 <span className="badge-dot"></span>
+
                 {user?.user_type || "Resident"}
               </span>
 
@@ -152,28 +178,47 @@ function MyProfile() {
             <div className="profile-stats">
 
               <div className="profile-stat">
-                <span>BLOCK / WING</span>
+
+                <span>
+                  BLOCK / WING
+                </span>
+
                 <strong>
-                  {user?.block_wing || "Not assigned"}
+                  {user?.block_wing ||
+                    "Not assigned"}
                 </strong>
+
               </div>
 
               <div className="stat-separator"></div>
 
               <div className="profile-stat">
-                <span>FLAT NUMBER</span>
+
+                <span>
+                  FLAT NUMBER
+                </span>
+
                 <strong>
-                  {user?.flat_number || "Not assigned"}
+                  {user?.flat_number ||
+                    "Not assigned"}
                 </strong>
+
               </div>
 
               <div className="stat-separator"></div>
 
               <div className="profile-stat">
-                <span>MEMBER SINCE</span>
+
+                <span>
+                  MEMBER SINCE
+                </span>
+
                 <strong>
-                  {formatDate(user?.created_at)}
+                  {formatDate(
+                    user?.created_at
+                  )}
                 </strong>
+
               </div>
 
             </div>
@@ -182,104 +227,200 @@ function MyProfile() {
 
         </div>
 
+
+        {/* INFORMATION CARDS */}
+
         <div className="profile-info-grid">
+
+
+          {/* PERSONAL INFORMATION */}
 
           <div className="info-card">
 
             <div className="info-card-header">
+
               <div className="info-icon blue">
                 👤
               </div>
 
               <div>
-                <span>PERSONAL DETAILS</span>
-                <h3>Personal Information</h3>
+                <span>
+                  PERSONAL DETAILS
+                </span>
+
+                <h3>
+                  Personal Information
+                </h3>
               </div>
+
             </div>
+
 
             <div className="info-fields">
 
               <div className="info-field">
-                <label>First Name</label>
-                <div>{user?.first_name || "Not available"}</div>
+
+                <label>
+                  First Name
+                </label>
+
+                <div>
+                  {user?.first_name ||
+                    "Not available"}
+                </div>
+
               </div>
 
+
               <div className="info-field">
-                <label>Last Name</label>
-                <div>{user?.last_name || "Not available"}</div>
+
+                <label>
+                  Last Name
+                </label>
+
+                <div>
+                  {user?.last_name ||
+                    "Not available"}
+                </div>
+
               </div>
+
 
               <div className="info-field full">
-                <label>Email Address</label>
-                <div>{user?.email || "Not available"}</div>
+
+                <label>
+                  Email Address
+                </label>
+
+                <div>
+                  {user?.email ||
+                    "Not available"}
+                </div>
+
               </div>
 
-              <div className="info-field">
-                <label>Phone Number</label>
-                <div>{user?.phone || "Not available"}</div>
-              </div>
 
               <div className="info-field">
-                <label>Account Type</label>
-                <div>{user?.user_type || "Resident"}</div>
+
+                <label>
+                  Phone Number
+                </label>
+
+                <div>
+                  {user?.phone ||
+                    "Not available"}
+                </div>
+
+              </div>
+
+
+              <div className="info-field">
+
+                <label>
+                  Account Type
+                </label>
+
+                <div>
+                  {user?.user_type ||
+                    "Resident"}
+                </div>
+
               </div>
 
             </div>
 
           </div>
 
+
+          {/* RESIDENCE INFORMATION */}
+
           <div className="info-card">
 
             <div className="info-card-header">
+
               <div className="info-icon green">
                 🏠
               </div>
 
               <div>
-                <span>RESIDENCE DETAILS</span>
-                <h3>My Residence</h3>
+                <span>
+                  RESIDENCE DETAILS
+                </span>
+
+                <h3>
+                  My Residence
+                </h3>
               </div>
+
             </div>
+
 
             <div className="residence-profile">
 
+
               <div className="residence-row">
+
                 <div className="residence-symbol">
                   B
                 </div>
 
                 <div>
-                  <span>BLOCK / WING</span>
+
+                  <span>
+                    BLOCK / WING
+                  </span>
+
                   <strong>
-                    {user?.block_wing || "Not assigned"}
+                    {user?.block_wing ||
+                      "Not assigned"}
                   </strong>
+
                 </div>
+
               </div>
 
+
               <div className="residence-row">
+
                 <div className="residence-symbol">
                   F
                 </div>
 
                 <div>
-                  <span>FLAT NUMBER</span>
+
+                  <span>
+                    FLAT NUMBER
+                  </span>
+
                   <strong>
-                    {user?.flat_number || "Not assigned"}
+                    {user?.flat_number ||
+                      "Not assigned"}
                   </strong>
+
                 </div>
+
               </div>
 
+
               <div className="residence-row">
+
                 <div className="residence-symbol">
                   R
                 </div>
 
                 <div>
-                  <span>RESIDENT TYPE</span>
+
+                  <span>
+                    RESIDENT TYPE
+                  </span>
+
                   <strong>
-                    {user?.user_type || "Resident"}
+                    {user?.user_type ||
+                      "Resident"}
                   </strong>
+
                 </div>
+
               </div>
 
             </div>
@@ -287,6 +428,9 @@ function MyProfile() {
           </div>
 
         </div>
+
+
+        {/* ACCOUNT STATUS */}
 
         <div className="profile-security-card">
 
@@ -295,14 +439,21 @@ function MyProfile() {
           </div>
 
           <div>
-            <span>ACCOUNT STATUS</span>
 
-            <h3>Your account is active</h3>
+            <span>
+              ACCOUNT STATUS
+            </span>
+
+            <h3>
+              Your account is active
+            </h3>
 
             <p>
-              Your resident account is securely connected
-              to the Smart Apartment management system.
+              Your resident account is securely
+              connected to the Smart Apartment
+              management system.
             </p>
+
           </div>
 
           <div className="active-pill">

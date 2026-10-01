@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import "../../css/flatDetails.css";
+import "../../css/resident/flatDetails.css";
 
 function FlatDetails() {
   const [user, setUser] = useState(null);
