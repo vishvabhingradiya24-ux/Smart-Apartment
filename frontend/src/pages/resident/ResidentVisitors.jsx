@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "../../css/resident/residentVisitors.css";
 
@@ -24,15 +24,10 @@ function ResidentVisitors() {
   const [showForm, setShowForm] = useState(false);
 
   const fetchVisitors = async () => {
-    try {
-      setLoading(true);
-      setError("");
-
       const token = localStorage.getItem("token");
 
       if (!token) {
-        setError("Session expired. Please login again.");
-        return;
+        throw new Error("Session expired. Please login again.");
       }
 
       const response = await fetch(API_URL, {
@@ -63,22 +58,50 @@ function ResidentVisitors() {
         visitorList = data.data.visitors;
       }
 
-      setVisitors(visitorList);
+      return visitorList;
+  };
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadVisitors = async () => {
+      try {
+        const visitorList = await fetchVisitors();
+        if (!cancelled) setVisitors(visitorList);
+      } catch (err) {
+        console.error("Fetch Visitors Error:", err);
+
+        if (!cancelled) {
+          setVisitors([]);
+          setError(err.message || "Unable to fetch visitor records.");
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    loadVisitors();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const refreshVisitors = async () => {
+    setLoading(true);
+    setError("");
+
+    try {
+      setVisitors(await fetchVisitors());
     } catch (err) {
       console.error("Fetch Visitors Error:", err);
 
       setVisitors([]);
-      setError(
-        err.message || "Unable to fetch visitor records."
-      );
+      setError(err.message || "Unable to fetch visitor records.");
     } finally {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    fetchVisitors();
-  }, []);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -164,7 +187,7 @@ function ResidentVisitors() {
 
       setShowForm(false);
 
-      await fetchVisitors();
+      await refreshVisitors();
     } catch (err) {
       console.error("Create Visitor Error:", err);
 
@@ -577,7 +600,7 @@ function ResidentVisitors() {
           <button
             type="button"
             className="resident-visitors-refresh"
-            onClick={fetchVisitors}
+            onClick={refreshVisitors}
             disabled={loading}
           >
             ↻ Refresh

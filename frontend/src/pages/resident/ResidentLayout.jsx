@@ -1,32 +1,22 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { NavLink, Link, Outlet, useNavigate } from "react-router-dom";
 import "../../css/resident/resident_Dashboard.css";
 
 function ResidentLayout() {
   const navigate = useNavigate();
-
-  const [user, setUser] = useState({});
-
-  useEffect(() => {
+const [user] = useState(() => {
     try {
       const storedUser = localStorage.getItem("user");
 
       if (storedUser) {
         const parsedUser = JSON.parse(storedUser);
-
-        if (parsedUser?.user) {
-          setUser(parsedUser.user);
-        } else if (parsedUser?.data?.user) {
-          setUser(parsedUser.data.user);
-        } else {
-          setUser(parsedUser);
-        }
+        return parsedUser?.user || parsedUser?.data?.user || parsedUser || {};
       }
     } catch (error) {
       console.error("User data error:", error);
-      setUser({});
     }
-  }, []);
+    return {};
+  });
 
   const firstName = user?.first_name || "";
   const lastName = user?.last_name || "";
@@ -84,11 +74,8 @@ function ResidentLayout() {
     navigate("/login");
   };
 
-  const navClass = ({ isActive }) =>
-    `resident-nav-item ${isActive ? "active" : ""}`;
-
   return (
-    <div className="resident-layout">
+    <div className="resident-layout resident-dashboard">
 
       <aside className="resident-sidebar">
 
@@ -96,13 +83,13 @@ function ResidentLayout() {
 
           <Link
             to="/resident"
-            className="resident-brand"
+            className="resident-brand sidebar-brand"
           >
-            <div className="resident-brand-icon">
+            <div className="resident-brand-icon brand-mark">
               ⌂
             </div>
 
-            <div className="resident-brand-text">
+            <div className="resident-brand-text brand-text">
               <strong>
                 Smart Apartment
               </strong>
@@ -114,19 +101,19 @@ function ResidentLayout() {
           </Link>
 
 
-          <div className="resident-menu-label">
+          <div className="resident-menu-label sidebar-section-label">
             MAIN MENU
           </div>
 
 
-          <nav className="resident-navigation">
+          <nav className="resident-navigation resident-nav">
 
             <NavLink
               to="/resident"
               end
-              className={navClass}
+              className={({ isActive }) => `resident-nav-item nav-item ${isActive ? "active" : ""}`}
             >
-              <span className="resident-nav-icon">
+              <span className="resident-nav-icon nav-icon">
                 ⌂
               </span>
 
@@ -138,9 +125,9 @@ function ResidentLayout() {
 
             <NavLink
               to="/resident/profile"
-              className={navClass}
+              className={({ isActive }) => `resident-nav-item nav-item ${isActive ? "active" : ""}`}
             >
-              <span className="resident-nav-icon">
+              <span className="resident-nav-icon nav-icon">
                 ◯
               </span>
 
@@ -152,9 +139,9 @@ function ResidentLayout() {
 
             <NavLink
               to="/resident/flat-details"
-              className={navClass}
+              className={({ isActive }) => `resident-nav-item nav-item ${isActive ? "active" : ""}`}
             >
-              <span className="resident-nav-icon">
+              <span className="resident-nav-icon nav-icon">
                 ▦
               </span>
 
@@ -166,9 +153,9 @@ function ResidentLayout() {
 
             <NavLink
               to="/resident/payment"
-              className={navClass}
+              className={({ isActive }) => `resident-nav-item nav-item ${isActive ? "active" : ""}`}
             >
-              <span className="resident-nav-icon">
+              <span className="resident-nav-icon nav-icon">
                 ₹
               </span>
 
@@ -180,9 +167,9 @@ function ResidentLayout() {
 
             <NavLink
               to="/resident/complaints"
-              className={navClass}
+              className={({ isActive }) => `resident-nav-item nav-item ${isActive ? "active" : ""}`}
             >
-              <span className="resident-nav-icon">
+              <span className="resident-nav-icon nav-icon">
                 ⚒
               </span>
 
@@ -194,9 +181,9 @@ function ResidentLayout() {
 
             <NavLink
               to="/resident/requests"
-              className={navClass}
+              className={({ isActive }) => `resident-nav-item nav-item ${isActive ? "active" : ""}`}
             >
-              <span className="resident-nav-icon">
+              <span className="resident-nav-icon nav-icon">
                 ≡
               </span>
 
@@ -208,9 +195,9 @@ function ResidentLayout() {
 
             <NavLink
               to="/resident/visitors"
-              className={navClass}
+              className={({ isActive }) => `resident-nav-item nav-item ${isActive ? "active" : ""}`}
             >
-              <span className="resident-nav-icon">
+              <span className="resident-nav-icon nav-icon">
                 ◉
               </span>
 
@@ -222,9 +209,9 @@ function ResidentLayout() {
 
             <NavLink
               to="/resident/facilities"
-              className={navClass}
+              className={({ isActive }) => `resident-nav-item nav-item ${isActive ? "active" : ""}`}
             >
-              <span className="resident-nav-icon">
+              <span className="resident-nav-icon nav-icon">
                 □
               </span>
 
@@ -236,9 +223,9 @@ function ResidentLayout() {
 
             <NavLink
               to="/resident/notices"
-              className={navClass}
+              className={({ isActive }) => `resident-nav-item nav-item ${isActive ? "active" : ""}`}
             >
-              <span className="resident-nav-icon">
+              <span className="resident-nav-icon nav-icon">
                 !
               </span>
 
@@ -250,9 +237,9 @@ function ResidentLayout() {
 
             <NavLink
               to="/resident/polls"
-              className={navClass}
+              className={({ isActive }) => `resident-nav-item nav-item ${isActive ? "active" : ""}`}
             >
-              <span className="resident-nav-icon">
+              <span className="resident-nav-icon nav-icon">
                 ✓
               </span>
 
@@ -261,20 +248,46 @@ function ResidentLayout() {
               </span>
             </NavLink>
 
+            <NavLink
+              to="/resident/notifications"
+              className={({ isActive }) => `resident-nav-item nav-item ${isActive ? "active" : ""}`}
+            >
+              <span className="resident-nav-icon nav-icon">
+                ○
+              </span>
+
+              <span>
+                Notifications
+              </span>
+            </NavLink>
+
+            <NavLink
+              to="/resident/emergency"
+              className={({ isActive }) => `resident-nav-item nav-item emergency-nav ${isActive ? "active" : ""}`}
+            >
+              <span className="resident-nav-icon nav-icon">
+                !
+              </span>
+
+              <span>
+                Emergency Contacts
+              </span>
+            </NavLink>
+
           </nav>
 
         </div>
 
 
-        <div className="resident-sidebar-bottom">
+        <div className="resident-sidebar-bottom sidebar-bottom">
 
-          <div className="resident-sidebar-user">
+          <div className="resident-sidebar-user sidebar-user">
 
-            <div className="resident-sidebar-avatar">
+            <div className="resident-sidebar-avatar sidebar-avatar">
               {initials}
             </div>
 
-            <div className="resident-sidebar-user-info">
+            <div className="resident-sidebar-user-info sidebar-user-info">
 
               <strong>
                 {fullName}
@@ -291,7 +304,7 @@ function ResidentLayout() {
 
           <button
             type="button"
-            className="resident-logout"
+            className="resident-logout logout-button"
             onClick={handleLogout}
           >
             <span>
@@ -310,9 +323,9 @@ function ResidentLayout() {
 
         <header className="resident-header">
 
-          <div className="resident-header-left">
+          <div className="resident-header-left header-left">
 
-            <span className="resident-header-label">
+            <span className="resident-header-label header-overline">
               RESIDENT SPACE
             </span>
 
@@ -328,18 +341,28 @@ function ResidentLayout() {
           </div>
 
 
-          <div className="resident-header-right">
+          <div className="resident-header-right header-right">
+
+            <Link
+              to="/resident/notifications"
+              className="header-notification"
+              aria-label="Notifications"
+            >
+              <span>
+                ○
+              </span>
+            </Link>
 
             <Link
               to="/resident/profile"
-              className="resident-header-profile"
+              className="resident-header-profile header-profile"
             >
 
-              <div className="resident-header-avatar">
+              <div className="resident-header-avatar header-avatar">
                 {initials}
               </div>
 
-              <div className="resident-header-user">
+              <div className="resident-header-user header-profile-info">
 
                 <strong>
                   {fullName}

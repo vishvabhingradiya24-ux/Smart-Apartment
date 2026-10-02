@@ -1,11 +1,8 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import "../../css/resident/resident_Dashboard.css";
 
 function ResidentDashboard() {
-  const navigate = useNavigate();
-
-  // 1. useState માં Lazy Initializer વાપરીને ડેટા લોડ કર્યો
   const [user] = useState(() => {
     try {
       const storedUser = localStorage.getItem("user");
@@ -18,161 +15,24 @@ function ResidentDashboard() {
     }
   });
 
-  // 2. Dynamic Greeting (Morning/Afternoon/Evening)
-  const getGreeting = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return "Good Morning";
-    if (hour < 17) return "Good Afternoon";
-    return "Good Evening";
-  };
-
-  const greeting = getGreeting();
-
-  // 3. Logout Handler
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-    navigate("/login");
-  };
-
   const firstName = user?.first_name || "";
   const lastName = user?.last_name || "";
 
   const fullName = `${firstName} ${lastName}`.trim() || "Resident";
 
-  const initials = firstName && lastName
-    ? `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase()
-    : firstName
-    ? firstName.charAt(0).toUpperCase()
-    : "R";
+  const initials =
+    firstName && lastName
+      ? `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase()
+      : firstName
+        ? firstName.charAt(0).toUpperCase()
+        : "R";
 
   const blockWing = user?.block_wing || "";
   const flatNumber = user?.flat_number || "";
   const userType = user?.user_type || "Resident";
 
   return (
-    <div className="resident-dashboard">
-      <aside className="resident-sidebar">
-        <div className="sidebar-brand">
-          <div className="brand-mark">⌂</div>
-          <div className="brand-text">
-            <h2>Smart Apartment</h2>
-            <span>Resident Portal</span>
-          </div>
-        </div>
-
-        <div className="sidebar-section-label">MAIN MENU</div>
-
-        <nav className="resident-nav">
-          <Link to="/resident" className="nav-item active">
-            <span className="nav-icon">⌂</span>
-            <span>Dashboard</span>
-          </Link>
-
-          <Link to="/resident/profile" className="nav-item">
-            <span className="nav-icon">◯</span>
-            <span>My Profile</span>
-          </Link>
-
-          <Link to="/resident/flat-details" className="nav-item">
-            <span className="nav-icon">▦</span>
-            <span>Flat Details</span>
-          </Link>
-
-          <Link to="/resident/payment" className="nav-item">
-            <span className="nav-icon">₹</span>
-            <span>Payments</span>
-          </Link>
-
-          <Link to="/resident/complaints" className="nav-item">
-            <span className="nav-icon">⚒</span>
-            <span>Complaints</span>
-          </Link>
-
-          <Link to="/resident/requests" className="nav-item">
-            <span className="nav-icon">≡</span>
-            <span>Service Requests</span>
-          </Link>
-
-          <Link to="/resident/visitors" className="nav-item">
-            <span className="nav-icon">◉</span>
-            <span>Visitors</span>
-          </Link>
-
-          <Link to="/resident/facilities" className="nav-item">
-            <span className="nav-icon">□</span>
-            <span>Amenity Booking</span>
-          </Link>
-
-          <Link to="/resident/notices" className="nav-item">
-            <span className="nav-icon">!</span>
-            <span>Notices & Events</span>
-          </Link>
-
-          <Link to="/resident/polls" className="nav-item">
-            <span className="nav-icon">✓</span>
-            <span>Polls & Voting</span>
-          </Link>
-
-          <Link to="/resident/notifications" className="nav-item">
-            <span className="nav-icon">○</span>
-            <span>Notifications</span>
-          </Link>
-
-          <Link to="/resident/emergency" className="nav-item emergency-nav">
-            <span className="nav-icon">!</span>
-            <span>Emergency Contacts</span>
-          </Link>
-        </nav>
-
-        <div className="sidebar-bottom">
-          <div className="sidebar-user">
-            <div className="sidebar-avatar">{initials}</div>
-            <div className="sidebar-user-info">
-              <strong>{fullName}</strong>
-              <span>{userType}</span>
-            </div>
-          </div>
-
-          <button className="logout-button" onClick={handleLogout}>
-            <span>↪</span>
-            Logout
-          </button>
-        </div>
-      </aside>
-
-      <main className="resident-main">
-        <header className="resident-header">
-          <div className="header-left">
-            <span className="header-overline">RESIDENT SPACE</span>
-            <h1>
-              {greeting}, {fullName}
-            </h1>
-            <p>
-              Everything you need for a smarter, more connected residential
-              experience.
-            </p>
-          </div>
-
-          <div className="header-right">
-            <Link to="/resident/notifications" className="header-notification">
-              <span>○</span>
-            </Link>
-
-            <Link to="/resident/profile" className="header-profile">
-              <div className="header-avatar">{initials}</div>
-              <div className="header-profile-info">
-                <strong>{fullName}</strong>
-                <span>
-                  {blockWing && flatNumber
-                    ? `${blockWing} • ${flatNumber}`
-                    : userType}
-                </span>
-              </div>
-            </Link>
-          </div>
-        </header>
-
+    <div className="resident-dashboard-content">
         <section className="residence-hero">
           <div className="residence-photo"></div>
           <div className="residence-photo-overlay"></div>
@@ -348,11 +208,6 @@ function ResidentDashboard() {
           </div>
         </section>
 
-        <footer className="resident-footer">
-          <span>Smart Apartment</span>
-          <span>Residential Management System</span>
-        </footer>
-      </main>
     </div>
   );
 }
