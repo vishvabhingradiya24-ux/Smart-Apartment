@@ -43,6 +43,14 @@ import "./css/global.css";
 // ==========================================
 
 import StaffDashboard from "./pages/staff/StaffDashboard";
+import AssignedComplaints from "./pages/staff/AssignedComplaints";
+import StaffServiceRequests from "./pages/staff/StaffServiceRequests";
+import StaffTasks from "./pages/staff/StaffTasks";
+import StaffMaintenance from "./pages/staff/StaffMaintenance";
+import StaffInventory from "./pages/staff/StaffInventory";
+import StaffWorkHistory from "./pages/staff/StaffWorkHistory";
+import StaffProfile from "./pages/staff/StaffProfile";
+
 
 // ==========================================
 // ADMIN PAGES
@@ -64,133 +72,45 @@ import Settings from "./pages/admin/Settings";
 function App() {
   return (
     <BrowserRouter>
-
       <Routes>
+        {/* PUBLIC */}
+        <Route path="/" element={<Home />} />
 
-        {/* ==========================================
-            PUBLIC
-        ========================================== */}
+        {/* AUTH */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/verify-otp" element={<VerifyOTP />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
 
-        <Route
-          path="/"
-          element={<Home />}
-        />
-
-        {/* ==========================================
-            AUTH
-        ========================================== */}
-
-        <Route
-          path="/login"
-          element={<Login />}
-        />
-
-        <Route
-          path="/register"
-          element={<Register />}
-        />
-
-        <Route
-          path="/forgot-password"
-          element={<ForgotPassword />}
-        />
-
-        <Route
-          path="/verify-otp"
-          element={<VerifyOTP />}
-        />
-
-        <Route
-          path="/reset-password"
-          element={<ResetPassword />}
-        />
-
-        {/* ==========================================
-            RESIDENT
-            Common Sidebar + Header + Footer
-            Only middle content changes
-        ========================================== */}
-
-        <Route
-          path="/resident"
-          element={<ResidentLayout />}
-        >
-
-          {/* Dashboard */}
-          <Route
-            index
-            element={<ResidentDashboard />}
-          />
-
-          {/* My Profile */}
-          <Route
-            path="profile"
-            element={<MyProfile />}
-          />
-
-          {/* Flat Details */}
-          <Route
-            path="flat-details"
-            element={<FlatDetails />}
-          />
-
-          {/* Complaints */}
-          <Route
-            path="complaints"
-            element={<ResidentComplaints />}
-          />
-
-          {/* Payments */}
-          <Route
-            path="payment"
-            element={<Payment />}
-          />
-
-          {/* Service Requests */}
-          <Route
-            path="requests"
-            element={<ServiceRequests />}
-          />
-
-          {/* Visitors */}
-          <Route
-            path="visitors"
-            element={<ResidentVisitors />}
-          />
-
-          {/* Amenity Booking */}
-          <Route
-            path="facilities"
-            element={<Facilities />}
-          />
-
-          {/* Notices & Events */}
-          <Route
-            path="notices"
-            element={<ResidentNotices />}
-          />
-
-          {/* Polls & Voting */}
-          <Route
-            path="polls"
-            element={<ResidentPolls />}
-          />
-
+        {/* RESIDENT */}
+        <Route path="/resident" element={<ResidentLayout />}>
+          <Route index element={<ResidentDashboard />} />
+          <Route path="profile" element={<MyProfile />} />
+          <Route path="flat-details" element={<FlatDetails />} />
+          <Route path="complaints" element={<ResidentComplaints />} />
+          <Route path="payment" element={<Payment />} />
+          <Route path="requests" element={<ServiceRequests />} />
+          <Route path="visitors" element={<ResidentVisitors />} />
+          <Route path="facilities" element={<Facilities />} />
+          <Route path="notices" element={<ResidentNotices />} />
+          <Route path="polls" element={<ResidentPolls />} />
         </Route>
 
-        {/* ==========================================
-            STAFF
-        ========================================== */}
+        {/* STAFF (FIXED PATHS HERE) */}
+        <Route path="/staff" element={<StaffDashboard />} />
+        <Route path="/staff/dashboard" element={<StaffDashboard />} />
+        <Route path="/staff/complaints" element={<AssignedComplaints />} />
+        <Route path="/staff/service-requests" element={<StaffServiceRequests />} />
+        <Route path="/staff/tasks" element={<StaffTasks />} />
+        <Route path="/staff/maintenance" element={<StaffMaintenance />} />
+        <Route path="/staff/assets" element={<StaffInventory />} />
+        <Route path="/staff/inventory" element={<StaffInventory />} />
+        <Route path="/staff/work-history" element={<StaffWorkHistory />} />
+        <Route path="/staff/profile" element={<StaffProfile />} />
 
-        <Route
-          path="/staff"
-          element={<StaffDashboard />}
-        />
 
-        {/* ==========================================
-            ADMIN DASHBOARD
-        ========================================== */}
-
+        {/* ADMIN DASHBOARD */}
         <Route
           path="/admin"
           element={
@@ -199,11 +119,6 @@ function App() {
             </AdminLayout>
           }
         />
-
-        {/* ==========================================
-            ADMIN RESIDENTS
-        ========================================== */}
-
         <Route
           path="/admin/residents"
           element={
@@ -212,11 +127,6 @@ function App() {
             </AdminLayout>
           }
         />
-
-        {/* ==========================================
-            ADMIN SECURITY
-        ========================================== */}
-
         <Route
           path="/admin/security"
           element={
@@ -225,11 +135,6 @@ function App() {
             </AdminLayout>
           }
         />
-
-        {/* ==========================================
-            ADMIN STAFF
-        ========================================== */}
-
         <Route
           path="/admin/staff"
           element={
@@ -238,11 +143,6 @@ function App() {
             </AdminLayout>
           }
         />
-
-        {/* ==========================================
-            ADMIN COMPLAINTS
-        ========================================== */}
-
         <Route
           path="/admin/complaints"
           element={
@@ -251,11 +151,6 @@ function App() {
             </AdminLayout>
           }
         />
-
-        {/* ==========================================
-            ADMIN PAYMENTS
-        ========================================== */}
-
         <Route
           path="/admin/payments"
           element={
@@ -264,11 +159,6 @@ function App() {
             </AdminLayout>
           }
         />
-
-        {/* ==========================================
-            ADMIN VISITORS
-        ========================================== */}
-
         <Route
           path="/admin/visitors"
           element={
@@ -277,11 +167,6 @@ function App() {
             </AdminLayout>
           }
         />
-
-        {/* ==========================================
-            ADMIN AMENITIES
-        ========================================== */}
-
         <Route
           path="/admin/amenities"
           element={
@@ -290,11 +175,6 @@ function App() {
             </AdminLayout>
           }
         />
-
-        {/* ==========================================
-            ADMIN NOTICES
-        ========================================== */}
-
         <Route
           path="/admin/notices"
           element={
@@ -303,11 +183,6 @@ function App() {
             </AdminLayout>
           }
         />
-
-        {/* ==========================================
-            ADMIN NOTIFICATIONS
-        ========================================== */}
-
         <Route
           path="/admin/notifications"
           element={
@@ -316,11 +191,6 @@ function App() {
             </AdminLayout>
           }
         />
-
-        {/* ==========================================
-            ADMIN SETTINGS
-        ========================================== */}
-
         <Route
           path="/admin/settings"
           element={
@@ -329,9 +199,7 @@ function App() {
             </AdminLayout>
           }
         />
-
       </Routes>
-
     </BrowserRouter>
   );
 }

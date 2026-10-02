@@ -1,6 +1,8 @@
 const { pool } = require("../config/db");
 
+// ==========================================
 // CREATE COMPLAINT
+// ==========================================
 const createComplaint = async (req, res) => {
   try {
     const {
@@ -11,11 +13,7 @@ const createComplaint = async (req, res) => {
 
     const resident_id = req.user.id;
 
-    if (
-      !complaint_title ||
-      !complaint_description ||
-      !category
-    ) {
+    if (!complaint_title || !complaint_description || !category) {
       return res.status(400).json({
         message: "Please fill all complaint fields"
       });
@@ -68,7 +66,9 @@ const createComplaint = async (req, res) => {
 };
 
 
-// GET MY COMPLAINTS
+// ==========================================
+// GET MY COMPLAINTS - RESIDENT
+// ==========================================
 const getMyComplaints = async (req, res) => {
   try {
     const resident_id = req.user.id;
@@ -106,7 +106,9 @@ const getMyComplaints = async (req, res) => {
 };
 
 
+// ==========================================
 // GET SINGLE COMPLAINT
+// ==========================================
 const getComplaintById = async (req, res) => {
   try {
     const resident_id = req.user.id;
@@ -154,8 +156,84 @@ const getComplaintById = async (req, res) => {
 };
 
 
+// ==========================================
+// GET ALL COMPLAINTS FOR STAFF
+// ==========================================
+const getStaffComplaints = async (req, res) => {
+  try {
+    const [complaints] = await pool.query(
+      `SELECT
+        c.complaint_id,
+        c.resident_id,
+        r.first_name,
+        r.last_name,
+        r.flat_number,
+        c.complaint_title,
+        c.complaint_description,
+        c.category,
+        c.status,
+        c.user_id,
+        c.complaint_date
+      FROM complaints c
+      INNER JOIN residents r
+        ON c.resident_id = r.id
+      ORDER BY c.complaint_date DESC`
+    );
+
+    res.status(200).json(complaints);
+
+  } catch (error) {
+    console.error("Get Staff Complaints Error:", error);
+
+    res.status(500).json({
+      message: "Unable to fetch staff complaints"
+    });
+  }
+};
+
+// ==========================================
+// GET ALL COMPLAINTS FOR ADMIN
+// ==========================================
+const getAdminComplaints = async (req, res) => {
+  try {
+    const [complaints] = await pool.query(
+      `SELECT
+        c.complaint_id,
+        c.resident_id,
+        r.first_name,
+        r.last_name,
+        r.flat_number,
+        c.complaint_title,
+        c.complaint_description,
+        c.category,
+        c.status,
+        c.user_id,
+        c.complaint_date
+      FROM complaints c
+      INNER JOIN residents r
+        ON c.resident_id = r.id
+      ORDER BY c.complaint_date DESC`
+    );
+
+    res.status(200).json(complaints);
+
+  } catch (error) {
+    console.error("Get Admin Complaints Error:", error);
+
+    res.status(500).json({
+      message: "Unable to fetch admin complaints"
+    });
+  }
+};
+
+
+// ==========================================
+// EXPORTS
+// ==========================================
 module.exports = {
   createComplaint,
   getMyComplaints,
-  getComplaintById
+  getComplaintById,
+  getStaffComplaints,
+  getAdminComplaints
 };

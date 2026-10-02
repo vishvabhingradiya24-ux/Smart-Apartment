@@ -36,24 +36,19 @@ const visitorRoutes = require("./routes/visitorRoutes");
 const noticeRoutes = require("./routes/noticeRoutes");
 
 
+
 // ==========================================
 // API ROUTES
 // ==========================================
-
 // Resident
 app.use("/api/resident", residentRoutes);
+app.use("/api/resident/complaints", complaintRoutes);
 
 // Admin
 app.use("/api/admin", adminRoutes);
 
 // Staff
 app.use("/api/staff", staffRoutes);
-
-// Complaints
-app.use(
-  "/api/resident/complaints",
-  complaintRoutes
-);
 
 // Payments
 app.use(
@@ -84,8 +79,6 @@ app.use(
   "/api/notices",
   noticeRoutes
 );
-
-
 // ==========================================
 // HOME ROUTE
 // ==========================================

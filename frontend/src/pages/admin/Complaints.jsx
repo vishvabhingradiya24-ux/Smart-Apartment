@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "../../css/complaints.css";
 
 const Complaints = () => {
@@ -6,88 +6,96 @@ const Complaints = () => {
   const [statusFilter, setStatusFilter] = useState("All");
   const [categoryFilter, setCategoryFilter] = useState("All");
 
-  // Demo data for UI.
-  // Backend + MySQL integration will be added later.
-  const [complaints] = useState([
-    {
-      id: "C001",
-      residentId: "R201",
-      residentName: "Rahul Patel",
-      flat: "A-305",
-      title: "Water leakage",
-      description: "Water is leaking from the bathroom pipe.",
-      category: "Plumbing",
-      priority: "High",
-      status: "Pending",
-      assignedTo: "Vijay Parmar",
-      date: "18-Sep-2026 10:30 AM",
-    },
-    {
-      id: "C002",
-      residentId: "R202",
-      residentName: "Priya Shah",
-      flat: "B-204",
-      title: "Lift not working",
-      description: "The lift is not working properly.",
-      category: "Electrical",
-      priority: "High",
-      status: "In Progress",
-      assignedTo: "Amit Shah",
-      date: "18-Sep-2026 12:15 PM",
-    },
-    {
-      id: "C003",
-      residentId: "R203",
-      residentName: "Karan Mehta",
-      flat: "A-102",
-      title: "Cleaning required",
-      description: "Common area requires cleaning.",
-      category: "Cleaning",
-      priority: "Medium",
-      status: "Assigned",
-      assignedTo: "Kiran Mehta",
-      date: "19-Sep-2026 09:20 AM",
-    },
-    {
-      id: "C004",
-      residentId: "R204",
-      residentName: "Neha Patel",
-      flat: "C-401",
-      title: "Parking issue",
-      description: "Another vehicle is parked in the assigned space.",
-      category: "Parking",
-      priority: "Low",
-      status: "Resolved",
-      assignedTo: "Rahul Patel",
-      date: "19-Sep-2026 03:40 PM",
-    },
-    {
-      id: "C005",
-      residentId: "R205",
-      residentName: "Aarav Shah",
-      flat: "B-302",
-      title: "Water supply issue",
-      description: "Water supply is not available in the morning.",
-      category: "Water",
-      priority: "Medium",
-      status: "Pending",
-      assignedTo: "Not Assigned",
-      date: "20-Sep-2026 08:45 AM",
-    },
-  ]);
+  const [complaints, setComplaints] = useState([]);
+  const [loading, setLoading] = useState(true);
 
+  // ==========================================
+  // FETCH COMPLAINTS FROM DATABASE
+  // ==========================================
+  useEffect(() => {
+    fetchComplaints();
+  }, []);
+
+  const fetchComplaints = async () => {
+    try {
+      setLoading(true);
+
+      const token = localStorage.getItem("token");
+
+      const response = await fetch(
+        "http://localhost:5000/api/resident/complaints/admin/all",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.message || "Failed to fetch complaints"
+        );
+      }
+
+      // Convert backend data to existing UI format
+      const formattedComplaints = data.map((complaint) => ({
+        id: `C${String(complaint.complaint_id).padStart(3, "0")}`,
+
+        residentId: complaint.resident_id,
+
+        residentName:
+          `${complaint.first_name || ""} ${complaint.last_name || ""}`.trim(),
+
+        flat: complaint.flat_number || "N/A",
+
+        title: complaint.complaint_title || "No Title",
+
+        description:
+          complaint.complaint_description || "No Description",
+
+        category: complaint.category || "Other",
+
+        // Priority is not currently stored in complaints table
+        priority: "Medium",
+
+        status: complaint.status || "Pending",
+
+        // Staff assignment will be connected later
+        assignedTo: "Not Assigned",
+
+        date: complaint.complaint_date
+          ? new Date(
+              complaint.complaint_date
+            ).toLocaleString()
+          : "N/A",
+      }));
+
+      setComplaints(formattedComplaints);
+
+    } catch (error) {
+      console.error("Admin Complaints Error:", error);
+
+      setComplaints([]);
+
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+  // ==========================================
+  // SEARCH + FILTER
+  // ==========================================
   const filteredComplaints = complaints.filter((complaint) => {
+    const search = searchTerm.toLowerCase();
+
     const matchesSearch =
-      complaint.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      complaint.residentName
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-      complaint.flat
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-      complaint.title
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase());
+      complaint.id.toLowerCase().includes(search) ||
+      complaint.residentName.toLowerCase().includes(search) ||
+      complaint.flat.toLowerCase().includes(search) ||
+      complaint.title.toLowerCase().includes(search);
 
     const matchesStatus =
       statusFilter === "All" ||
@@ -104,6 +112,10 @@ const Complaints = () => {
     );
   });
 
+
+  // ==========================================
+  // STATISTICS
+  // ==========================================
   const pendingCount = complaints.filter(
     (complaint) => complaint.status === "Pending"
   ).length;
@@ -116,24 +128,50 @@ const Complaints = () => {
     (complaint) => complaint.status === "Resolved"
   ).length;
 
+
+  // ==========================================
+  // VIEW COMPLAINT
+  // ==========================================
   const handleView = (complaint) => {
     alert(
-      `Complaint Details\n\nComplaint ID: ${complaint.id}\nResident: ${complaint.residentName}\nFlat: ${complaint.flat}\nTitle: ${complaint.title}\nCategory: ${complaint.category}\nStatus: ${complaint.status}\nAssigned To: ${complaint.assignedTo}`
+      `Complaint Details\n\n` +
+      `Complaint ID: ${complaint.id}\n` +
+      `Resident: ${complaint.residentName}\n` +
+      `Flat: ${complaint.flat}\n` +
+      `Title: ${complaint.title}\n` +
+      `Category: ${complaint.category}\n` +
+      `Status: ${complaint.status}\n` +
+      `Assigned To: ${complaint.assignedTo}\n` +
+      `Date: ${complaint.date}`
     );
   };
 
+
+  // ==========================================
+  // EDIT COMPLAINT
+  // ==========================================
   const handleEdit = (complaint) => {
     alert(
-      `Update Complaint: ${complaint.id}\n\nBackend functionality will be connected later.`
+      `Update Complaint: ${complaint.id}\n\n` +
+      `Backend update functionality will be connected later.`
     );
   };
 
+
+  // ==========================================
+  // ASSIGN COMPLAINT
+  // ==========================================
   const handleAssign = (complaint) => {
     alert(
-      `Assign Complaint: ${complaint.id}\n\nStaff assignment will be connected with backend later.`
+      `Assign Complaint: ${complaint.id}\n\n` +
+      `Staff assignment functionality will be connected later.`
     );
   };
 
+
+  // ==========================================
+  // UI
+  // ==========================================
   return (
     <div className="complaints-page">
 
@@ -153,6 +191,7 @@ const Complaints = () => {
         </div>
       </div>
 
+
       {/* ================= SUMMARY ================= */}
 
       <div className="complaints-stats">
@@ -168,6 +207,7 @@ const Complaints = () => {
           </div>
         </div>
 
+
         <div className="complaint-stat-card">
           <div className="complaint-stat-icon">
             ⏳
@@ -179,6 +219,7 @@ const Complaints = () => {
           </div>
         </div>
 
+
         <div className="complaint-stat-card">
           <div className="complaint-stat-icon">
             🔧
@@ -189,6 +230,7 @@ const Complaints = () => {
             <strong>{inProgressCount}</strong>
           </div>
         </div>
+
 
         <div className="complaint-stat-card">
           <div className="complaint-stat-icon">
@@ -203,11 +245,13 @@ const Complaints = () => {
 
       </div>
 
+
       {/* ================= FILTERS ================= */}
 
       <div className="complaints-toolbar">
 
         <div className="complaints-search">
+
           <span>🔍</span>
 
           <input
@@ -218,7 +262,9 @@ const Complaints = () => {
               setSearchTerm(e.target.value)
             }
           />
+
         </div>
+
 
         <select
           value={statusFilter}
@@ -226,13 +272,31 @@ const Complaints = () => {
             setStatusFilter(e.target.value)
           }
         >
-          <option value="All">All Status</option>
-          <option value="Pending">Pending</option>
-          <option value="Assigned">Assigned</option>
-          <option value="In Progress">In Progress</option>
-          <option value="Resolved">Resolved</option>
-          <option value="Closed">Closed</option>
+          <option value="All">
+            All Status
+          </option>
+
+          <option value="Pending">
+            Pending
+          </option>
+
+          <option value="Assigned">
+            Assigned
+          </option>
+
+          <option value="In Progress">
+            In Progress
+          </option>
+
+          <option value="Resolved">
+            Resolved
+          </option>
+
+          <option value="Closed">
+            Closed
+          </option>
         </select>
+
 
         <select
           value={categoryFilter}
@@ -240,36 +304,65 @@ const Complaints = () => {
             setCategoryFilter(e.target.value)
           }
         >
-          <option value="All">All Categories</option>
-          <option value="Plumbing">Plumbing</option>
-          <option value="Electrical">Electrical</option>
-          <option value="Cleaning">Cleaning</option>
-          <option value="Parking">Parking</option>
-          <option value="Water">Water</option>
+          <option value="All">
+            All Categories
+          </option>
+
+          <option value="Plumbing">
+            Plumbing
+          </option>
+
+          <option value="Electrical">
+            Electrical
+          </option>
+
+          <option value="Cleaning">
+            Cleaning
+          </option>
+
+          <option value="Parking">
+            Parking
+          </option>
+
+          <option value="Water">
+            Water
+          </option>
         </select>
 
       </div>
+
 
       {/* ================= TABLE ================= */}
 
       <div className="complaints-table-card">
 
         <div className="complaints-table-header">
+
           <div>
-            <h2>Complaint List</h2>
+
+            <h2>
+              Complaint List
+            </h2>
 
             <p>
               {filteredComplaints.length} complaint
-              {filteredComplaints.length !== 1 ? "s" : ""} found
+              {filteredComplaints.length !== 1
+                ? "s"
+                : ""}{" "}
+              found
             </p>
+
           </div>
+
         </div>
+
 
         <div className="complaints-table-wrapper">
 
           <table className="complaints-table">
 
             <thead>
+
               <tr>
                 <th>Complaint ID</th>
                 <th>Resident</th>
@@ -281,28 +374,73 @@ const Complaints = () => {
                 <th>Date</th>
                 <th>Actions</th>
               </tr>
+
             </thead>
+
 
             <tbody>
 
-              {filteredComplaints.length > 0 ? (
+              {/* LOADING */}
+
+              {loading ? (
+
+                <tr>
+
+                  <td colSpan="9">
+
+                    <div className="complaints-empty">
+
+                      <div>⏳</div>
+
+                      <h3>
+                        Loading complaints...
+                      </h3>
+
+                      <p>
+                        Please wait while complaints are
+                        fetched from database.
+                      </p>
+
+                    </div>
+
+                  </td>
+
+                </tr>
+
+              ) : filteredComplaints.length > 0 ? (
+
                 filteredComplaints.map((complaint) => (
+
                   <tr key={complaint.id}>
 
+                    {/* COMPLAINT ID */}
+
                     <td>
+
                       <span className="complaint-id">
                         {complaint.id}
                       </span>
+
                     </td>
 
+
+                    {/* RESIDENT */}
+
                     <td>
+
                       <div className="resident-complaint-details">
 
                         <div className="resident-complaint-avatar">
-                          {complaint.residentName.charAt(0)}
+
+                          {complaint.residentName
+                            ? complaint.residentName.charAt(0)
+                            : "R"}
+
                         </div>
 
+
                         <div>
+
                           <strong>
                             {complaint.residentName}
                           </strong>
@@ -314,12 +452,18 @@ const Complaints = () => {
                           <small>
                             ID: {complaint.residentId}
                           </small>
+
                         </div>
 
                       </div>
+
                     </td>
 
+
+                    {/* COMPLAINT */}
+
                     <td>
+
                       <div className="complaint-title-cell">
 
                         <strong>
@@ -331,29 +475,49 @@ const Complaints = () => {
                         </small>
 
                       </div>
+
                     </td>
 
+
+                    {/* CATEGORY */}
+
                     <td>
+
                       <span className="category-badge">
                         {complaint.category}
                       </span>
+
                     </td>
 
+
+                    {/* PRIORITY */}
+
                     <td>
+
                       <span
                         className={`priority-badge ${complaint.priority.toLowerCase()}`}
                       >
                         {complaint.priority}
                       </span>
+
                     </td>
 
+
+                    {/* ASSIGNED STAFF */}
+
                     <td>
+
                       <span className="assigned-staff">
                         {complaint.assignedTo}
                       </span>
+
                     </td>
 
+
+                    {/* STATUS */}
+
                     <td>
+
                       <span
                         className={`complaint-status ${complaint.status
                           .toLowerCase()
@@ -361,13 +525,22 @@ const Complaints = () => {
                       >
                         {complaint.status}
                       </span>
+
                     </td>
 
+
+                    {/* DATE */}
+
                     <td>
+
                       <span className="complaint-date">
                         {complaint.date}
                       </span>
+
                     </td>
+
+
+                    {/* ACTIONS */}
 
                     <td>
 
@@ -383,6 +556,7 @@ const Complaints = () => {
                           👁️
                         </button>
 
+
                         <button
                           className="complaint-action-assign"
                           onClick={() =>
@@ -392,6 +566,7 @@ const Complaints = () => {
                         >
                           👨‍🔧
                         </button>
+
 
                         <button
                           className="complaint-action-edit"
@@ -408,9 +583,13 @@ const Complaints = () => {
                     </td>
 
                   </tr>
+
                 ))
+
               ) : (
+
                 <tr>
+
                   <td colSpan="9">
 
                     <div className="complaints-empty">
@@ -422,13 +601,16 @@ const Complaints = () => {
                       </h3>
 
                       <p>
-                        Try changing your search or filter criteria.
+                        Try changing your search or
+                        filter criteria.
                       </p>
 
                     </div>
 
                   </td>
+
                 </tr>
+
               )}
 
             </tbody>
@@ -438,6 +620,7 @@ const Complaints = () => {
         </div>
 
       </div>
+
 
       {/* ================= COMPLAINT WORKFLOW ================= */}
 
@@ -454,10 +637,10 @@ const Complaints = () => {
           </h3>
 
           <p>
-            Resident submits complaint → Admin reviews and
-            categorizes → Complaint is assigned to staff →
-            Staff works on the issue → Status is updated →
-            Complaint is resolved.
+            Resident submits complaint → Admin reviews
+            and categorizes → Complaint is assigned to
+            staff → Staff works on the issue → Status is
+            updated → Complaint is resolved.
           </p>
 
         </div>
