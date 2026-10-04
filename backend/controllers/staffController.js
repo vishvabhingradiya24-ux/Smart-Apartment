@@ -155,9 +155,37 @@ const loginStaff = async (req, res) => {
       message: "Staff login failed"
     });
   }
+
+};
+
+const getAllStaff = async (req, res) => {
+  try {
+    const [staffList] = await pool.query(
+      `SELECT
+        id,
+        first_name,
+        last_name,
+        email,
+        phone,
+        staff_type,
+        created_at
+      FROM staff
+      ORDER BY first_name ASC, last_name ASC`
+    );
+
+    res.status(200).json(staffList);
+
+  } catch (error) {
+    console.error("Get All Staff Error:", error);
+
+    res.status(500).json({
+      message: "Unable to fetch staff"
+    });
+  }
 };
 
 module.exports = {
   registerStaff,
-  loginStaff
+  loginStaff,
+  getAllStaff
 };

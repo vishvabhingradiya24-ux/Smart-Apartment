@@ -41,6 +41,8 @@ function StaffComplaints() {
   const [searchTerm, setSearchTerm] = useState("");
 
   const [selectedComplaint, setSelectedComplaint] = useState(null);
+  const [updatingStatus, setUpdatingStatus] = useState(false);
+  const [resolutionDetails, setResolutionDetails] = useState("");
 
 
   // ======================================================
@@ -70,6 +72,7 @@ function StaffComplaints() {
         "http://localhost:5000/api/resident/complaints/staff/assigned",
         {
           method: "GET",
+          cache: "no-store",
 
           headers: {
             Authorization: `Bearer ${token}`,
@@ -155,6 +158,8 @@ function StaffComplaints() {
           phone: "Not available",
 
           userId: item.user_id,
+
+          resolutionDetails: item.resolution_details || "",
         };
       });
 
@@ -179,6 +184,69 @@ function StaffComplaints() {
       setLoading(false);
 
     }
+  };
+
+
+  // ======================================================
+  // UPDATE COMPLAINT STATUS
+  // ======================================================
+
+  const updateComplaintStatus = async (status) => {
+    if (!selectedComplaint) return;
+
+    if (status === "Resolved" && !resolutionDetails.trim()) {
+      alert("Please enter resolution details before resolving the complaint.");
+      return;
+    }
+
+    try {
+      setUpdatingStatus(true);
+
+      const token = localStorage.getItem("token");
+
+      const response = await fetch(
+        `http://localhost:5000/api/resident/complaints/staff/${selectedComplaint.complaintId}/status`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            status,
+            resolution_details: resolutionDetails.trim() || null,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Unable to update complaint status");
+      }
+
+      alert(`Complaint ${selectedComplaint.id} updated to ${status}.`);
+
+      setSelectedComplaint(null);
+      setResolutionDetails("");
+
+      await fetchAssignedComplaints();
+    } catch (error) {
+      console.error("Update Complaint Status Error:", error);
+      alert(error.message || "Unable to update complaint status.");
+    } finally {
+      setUpdatingStatus(false);
+    }
+  };
+
+
+  // ======================================================
+  // OPEN COMPLAINT DETAILS
+  // ======================================================
+
+  const openComplaint = (complaint) => {
+    setSelectedComplaint(complaint);
+    setResolutionDetails(complaint.resolutionDetails || "");
   };
 
 
@@ -255,9 +323,15 @@ function StaffComplaints() {
   ).length;
 
 
-  const completedCount = complaints.filter(
+  const assignedCount = complaints.filter(
     (item) =>
-      String(item.status).toLowerCase() === "completed"
+      String(item.status).toLowerCase() === "assigned"
+  ).length;
+
+
+  const resolvedCount = complaints.filter(
+    (item) =>
+      String(item.status).toLowerCase() === "resolved"
   ).length;
 
 
@@ -284,7 +358,12 @@ function StaffComplaints() {
     }
 
 
-    if (normalizedStatus === "completed") {
+    if (normalizedStatus === "assigned") {
+      return "assigned";
+    }
+
+
+    if (normalizedStatus === "resolved" || normalizedStatus === "completed") {
       return "completed";
     }
 
@@ -644,7 +723,7 @@ function StaffComplaints() {
           <button
             className="complaint-stat-card completed"
             onClick={() =>
-              setActiveFilter("Completed")
+              setActiveFilter("Resolved")
             }
           >
 
@@ -656,11 +735,11 @@ function StaffComplaints() {
             <div>
 
               <span>
-                Completed
+                Resolved
               </span>
 
               <strong>
-                {completedCount}
+                {resolvedCount}
               </strong>
 
               <small>
@@ -747,7 +826,7 @@ function StaffComplaints() {
               "All",
               "Pending",
               "In Progress",
-              "Completed",
+              "Resolved",
             ].map((filter) => (
 
               <button
@@ -1018,11 +1097,7 @@ function StaffComplaints() {
 
                           <button
                             className="view-complaint-btn"
-                            onClick={() =>
-                              setSelectedComplaint(
-                                complaint
-                              )
-                            }
+                            onClick={() => openComplaint(complaint)}
                           >
                             View
                             <span>→</span>
@@ -1257,34 +1332,64 @@ function StaffComplaints() {
             </div>
 
 
+            {/* RESOLUTION DETAILS */}
+
+            {selectedComplaint.status !== "Resolved" && (
+              <div className="modal-resolution-box">
+
+                <label htmlFor="resolution-details">
+                  Resolution Details
+                </label>
+
+                <textarea
+                  id="resolution-details"
+                  value={resolutionDetails}
+                  onChange={(e) => setResolutionDetails(e.target.value)}
+                  placeholder="Enter work done / resolution details..."
+                  rows="4"
+                  disabled={updatingStatus}
+                />
+
+              </div>
+            )}
+
+
             {/* MODAL ACTIONS */}
 
             <div className="modal-actions">
 
               <button
                 className="modal-secondary-btn"
-                onClick={() =>
-                  setSelectedComplaint(null)
-                }
+                onClick={() => {
+                  setSelectedComplaint(null);
+                  setResolutionDetails("");
+                }}
+                disabled={updatingStatus}
               >
                 Close
               </button>
 
 
-              <button
-                className="modal-primary-btn"
-                onClick={() => {
+              {selectedComplaint.status === "Assigned" && (
+                <button
+                  className="modal-primary-btn"
+                  onClick={() => updateComplaintStatus("In Progress")}
+                  disabled={updatingStatus}
+                >
+                  {updatingStatus ? "Updating..." : "Start Work"}
+                </button>
+              )}
 
-                  setSelectedComplaint(null);
 
-                  alert(
-                    `Complaint ${selectedComplaint.id} selected for update.`
-                  );
-
-                }}
-              >
-                Update Complaint
-              </button>
+              {selectedComplaint.status === "In Progress" && (
+                <button
+                  className="modal-primary-btn"
+                  onClick={() => updateComplaintStatus("Resolved")}
+                  disabled={updatingStatus}
+                >
+                  {updatingStatus ? "Resolving..." : "Mark as Resolved"}
+                </button>
+              )}
 
             </div>
 

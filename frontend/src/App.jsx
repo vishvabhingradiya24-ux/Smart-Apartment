@@ -68,6 +68,7 @@ import Amenities from "./pages/admin/Amenities";
 import Notices from "./pages/admin/Notices";
 import Notifications from "./pages/admin/Notifications";
 import Settings from "./pages/admin/Settings";
+import AdminTasks from "./pages/admin/AdminTasks";
 
 function App() {
   return (
@@ -191,6 +192,7 @@ function App() {
             </AdminLayout>
           }
         />
+        
         <Route
           path="/admin/settings"
           element={
@@ -199,6 +201,17 @@ function App() {
             </AdminLayout>
           }
         />
+
+
+
+        <Route
+  path="/admin/task"
+  element={
+    <AdminLayout>
+      <AdminTasks />
+    </AdminLayout>
+  }
+/>
       </Routes>
     </BrowserRouter>
   );

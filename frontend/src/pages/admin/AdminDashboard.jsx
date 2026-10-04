@@ -68,6 +68,12 @@ const AdminDashboard = () => {
       path: "/admin/complaints",
     },
     {
+    title: "Tasks",
+    description: "Create and assign tasks to staff",
+    icon: "✅",
+    path: "/admin/task",
+  },
+    {
       title: "Payments",
       description: "Track maintenance payments",
       icon: "💳",

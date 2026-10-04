@@ -32,6 +32,12 @@ const AdminLayout = ({ children }) => {
       icon: "📝",
       path: "/admin/complaints",
     },
+    { 
+  label: "Tasks", 
+  icon: "✅", 
+  path: "/admin/task", 
+},
+    
     {
       label: "Payments",
       icon: "💳",

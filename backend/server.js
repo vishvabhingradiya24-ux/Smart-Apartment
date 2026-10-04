@@ -32,8 +32,10 @@ const paymentRoutes = require("./routes/paymentRoutes");
 const residentRoutes = require("./routes/residentRoutes");
 const serviceRequestRoutes = require("./routes/serviceRequestRoutes");
 const staffRoutes = require("./routes/staffRoutes");
+const adminTaskRoutes = require("./routes/adminTaskRoutes");
 const visitorRoutes = require("./routes/visitorRoutes");
 const noticeRoutes = require("./routes/noticeRoutes");
+const taskRoutes = require("./routes/taskRoutes");
 
 
 
@@ -47,8 +49,13 @@ app.use("/api/resident/complaints", complaintRoutes);
 // Admin
 app.use("/api/admin", adminRoutes);
 
+// Admin Tasks
+app.use("/api/admin/tasks", adminTaskRoutes);
+
 // Staff
 app.use("/api/staff", staffRoutes);
+// Tasks
+app.use("/api/staff/tasks", taskRoutes);
 
 // Payments
 app.use(

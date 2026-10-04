@@ -8,14 +8,19 @@ const Complaints = () => {
 
   const [complaints, setComplaints] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [staffList, setStaffList] = useState([]);
+const [showAssignModal, setShowAssignModal] = useState(false);
+const [selectedComplaint, setSelectedComplaint] = useState(null);
+const [selectedStaff, setSelectedStaff] = useState("");
+const [assigning, setAssigning] = useState(false);
 
   // ==========================================
   // FETCH COMPLAINTS FROM DATABASE
   // ==========================================
   useEffect(() => {
-    fetchComplaints();
-  }, []);
-
+  fetchComplaints();
+  fetchStaff();
+}, []);
   const fetchComplaints = async () => {
     try {
       setLoading(true);
@@ -43,6 +48,8 @@ const Complaints = () => {
       const formattedComplaints = data.map((complaint) => ({
         id: `C${String(complaint.complaint_id).padStart(3, "0")}`,
 
+        complaintId: complaint.complaint_id,
+
         residentId: complaint.resident_id,
 
         residentName:
@@ -63,7 +70,15 @@ const Complaints = () => {
         status: complaint.status || "Pending",
 
         // Staff assignment will be connected later
-        assignedTo: "Not Assigned",
+        assignedStaffId:
+  complaint.assigned_staff_id || null,
+
+assignedTo:
+  complaint.assigned_staff_id
+    ? `${complaint.staff_first_name || ""} ${
+        complaint.staff_last_name || ""
+      }`.trim() || "Assigned Staff"
+    : "Not Assigned",
 
         date: complaint.complaint_date
           ? new Date(
@@ -83,6 +98,28 @@ const Complaints = () => {
       setLoading(false);
     }
   };
+
+  const fetchStaff = async () => {
+  try {
+    const response = await fetch(
+      "http://localhost:5000/api/staff/all"
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.message || "Failed to fetch staff"
+      );
+    }
+
+    setStaffList(data);
+
+  } catch (error) {
+    console.error("Fetch Staff Error:", error);
+    setStaffList([]);
+  }
+};
 
 
   // ==========================================
@@ -161,12 +198,82 @@ const Complaints = () => {
   // ==========================================
   // ASSIGN COMPLAINT
   // ==========================================
-  const handleAssign = (complaint) => {
-    alert(
-      `Assign Complaint: ${complaint.id}\n\n` +
-      `Staff assignment functionality will be connected later.`
+  const handleAssign = async  (complaint) => {
+  setSelectedComplaint(complaint);
+  setSelectedStaff(
+    complaint.assignedStaffId
+      ? String(complaint.assignedStaffId)
+      : ""
+  );
+   // Get latest registered staff from database
+  await fetchStaff();
+  setShowAssignModal(true);
+};
+
+const handleConfirmAssign = async () => {
+  if (!selectedComplaint) {
+    return;
+  }
+
+  if (!selectedStaff) {
+    alert("Please select a staff member.");
+    return;
+  }
+
+  try {
+    setAssigning(true);
+
+    const token = localStorage.getItem("token");
+
+    const response = await fetch(
+     `http://localhost:5000/api/resident/complaints/admin/${selectedComplaint.id
+  .replace("C", "")
+  .replace(/^0+/, "")}/assign`,
+      {
+        method: "PUT",
+
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+
+        body: JSON.stringify({
+          staff_id: Number(selectedStaff),
+        }),
+      }
     );
-  };
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.message || "Failed to assign complaint"
+      );
+    }
+
+    alert("Complaint assigned successfully.");
+
+    setShowAssignModal(false);
+    setSelectedComplaint(null);
+    setSelectedStaff("");
+
+    await fetchComplaints();
+
+  } catch (error) {
+    console.error(
+      "Assign Complaint Error:",
+      error
+    );
+
+    alert(
+      error.message ||
+      "Unable to assign complaint"
+    );
+
+  } finally {
+    setAssigning(false);
+  }
+};
 
 
   // ==========================================
@@ -646,6 +753,217 @@ const Complaints = () => {
         </div>
 
       </div>
+      {showAssignModal && selectedComplaint && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(10, 35, 50, 0.45)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 9999,
+            padding: "20px",
+          }}
+        >
+          <div
+            style={{
+              width: "100%",
+              maxWidth: "440px",
+              background: "#ffffff",
+              borderRadius: "18px",
+              padding: "25px",
+              boxShadow: "0 20px 50px rgba(0,0,0,0.18)",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: "20px",
+              }}
+            >
+              <div>
+                <span
+                  style={{
+                    fontSize: "10px",
+                    fontWeight: 800,
+                    color: "#167a8a",
+                    letterSpacing: "1px",
+                  }}
+                >
+                  ASSIGN COMPLAINT
+                </span>
+
+                <h2
+                  style={{
+                    margin: "5px 0 0",
+                    color: "#102d42",
+                    fontSize: "20px",
+                  }}
+                >
+                  Assign Staff
+                </h2>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setShowAssignModal(false);
+                  setSelectedComplaint(null);
+                  setSelectedStaff("");
+                }}
+                style={{
+                  border: "none",
+                  background: "#f1f5f6",
+                  width: "34px",
+                  height: "34px",
+                  borderRadius: "9px",
+                  cursor: "pointer",
+                  fontSize: "16px",
+                }}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div
+              style={{
+                background: "#f4fafb",
+                borderRadius: "12px",
+                padding: "14px",
+                marginBottom: "18px",
+              }}
+            >
+              <strong
+                style={{
+                  display: "block",
+                  color: "#102d42",
+                  fontSize: "13px",
+                  marginBottom: "5px",
+                }}
+              >
+                {selectedComplaint.title}
+              </strong>
+
+              <span
+                style={{
+                  color: "#708692",
+                  fontSize: "11px",
+                }}
+              >
+                {selectedComplaint.id} •{" "}
+                {selectedComplaint.residentName} •{" "}
+                {selectedComplaint.flat}
+              </span>
+            </div>
+
+            <label
+              style={{
+                display: "block",
+                marginBottom: "7px",
+                color: "#102d42",
+                fontSize: "12px",
+                fontWeight: 700,
+              }}
+            >
+              Select Staff
+            </label>
+
+            <select
+              value={selectedStaff}
+              onChange={(e) => setSelectedStaff(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "12px",
+                border: "1px solid #dcebef",
+                borderRadius: "10px",
+                background: "#ffffff",
+                color: "#102d42",
+                fontSize: "12px",
+                outline: "none",
+                cursor: "pointer",
+              }}
+            >
+              <option value="">Select staff member</option>
+
+              {staffList.map((staff) => (
+                <option key={staff.id} value={staff.id}>
+                  {staff.first_name} {staff.last_name}
+                  {staff.staff_type ? ` - ${staff.staff_type}` : ""}
+                </option>
+              ))}
+            </select>
+
+            {staffList.length === 0 && (
+              <p
+                style={{
+                  color: "#c04b4b",
+                  fontSize: "11px",
+                  marginTop: "8px",
+                }}
+              >
+                No staff members found.
+              </p>
+            )}
+
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                gap: "10px",
+                marginTop: "22px",
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => {
+                  setShowAssignModal(false);
+                  setSelectedComplaint(null);
+                  setSelectedStaff("");
+                }}
+                style={{
+                  padding: "10px 16px",
+                  border: "1px solid #dcebef",
+                  borderRadius: "9px",
+                  background: "#ffffff",
+                  color: "#5d7380",
+                  cursor: "pointer",
+                  fontSize: "11px",
+                  fontWeight: 700,
+                }}
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                disabled={assigning || staffList.length === 0}
+                onClick={handleConfirmAssign}
+                style={{
+                  padding: "10px 18px",
+                  border: "none",
+                  borderRadius: "9px",
+                  background:
+                    assigning || staffList.length === 0
+                      ? "#9dbfc5"
+                      : "#167a8a",
+                  color: "#ffffff",
+                  cursor:
+                    assigning || staffList.length === 0
+                      ? "not-allowed"
+                      : "pointer",
+                  fontSize: "11px",
+                  fontWeight: 700,
+                }}
+              >
+                {assigning ? "Assigning..." : "Assign Staff"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );
