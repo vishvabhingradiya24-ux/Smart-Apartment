@@ -35,7 +35,7 @@ const staffRoutes = require("./routes/staffRoutes");
 const adminTaskRoutes = require("./routes/adminTaskRoutes");
 const visitorRoutes = require("./routes/visitorRoutes");
 const noticeRoutes = require("./routes/noticeRoutes");
-const taskRoutes = require("./routes/taskRoutes");
+
 
 
 
@@ -54,8 +54,6 @@ app.use("/api/admin/tasks", adminTaskRoutes);
 
 // Staff
 app.use("/api/staff", staffRoutes);
-// Tasks
-app.use("/api/staff/tasks", taskRoutes);
 
 // Payments
 app.use(

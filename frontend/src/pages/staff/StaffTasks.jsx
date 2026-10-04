@@ -42,12 +42,17 @@ function StaffTasks() {
 
   // ================= FETCH TASKS =================
 
+  
+
   const fetchTasks = useCallback(async (signal) => {
     try {
       setLoading(true);
       setError("");
 
       const token = localStorage.getItem("token");
+
+      console.log("STAFF TOKEN:", token);
+      console.log("STAFF USER:", localStorage.getItem("user"));
 
       if (!token) {
         throw new Error(

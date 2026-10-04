@@ -3,7 +3,6 @@ const { pool } = require("../config/db");
 // ==========================================
 // CREATE TASK
 // ==========================================
-
 const createTask = async (req, res) => {
   try {
     const {
@@ -11,17 +10,16 @@ const createTask = async (req, res) => {
       description,
       assigned_to,
       priority,
-      status,
       due_date,
     } = req.body;
 
-    if (!task_name || !assigned_to || !due_date) {
+    if (!task_name || !assigned_to) {
       return res.status(400).json({
-        message: "Task name, assigned staff and due date are required",
+        message: "Task name and staff assignment are required",
       });
     }
 
-    // Check whether selected staff exists
+    // Check staff exists
     const [staff] = await pool.query(
       `SELECT id, first_name, last_name, staff_type
        FROM staff
@@ -35,9 +33,6 @@ const createTask = async (req, res) => {
       });
     }
 
-    const taskPriority = priority || "Normal";
-    const taskStatus = status || "Pending";
-
     const [result] = await pool.query(
       `INSERT INTO tasks
       (
@@ -48,20 +43,19 @@ const createTask = async (req, res) => {
         status,
         due_date
       )
-      VALUES (?, ?, ?, ?, ?, ?)`,
+      VALUES (?, ?, ?, ?, 'Pending', ?)`,
       [
         task_name,
         description || null,
         assigned_to,
-        taskPriority,
-        taskStatus,
-        due_date,
+        priority || "Normal",
+        due_date || null,
       ]
     );
 
     res.status(201).json({
-      message: "Task created successfully",
-      taskId: result.insertId,
+      message: "Task created and assigned successfully",
+      task_id: result.insertId,
     });
   } catch (error) {
     console.error("Create Task Error:", error);
@@ -72,11 +66,9 @@ const createTask = async (req, res) => {
   }
 };
 
-
 // ==========================================
 // GET ALL TASKS
 // ==========================================
-
 const getAllTasks = async (req, res) => {
   try {
     const [tasks] = await pool.query(
@@ -88,18 +80,13 @@ const getAllTasks = async (req, res) => {
         t.priority,
         t.status,
         t.due_date,
-        t.complate_date,
+        t.completed_date,
         t.created_at,
-
-        s.first_name,
-        s.last_name,
+        CONCAT(s.first_name, ' ', s.last_name) AS staff_name,
         s.staff_type
-
       FROM tasks t
-
       LEFT JOIN staff s
         ON t.assigned_to = s.id
-
       ORDER BY t.created_at DESC`
     );
 
@@ -115,12 +102,10 @@ const getAllTasks = async (req, res) => {
   }
 };
 
-
 // ==========================================
 // GET ALL STAFF
 // ==========================================
-
-const getAllStaffForTask = async (req, res) => {
+const getStaffForTask = async (req, res) => {
   try {
     const [staff] = await pool.query(
       `SELECT
@@ -128,7 +113,6 @@ const getAllStaffForTask = async (req, res) => {
         first_name,
         last_name,
         email,
-        phone,
         staff_type
       FROM staff
       ORDER BY first_name ASC, last_name ASC`
@@ -146,85 +130,8 @@ const getAllStaffForTask = async (req, res) => {
   }
 };
 
-
-// ==========================================
-// UPDATE TASK STATUS
-// ==========================================
-
-const updateTaskStatus = async (req, res) => {
-  try {
-    const { taskId } = req.params;
-    const { status } = req.body;
-
-    const allowedStatuses = [
-      "Pending",
-      "In Progress",
-      "Completed",
-    ];
-
-    if (!status) {
-      return res.status(400).json({
-        message: "Status is required",
-      });
-    }
-
-    if (!allowedStatuses.includes(status)) {
-      return res.status(400).json({
-        message: "Invalid task status",
-      });
-    }
-
-    const [existingTask] = await pool.query(
-      `SELECT task_id
-       FROM tasks
-       WHERE task_id = ?`,
-      [taskId]
-    );
-
-    if (existingTask.length === 0) {
-      return res.status(404).json({
-        message: "Task not found",
-      });
-    }
-
-    if (status === "Completed") {
-      await pool.query(
-        `UPDATE tasks
-         SET status = ?,
-             complate_date = NOW()
-         WHERE task_id = ?`,
-        [status, taskId]
-      );
-    } else {
-      await pool.query(
-        `UPDATE tasks
-         SET status = ?,
-             complate_date = NULL
-         WHERE task_id = ?`,
-        [status, taskId]
-      );
-    }
-
-    res.status(200).json({
-      message: "Task status updated successfully",
-    });
-  } catch (error) {
-    console.error("Update Task Status Error:", error);
-
-    res.status(500).json({
-      message: "Unable to update task status",
-    });
-  }
-};
-
-
-// ==========================================
-// EXPORT
-// ==========================================
-
 module.exports = {
   createTask,
   getAllTasks,
-  getAllStaffForTask,
-  updateTaskStatus,
+  getStaffForTask,
 };

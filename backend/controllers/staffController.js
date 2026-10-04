@@ -184,8 +184,173 @@ const getAllStaff = async (req, res) => {
   }
 };
 
+// ==========================================
+// GET TASKS ASSIGNED TO LOGGED-IN STAFF
+// ==========================================
+
+const getStaffTasks = async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({
+        message: "Authorization token is required"
+      });
+    }
+
+    const token = authHeader.split(" ")[1];
+
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET
+    );
+
+    console.log("DECODED STAFF TOKEN:", decoded);
+
+    const staffId = decoded.id;
+
+    if (!staffId) {
+      return res.status(401).json({
+        message: "Staff ID not found in token"
+      });
+    }
+
+    const [tasks] = await pool.query(
+  `SELECT
+    task_id,
+    task_name,
+    description,
+    assigned_to,
+    priority,
+    status,
+    due_date,
+    created_at
+  FROM tasks
+  WHERE assigned_to = ?
+  ORDER BY created_at DESC`,
+  [staffId]
+);
+
+    console.log(
+      `Tasks found for staff ${staffId}:`,
+      tasks
+    );
+
+    res.status(200).json({
+      tasks
+    });
+
+  } catch (error) {
+    console.error(
+      "Get Staff Tasks Error:",
+      error
+    );
+
+    if (
+      error.name === "JsonWebTokenError" ||
+      error.name === "TokenExpiredError"
+    ) {
+      return res.status(401).json({
+        message: "Invalid or expired token"
+      });
+    }
+
+    res.status(500).json({
+      message: "Unable to fetch staff tasks"
+    });
+  }
+};
+
+
+// ==========================================
+// UPDATE STAFF TASK STATUS
+// ==========================================
+
+const updateStaffTaskStatus = async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({
+        message: "Authorization token is required"
+      });
+    }
+
+    const token = authHeader.split(" ")[1];
+
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET
+    );
+
+    const staffId = decoded.id;
+    const { taskId } = req.params;
+    const { status } = req.body;
+
+    const allowedStatuses = [
+      "Pending",
+      "In Progress",
+      "Completed"
+    ];
+
+    if (!allowedStatuses.includes(status)) {
+      return res.status(400).json({
+        message: "Invalid task status"
+      });
+    }
+
+    const [existingTask] = await pool.query(
+      `SELECT task_id
+       FROM tasks
+       WHERE task_id = ?
+       AND assigned_to = ?`,
+      [taskId, staffId]
+    );
+
+    if (existingTask.length === 0) {
+      return res.status(404).json({
+        message: "Task not found or not assigned to you"
+      });
+    }
+
+    await pool.query(
+  `UPDATE tasks
+   SET status = ?
+   WHERE task_id = ?
+   AND assigned_to = ?`,
+  [status, taskId, staffId]
+);
+    res.status(200).json({
+      message: "Task status updated successfully"
+    });
+
+  } catch (error) {
+    console.error(
+      "Update Staff Task Status Error:",
+      error
+    );
+
+    if (
+      error.name === "JsonWebTokenError" ||
+      error.name === "TokenExpiredError"
+    ) {
+      return res.status(401).json({
+        message: "Invalid or expired token"
+      });
+    }
+
+    res.status(500).json({
+      message: "Unable to update task status"
+    });
+  }
+};
+
+
+
 module.exports = {
   registerStaff,
   loginStaff,
-  getAllStaff
+  getAllStaff,
+  getStaffTasks,
+  updateStaffTaskStatus
 };
