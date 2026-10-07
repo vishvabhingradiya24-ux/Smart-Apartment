@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import "../../css/staff/staff_work_history.css";
 import { useNavigate } from "react-router-dom";
 
@@ -24,85 +24,45 @@ function StaffWorkHistory() {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeFilter, setActiveFilter] = useState("All");
 
-  const [workHistory, setWorkHistory] = useState([
-    {
-      id: "WRK-001",
-      title: "Water Leakage Repair",
-      category: "Plumbing",
-      location: "Flat A-204",
-      priority: "High",
-      status: "Completed",
-      date: "28 Sep 2026",
-      duration: "2 hrs",
-      description: "Bathroom water leakage repaired successfully.",
-    },
-    {
-      id: "WRK-002",
-      title: "Electrical Switch Replacement",
-      category: "Electrical",
-      location: "Block B - 2nd Floor",
-      priority: "Medium",
-      status: "Completed",
-      date: "26 Sep 2026",
-      duration: "1 hr",
-      description: "Damaged electrical switches replaced.",
-    },
-    {
-      id: "WRK-003",
-      title: "Lift Inspection",
-      category: "Inspection",
-      location: "Block A",
-      priority: "High",
-      status: "Completed",
-      date: "24 Sep 2026",
-      duration: "1.5 hrs",
-      description: "Monthly lift inspection completed.",
-    },
-    {
-      id: "WRK-004",
-      title: "Garden Maintenance",
-      category: "Cleaning",
-      location: "Main Garden",
-      priority: "Low",
-      status: "Completed",
-      date: "22 Sep 2026",
-      duration: "3 hrs",
-      description: "Garden cleaning and maintenance completed.",
-    },
-    {
-      id: "WRK-005",
-      title: "Water Tank Cleaning",
-      category: "Maintenance",
-      location: "Block C",
-      priority: "Medium",
-      status: "Completed",
-      date: "20 Sep 2026",
-      duration: "4 hrs",
-      description: "Overhead water tank cleaning completed.",
-    },
-    {
-      id: "WRK-006",
-      title: "Common Area Light Repair",
-      category: "Electrical",
-      location: "Block C - Ground Floor",
-      priority: "Medium",
-      status: "Completed",
-      date: "18 Sep 2026",
-      duration: "1 hr",
-      description: "Faulty common area lights repaired.",
-    },
-    {
-      id: "WRK-007",
-      title: "AC Maintenance",
-      category: "Maintenance",
-      location: "Club House",
-      priority: "Low",
-      status: "Completed",
-      date: "15 Sep 2026",
-      duration: "2.5 hrs",
-      description: "Routine AC maintenance completed.",
-    },
-  ]);
+  const [workHistory, setWorkHistory] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const fetchWorkHistory = useCallback(async (signal) => {
+    try {
+      setLoading(true);
+      setError("");
+      const response = await fetch("http://localhost:5000/api/staff/work-history", {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }, signal,
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Unable to load work history.");
+      setWorkHistory((data.works || []).map((work) => ({
+        id: String(work.task_id),
+        title: work.task_name || "Completed task",
+        category: "Task",
+        location: "—",
+        priority: work.priority || "Normal",
+        status: work.status,
+        date: work.completed_at ? new Date(work.completed_at).toLocaleDateString() : "—",
+        dateValue: work.completed_at,
+        duration: "Not tracked",
+        description: work.description || "No description provided.",
+      })));
+    } catch (err) {
+      if (err.name === "AbortError") return;
+      setError(err.message || "Unable to load work history.");
+      setWorkHistory([]);
+    } finally {
+      if (!signal?.aborted) setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    fetchWorkHistory(controller.signal);
+    return () => controller.abort();
+  }, [fetchWorkHistory]);
 
   const filteredHistory = useMemo(() => {
     return workHistory.filter((work) => {
@@ -111,9 +71,8 @@ function StaffWorkHistory() {
       const matchesSearch =
         work.id.toLowerCase().includes(search) ||
         work.title.toLowerCase().includes(search) ||
-        work.category.toLowerCase().includes(search) ||
-        work.location.toLowerCase().includes(search) ||
-        work.priority.toLowerCase().includes(search);
+        work.priority.toLowerCase().includes(search) ||
+        work.description.toLowerCase().includes(search);
 
       const matchesFilter =
         activeFilter === "All" || work.category === activeFilter;
@@ -126,16 +85,18 @@ function StaffWorkHistory() {
     (work) => work.status === "Completed"
   ).length;
 
-  const totalHours = workHistory.reduce((total, work) => {
-    const hours = parseFloat(work.duration);
-    return total + (isNaN(hours) ? 0 : hours);
-  }, 0);
+  const totalHours = "—";
 
   const highPriority = workHistory.filter(
     (work) => work.priority === "High"
   ).length;
 
-  const thisMonth = workHistory.length;
+  const now = new Date();
+  const thisMonth = workHistory.filter((work) => {
+    if (!work.dateValue) return false;
+    const workDate = new Date(work.dateValue);
+    return workDate.getMonth() === now.getMonth() && workDate.getFullYear() === now.getFullYear();
+  }).length;
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -154,26 +115,21 @@ function StaffWorkHistory() {
       `Work Details\n\n` +
         `Work ID: ${work.id}\n` +
         `Title: ${work.title}\n` +
-        `Category: ${work.category}\n` +
-        `Location: ${work.location}\n` +
         `Priority: ${work.priority}\n` +
         `Status: ${work.status}\n` +
         `Date: ${work.date}\n` +
-        `Duration: ${work.duration}\n\n` +
         `Description: ${work.description}`
     );
   };
 
   const handleDownload = () => {
+    if (workHistory.length === 0) return;
     const rows = workHistory.map((work) => ({
       "Work ID": work.id,
       "Work Title": work.title,
-      Category: work.category,
-      Location: work.location,
       Priority: work.priority,
       Status: work.status,
       Date: work.date,
-      Duration: work.duration,
     }));
 
     const headers = Object.keys(rows[0]);
@@ -352,11 +308,9 @@ function StaffWorkHistory() {
             <div className="stat-info">
               <h3>Total Hours</h3>
 
-              <span className="stat-value">
-                {totalHours.toFixed(1)}
-              </span>
+              <span className="stat-value">{totalHours}</span>
 
-              <small>Hours worked</small>
+              <small>Duration not recorded</small>
             </div>
           </div>
 
@@ -380,7 +334,7 @@ function StaffWorkHistory() {
 
               <span className="stat-value">{thisMonth}</span>
 
-              <small>Work records</small>
+              <small>Completed this month</small>
             </div>
           </div>
         </section>
@@ -410,14 +364,7 @@ function StaffWorkHistory() {
           </div>
 
           <div className="filter-tabs">
-            {[
-              "All",
-              "Plumbing",
-              "Electrical",
-              "Maintenance",
-              "Cleaning",
-              "Inspection",
-            ].map((filter) => (
+            {["All"].map((filter) => (
               <button
                 key={filter}
                 className={`filter-tab-btn ${
@@ -447,23 +394,25 @@ function StaffWorkHistory() {
             <button
               className="download-btn"
               onClick={handleDownload}
+              disabled={workHistory.length === 0}
             >
               ⬇ Export CSV
             </button>
           </div>
 
-          {filteredHistory.length > 0 ? (
+          {loading ? (
+            <div className="empty-state"><div className="empty-icon">⏳</div><h3>Loading work history...</h3><p>Fetching completed tasks from the database.</p></div>
+          ) : error ? (
+            <div className="empty-state"><div className="empty-icon">⚠️</div><h3>Unable to Load Work History</h3><p>{error}</p><button className="empty-reset-btn" onClick={() => fetchWorkHistory()}>Try Again</button></div>
+          ) : filteredHistory.length > 0 ? (
             <div className="table-scroll">
               <table className="custom-table">
                 <thead>
                   <tr>
                     <th>WORK ID</th>
                     <th>WORK DETAILS</th>
-                    <th>CATEGORY</th>
-                    <th>LOCATION</th>
                     <th>PRIORITY</th>
                     <th>DATE</th>
-                    <th>DURATION</th>
                     <th>STATUS</th>
                     <th>ACTION</th>
                   </tr>
@@ -479,15 +428,7 @@ function StaffWorkHistory() {
                       <td>
                         <div className="work-cell">
                           <div className="work-avatar">
-                            {work.category === "Plumbing" && "🚰"}
-
-                            {work.category === "Electrical" && "⚡"}
-
-                            {work.category === "Maintenance" && "🔧"}
-
-                            {work.category === "Cleaning" && "🧹"}
-
-                            {work.category === "Inspection" && "🔍"}
+                            🔧
                           </div>
 
                           <div>
@@ -496,18 +437,6 @@ function StaffWorkHistory() {
                             <small>{work.description}</small>
                           </div>
                         </div>
-                      </td>
-
-                      <td>
-                        <span className="category-tag">
-                          {work.category}
-                        </span>
-                      </td>
-
-                      <td>
-                        <span className="location-cell">
-                          📍 {work.location}
-                        </span>
                       </td>
 
                       <td>
@@ -521,12 +450,6 @@ function StaffWorkHistory() {
                       <td>
                         <span className="date-cell">
                           📅 {work.date}
-                        </span>
-                      </td>
-
-                      <td>
-                        <span className="duration-cell">
-                          ⏱ {work.duration}
                         </span>
                       </td>
 

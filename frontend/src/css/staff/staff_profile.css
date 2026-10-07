@@ -723,13 +723,27 @@ body {
 .input-with-icon span {
   position: absolute;
 
-  left: 11px;
+  left: 14px;
+
+  width: 20px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  z-index: 1;
 
   font-size: 13px;
 }
 
-.input-with-icon input {
-  padding-left: 35px;
+.profile-form-grid .input-with-icon input {
+  width: 100%;
+
+  min-width: 0;
+
+  padding-left: 50px;
 }
 
 /* ============================= */

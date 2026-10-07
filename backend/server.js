@@ -13,7 +13,13 @@ const app = express();
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: (origin, callback) => {
+      // Vite may choose another port (for example 5174) when 5173 is occupied.
+      const isLocalFrontend =
+        !origin || /^http:\/\/(localhost|127\.0\.0\.1):\d+$/.test(origin);
+
+      callback(null, isLocalFrontend);
+    },
     credentials: true,
   })
 );

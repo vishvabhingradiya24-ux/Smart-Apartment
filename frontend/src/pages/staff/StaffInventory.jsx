@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import "../../css/staff/staff_inventory.css";
 import { useNavigate } from "react-router-dom";
 
@@ -24,80 +24,45 @@ function StaffAssets() {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeFilter, setActiveFilter] = useState("All");
 
-  const [assets, setAssets] = useState([
-    {
-      id: "AST-001",
-      name: "Electric Drill Machine",
-      category: "Electrical",
-      quantity: 3,
-      assigned: 2,
-      available: 1,
-      condition: "Good",
-      location: "Maintenance Room",
-      status: "Available",
-      date: "25 Sep 2026",
-    },
-    {
-      id: "AST-002",
-      name: "Ladder - 10 Feet",
-      category: "Tools",
-      quantity: 5,
-      assigned: 4,
-      available: 1,
-      condition: "Good",
-      location: "Block A Store",
-      status: "Available",
-      date: "22 Sep 2026",
-    },
-    {
-      id: "AST-003",
-      name: "Water Pump",
-      category: "Plumbing",
-      quantity: 2,
-      assigned: 2,
-      available: 0,
-      condition: "In Use",
-      location: "Block B",
-      status: "In Use",
-      date: "20 Sep 2026",
-    },
-    {
-      id: "AST-004",
-      name: "Cleaning Machine",
-      category: "Cleaning",
-      quantity: 4,
-      assigned: 2,
-      available: 2,
-      condition: "Good",
-      location: "Cleaning Store",
-      status: "Available",
-      date: "18 Sep 2026",
-    },
-    {
-      id: "AST-005",
-      name: "Safety Helmet",
-      category: "Safety",
-      quantity: 10,
-      assigned: 8,
-      available: 2,
-      condition: "Good",
-      location: "Security Store",
-      status: "Available",
-      date: "15 Sep 2026",
-    },
-    {
-      id: "AST-006",
-      name: "Voltage Tester",
-      category: "Electrical",
-      quantity: 3,
-      assigned: 3,
-      available: 0,
-      condition: "Maintenance",
-      location: "Electrical Room",
-      status: "Maintenance",
-      date: "12 Sep 2026",
-    },
-  ]);
+  const [assets, setAssets] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const fetchAssets = useCallback(async (signal) => {
+    try {
+      setLoading(true);
+      setError("");
+      const response = await fetch("http://localhost:5000/api/staff/assets", {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }, signal,
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Unable to load inventory.");
+      setAssets((data.assets || []).map((asset) => ({
+        id: String(asset.asset_id),
+        name: asset.asset_name,
+        category: asset.category,
+        quantity: Number(asset.quantity || 0),
+        assigned: Number(asset.assigned || 0),
+        available: Number(asset.available || 0),
+        condition: asset.condition_status || "Good",
+        location: asset.location || "—",
+        status: asset.status || "Available",
+        date: asset.updated_at ? new Date(asset.updated_at).toLocaleDateString() : "—",
+      })));
+    } catch (err) {
+      if (err.name === "AbortError") return;
+      setError(err.message || "Unable to load inventory.");
+      setAssets([]);
+    } finally {
+      if (!signal?.aborted) setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    fetchAssets(controller.signal);
+    return () => controller.abort();
+  }, [fetchAssets]);
 
   const filteredAssets = useMemo(() => {
     return assets.filter((asset) => {
@@ -148,35 +113,22 @@ function StaffAssets() {
     navigate(path);
   };
 
-  const updateStatus = (id, newStatus) => {
-    setAssets((prev) =>
-      prev.map((asset) => {
-        if (asset.id !== id) return asset;
-
-        let assigned = asset.assigned;
-        let available = asset.available;
-
-        if (newStatus === "Available") {
-          available = Math.max(1, asset.available);
-        }
-
-        if (newStatus === "In Use") {
-          assigned = asset.quantity;
-          available = 0;
-        }
-
-        if (newStatus === "Maintenance") {
-          available = 0;
-        }
-
-        return {
-          ...asset,
-          status: newStatus,
-          assigned,
-          available,
-        };
-      })
-    );
+  const updateStatus = async (id, newStatus) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/staff/assets/${id}/status`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Unable to update asset status.");
+      await fetchAssets();
+    } catch (err) {
+      setError(err.message || "Unable to update asset status.");
+    }
   };
 
   const handleView = (asset) => {
@@ -427,16 +379,17 @@ function StaffAssets() {
 
             <button
               className="refresh-btn"
-              onClick={() => {
-                setSearchTerm("");
-                setActiveFilter("All");
-              }}
+              onClick={() => fetchAssets()}
             >
-              ↻ Reset
+              ↻ Refresh
             </button>
           </div>
 
-          {filteredAssets.length > 0 ? (
+          {loading ? (
+            <div className="empty-state"><div className="empty-icon">⏳</div><h3>Loading inventory...</h3><p>Fetching records from the database.</p></div>
+          ) : error ? (
+            <div className="empty-state"><div className="empty-icon">⚠️</div><h3>Unable to Load Inventory</h3><p>{error}</p><button className="empty-reset-btn" onClick={() => fetchAssets()}>Try Again</button></div>
+          ) : filteredAssets.length > 0 ? (
             <div className="table-scroll">
               <table className="custom-table">
                 <thead>

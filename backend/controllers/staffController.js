@@ -285,18 +285,23 @@ const updateStaffTaskStatus = async (req, res) => {
 
     const staffId = decoded.id;
     const { taskId } = req.params;
-    const { status } = req.body;
+    const { status, priority } = req.body;
 
-    const allowedStatuses = [
-      "Pending",
-      "In Progress",
-      "Completed"
-    ];
+    const allowedStatuses = ["Pending", "In Progress", "Completed"];
+    const allowedPriorities = ["Low", "Medium", "Normal", "High", "Urgent"];
 
-    if (!allowedStatuses.includes(status)) {
+    if (status === undefined && priority === undefined) {
+      return res.status(400).json({ message: "Status or priority is required" });
+    }
+
+    if (status !== undefined && !allowedStatuses.includes(status)) {
       return res.status(400).json({
         message: "Invalid task status"
       });
+    }
+
+    if (priority !== undefined && !allowedPriorities.includes(priority)) {
+      return res.status(400).json({ message: "Invalid task priority" });
     }
 
     const [existingTask] = await pool.query(
@@ -313,15 +318,26 @@ const updateStaffTaskStatus = async (req, res) => {
       });
     }
 
+    const updates = [];
+    const values = [];
+    if (status !== undefined) {
+      updates.push("status = ?");
+      values.push(status);
+      updates.push("completed_date = CASE WHEN ? = 'Completed' THEN COALESCE(completed_date, CURRENT_TIMESTAMP) ELSE NULL END");
+      values.push(status);
+    }
+    if (priority !== undefined) {
+      updates.push("priority = ?");
+      values.push(priority);
+    }
+
+    values.push(taskId, staffId);
     await pool.query(
-  `UPDATE tasks
-   SET status = ?
-   WHERE task_id = ?
-   AND assigned_to = ?`,
-  [status, taskId, staffId]
-);
+      `UPDATE tasks SET ${updates.join(", ")} WHERE task_id = ? AND assigned_to = ?`,
+      values
+    );
     res.status(200).json({
-      message: "Task status updated successfully"
+      message: "Task updated successfully"
     });
 
   } catch (error) {
@@ -345,6 +361,92 @@ const updateStaffTaskStatus = async (req, res) => {
   }
 };
 
+const getStaffAssets = async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({ message: "Authorization token is required" });
+    }
+    jwt.verify(authHeader.split(" ")[1], process.env.JWT_SECRET);
+
+    const [assets] = await pool.query(
+      `SELECT asset_id, asset_name, category, quantity, assigned,
+              GREATEST(quantity - assigned, 0) AS available,
+              condition_status, location, status, updated_at
+       FROM assets ORDER BY asset_name ASC`
+    );
+    res.status(200).json({ assets });
+  } catch (error) {
+    console.error("Get Staff Assets Error:", error);
+    if (error.name === "JsonWebTokenError" || error.name === "TokenExpiredError") {
+      return res.status(401).json({ message: "Invalid or expired token" });
+    }
+    res.status(500).json({ message: "Unable to fetch inventory. Check that the assets table exists." });
+  }
+};
+
+const updateStaffAssetStatus = async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({ message: "Authorization token is required" });
+    }
+    jwt.verify(authHeader.split(" ")[1], process.env.JWT_SECRET);
+
+    const { assetId } = req.params;
+    const { status } = req.body;
+    const allowedStatuses = ["Available", "In Use", "Maintenance"];
+    if (!allowedStatuses.includes(status)) {
+      return res.status(400).json({ message: "Invalid asset status" });
+    }
+
+    const [result] = await pool.query(
+      `UPDATE assets SET
+         status = ?,
+         assigned = CASE
+           WHEN ? = 'In Use' THEN quantity
+           WHEN ? = 'Available' THEN LEAST(assigned, GREATEST(quantity - 1, 0))
+           ELSE assigned
+         END,
+         updated_at = CURRENT_TIMESTAMP
+       WHERE asset_id = ?`,
+      [status, status, status, assetId]
+    );
+    if (!result.affectedRows) return res.status(404).json({ message: "Asset not found" });
+    res.status(200).json({ message: "Asset status updated successfully" });
+  } catch (error) {
+    console.error("Update Staff Asset Error:", error);
+    if (error.name === "JsonWebTokenError" || error.name === "TokenExpiredError") {
+      return res.status(401).json({ message: "Invalid or expired token" });
+    }
+    res.status(500).json({ message: "Unable to update asset status" });
+  }
+};
+
+const getStaffWorkHistory = async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({ message: "Authorization token is required" });
+    }
+    const decoded = jwt.verify(authHeader.split(" ")[1], process.env.JWT_SECRET);
+    const [works] = await pool.query(
+      `SELECT task_id, task_name, description, priority, status,
+              COALESCE(completed_date, created_at) AS completed_at
+       FROM tasks WHERE assigned_to = ? AND status = 'Completed'
+       ORDER BY created_at DESC`,
+      [decoded.id]
+    );
+    res.status(200).json({ works });
+  } catch (error) {
+    console.error("Get Staff Work History Error:", error);
+    if (error.name === "JsonWebTokenError" || error.name === "TokenExpiredError") {
+      return res.status(401).json({ message: "Invalid or expired token" });
+    }
+    res.status(500).json({ message: "Unable to fetch work history" });
+  }
+};
+
 
 
 module.exports = {
@@ -352,5 +454,8 @@ module.exports = {
   loginStaff,
   getAllStaff,
   getStaffTasks,
-  updateStaffTaskStatus
+  updateStaffTaskStatus,
+  getStaffAssets,
+  updateStaffAssetStatus,
+  getStaffWorkHistory
 };

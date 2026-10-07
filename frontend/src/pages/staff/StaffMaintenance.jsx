@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import "../../css/staff/staff_maintenance.css";
 import { useNavigate } from "react-router-dom";
 
@@ -24,58 +24,43 @@ function StaffMaintenance() {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeFilter, setActiveFilter] = useState("All");
 
-  const [maintenance, setMaintenance] = useState([
-    {
-      id: "MNT-001",
-      title: "Water Tank Cleaning",
-      category: "Plumbing",
-      location: "Building A",
-      priority: "High",
-      status: "Scheduled",
-      date: "30 Sep 2026",
-      description: "Clean and inspect the overhead water tank.",
-    },
-    {
-      id: "MNT-002",
-      title: "Lift Maintenance",
-      category: "Electrical",
-      location: "Block B",
-      priority: "Urgent",
-      status: "In Progress",
-      date: "29 Sep 2026",
-      description: "Routine lift inspection and maintenance work.",
-    },
-    {
-      id: "MNT-003",
-      title: "Garden Maintenance",
-      category: "Garden",
-      location: "Garden Area",
-      priority: "Medium",
-      status: "Completed",
-      date: "27 Sep 2026",
-      description: "Complete trimming, cleaning and garden maintenance.",
-    },
-    {
-      id: "MNT-004",
-      title: "Electrical Panel Inspection",
-      category: "Electrical",
-      location: "Block C",
-      priority: "High",
-      status: "Scheduled",
-      date: "01 Oct 2026",
-      description: "Inspect electrical panels and check loose connections.",
-    },
-    {
-      id: "MNT-005",
-      title: "Common Area Cleaning",
-      category: "Cleaning",
-      location: "Block A",
-      priority: "Low",
-      status: "In Progress",
-      date: "02 Oct 2026",
-      description: "Deep cleaning of common society areas.",
-    },
-  ]);
+  const [maintenance, setMaintenance] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const fetchMaintenance = useCallback(async (signal) => {
+    try {
+      setLoading(true);
+      setError("");
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("Please log in again to view assigned maintenance work.");
+      const response = await fetch("http://localhost:5000/api/staff/tasks", {
+        headers: { Authorization: `Bearer ${token}` }, signal,
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Unable to load maintenance work.");
+      setMaintenance((data.tasks || []).map((task) => ({
+        id: String(task.task_id),
+        title: task.task_name || "Untitled task",
+        description: task.description || "No description provided.",
+        priority: task.priority || "Normal",
+        status: task.status || "Pending",
+        date: task.due_date ? new Date(task.due_date).toLocaleDateString() : "Not set",
+      })));
+    } catch (err) {
+      if (err.name === "AbortError") return;
+      setError(err.message || "Unable to load maintenance work.");
+      setMaintenance([]);
+    } finally {
+      if (!signal?.aborted) setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    fetchMaintenance(controller.signal);
+    return () => controller.abort();
+  }, [fetchMaintenance]);
 
   const filteredMaintenance = useMemo(() => {
     return maintenance.filter((item) => {
@@ -84,8 +69,6 @@ function StaffMaintenance() {
       const matchesSearch =
         item.id.toLowerCase().includes(search) ||
         item.title.toLowerCase().includes(search) ||
-        item.category.toLowerCase().includes(search) ||
-        item.location.toLowerCase().includes(search) ||
         item.priority.toLowerCase().includes(search);
 
       const matchesFilter =
@@ -98,7 +81,7 @@ function StaffMaintenance() {
   const totalMaintenance = maintenance.length;
 
   const scheduledCount = maintenance.filter(
-    (item) => item.status === "Scheduled"
+    (item) => item.status === "Pending"
   ).length;
 
   const inProgressCount = maintenance.filter(
@@ -120,17 +103,24 @@ function StaffMaintenance() {
     navigate(path);
   };
 
-  const updateStatus = (id, newStatus) => {
-    setMaintenance((prev) =>
-      prev.map((item) =>
-        item.id === id
-          ? {
-              ...item,
-              status: newStatus,
-            }
-          : item
-      )
-    );
+  const updateMaintenance = async (id, changes) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/staff/tasks/${id}/status`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(changes),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Unable to save changes.");
+      setMaintenance((previous) => previous.map((item) => item.id === id ? { ...item, ...changes } : item));
+      setError("");
+    } catch (err) {
+      setError(err.message || "Unable to save changes.");
+      fetchMaintenance();
+    }
   };
 
   const handleView = (item) => {
@@ -138,8 +128,6 @@ function StaffMaintenance() {
       `Maintenance Details\n\n` +
         `ID: ${item.id}\n` +
         `Title: ${item.title}\n` +
-        `Category: ${item.category}\n` +
-        `Location: ${item.location}\n` +
         `Priority: ${item.priority}\n` +
         `Status: ${item.status}\n` +
         `Scheduled Date: ${item.date}\n\n` +
@@ -290,11 +278,11 @@ function StaffMaintenance() {
             <div className="stat-icon scheduled-icon">📅</div>
 
             <div className="stat-info">
-              <h3>Scheduled</h3>
+              <h3>Pending</h3>
 
               <span className="stat-value">{scheduledCount}</span>
 
-              <small>Upcoming work</small>
+              <small>Awaiting work</small>
             </div>
           </div>
 
@@ -348,7 +336,7 @@ function StaffMaintenance() {
           </div>
 
           <div className="filter-tabs">
-            {["All", "Scheduled", "In Progress", "Completed"].map(
+            {["All", "Pending", "In Progress", "Completed"].map(
               (filter) => (
                 <button
                   key={filter}
@@ -379,27 +367,26 @@ function StaffMaintenance() {
 
             <button
               className="refresh-btn"
-              onClick={() => {
-                setSearchTerm("");
-                setActiveFilter("All");
-              }}
+              onClick={() => fetchMaintenance()}
             >
-              ↻ Reset
+              ↻ Refresh
             </button>
           </div>
 
-          {filteredMaintenance.length > 0 ? (
+          {loading ? (
+            <div className="empty-state"><div className="empty-icon">⏳</div><h3>Loading maintenance work...</h3><p>Fetching tasks assigned to you.</p></div>
+          ) : error ? (
+            <div className="empty-state"><div className="empty-icon">⚠️</div><h3>Unable to Load Maintenance</h3><p>{error}</p><button className="empty-reset-btn" onClick={() => fetchMaintenance()}>Try Again</button></div>
+          ) : filteredMaintenance.length > 0 ? (
             <div className="table-scroll">
               <table className="custom-table">
                 <thead>
                   <tr>
-                    <th>MAINTENANCE ID</th>
+                    <th>TASK ID</th>
                     <th>MAINTENANCE DETAILS</th>
-                    <th>CATEGORY</th>
-                    <th>LOCATION</th>
                     <th>PRIORITY</th>
                     <th>STATUS</th>
-                    <th>SCHEDULED DATE</th>
+                    <th>DUE DATE</th>
                     <th>ACTION</th>
                   </tr>
                 </thead>
@@ -420,32 +407,16 @@ function StaffMaintenance() {
                       </td>
 
                       <td>
-                        <span className="category-tag">
-                          {item.category === "Plumbing" && "🚰"}
-
-                          {item.category === "Electrical" && "⚡"}
-
-                          {item.category === "Garden" && "🌱"}
-
-                          {item.category === "Cleaning" && "🧹"}
-
-                          {" "}
-                          {item.category}
-                        </span>
-                      </td>
-
-                      <td>
-                        <span className="location-cell">
-                          📍 {item.location}
-                        </span>
-                      </td>
-
-                      <td>
-                        <span
-                          className={`priority-pill ${item.priority.toLowerCase()}`}
+                        <select
+                          className={`status-select ${item.priority.toLowerCase()}`}
+                          value={item.priority}
+                          aria-label={`Change priority for ${item.title}`}
+                          onChange={(e) => updateMaintenance(item.id, { priority: e.target.value })}
                         >
-                          {item.priority}
-                        </span>
+                          {["Low", "Medium", "Normal", "High", "Urgent"].map((priority) => (
+                            <option key={priority} value={priority}>{priority}</option>
+                          ))}
+                        </select>
                       </td>
 
                       <td>
@@ -455,10 +426,10 @@ function StaffMaintenance() {
                             .replace(" ", "-")}`}
                           value={item.status}
                           onChange={(e) =>
-                            updateStatus(item.id, e.target.value)
+                            updateMaintenance(item.id, { status: e.target.value })
                           }
                         >
-                          <option value="Scheduled">Scheduled</option>
+                          <option value="Pending">Pending</option>
 
                           <option value="In Progress">
                             In Progress
@@ -474,7 +445,7 @@ function StaffMaintenance() {
                         <div className="date-cell">
                           <strong>{item.date}</strong>
 
-                          <small>Scheduled work</small>
+                          <small>Due date</small>
                         </div>
                       </td>
 

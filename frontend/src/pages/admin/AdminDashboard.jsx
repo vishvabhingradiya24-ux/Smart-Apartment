@@ -1,43 +1,84 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../../css/admin.css";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
 
-  const [admin] = useState({
-    name: "Admin",
+  const [admin] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("user") || "{}") || {};
+    } catch {
+      return {};
+    }
   });
+  const [dashboard, setDashboard] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const adminName = admin.name;
+  useEffect(() => {
+    const controller = new AbortController();
+    const loadDashboard = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) throw new Error("Admin session expired. Please log in again.");
+        const response = await fetch("http://localhost:5000/api/admin/dashboard", {
+          headers: { Authorization: `Bearer ${token}` },
+          signal: controller.signal,
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || "Unable to load dashboard data.");
+        setDashboard(data);
+      } catch (err) {
+        if (err.name !== "AbortError") setError(err.message || "Unable to load dashboard data.");
+      } finally {
+        if (!controller.signal.aborted) setLoading(false);
+      }
+    };
+    loadDashboard();
+    return () => controller.abort();
+  }, []);
+
+  const adminName = admin.name || "Admin";
+  const statsData = dashboard?.stats || {};
+  const community = dashboard?.community || {};
+  const recentActivities = dashboard?.recentActivities || [];
+  const formatActivityTime = (value) => {
+    if (!value) return "";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return "";
+    return date.toLocaleString("en-IN", {
+      day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit",
+    });
+  };
 
   const stats = [
     {
       title: "Total Residents",
-      value: "128",
+      value: statsData.residents ?? "—",
       icon: "👥",
-      change: "+8 this month",
+      change: loading ? "Loading from database..." : "Registered residents",
       path: "/admin/residents",
     },
     {
       title: "Complaints",
-      value: "12",
+      value: statsData.complaints ?? "—",
       icon: "📋",
-      change: "4 pending",
+      change: `${statsData.pendingComplaints ?? 0} pending`,
       path: "/admin/complaints",
     },
     {
       title: "Payments",
-      value: "₹45,600",
+      value: statsData.paidTotal === undefined ? "—" : `₹${Number(statsData.paidTotal).toLocaleString("en-IN")}`,
       icon: "💳",
-      change: "8 pending",
+      change: `${statsData.pendingPayments ?? 0} pending`,
       path: "/admin/payments",
     },
     {
       title: "Visitors Today",
-      value: "24",
+      value: statsData.visitorsToday ?? "—",
       icon: "🚪",
-      change: "18 checked in",
+      change: `${statsData.checkedInToday ?? 0} checked in today`,
       path: "/admin/visitors",
     },
   ];
@@ -99,44 +140,6 @@ const AdminDashboard = () => {
     },
   ];
 
-  const recentActivities = [
-    {
-      type: "Complaint",
-      description: "New complaint submitted by Flat A-203",
-      time: "10 minutes ago",
-      status: "Pending",
-      icon: "📋",
-    },
-    {
-      type: "Payment",
-      description: "Maintenance payment received from Flat B-102",
-      time: "35 minutes ago",
-      status: "Paid",
-      icon: "💳",
-    },
-    {
-      type: "Visitor",
-      description: "Visitor checked in for Flat C-301",
-      time: "1 hour ago",
-      status: "Checked In",
-      icon: "🚪",
-    },
-    {
-      type: "Resident",
-      description: "New resident profile added",
-      time: "2 hours ago",
-      status: "New",
-      icon: "👤",
-    },
-    {
-      type: "Staff",
-      description: "Maintenance task assigned to electrician",
-      time: "3 hours ago",
-      status: "Assigned",
-      icon: "🔧",
-    },
-  ];
-
   return (
     <div className="admin-dashboard-content">
 
@@ -167,7 +170,7 @@ const AdminDashboard = () => {
 
           <div className="admin-header-profile">
             <div className="admin-header-avatar">
-              A
+              {adminName.charAt(0).toUpperCase()}
             </div>
 
             <div>
@@ -178,6 +181,13 @@ const AdminDashboard = () => {
 
         </div>
       </header>
+
+      {error && (
+        <div className="dashboard-load-error" role="alert">
+          <span>{error}</span>
+          <button type="button" onClick={() => window.location.reload()}>Retry</button>
+        </div>
+      )}
 
       {/* ================= WELCOME ================= */}
       <section className="admin-welcome-card">
@@ -364,7 +374,11 @@ const AdminDashboard = () => {
 
         <div className="activity-card">
 
-          {recentActivities.map((activity, index) => (
+          {loading ? (
+            <div className="dashboard-empty-state">Loading recent activity from database...</div>
+          ) : recentActivities.length === 0 ? (
+            <div className="dashboard-empty-state">No recent activity found.</div>
+          ) : recentActivities.map((activity, index) => (
             <div
               className="activity-row"
               key={index}
@@ -384,9 +398,7 @@ const AdminDashboard = () => {
                   {activity.description}
                 </p>
 
-                <span>
-                  {activity.time}
-                </span>
+                <span>{formatActivityTime(activity.time)}</span>
 
               </div>
 
@@ -429,7 +441,7 @@ const AdminDashboard = () => {
             <span className="community-icon">🏠</span>
 
             <div>
-              <strong>128</strong>
+              <strong>{community.residents ?? "—"}</strong>
               <p>Total Residents</p>
             </div>
           </div>
@@ -438,7 +450,7 @@ const AdminDashboard = () => {
             <span className="community-icon">🏢</span>
 
             <div>
-              <strong>64</strong>
+              <strong>{community.flats ?? "—"}</strong>
               <p>Total Flats</p>
             </div>
           </div>
@@ -447,7 +459,7 @@ const AdminDashboard = () => {
             <span className="community-icon">👨‍🔧</span>
 
             <div>
-              <strong>18</strong>
+              <strong>{community.staff ?? "—"}</strong>
               <p>Active Staff</p>
             </div>
           </div>
@@ -456,7 +468,7 @@ const AdminDashboard = () => {
             <span className="community-icon">🎯</span>
 
             <div>
-              <strong>6</strong>
+              <strong>{community.amenities ?? "—"}</strong>
               <p>Active Amenities</p>
             </div>
           </div>

@@ -869,6 +869,197 @@
   box-shadow: var(--admin-shadow);
 }
 
+.dashboard-load-error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding: 12px 15px;
+  border: 1px solid #f0c4c4;
+  border-radius: 9px;
+  background: #fff4f4;
+  color: #b42318;
+  font-size: 13px;
+}
+
+.dashboard-load-error button {
+  border: 0;
+  background: transparent;
+  color: #9f1d18;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.dashboard-empty-state {
+  padding: 22px;
+  color: #71849a;
+  font-size: 13px;
+  text-align: center;
+}
+
+/* Shared, responsive records layout for admin data pages. */
+.admin-records-page {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  color: var(--admin-text, #172b4d);
+}
+
+.admin-records-header,
+.admin-records-card-header,
+.admin-records-header-actions,
+.admin-records-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.admin-records-header { margin-bottom: 22px; }
+.admin-records-header h1 { margin: 6px 0; color: #17324f; font-size: 28px; }
+.admin-records-header p { margin: 0; color: #71849a; font-size: 13px; }
+.admin-records-eyebrow { color: var(--admin-primary, #0f9f82); font-size: 10px; font-weight: 800; letter-spacing: 1.2px; }
+
+.admin-records-refresh,
+.admin-records-secondary {
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid #dce5ed;
+  border-radius: 9px;
+  background: #ffffff;
+  color: #36536f;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.admin-records-refresh:disabled { opacity: 0.6; cursor: wait; }
+.admin-records-secondary:hover,
+.admin-records-refresh:hover { background: #f3f8fa; }
+.admin-records-header-actions { justify-content: flex-end; }
+
+.admin-records-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 21px;
+}
+
+.admin-records-stats article {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 78px;
+  padding: 15px;
+  border: 1px solid #e1e8ef;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 3px 12px rgba(23, 50, 79, 0.03);
+}
+
+.admin-records-stats article > span {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 11px;
+  background: #eaf7f4;
+  font-size: 19px;
+}
+
+.admin-records-stats article div { display: flex; flex-direction: column; gap: 4px; }
+.admin-records-stats small { color: #71849a; font-size: 11px; font-weight: 650; }
+.admin-records-stats strong { color: #17324f; font-size: 21px; }
+
+.admin-records-card {
+  overflow: hidden;
+  border: 1px solid #e1e8ef;
+  border-radius: 13px;
+  background: #ffffff;
+  box-shadow: 0 3px 12px rgba(23, 50, 79, 0.035);
+}
+
+.admin-records-card-header { padding: 18px 20px; border-bottom: 1px solid #edf1f4; }
+.admin-records-card-header h2 { margin: 0 0 4px; color: #17324f; font-size: 17px; }
+.admin-records-card-header p { margin: 0; color: #8294a6; font-size: 11px; }
+.admin-records-controls { justify-content: flex-end; }
+
+.admin-records-search {
+  min-width: 260px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 11px;
+  border: 1px solid #e1e8ef;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.admin-records-search input {
+  width: 100%;
+  min-height: 38px;
+  border: 0;
+  outline: 0;
+  color: #17324f;
+  font: inherit;
+  font-size: 12px;
+}
+
+.admin-records-controls select {
+  min-height: 40px;
+  padding: 0 11px;
+  border: 1px solid #e1e8ef;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #36536f;
+  font: inherit;
+  font-size: 12px;
+}
+
+.admin-records-table-wrap { width: 100%; overflow-x: auto; }
+.admin-records-table { width: 100%; min-width: 760px; border-collapse: collapse; text-align: left; }
+.admin-records-table th { padding: 12px 16px; background: #f7f9fb; color: #71849a; font-size: 10px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; white-space: nowrap; }
+.admin-records-table td { padding: 13px 16px; border-top: 1px solid #edf1f4; color: #36536f; font-size: 12px; vertical-align: middle; }
+.admin-records-table tbody tr:hover { background: #f9fcfb; }
+.admin-records-person { display: flex; align-items: center; gap: 10px; min-width: 180px; }
+.admin-records-person > span { width: 34px; height: 34px; flex: 0 0 34px; display: grid; place-items: center; border-radius: 50%; background: #e8f7f3; color: #087f69; font-size: 13px; font-weight: 800; }
+.admin-records-person div { display: flex; flex-direction: column; gap: 3px; }
+.admin-records-person strong { color: #17324f; font-size: 12px; }
+.admin-records-person small { color: #8294a6; font-size: 10px; }
+.admin-records-badge { display: inline-block; padding: 5px 9px; border-radius: 20px; background: #edf7f5; color: #087f69; font-size: 10px; font-weight: 700; white-space: nowrap; }
+.admin-records-actions { display: flex; gap: 6px; }
+.admin-records-actions button,
+.admin-records-state button { padding: 7px 10px; border: 1px solid #d8e8e3; border-radius: 7px; background: #ffffff; color: #087f69; font: inherit; font-size: 11px; font-weight: 700; cursor: pointer; }
+.admin-records-actions button:hover,
+.admin-records-state button:hover { background: #effaf7; }
+
+.admin-records-state { padding: 38px 18px; color: #71849a; font-size: 13px; text-align: center; }
+.admin-records-state.error { color: #b42318; }
+.admin-records-state p { margin: 6px 0 12px; }
+
+@media (max-width: 900px) {
+  .admin-records-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .admin-records-card-header { align-items: flex-start; flex-direction: column; }
+  .admin-records-controls { width: 100%; }
+  .admin-records-search { flex: 1; min-width: 0; }
+}
+
+@media (max-width: 600px) {
+  .admin-records-header { align-items: flex-start; flex-direction: column; }
+  .admin-records-header-actions { width: 100%; }
+  .admin-records-refresh,
+  .admin-records-secondary { flex: 1; }
+  .admin-records-stats { gap: 9px; }
+  .admin-records-stats article { gap: 8px; padding: 11px; }
+  .admin-records-stats article > span { width: 34px; height: 34px; flex-basis: 34px; font-size: 16px; }
+  .admin-records-stats strong { font-size: 18px; }
+  .admin-records-controls { align-items: stretch; flex-direction: column; }
+}
+
 .activity-row {
   display: flex;
   align-items: center;
@@ -1271,4 +1462,76 @@
 
     text-align: center;
   }
+}
+
+/* Polished page-specific accents for Residents, Security and Staff. */
+.admin-records-page {
+  --records-accent: #2563eb;
+  --records-soft: #eff6ff;
+}
+
+.admin-residents-page { --records-accent: #2563eb; --records-soft: #eff6ff; }
+.admin-security-page { --records-accent: #d97706; --records-soft: #fff7e8; }
+.admin-staff-page { --records-accent: #0f8b72; --records-soft: #eaf8f4; }
+
+.admin-records-header {
+  position: relative;
+  padding: 4px 0 18px;
+  border-bottom: 1px solid #e6ebf1;
+}
+
+.admin-records-header h1 { letter-spacing: -0.6px; }
+.admin-records-eyebrow { color: var(--records-accent); }
+
+.admin-records-refresh,
+.admin-records-secondary {
+  border-color: color-mix(in srgb, var(--records-accent) 22%, white);
+  color: var(--records-accent);
+  box-shadow: 0 2px 6px rgba(23, 50, 79, 0.04);
+}
+
+.admin-records-stats article {
+  position: relative;
+  overflow: hidden;
+  border-color: #e6ebf1;
+  box-shadow: 0 4px 14px rgba(23, 50, 79, 0.045);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.admin-records-stats article::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: var(--records-accent);
+}
+
+.admin-records-stats article:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(23, 50, 79, 0.08);
+}
+
+.admin-records-stats article > span {
+  background: var(--records-soft);
+  color: var(--records-accent);
+}
+
+.admin-records-card {
+  border-color: #e2e8ef;
+  box-shadow: 0 5px 18px rgba(23, 50, 79, 0.045);
+}
+
+.admin-records-card-header { background: linear-gradient(180deg, #ffffff, #fbfcfe); }
+.admin-records-search:focus-within { border-color: var(--records-accent); box-shadow: 0 0 0 3px var(--records-soft); }
+.admin-records-controls select:focus { outline: 2px solid var(--records-soft); border-color: var(--records-accent); }
+.admin-records-table th { background: #f5f8fb; }
+.admin-records-table tbody tr:nth-child(even) { background: #fcfdfe; }
+.admin-records-table tbody tr:hover { background: var(--records-soft); }
+.admin-records-person > span { background: var(--records-soft); color: var(--records-accent); }
+.admin-records-badge { background: var(--records-soft); color: var(--records-accent); }
+.admin-records-actions button { border-color: color-mix(in srgb, var(--records-accent) 22%, white); color: var(--records-accent); }
+.admin-records-actions button:hover { background: var(--records-soft); }
+
+@media (max-width: 600px) {
+  .admin-records-header { padding-bottom: 14px; }
 }

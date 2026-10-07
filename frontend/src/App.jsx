@@ -29,6 +29,7 @@ import ServiceRequests from "./pages/resident/ServiceRequests";
 import ResidentVisitors from "./pages/resident/ResidentVisitors";
 import Facilities from "./pages/resident/Facilities";
 import ResidentNotices from "./pages/resident/Notices";
+import ResidentNotifications from "./pages/resident/ResidentNotifications";
 import ResidentPolls from "./pages/resident/residentPolls";
 import ResidentLayout from "./pages/resident/ResidentLayout";
 
@@ -95,6 +96,7 @@ function App() {
           <Route path="visitors" element={<ResidentVisitors />} />
           <Route path="facilities" element={<Facilities />} />
           <Route path="notices" element={<ResidentNotices />} />
+          <Route path="notifications" element={<ResidentNotifications />} />
           <Route path="polls" element={<ResidentPolls />} />
         </Route>
 

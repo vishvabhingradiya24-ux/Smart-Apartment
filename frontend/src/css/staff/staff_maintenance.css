@@ -884,6 +884,11 @@ body {
   color: #1d4ed8;
 }
 
+.status-select.pending {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
 .status-select.in-progress {
   background: #fef3c7;
 
@@ -894,6 +899,23 @@ body {
   background: #dcfce7;
 
   color: #15803d;
+}
+
+.status-select.low {
+  background: #f0fdf4;
+  color: #15803d;
+}
+
+.status-select.medium,
+.status-select.normal {
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+.status-select.high,
+.status-select.urgent {
+  background: #fff1f2;
+  color: #be123c;
 }
 
 .status-select:hover {

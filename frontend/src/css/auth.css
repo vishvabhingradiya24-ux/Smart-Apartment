@@ -269,11 +269,17 @@ body {
 
 .select-wrapper select {
   appearance: none;
-  padding: 0 45px 0 47px;
+  padding: 0 45px 0 50px;
 }
 
 .input-wrapper input {
-  padding: 0 45px 0 47px;
+  padding: 0 45px 0 50px;
+}
+
+/* Keep field text clear of the leading icon, even when global form styles load. */
+.login-page .select-wrapper select,
+.login-page .input-wrapper input {
+  padding-left: 50px;
 }
 
 .select-wrapper select:focus,
@@ -293,6 +299,14 @@ body {
   pointer-events: none;
 }
 
+.login-page .field-icon {
+  width: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
 .password-top {
   display: flex;
   align-items: center;
@@ -308,6 +322,28 @@ body {
 
 .password-top a:hover {
   text-decoration: underline;
+}
+
+.auth-error {
+  margin: 0 0 16px;
+  padding: 11px 14px;
+  border: 1px solid #f3b8bd;
+  border-radius: 9px;
+  background: #fff1f2;
+  color: #c62828;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.auth-success {
+  margin: 0 0 16px;
+  padding: 11px 14px;
+  border: 1px solid #a7dfc9;
+  border-radius: 9px;
+  background: #effaf5;
+  color: #087f5b;
+  font-size: 13px;
+  line-height: 1.5;
 }
 
 .show-password {

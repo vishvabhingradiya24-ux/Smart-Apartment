@@ -7,7 +7,10 @@ const {
   loginStaff,
   getAllStaff,
   getStaffTasks,
-  updateStaffTaskStatus
+  updateStaffTaskStatus,
+  getStaffAssets,
+  updateStaffAssetStatus,
+  getStaffWorkHistory
 } = require("../controllers/staffController");
 
 router.post("/register", registerStaff);
@@ -23,5 +26,9 @@ router.put(
   "/tasks/:taskId/status",
   updateStaffTaskStatus
 );
+
+router.get("/assets", getStaffAssets);
+router.put("/assets/:assetId/status", updateStaffAssetStatus);
+router.get("/work-history", getStaffWorkHistory);
 
 module.exports = router;

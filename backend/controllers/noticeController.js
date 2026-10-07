@@ -2,6 +2,7 @@ const db = require("../config/db");
 
 const createNotice = async (req, res) => {
   try {
+    if (req.user?.role !== "Admin") return res.status(403).json({ success: false, message: "Admin access required" });
     const { title, description, notice_type, publish_date, expiry_date } =
       req.body;
 
@@ -17,7 +18,7 @@ const createNotice = async (req, res) => {
     const [result] = await db.query(
       `INSERT INTO notices
       (title, description, notice_type, posted_by, publish_date, expiry_date, status)
-      VALUES (?, ?, ?, ?, ?, ?, 'Active')`,
+      VALUES (?, ?, ?, ?, ?, ?, ?)`,
       [
         title,
         description,
@@ -25,6 +26,7 @@ const createNotice = async (req, res) => {
         postedBy,
         publish_date || new Date(),
         expiry_date || null,
+        req.body.status === "Inactive" ? "Inactive" : "Active",
       ]
     );
 
@@ -45,6 +47,7 @@ const createNotice = async (req, res) => {
 
 const getAllNotices = async (req, res) => {
   try {
+    if (req.user?.role !== "Admin") return res.status(403).json({ success: false, message: "Admin access required" });
     const [rows] = await db.query(`
       SELECT
         n.notice_id,
@@ -111,6 +114,7 @@ const getActiveNotices = async (req, res) => {
 
 const updateNotice = async (req, res) => {
   try {
+    if (req.user?.role !== "Admin") return res.status(403).json({ success: false, message: "Admin access required" });
     const { id } = req.params;
     const {
       title,
@@ -120,6 +124,10 @@ const updateNotice = async (req, res) => {
       expiry_date,
       status,
     } = req.body;
+
+    if (!title || !description || !notice_type || !["Active", "Inactive"].includes(status)) {
+      return res.status(400).json({ success: false, message: "Valid title, description, type and status are required" });
+    }
 
     await db.query(
       `UPDATE notices
@@ -157,6 +165,7 @@ const updateNotice = async (req, res) => {
 
 const deleteNotice = async (req, res) => {
   try {
+    if (req.user?.role !== "Admin") return res.status(403).json({ success: false, message: "Admin access required" });
     const { id } = req.params;
 
     await db.query(

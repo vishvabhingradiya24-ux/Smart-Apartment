@@ -1,476 +1,107 @@
-import { useState } from "react";
-import "../../css/staff.css";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import "../../css/admin.css";
+
+const formatDate = (value) => {
+  if (!value) return "—";
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? "—" : date.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+};
 
 const Staff = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
-  const [departmentFilter, setDepartmentFilter] = useState("All");
-  const [statusFilter, setStatusFilter] = useState("All");
+  const [typeFilter, setTypeFilter] = useState("All");
+  const [staffList, setStaffList] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  // Demo data for UI.
-  // Backend + MySQL integration will be added later.
-  const [staffList] = useState([
-    {
-      id: "S001",
-      userId: "U201",
-      name: "Rahul Patel",
-      staffType: "Maintenance Staff",
-      joiningDate: "10-Feb-2025",
-      department: "Maintenance",
-      salary: "150000.00",
-      phone: "9876543210",
-      status: "Active",
-    },
-    {
-      id: "S002",
-      userId: "U202",
-      name: "Amit Shah",
-      staffType: "Electrician",
-      joiningDate: "18-Mar-2024",
-      department: "Electrical",
-      salary: "180000.00",
-      phone: "9876543211",
-      status: "Active",
-    },
-    {
-      id: "S003",
-      userId: "U203",
-      name: "Kiran Mehta",
-      staffType: "Housekeeping",
-      joiningDate: "05-Jun-2024",
-      department: "Housekeeping",
-      salary: "120000.00",
-      phone: "9876543212",
-      status: "Active",
-    },
-    {
-      id: "S004",
-      userId: "U204",
-      name: "Vijay Parmar",
-      staffType: "Plumber",
-      joiningDate: "22-Aug-2023",
-      department: "Maintenance",
-      salary: "145000.00",
-      phone: "9876543213",
-      status: "Inactive",
-    },
-  ]);
-
-  const filteredStaff = staffList.filter((staff) => {
-    const matchesSearch =
-      staff.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      staff.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      staff.userId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      staff.staffType.toLowerCase().includes(searchTerm.toLowerCase());
-
-    const matchesDepartment =
-      departmentFilter === "All" ||
-      staff.department === departmentFilter;
-
-    const matchesStatus =
-      statusFilter === "All" ||
-      staff.status === statusFilter;
-
-    return (
-      matchesSearch &&
-      matchesDepartment &&
-      matchesStatus
-    );
-  });
-
-  const activeStaff = staffList.filter(
-    (staff) => staff.status === "Active"
-  ).length;
-
-  const maintenanceStaff = staffList.filter(
-    (staff) => staff.department === "Maintenance"
-  ).length;
-
-  const housekeepingStaff = staffList.filter(
-    (staff) => staff.department === "Housekeeping"
-  ).length;
-
-  const handleAddStaff = () => {
-    alert("Add Staff form will be connected with backend later.");
-  };
-
-  const handleView = (staff) => {
-    alert(
-      `Staff Details\n\nName: ${staff.name}\nStaff ID: ${staff.id}\nType: ${staff.staffType}\nDepartment: ${staff.department}`
-    );
-  };
-
-  const handleEdit = (staff) => {
-    alert(`Edit Staff: ${staff.name}`);
-  };
-
-  const handleDelete = (staff) => {
-    const confirmDelete = window.confirm(
-      `Are you sure you want to delete ${staff.name}?`
-    );
-
-    if (confirmDelete) {
-      alert(
-        "Delete functionality will be connected with backend later."
-      );
+  const fetchStaff = useCallback(async (signal) => {
+    try {
+      setLoading(true);
+      setError("");
+      const response = await fetch("http://localhost:5000/api/admin/staff", {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }, signal,
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Unable to load staff records.");
+      setStaffList(data.staff || []);
+    } catch (err) {
+      if (err.name === "AbortError") return;
+      setError(err.message || "Unable to load staff records.");
+      setStaffList([]);
+    } finally {
+      if (!signal?.aborted) setLoading(false);
     }
-  };
+  }, []);
 
-  const handleViewTasks = (staff) => {
-    alert(
-      `Assigned Tasks for ${staff.name}\n\nTask Management will be connected with backend later.`
-    );
+  useEffect(() => {
+    const controller = new AbortController();
+    fetchStaff(controller.signal);
+    return () => controller.abort();
+  }, [fetchStaff]);
+
+  const staffTypes = useMemo(() => [...new Set(staffList.map((person) => person.staff_type).filter(Boolean))].sort(), [staffList]);
+  const filteredStaff = useMemo(() => {
+    const query = searchTerm.trim().toLowerCase();
+    return staffList.filter((person) => {
+      const matchesSearch = [person.id, person.first_name, person.last_name, person.email, person.phone, person.staff_type]
+        .some((value) => String(value || "").toLowerCase().includes(query));
+      return matchesSearch && (typeFilter === "All" || person.staff_type === typeFilter);
+    });
+  }, [staffList, searchTerm, typeFilter]);
+
+  const countType = (fragment) => staffList.filter((person) => (person.staff_type || "").toLowerCase().includes(fragment)).length;
+
+  const viewStaff = (person) => {
+    alert(`Staff Details\n\nName: ${person.first_name || ""} ${person.last_name || ""}\nStaff ID: ${person.id}\nType: ${person.staff_type || "—"}\nEmail: ${person.email || "—"}\nPhone: ${person.phone || "—"}\nJoined: ${formatDate(person.created_at)}`);
   };
 
   return (
-    <div className="staff-page">
+    <div className="admin-records-page admin-staff-page">
+      <header className="admin-records-header">
+        <div><span className="admin-records-eyebrow">STAFF MANAGEMENT</span><h1>Staff Members</h1><p>Staff directory from your database, including roles and contact details.</p></div>
+        <button type="button" className="admin-records-refresh" onClick={() => fetchStaff()} disabled={loading}>↻ Refresh</button>
+      </header>
 
-      {/* ================= HEADER ================= */}
+      <section className="admin-records-stats">
+        <article><span>👨‍💼</span><div><small>Total staff</small><strong>{loading ? "—" : staffList.length}</strong></div></article>
+        <article><span>🔧</span><div><small>Maintenance</small><strong>{loading ? "—" : countType("maintenance")}</strong></div></article>
+        <article><span>🧹</span><div><small>Housekeeping</small><strong>{loading ? "—" : countType("housekeeping")}</strong></div></article>
+        <article><span>🛡️</span><div><small>Security</small><strong>{loading ? "—" : countType("security")}</strong></div></article>
+      </section>
 
-      <div className="staff-header">
-        <div>
-          <span className="staff-overline">
-            STAFF MANAGEMENT
-          </span>
-
-          <h1>Staff Members</h1>
-
-          <p>
-            Manage staff information, departments and assigned work.
-          </p>
-        </div>
-
-        <button
-          className="staff-add-btn"
-          onClick={handleAddStaff}
-        >
-          <span>＋</span>
-          Add Staff
-        </button>
-      </div>
-
-      {/* ================= SUMMARY CARDS ================= */}
-
-      <div className="staff-stats">
-
-        <div className="staff-stat-card">
-          <div className="staff-stat-icon">
-            👨‍💼
-          </div>
-
-          <div>
-            <span>Total Staff</span>
-            <strong>{staffList.length}</strong>
+      <section className="admin-records-card">
+        <div className="admin-records-card-header">
+          <div><h2>Staff Directory</h2><p>{filteredStaff.length} of {staffList.length} staff members</p></div>
+          <div className="admin-records-controls">
+            <label className="admin-records-search"><span>🔍</span><input value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} placeholder="Search name, phone or email" /></label>
+            <select value={typeFilter} onChange={(event) => setTypeFilter(event.target.value)} aria-label="Filter by staff type">
+              <option value="All">All staff types</option>
+              {staffTypes.map((type) => <option key={type} value={type}>{type}</option>)}
+            </select>
           </div>
         </div>
 
-        <div className="staff-stat-card">
-          <div className="staff-stat-icon">
-            ✅
+        {loading ? <div className="admin-records-state">Loading staff from database...</div> : error ? (
+          <div className="admin-records-state error"><strong>Unable to load staff</strong><p>{error}</p><button type="button" onClick={() => fetchStaff()}>Try again</button></div>
+        ) : filteredStaff.length === 0 ? <div className="admin-records-state">No staff members match this search.</div> : (
+          <div className="admin-records-table-wrap">
+            <table className="admin-records-table">
+              <thead><tr><th>Staff member</th><th>Staff type</th><th>Phone</th><th>Email</th><th>Joined</th><th>Actions</th></tr></thead>
+              <tbody>{filteredStaff.map((person) => {
+                const name = `${person.first_name || ""} ${person.last_name || ""}`.trim() || "Staff member";
+                return <tr key={person.id}>
+                  <td><div className="admin-records-person"><span>{name.charAt(0).toUpperCase()}</span><div><strong>{name}</strong><small>Staff ID #{person.id}</small></div></div></td>
+                  <td><span className="admin-records-badge">{person.staff_type || "—"}</span></td>
+                  <td>{person.phone || "—"}</td><td>{person.email || "—"}</td><td>{formatDate(person.created_at)}</td>
+                  <td><div className="admin-records-actions"><button type="button" onClick={() => viewStaff(person)}>View</button><button type="button" onClick={() => navigate("/admin/task")}>Tasks</button></div></td>
+                </tr>;
+              })}</tbody>
+            </table>
           </div>
-
-          <div>
-            <span>Active Staff</span>
-            <strong>{activeStaff}</strong>
-          </div>
-        </div>
-
-        <div className="staff-stat-card">
-          <div className="staff-stat-icon">
-            🔧
-          </div>
-
-          <div>
-            <span>Maintenance</span>
-            <strong>{maintenanceStaff}</strong>
-          </div>
-        </div>
-
-        <div className="staff-stat-card">
-          <div className="staff-stat-icon">
-            🧹
-          </div>
-
-          <div>
-            <span>Housekeeping</span>
-            <strong>{housekeepingStaff}</strong>
-          </div>
-        </div>
-
-      </div>
-
-      {/* ================= FILTERS ================= */}
-
-      <div className="staff-toolbar">
-
-        <div className="staff-search">
-          <span>🔍</span>
-
-          <input
-            type="text"
-            placeholder="Search by name, Staff ID, User ID or type..."
-            value={searchTerm}
-            onChange={(e) =>
-              setSearchTerm(e.target.value)
-            }
-          />
-        </div>
-
-        <select
-          value={departmentFilter}
-          onChange={(e) =>
-            setDepartmentFilter(e.target.value)
-          }
-        >
-          <option value="All">
-            All Departments
-          </option>
-
-          <option value="Maintenance">
-            Maintenance
-          </option>
-
-          <option value="Electrical">
-            Electrical
-          </option>
-
-          <option value="Housekeeping">
-            Housekeeping
-          </option>
-        </select>
-
-        <select
-          value={statusFilter}
-          onChange={(e) =>
-            setStatusFilter(e.target.value)
-          }
-        >
-          <option value="All">
-            All Status
-          </option>
-
-          <option value="Active">
-            Active
-          </option>
-
-          <option value="Inactive">
-            Inactive
-          </option>
-        </select>
-
-      </div>
-
-      {/* ================= STAFF TABLE ================= */}
-
-      <div className="staff-table-card">
-
-        <div className="staff-table-header">
-          <div>
-            <h2>Staff List</h2>
-
-            <p>
-              {filteredStaff.length} staff member
-              {filteredStaff.length !== 1 ? "s" : ""} found
-            </p>
-          </div>
-        </div>
-
-        <div className="staff-table-wrapper">
-
-          <table className="staff-table">
-
-            <thead>
-              <tr>
-                <th>Staff ID</th>
-                <th>Staff Details</th>
-                <th>Staff Type</th>
-                <th>Joining Date</th>
-                <th>Department</th>
-                <th>Salary</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-
-            <tbody>
-
-              {filteredStaff.length > 0 ? (
-                filteredStaff.map((staff) => (
-                  <tr key={staff.id}>
-
-                    <td>
-                      <span className="staff-id">
-                        {staff.id}
-                      </span>
-                    </td>
-
-                    <td>
-                      <div className="staff-details">
-
-                        <div className="staff-avatar">
-                          {staff.name.charAt(0)}
-                        </div>
-
-                        <div>
-                          <strong>
-                            {staff.name}
-                          </strong>
-
-                          <small>
-                            User ID: {staff.userId}
-                          </small>
-
-                          <small>
-                            📞 {staff.phone}
-                          </small>
-                        </div>
-
-                      </div>
-                    </td>
-
-                    <td>
-                      <span className="staff-type">
-                        {staff.staffType}
-                      </span>
-                    </td>
-
-                    <td>
-                      {staff.joiningDate}
-                    </td>
-
-                    <td>
-                      <span className="department-badge">
-                        {staff.department}
-                      </span>
-                    </td>
-
-                    <td>
-                      <span className="salary-value">
-                        ₹{staff.salary}
-                      </span>
-                    </td>
-
-                    <td>
-                      <span
-                        className={`staff-status ${staff.status.toLowerCase()}`}
-                      >
-                        {staff.status}
-                      </span>
-                    </td>
-
-                    <td>
-
-                      <div className="staff-actions">
-
-                        <button
-                          className="action-task"
-                          onClick={() =>
-                            handleViewTasks(staff)
-                          }
-                          title="Assigned Tasks"
-                        >
-                          🔧
-                        </button>
-
-                        <button
-                          className="action-view"
-                          onClick={() =>
-                            handleView(staff)
-                          }
-                          title="View"
-                        >
-                          👁️
-                        </button>
-
-                        <button
-                          className="action-edit"
-                          onClick={() =>
-                            handleEdit(staff)
-                          }
-                          title="Edit"
-                        >
-                          ✏️
-                        </button>
-
-                        <button
-                          className="action-delete"
-                          onClick={() =>
-                            handleDelete(staff)
-                          }
-                          title="Delete"
-                        >
-                          🗑️
-                        </button>
-
-                      </div>
-
-                    </td>
-
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="8">
-
-                    <div className="staff-empty">
-
-                      <div>🔍</div>
-
-                      <h3>
-                        No staff members found
-                      </h3>
-
-                      <p>
-                        Try changing your search or filter criteria.
-                      </p>
-
-                    </div>
-
-                  </td>
-                </tr>
-              )}
-
-            </tbody>
-
-          </table>
-
-        </div>
-
-      </div>
-
-      {/* ================= STAFF TASK SECTION ================= */}
-
-      <div className="staff-task-card">
-
-        <div className="staff-task-icon">
-          🔧
-        </div>
-
-        <div className="staff-task-content">
-
-          <h3>
-            Staff Task Management
-          </h3>
-
-          <p>
-            Assign maintenance work, monitor task progress,
-            and track completed activities of staff members.
-          </p>
-
-        </div>
-
-        <button
-          className="staff-task-btn"
-          onClick={() =>
-            alert(
-              "Staff Task Management will be developed next."
-            )
-          }
-        >
-          Manage Tasks
-        </button>
-
-      </div>
-
+        )}
+      </section>
     </div>
   );
 };

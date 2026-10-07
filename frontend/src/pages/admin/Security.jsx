@@ -1,346 +1,98 @@
-import { useState } from "react";
-import "../../css/security.css";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import "../../css/admin.css";
+
+const formatDate = (value) => {
+  if (!value) return "—";
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? "—" : date.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+};
 
 const Security = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [shiftFilter, setShiftFilter] = useState("All");
-  const [statusFilter, setStatusFilter] = useState("All");
+  const [guards, setGuards] = useState([]);
+  const [visitorStats, setVisitorStats] = useState({ visitorsToday: 0, checkedInToday: 0 });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  // Demo data for UI
-  // Backend + MySQL integration will be done later.
-  const [guards] = useState([
-    {
-      id: "G001",
-      name: "Ramesh Patel",
-      userId: "U101",
-      shift: "Morning",
-      joiningDate: "12-Jan-2025",
-      gateNumber: "Gate 1",
-      phone: "9876543210",
-      email: "ramesh@gmail.com",
-      status: "Active",
-    },
-    {
-      id: "G002",
-      name: "Mahesh Shah",
-      userId: "U102",
-      shift: "Evening",
-      joiningDate: "05-Mar-2025",
-      gateNumber: "Gate 2",
-      phone: "9876543211",
-      email: "mahesh@gmail.com",
-      status: "Active",
-    },
-    {
-      id: "G003",
-      name: "Suresh Parmar",
-      userId: "U103",
-      shift: "Night",
-      joiningDate: "20-Jun-2024",
-      gateNumber: "Gate 1",
-      phone: "9876543212",
-      email: "suresh@gmail.com",
-      status: "Active",
-    },
-    {
-      id: "G004",
-      name: "Ajay Mehta",
-      userId: "U104",
-      shift: "Morning",
-      joiningDate: "15-Aug-2024",
-      gateNumber: "Gate 2",
-      phone: "9876543213",
-      email: "ajay@gmail.com",
-      status: "Inactive",
-    },
-  ]);
-
-  const filteredGuards = guards.filter((guard) => {
-    const matchesSearch =
-      guard.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      guard.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      guard.userId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      guard.gateNumber.toLowerCase().includes(searchTerm.toLowerCase());
-
-    const matchesShift =
-      shiftFilter === "All" || guard.shift === shiftFilter;
-
-    const matchesStatus =
-      statusFilter === "All" || guard.status === statusFilter;
-
-    return matchesSearch && matchesShift && matchesStatus;
-  });
-
-  const handleAddGuard = () => {
-    alert("Add Security Guard form will be connected with backend later.");
-  };
-
-  const handleView = (guard) => {
-    alert(
-      `Security Guard Details\n\nName: ${guard.name}\nGuard ID: ${guard.id}\nShift: ${guard.shift}\nGate: ${guard.gateNumber}`
-    );
-  };
-
-  const handleEdit = (guard) => {
-    alert(`Edit Security Guard: ${guard.name}`);
-  };
-
-  const handleDelete = (guard) => {
-    const confirmDelete = window.confirm(
-      `Are you sure you want to delete ${guard.name}?`
-    );
-
-    if (confirmDelete) {
-      alert("Delete functionality will be connected with backend later.");
+  const fetchSecurity = useCallback(async (signal) => {
+    try {
+      setLoading(true);
+      setError("");
+      const response = await fetch("http://localhost:5000/api/admin/security", {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }, signal,
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Unable to load security records.");
+      setGuards(data.guards || []);
+      setVisitorStats({ visitorsToday: Number(data.visitorsToday || 0), checkedInToday: Number(data.checkedInToday || 0) });
+    } catch (err) {
+      if (err.name === "AbortError") return;
+      setError(err.message || "Unable to load security records.");
+      setGuards([]);
+    } finally {
+      if (!signal?.aborted) setLoading(false);
     }
-  };
+  }, []);
 
-  const activeGuards = guards.filter(
-    (guard) => guard.status === "Active"
-  ).length;
+  useEffect(() => {
+    const controller = new AbortController();
+    fetchSecurity(controller.signal);
+    return () => controller.abort();
+  }, [fetchSecurity]);
 
-  const morningGuards = guards.filter(
-    (guard) => guard.shift === "Morning"
-  ).length;
+  const filteredGuards = useMemo(() => {
+    const query = searchTerm.trim().toLowerCase();
+    if (!query) return guards;
+    return guards.filter((guard) => [guard.id, guard.first_name, guard.last_name, guard.email, guard.phone, guard.staff_type]
+      .some((value) => String(value || "").toLowerCase().includes(query)));
+  }, [guards, searchTerm]);
 
-  const nightGuards = guards.filter(
-    (guard) => guard.shift === "Night"
-  ).length;
+  const joinedThisMonth = guards.filter((guard) => {
+    const date = new Date(guard.created_at);
+    const now = new Date();
+    return !Number.isNaN(date.getTime()) && date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
+  }).length;
 
   return (
-    <div className="security-page">
-      {/* Header */}
-      <div className="security-header">
-        <div>
-          <span className="security-overline">SECURITY MANAGEMENT</span>
-          <h1>Security Guards</h1>
-          <p>
-            Manage security guards, shifts and gate assignments.
-          </p>
+    <div className="admin-records-page admin-security-page">
+      <header className="admin-records-header">
+        <div><span className="admin-records-eyebrow">SECURITY MANAGEMENT</span><h1>Security Guards</h1><p>Security team records and today’s visitor activity.</p></div>
+        <div className="admin-records-header-actions">
+          <button type="button" className="admin-records-refresh" onClick={() => fetchSecurity()} disabled={loading}>↻ Refresh</button>
+        </div>
+      </header>
+
+      <section className="admin-records-stats">
+        <article><span>🛡️</span><div><small>Security staff</small><strong>{loading ? "—" : guards.length}</strong></div></article>
+        <article><span>🚪</span><div><small>Visitor requests today</small><strong>{loading ? "—" : visitorStats.visitorsToday}</strong></div></article>
+        <article><span>✅</span><div><small>Checked in today</small><strong>{loading ? "—" : visitorStats.checkedInToday}</strong></div></article>
+        <article><span>🆕</span><div><small>Guards joined this month</small><strong>{loading ? "—" : joinedThisMonth}</strong></div></article>
+      </section>
+
+      <section className="admin-records-card">
+        <div className="admin-records-card-header">
+          <div><h2>Security Team</h2><p>{filteredGuards.length} of {guards.length} guards</p></div>
+          <label className="admin-records-search"><span>🔍</span><input value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} placeholder="Search name, phone or email" /></label>
         </div>
 
-        <button className="security-add-btn" onClick={handleAddGuard}>
-          <span>＋</span>
-          Add Security Guard
-        </button>
-      </div>
-
-      {/* Summary Cards */}
-      <div className="security-stats">
-        <div className="security-stat-card">
-          <div className="security-stat-icon">🛡️</div>
-          <div>
-            <span>Total Guards</span>
-            <strong>{guards.length}</strong>
+        {loading ? <div className="admin-records-state">Loading security staff from database...</div> : error ? (
+          <div className="admin-records-state error"><strong>Unable to load security staff</strong><p>{error}</p><button type="button" onClick={() => fetchSecurity()}>Try again</button></div>
+        ) : filteredGuards.length === 0 ? <div className="admin-records-state">No security staff records found.</div> : (
+          <div className="admin-records-table-wrap">
+            <table className="admin-records-table">
+              <thead><tr><th>Security staff</th><th>Role</th><th>Phone</th><th>Email</th><th>Joined</th></tr></thead>
+              <tbody>{filteredGuards.map((guard) => {
+                const name = `${guard.first_name || ""} ${guard.last_name || ""}`.trim() || "Security staff";
+                return <tr key={guard.id}>
+                  <td><div className="admin-records-person"><span>{name.charAt(0).toUpperCase()}</span><div><strong>{name}</strong><small>Staff ID #{guard.id}</small></div></div></td>
+                  <td><span className="admin-records-badge">{guard.staff_type || "Security Staff"}</span></td>
+                  <td>{guard.phone || "—"}</td><td>{guard.email || "—"}</td><td>{formatDate(guard.created_at)}</td>
+                </tr>;
+              })}</tbody>
+            </table>
           </div>
-        </div>
-
-        <div className="security-stat-card">
-          <div className="security-stat-icon">✅</div>
-          <div>
-            <span>Active Guards</span>
-            <strong>{activeGuards}</strong>
-          </div>
-        </div>
-
-        <div className="security-stat-card">
-          <div className="security-stat-icon">🌅</div>
-          <div>
-            <span>Morning Shift</span>
-            <strong>{morningGuards}</strong>
-          </div>
-        </div>
-
-        <div className="security-stat-card">
-          <div className="security-stat-icon">🌙</div>
-          <div>
-            <span>Night Shift</span>
-            <strong>{nightGuards}</strong>
-          </div>
-        </div>
-      </div>
-
-      {/* Filters */}
-      <div className="security-toolbar">
-        <div className="security-search">
-          <span>🔍</span>
-          <input
-            type="text"
-            placeholder="Search by name, Guard ID, User ID or gate..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-
-        <select
-          value={shiftFilter}
-          onChange={(e) => setShiftFilter(e.target.value)}
-        >
-          <option value="All">All Shifts</option>
-          <option value="Morning">Morning</option>
-          <option value="Evening">Evening</option>
-          <option value="Night">Night</option>
-        </select>
-
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-        >
-          <option value="All">All Status</option>
-          <option value="Active">Active</option>
-          <option value="Inactive">Inactive</option>
-        </select>
-      </div>
-
-      {/* Security Guard Table */}
-      <div className="security-table-card">
-        <div className="security-table-header">
-          <div>
-            <h2>Security Guard List</h2>
-            <p>
-              {filteredGuards.length} guard
-              {filteredGuards.length !== 1 ? "s" : ""} found
-            </p>
-          </div>
-        </div>
-
-        <div className="security-table-wrapper">
-          <table className="security-table">
-            <thead>
-              <tr>
-                <th>Guard ID</th>
-                <th>Guard Details</th>
-                <th>Shift</th>
-                <th>Joining Date</th>
-                <th>Gate No.</th>
-                <th>Contact</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {filteredGuards.length > 0 ? (
-                filteredGuards.map((guard) => (
-                  <tr key={guard.id}>
-                    <td>
-                      <span className="guard-id">{guard.id}</span>
-                    </td>
-
-                    <td>
-                      <div className="guard-details">
-                        <div className="guard-avatar">
-                          {guard.name.charAt(0)}
-                        </div>
-
-                        <div>
-                          <strong>{guard.name}</strong>
-                          <small>User ID: {guard.userId}</small>
-                        </div>
-                      </div>
-                    </td>
-
-                    <td>
-                      <span
-                        className={`shift-badge ${guard.shift.toLowerCase()}`}
-                      >
-                        {guard.shift}
-                      </span>
-                    </td>
-
-                    <td>{guard.joiningDate}</td>
-
-                    <td>
-                      <span className="gate-badge">
-                        🚪 {guard.gateNumber}
-                      </span>
-                    </td>
-
-                    <td>
-                      <div className="contact-info">
-                        <span>📞 {guard.phone}</span>
-                        <small>✉️ {guard.email}</small>
-                      </div>
-                    </td>
-
-                    <td>
-                      <span
-                        className={`security-status ${
-                          guard.status.toLowerCase()
-                        }`}
-                      >
-                        {guard.status}
-                      </span>
-                    </td>
-
-                    <td>
-                      <div className="security-actions">
-                        <button
-                          className="action-view"
-                          onClick={() => handleView(guard)}
-                          title="View"
-                        >
-                          👁️
-                        </button>
-
-                        <button
-                          className="action-edit"
-                          onClick={() => handleEdit(guard)}
-                          title="Edit"
-                        >
-                          ✏️
-                        </button>
-
-                        <button
-                          className="action-delete"
-                          onClick={() => handleDelete(guard)}
-                          title="Delete"
-                        >
-                          🗑️
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="8">
-                    <div className="security-empty">
-                      <div>🔍</div>
-                      <h3>No security guards found</h3>
-                      <p>
-                        Try changing your search or filter criteria.
-                      </p>
-                    </div>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Gate Activity Section */}
-      <div className="gate-activity-card">
-        <div className="gate-activity-icon">🚪</div>
-
-        <div className="gate-activity-content">
-          <h3>Gate Activity Monitoring</h3>
-          <p>
-            Visitor verification, entry/exit records and gate activity
-            monitoring will be connected with the security module.
-          </p>
-        </div>
-
-        <button
-          className="gate-activity-btn"
-          onClick={() =>
-            alert("Gate activity module will be developed next.")
-          }
-        >
-          View Activity
-        </button>
-      </div>
+        )}
+      </section>
     </div>
   );
 };
