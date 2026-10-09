@@ -71,6 +71,10 @@ import Notifications from "./pages/admin/Notifications";
 import Settings from "./pages/admin/Settings";
 import AdminTasks from "./pages/admin/AdminTasks";
 
+// Keep personal/project-wide CSS overrides last so they can override page styles.
+import "./css/admin_residents.css";
+import "./css/custom-overrides.css";
+
 function App() {
   return (
     <BrowserRouter>

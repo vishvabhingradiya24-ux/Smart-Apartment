@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import "../../css/staff/staff_inventory.css";
+import "../../css/staff/staff_shared_theme.css";
 import { useNavigate } from "react-router-dom";
 
 function StaffAssets() {
@@ -272,6 +273,12 @@ function StaffAssets() {
             </div>
           </div>
         </header>
+
+        <section className="staff-page-intro staff-page-intro--inventory">
+          <div><span className="staff-page-intro-kicker">EQUIPMENT & SUPPLIES</span><h2>Know what’s available before work begins.</h2><p>Check stock, assigned equipment and available items from one inventory desk.</p></div>
+          <div className="staff-page-intro-aside"><span>AVAILABLE UNITS</span><strong>{availableAssets}</strong><small>across {assets.length} asset records</small><i aria-hidden="true">▦</i></div>
+          <span className="staff-page-intro-art" aria-hidden="true">▤</span>
+        </section>
 
         {/* ================= STATS ================= */}
 

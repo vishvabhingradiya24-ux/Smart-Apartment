@@ -86,11 +86,11 @@ const [user] = useState(() => {
             className="resident-brand sidebar-brand"
           >
             <div className="resident-brand-icon brand-mark">
-              ⌂
+              🏢
             </div>
 
             <div className="resident-brand-text brand-text">
-              <strong>
+              <strong style={{ color: "#fff", fontSize: "15px", fontWeight: 750, lineHeight: 1.2, whiteSpace: "nowrap" }}>
                 Smart Apartment
               </strong>
 

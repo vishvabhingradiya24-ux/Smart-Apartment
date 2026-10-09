@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../../css/admin.css";
+import "../../css/admin_dashboard.css";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -208,42 +209,6 @@ const AdminDashboard = () => {
             Manage residents, security, complaints, payments,
             visitors and community services from your dashboard.
           </p>
-
-        </div>
-
-        <div className="welcome-building">
-
-          <div className="building-roof"></div>
-
-          <div className="building-structure">
-
-            <div className="building-row">
-              <i></i>
-              <i></i>
-              <i></i>
-            </div>
-
-            <div className="building-row">
-              <i></i>
-              <i></i>
-              <i></i>
-            </div>
-
-            <div className="building-row">
-              <i></i>
-              <i></i>
-              <i></i>
-            </div>
-
-            <div className="building-row">
-              <i></i>
-              <i></i>
-              <i></i>
-            </div>
-
-            <div className="building-entry"></div>
-
-          </div>
 
         </div>
 

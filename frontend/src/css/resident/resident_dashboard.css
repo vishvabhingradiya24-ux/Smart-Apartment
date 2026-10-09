@@ -10,6 +10,17 @@
   font-family: Arial, Helvetica, sans-serif;
 }
 
+.resident-dashboard-content {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.resident-dashboard-content button,
+.resident-dashboard-content input,
+.resident-dashboard-content select,
+.resident-dashboard-content textarea {
+  font-family: inherit;
+}
+
 
 /* =========================================================
    SIDEBAR
@@ -866,7 +877,7 @@
   justify-content: space-between;
   gap: 20px;
   color: #8b959f;
-  font-size: 9px;
+  font-size: 12px;
 }
 
 
@@ -1053,4 +1064,214 @@
     padding: 17px;
   }
 
+}
+
+/* Keep dashboard typography in step with the Staff dashboard scale. */
+.resident-dashboard-content {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.resident-dashboard-content button,
+.resident-dashboard-content input,
+.resident-dashboard-content select,
+.resident-dashboard-content textarea { font-family: inherit; }
+
+.resident-dashboard-content .header-overline { font-size: 10px; letter-spacing: 1px; }
+.resident-dashboard-content .header-left h1 { font-size: 28px; letter-spacing: -.5px; }
+.resident-dashboard-content .header-left p { font-size: 13px; }
+.resident-dashboard-content .residence-content .section-eyebrow { font-size: 10px; letter-spacing: 1px; }
+.resident-dashboard-content .residence-content h2 { font-size: 30px; letter-spacing: -.7px; }
+.resident-dashboard-content .residence-description { font-size: 13px; }
+.resident-dashboard-content .section-heading .section-eyebrow { font-size: 9px; letter-spacing: 1px; }
+.resident-dashboard-content .section-heading h2,
+.resident-dashboard-content .panel-heading h2 { font-size: 20px; }
+.resident-dashboard-content .section-heading > p { font-size: 11px; }
+.resident-dashboard-content .service-content h3 { font-size: 14px; }
+.resident-dashboard-content .service-content p { font-size: 10px; }
+
+.resident-layout .resident-brand .brand-mark {
+  font-size: 20px;
+  letter-spacing: 0;
+}
+
+/* Keep the Resident portal branding and header typography aligned with Staff. */
+.resident-layout {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.resident-layout .resident-sidebar .resident-brand.sidebar-brand {
+  gap: 11px;
+}
+
+.resident-layout .resident-sidebar .resident-brand-icon.brand-mark {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  border-radius: 12px;
+  background: #d9f5ef;
+  color: #123746;
+  font-size: 22px;
+  letter-spacing: 0;
+}
+
+.resident-layout .resident-sidebar .resident-brand-text strong {
+  display: block;
+  margin: 0;
+  color: #fff !important;
+  font-size: 15px;
+  font-weight: 750;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.resident-layout .resident-sidebar .nav-item {
+  font-size: 13px;
+}
+
+.resident-layout .resident-sidebar .resident-brand-text span {
+  display: block;
+  margin-top: 2px;
+  color: #b8d0d5;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.resident-layout .resident-main .resident-header .header-overline {
+  font-size: 10px;
+  letter-spacing: 1px;
+}
+
+.resident-layout .resident-main .resident-header .header-left h1 {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.5px;
+}
+
+.resident-layout .resident-main .resident-header .header-left p {
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* Unified Resident page theme: dashboard navy, mint accents, and clean cards. */
+.resident-layout :is(.flat-page, .payment-page, .complaints-page, .service-requests-page,
+  .visitors-page, .resident-visitors-page, .facilities-page, .notice-page, .resident-polls-page,
+  .resident-notifications-page) {
+  color: #182230;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.resident-layout :is(.flat-page, .payment-page, .complaints-page, .service-requests-page,
+  .resident-visitors-page, .facilities-page, .notice-page, .resident-polls-page,
+  .resident-notifications-page) :is(h1, h2, h3) {
+  color: #182230;
+}
+
+.resident-layout :is(.flat-page, .payment-page, .complaints-page, .service-requests-page,
+  .resident-visitors-page, .facilities-page, .notice-page, .resident-polls-page,
+  .resident-notifications-page) :is(.flat-overline, .payment-overline, .complaints-overline,
+  .sr-eyebrow, .complaints-eyebrow, .visitors-eyebrow, .facilities-overline, .notice-eyebrow,
+  .resident-polls-overline, .resident-notifications-eyebrow) {
+  color: #087c79;
+}
+
+.resident-layout :is(.flat-page, .payment-page, .complaints-page, .service-requests-page,
+  .visitors-page, .resident-visitors-page, .facilities-page, .notice-page, .resident-polls-page,
+  .resident-notifications-page) :is(.flat-dashboard-btn, .back-dashboard, .pay-now-btn,
+  .complaints-dashboard-btn, .complaints-new-btn, .complaint-submit-btn, .sr-dashboard-btn,
+  .sr-submit-btn, .visitor-back-button, .visitor-new-button,
+  .visitor-refresh-button, .visitor-submit-button, .resident-visitors-back, .resident-visitors-new,
+  .resident-visitors-refresh, .resident-visitors-submit, .facilities-dashboard-button,
+  .facilities-back-button, .book-button, .submit-booking-button, .notice-back-button,
+  .notice-retry-button, .resident-poll-vote-button, .resident-notifications-header button,
+  .resident-notifications-state button) {
+  border-color: #087c79;
+  background-color: #087c79;
+  color: #fff;
+  box-shadow: 0 7px 18px rgba(8, 124, 121, .16);
+}
+
+.resident-layout :is(.flat-page, .payment-page, .complaints-page, .service-requests-page,
+  .visitors-page, .resident-visitors-page, .facilities-page, .notice-page, .resident-polls-page,
+  .resident-notifications-page) :is(.flat-dashboard-btn, .back-dashboard, .pay-now-btn,
+  .complaints-new-btn, .complaint-submit-btn, .sr-dashboard-btn, .sr-submit-btn,
+  .visitor-new-button, .visitor-submit-button,
+  .resident-visitors-new, .resident-visitors-submit, .facilities-dashboard-button,
+  .facilities-back-button, .book-button, .submit-booking-button, .resident-poll-vote-button,
+  .resident-notifications-header button, .resident-notifications-state button):hover {
+  border-color: #065f5d;
+  background-color: #065f5d;
+  color: #fff;
+}
+
+.resident-layout :is(.flat-overview, .complaints-page-header, .sr-page-header,
+  .facilities-intro, .resident-polls-hero) {
+  border-color: #123746;
+  background: linear-gradient(120deg, #182230 0%, #123746 65%, #087c79 100%);
+  color: #fff;
+}
+
+.resident-layout :is(.flat-overview, .complaints-page-header, .sr-page-header,
+  .facilities-intro, .resident-polls-hero) :is(h1, h2, h3, p, span, strong) {
+  color: inherit;
+}
+
+.resident-layout :is(.flat-card, .flat-quick-card, .payment-summary-card, .summary-card,
+  .current-payment-card, .history-card, .complaint-card, .complaint-form-card, .complaints-stat,
+  .sr-card, .sr-stat, .sr-form-card, .visitor-stat-card, .visitor-card,
+  .resident-visitors-stat, .resident-visitors-form-card, .resident-visitors-history,
+  .resident-visitor-card, .facility-card, .booking-history-card, .notice-card,
+  .resident-poll-card, .resident-notification-card, .resident-notifications-summary,
+  .resident-notifications-state) {
+  border-color: #dce5ec;
+  box-shadow: 0 8px 22px rgba(24, 34, 48, .055);
+}
+
+.resident-layout :is(.flat-page, .payment-page, .complaints-page, .service-requests-page,
+  .resident-visitors-page, .facilities-page, .notice-page, .resident-polls-page,
+  .resident-notifications-page) :is(.flat-icon, .summary-icon, .bill-icon, .complaint-icon,
+  .sr-icon, .resident-visitors-stat-icon, .facility-icon, .notice-icon, .resident-poll-icon,
+  .resident-notification-icon, .resident-notifications-summary-icon) {
+  background-color: #e4f6f1;
+  color: #087c79;
+}
+
+.resident-layout :is(.resident-polls-sidebar) {
+  background: #182230;
+  color: #fff;
+}
+
+.resident-layout .resident-polls-brand-mark,
+.resident-layout .resident-polls-nav-item.active,
+.resident-layout .resident-polls-nav-item:hover {
+  background: #d9f5ef;
+  color: #123746;
+}
+
+.resident-layout .notice-header {
+  border-color: #dce5ec;
+  background: #fff;
+}
+
+.resident-layout .notice-back-button {
+  border: 1px solid #087c79;
+  background: #087c79;
+  color: #fff;
+}
+
+.resident-layout :is(.notice-eyebrow, .notice-overline) {
+  color: #087c79;
+}
+
+@media (max-width: 700px) {
+  .resident-layout .resident-main .resident-header .header-left h1 {
+    font-size: 22px;
+  }
+}
+
+@media (max-width: 700px) {
+  .resident-dashboard-content .header-left h1 { font-size: 26px; }
+  .resident-dashboard-content .residence-content h2 { font-size: 25px; }
+  .resident-dashboard-content .residence-description { font-size: 12px; }
 }

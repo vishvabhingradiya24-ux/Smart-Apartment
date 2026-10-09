@@ -673,6 +673,87 @@
   transform: translateY(-1px);
 }
 
+/* Match the Resident dashboard's navy and mint visual theme. */
+.profile-page {
+  color: #182230;
+}
+
+.profile-overline {
+  color: #00a98f;
+}
+
+.profile-topbar h1,
+.profile-heading h2,
+.profile-security-card h3 {
+  color: #182230;
+}
+
+.profile-topbar p,
+.profile-heading p,
+.profile-stat span,
+.profile-security-card p {
+  color: #718096;
+}
+
+.profile-dashboard-btn {
+  border-color: #dce5ec;
+  color: #182230;
+  box-shadow: 0 5px 16px rgba(24, 34, 48, .06);
+}
+
+.profile-dashboard-btn:hover {
+  border-color: #00a98f;
+  background: #00a98f;
+}
+
+.profile-main-card,
+.profile-security-card {
+  border-color: #dce5ec;
+  box-shadow: 0 10px 28px rgba(24, 34, 48, .07);
+}
+
+.profile-cover {
+  height: 96px;
+  background: linear-gradient(110deg, #182230 0%, #123746 62%, #087c79 100%);
+}
+
+.profile-avatar {
+  background: #d9f5ef;
+  color: #087c79;
+  box-shadow: 0 8px 20px rgba(8, 124, 121, .18);
+}
+
+.resident-badge,
+.active-pill {
+  background: #d9f5ef;
+  color: #087c79;
+}
+
+.profile-divider,
+.info-card {
+  border-color: #e2e8ef;
+}
+
+.profile-stat {
+  border-color: #e0e7ee;
+  background: #f5f7fa;
+}
+
+.profile-stat strong,
+.residence-row strong {
+  color: #182230;
+}
+
+.security-icon {
+  background: #d9f5ef;
+  color: #087c79;
+}
+
+.profile-loader {
+  border-color: #dce5ec;
+  border-top-color: #087c79;
+}
+
 /* =========================================================
    RESPONSIVE
 ========================================================= */
