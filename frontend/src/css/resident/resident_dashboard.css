@@ -253,7 +253,7 @@
 ========================================================= */
 
 .resident-main {
-  margin-left: 250px;
+  margin-left: 270px;
   width: calc(100% - 250px);
   min-height: 100vh;
   padding: 30px 38px 40px;
@@ -1173,9 +1173,9 @@
   .resident-notifications-page) :is(.flat-overline, .payment-overline, .complaints-overline,
   .sr-eyebrow, .complaints-eyebrow, .visitors-eyebrow, .facilities-overline, .notice-eyebrow,
   .resident-polls-overline, .resident-notifications-eyebrow) {
-  color: #087c79;
+  color: #edf0f0;
 }
-
+  
 .resident-layout :is(.flat-page, .payment-page, .complaints-page, .service-requests-page,
   .visitors-page, .resident-visitors-page, .facilities-page, .notice-page, .resident-polls-page,
   .resident-notifications-page) :is(.flat-dashboard-btn, .back-dashboard, .pay-now-btn,

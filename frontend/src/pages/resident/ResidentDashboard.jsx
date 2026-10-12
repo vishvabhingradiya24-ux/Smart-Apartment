@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import "../../css/resident/resident_Dashboard.css";
+import "../../css/resident/resident_dashboard.css";
 
 function ResidentDashboard() {
   const [user] = useState(() => {
