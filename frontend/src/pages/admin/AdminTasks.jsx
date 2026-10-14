@@ -1,10 +1,7 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
 import "../../css/admin_task.css";
 
 const AdminTask = () => {
-  const navigate = useNavigate();
-
   const [tasks, setTasks] = useState([]);
   const [staffList, setStaffList] = useState([]);
 
@@ -28,9 +25,6 @@ const AdminTask = () => {
 
   const fetchTasks = async () => {
     try {
-      setLoading(true);
-      setError("");
-
       const token = localStorage.getItem("token");
 
       const response = await fetch(
@@ -85,8 +79,10 @@ const AdminTask = () => {
   };
 
   useEffect(() => {
-    fetchTasks();
-    fetchStaff();
+    const loadTasksAndStaff = async () => {
+      await Promise.all([fetchTasks(), fetchStaff()]);
+    };
+    loadTasksAndStaff();
   }, []);
 
   // ================= CREATE TASK =================

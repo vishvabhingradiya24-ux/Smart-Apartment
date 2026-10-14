@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../../css/staff/assigned_complaints.css";
 import "../../css/staff/staff_shared_theme.css";
@@ -50,22 +50,12 @@ function StaffComplaints() {
   // FETCH ASSIGNED COMPLAINTS FROM DATABASE
   // ======================================================
 
-  useEffect(() => {
-    fetchAssignedComplaints();
-  }, []);
-
-
   const fetchAssignedComplaints = async () => {
     try {
-      setLoading(true);
-      setError("");
-
       const token = localStorage.getItem("token");
 
       if (!token) {
-        setError("Login session expired. Please login again.");
-        setLoading(false);
-        return;
+        throw new Error("Login session expired. Please login again.");
       }
 
 
@@ -186,6 +176,13 @@ function StaffComplaints() {
 
     }
   };
+
+  useEffect(() => {
+    const loadComplaints = async () => {
+      await fetchAssignedComplaints();
+    };
+    loadComplaints();
+  }, []);
 
 
   // ======================================================
@@ -321,12 +318,6 @@ function StaffComplaints() {
   const progressCount = complaints.filter(
     (item) =>
       String(item.status).toLowerCase() === "in progress"
-  ).length;
-
-
-  const assignedCount = complaints.filter(
-    (item) =>
-      String(item.status).toLowerCase() === "assigned"
   ).length;
 
 

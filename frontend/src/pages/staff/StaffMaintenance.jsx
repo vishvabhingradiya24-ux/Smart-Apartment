@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import "../../css/staff/staff_maintenance.css";
 import "../../css/staff/staff_shared_theme.css";
 import { useNavigate } from "react-router-dom";
@@ -31,8 +31,6 @@ function StaffMaintenance() {
 
   const fetchMaintenance = useCallback(async (signal) => {
     try {
-      setLoading(true);
-      setError("");
       const token = localStorage.getItem("token");
       if (!token) throw new Error("Please log in again to view assigned maintenance work.");
       const response = await fetch("http://localhost:5000/api/staff/tasks", {
@@ -59,7 +57,10 @@ function StaffMaintenance() {
 
   useEffect(() => {
     const controller = new AbortController();
-    fetchMaintenance(controller.signal);
+    const loadMaintenance = async () => {
+      await fetchMaintenance(controller.signal);
+    };
+    loadMaintenance();
     return () => controller.abort();
   }, [fetchMaintenance]);
 

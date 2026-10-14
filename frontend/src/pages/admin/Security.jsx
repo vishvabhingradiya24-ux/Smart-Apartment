@@ -16,8 +16,6 @@ const Security = () => {
 
   const fetchSecurity = useCallback(async (signal) => {
     try {
-      setLoading(true);
-      setError("");
       const response = await fetch("http://localhost:5000/api/admin/security", {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }, signal,
       });
@@ -36,9 +34,18 @@ const Security = () => {
 
   useEffect(() => {
     const controller = new AbortController();
-    fetchSecurity(controller.signal);
+    const loadSecurity = async () => {
+      await fetchSecurity(controller.signal);
+    };
+    loadSecurity();
     return () => controller.abort();
   }, [fetchSecurity]);
+
+  const refreshSecurity = () => {
+    setLoading(true);
+    setError("");
+    fetchSecurity();
+  };
 
   const filteredGuards = useMemo(() => {
     const query = searchTerm.trim().toLowerCase();
@@ -58,7 +65,7 @@ const Security = () => {
       <header className="admin-records-header">
         <div><span className="admin-records-eyebrow">SECURITY MANAGEMENT</span><h1>Security Guards</h1><p>Security team records and today’s visitor activity.</p></div>
         <div className="admin-records-header-actions">
-          <button type="button" className="admin-records-refresh" onClick={() => fetchSecurity()} disabled={loading}>↻ Refresh</button>
+          <button type="button" className="admin-records-refresh" onClick={refreshSecurity} disabled={loading}>↻ Refresh</button>
         </div>
       </header>
 

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import "../../css/staff/staff_work_history.css";
 import "../../css/staff/staff_shared_theme.css";
 import { useNavigate } from "react-router-dom";
@@ -31,8 +31,6 @@ function StaffWorkHistory() {
 
   const fetchWorkHistory = useCallback(async (signal) => {
     try {
-      setLoading(true);
-      setError("");
       const response = await fetch("http://localhost:5000/api/staff/work-history", {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }, signal,
       });
@@ -61,7 +59,10 @@ function StaffWorkHistory() {
 
   useEffect(() => {
     const controller = new AbortController();
-    fetchWorkHistory(controller.signal);
+    const loadWorkHistory = async () => {
+      await fetchWorkHistory(controller.signal);
+    };
+    loadWorkHistory();
     return () => controller.abort();
   }, [fetchWorkHistory]);
 

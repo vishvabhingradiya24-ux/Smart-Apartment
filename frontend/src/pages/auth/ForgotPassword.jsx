@@ -55,7 +55,7 @@ function ForgotPassword() {
         });
       }, 1000);
 
-    } catch (error) {
+    } catch {
       setError(
         "Unable to connect to server. Please make sure backend is running."
       );

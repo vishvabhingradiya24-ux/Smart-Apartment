@@ -73,7 +73,7 @@ function ResetPassword() {
         navigate("/login");
       }, 1500);
 
-    } catch (error) {
+    } catch {
       setError(
         "Unable to connect to server. Please make sure backend is running."
       );

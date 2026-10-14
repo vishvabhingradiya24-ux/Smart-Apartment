@@ -17,14 +17,8 @@ const [assigning, setAssigning] = useState(false);
   // ==========================================
   // FETCH COMPLAINTS FROM DATABASE
   // ==========================================
-  useEffect(() => {
-  fetchComplaints();
-  fetchStaff();
-}, []);
   const fetchComplaints = async () => {
     try {
-      setLoading(true);
-
       const token = localStorage.getItem("token");
 
       const response = await fetch(
@@ -121,6 +115,12 @@ assignedTo:
   }
 };
 
+  useEffect(() => {
+    const loadComplaintsAndStaff = async () => {
+      await Promise.all([fetchComplaints(), fetchStaff()]);
+    };
+    loadComplaintsAndStaff();
+  }, []);
 
   // ==========================================
   // SEARCH + FILTER

@@ -1,5 +1,5 @@
 
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import "../../css/staff/staff_dashboard.css";
 import "../../css/staff/staff_shared_theme.css";
 import { useNavigate } from "react-router-dom";
@@ -144,7 +144,7 @@ function StaffDashboard() {
      SEARCH
   ========================= */
 
-  const filteredServices = useMemo(() => {
+  const filteredServices = (() => {
     const query = searchTerm.toLowerCase().trim();
 
     if (!query) {
@@ -157,7 +157,7 @@ function StaffDashboard() {
         service.description.toLowerCase().includes(query) ||
         service.tag.toLowerCase().includes(query)
     );
-  }, [searchTerm]);
+  })();
 
   /* =========================
      QUICK STATS
