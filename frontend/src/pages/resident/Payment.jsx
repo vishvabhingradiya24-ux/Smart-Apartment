@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "../../css/resident/payment.css";
 
@@ -11,10 +11,11 @@ function Payment() {
 
   const token = localStorage.getItem("token");
 
-  const loadPayments = async () => {
+  const loadPayments = useCallback(async () => {
     try {
-      setLoading(true);
-      setError("");
+      if (!token) {
+        throw new Error("SESSION_EXPIRED");
+      }
 
       const [allResponse, currentResponse] = await Promise.all([
         fetch("http://localhost:5000/api/resident/payments", {
@@ -54,17 +55,14 @@ function Payment() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token]);
 
   useEffect(() => {
-    if (!token) {
-      setError("Your session has expired. Please login again.");
-      setLoading(false);
-      return;
-    }
-
-    loadPayments();
-  }, []);
+    const load = async () => {
+      await loadPayments();
+    };
+    load();
+  }, [loadPayments]);
 
   const formatAmount = (amount) => {
     return Number(amount || 0).toLocaleString("en-IN", {

@@ -9,8 +9,6 @@ function ResidentNotifications() {
 
   const loadNotifications = useCallback(async (signal) => {
     try {
-      setLoading(true);
-      setError("");
       const token = localStorage.getItem("token");
       if (!token) throw new Error("Your session has expired. Please log in again.");
 
@@ -32,9 +30,18 @@ function ResidentNotifications() {
 
   useEffect(() => {
     const controller = new AbortController();
-    loadNotifications(controller.signal);
+    const load = async () => {
+      await loadNotifications(controller.signal);
+    };
+    load();
     return () => controller.abort();
   }, [loadNotifications]);
+
+  const refreshNotifications = () => {
+    setLoading(true);
+    setError("");
+    loadNotifications();
+  };
 
   const formatDate = (value) => {
     if (!value) return "";
@@ -52,7 +59,7 @@ function ResidentNotifications() {
           <h1>Notifications</h1>
           <p>Stay up to date with announcements from your apartment management.</p>
         </div>
-        <button type="button" onClick={() => loadNotifications()} disabled={loading}>
+        <button type="button" onClick={refreshNotifications} disabled={loading}>
           ↻ Refresh
         </button>
       </header>

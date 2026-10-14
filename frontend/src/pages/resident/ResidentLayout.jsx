@@ -90,8 +90,8 @@ const [user] = useState(() => {
             </div>
 
             <div className="resident-brand-text brand-text">
-              <strong style={{ color: "#fff", fontSize: "15px", fontWeight: 750, lineHeight: 1.2, whiteSpace: "nowrap" }}>
-                Smart Apartment
+              <strong>
+                Smart Apartment Mulsha
               </strong>
 
               <span>

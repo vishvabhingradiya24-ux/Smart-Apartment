@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import "../../css/staff/staff_inventory.css";
 import "../../css/staff/staff_shared_theme.css";
 import { useNavigate } from "react-router-dom";
@@ -31,8 +31,6 @@ function StaffAssets() {
 
   const fetchAssets = useCallback(async (signal) => {
     try {
-      setLoading(true);
-      setError("");
       const response = await fetch("http://localhost:5000/api/staff/assets", {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }, signal,
       });
@@ -61,7 +59,10 @@ function StaffAssets() {
 
   useEffect(() => {
     const controller = new AbortController();
-    fetchAssets(controller.signal);
+    const loadAssets = async () => {
+      await fetchAssets(controller.signal);
+    };
+    loadAssets();
     return () => controller.abort();
   }, [fetchAssets]);
 

@@ -1,5 +1,5 @@
 
-import React, {
+import {
   useCallback,
   useEffect,
   useMemo,
@@ -47,8 +47,6 @@ function StaffTasks() {
 
   const fetchTasks = useCallback(async (signal) => {
     try {
-      setLoading(true);
-      setError("");
 
       const token = localStorage.getItem("token");
 
@@ -163,7 +161,10 @@ function StaffTasks() {
   useEffect(() => {
     const controller = new AbortController();
 
-    fetchTasks(controller.signal);
+    const loadTasks = async () => {
+      await fetchTasks(controller.signal);
+    };
+    loadTasks();
 
     return () => {
       controller.abort();

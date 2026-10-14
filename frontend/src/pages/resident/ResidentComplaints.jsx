@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "../../css/resident/residentComplaints.css";
 
@@ -18,14 +18,10 @@ function ResidentComplaints() {
 
   const token = localStorage.getItem("token");
 
-  const fetchComplaints = async () => {
+  const fetchComplaints = useCallback(async () => {
     try {
-      setLoading(true);
-      setErrorMessage("");
-
       if (!token) {
-        setErrorMessage("Your session has expired. Please login again.");
-        return;
+        throw new Error("Your session has expired. Please login again.");
       }
 
       const response = await fetch(
@@ -68,11 +64,14 @@ function ResidentComplaints() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token]);
 
   useEffect(() => {
-    fetchComplaints();
-  }, []);
+    const loadComplaints = async () => {
+      await fetchComplaints();
+    };
+    loadComplaints();
+  }, [fetchComplaints]);
 
   const openComplaintForm = () => {
     setSuccessMessage("");

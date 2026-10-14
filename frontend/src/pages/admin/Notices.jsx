@@ -14,7 +14,7 @@ const Notices = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const token = localStorage.getItem("token");
-  const request = (url, options = {}) => fetch(`http://localhost:5000${url}`, { ...options, headers: { Authorization: `Bearer ${token}`, ...(options.body ? { "Content-Type": "application/json" } : {}), ...options.headers } });
+  const request = useCallback((url, options = {}) => fetch(`http://localhost:5000${url}`, { ...options, headers: { Authorization: `Bearer ${token}`, ...(options.body ? { "Content-Type": "application/json" } : {}), ...options.headers } }), [token]);
 
   const loadNotices = useCallback(async () => {
     try {
@@ -25,8 +25,13 @@ const Notices = () => {
       setError("");
     } catch (err) { setError(err.message); }
     finally { setLoading(false); }
-  }, []);
-  useEffect(() => { loadNotices(); }, [loadNotices]);
+  }, [request]);
+  useEffect(() => {
+    const load = async () => {
+      await loadNotices();
+    };
+    load();
+  }, [loadNotices]);
 
   const filteredNotices = useMemo(() => notices.filter((notice) => {
     const search = searchTerm.toLowerCase();

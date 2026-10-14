@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import "../../css/staff/staff_service_requests.css";
 import "../../css/staff/staff_shared_theme.css";
 import { useNavigate } from "react-router-dom";

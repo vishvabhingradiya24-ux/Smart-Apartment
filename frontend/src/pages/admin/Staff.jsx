@@ -18,8 +18,6 @@ const Staff = () => {
 
   const fetchStaff = useCallback(async (signal) => {
     try {
-      setLoading(true);
-      setError("");
       const response = await fetch("http://localhost:5000/api/admin/staff", {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }, signal,
       });
@@ -37,9 +35,18 @@ const Staff = () => {
 
   useEffect(() => {
     const controller = new AbortController();
-    fetchStaff(controller.signal);
+    const loadStaff = async () => {
+      await fetchStaff(controller.signal);
+    };
+    loadStaff();
     return () => controller.abort();
   }, [fetchStaff]);
+
+  const refreshStaff = () => {
+    setLoading(true);
+    setError("");
+    fetchStaff();
+  };
 
   const staffTypes = useMemo(() => [...new Set(staffList.map((person) => person.staff_type).filter(Boolean))].sort(), [staffList]);
   const filteredStaff = useMemo(() => {
@@ -61,7 +68,7 @@ const Staff = () => {
     <div className="admin-records-page admin-staff-page">
       <header className="admin-records-header">
         <div><span className="admin-records-eyebrow">STAFF MANAGEMENT</span><h1>Staff Members</h1><p>Staff directory from your database, including roles and contact details.</p></div>
-        <button type="button" className="admin-records-refresh" onClick={() => fetchStaff()} disabled={loading}>↻ Refresh</button>
+        <button type="button" className="admin-records-refresh" onClick={refreshStaff} disabled={loading}>↻ Refresh</button>
       </header>
 
       <section className="admin-records-stats">
