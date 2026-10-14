@@ -9,7 +9,7 @@ function Home() {
         <div className="brand">
           <div className="brand-logo">⌂</div>
           <div>
-            <h2>Smart Apartment</h2>
+            <h2>Smart Apartment Test</h2>
             <span>Society Management</span>
           </div>
         </div>

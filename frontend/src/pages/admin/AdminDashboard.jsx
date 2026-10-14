@@ -147,7 +147,7 @@ const AdminDashboard = () => {
       <header className="admin-header">
         <div className="admin-header-content">
           <span className="admin-overline">
-            ADMIN PANEL
+            ADMIN PANEL 
           </span>
 
           <h1>Dashboard</h1>

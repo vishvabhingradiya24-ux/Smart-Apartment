@@ -91,7 +91,7 @@ const [user] = useState(() => {
 
             <div className="resident-brand-text brand-text">
               <strong>
-                Smart Apartment
+                Smart Apartment Mulsha
               </strong>
 
               <span>

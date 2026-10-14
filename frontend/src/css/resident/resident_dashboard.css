@@ -10,7 +10,6 @@
   font-family: Arial, Helvetica, sans-serif;
 }
 
-
 /* =========================================================
    SIDEBAR
 ========================================================= */
@@ -22,7 +21,7 @@
   position: fixed;
   left: 0;
   top: 0;
-  background: #182230;
+  background: #172136 !important;
   color: #ffffff;
   display: flex;
   flex-direction: column;
@@ -126,7 +125,7 @@
   gap: 12px;
   text-decoration: none;
   color: #aeb8c4;
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 600;
   transition: 0.2s ease;
   box-sizing: border-box;
@@ -1054,3 +1053,6 @@
   }
 
 }
+
+
+
