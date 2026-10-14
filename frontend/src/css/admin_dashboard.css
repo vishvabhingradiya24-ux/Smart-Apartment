@@ -1,0 +1,185 @@
+/* Admin dashboard theme aligned with the Resident dashboard. */
+.admin-layout .admin-sidebar {
+  background: #182230;
+  border-right-color: rgba(255, 255, 255, .08);
+  color: #fff;
+  scrollbar-color: #526071 #182230;
+}
+
+.admin-layout .admin-logo { border-bottom-color: rgba(255, 255, 255, .09); }
+.admin-layout .admin-logo-icon { background: #fff; color: #182230; }
+.admin-layout .admin-logo h2 { color: #fff; }
+.admin-layout .admin-logo span { color: #aeb9c7; }
+.admin-layout .admin-nav-item { color: #c4cfdb; }
+.admin-layout .admin-nav-item:hover { background: rgba(255, 255, 255, .08); color: #fff; }
+.admin-layout .admin-nav-item.active {
+  background: #fff;
+  color: #182230;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, .12);
+}
+.admin-layout .admin-logout {
+  border-color: rgba(255, 255, 255, .12);
+  background: rgba(255, 255, 255, .04);
+  color: #d5dfeb;
+}
+.admin-layout .admin-logout:hover { background: rgba(255, 255, 255, .11); }
+
+.admin-main > .admin-dashboard-content {
+  min-height: 100vh;
+  padding: 30px 38px 40px;
+  background: #f6f7f9;
+  color: #1d2733;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.admin-main > .admin-dashboard-content button,
+.admin-main > .admin-dashboard-content input,
+.admin-main > .admin-dashboard-content select,
+.admin-main > .admin-dashboard-content textarea {
+  font-family: inherit;
+}
+
+.admin-main .admin-header {
+  min-height: 76px;
+  margin-bottom: 25px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e1e5e9;
+}
+
+.admin-main .admin-overline,
+.admin-main .admin-section-header > div > span,
+.admin-main .overview-header > div > span {
+  color: #7d8793;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.admin-main .admin-header-content h1 {
+  color: #182230;
+  font-size: 28px;
+  letter-spacing: -.5px;
+}
+
+.admin-main .admin-header-content p { color: #7d8793; font-size: 13px; }
+.admin-main .admin-notification { border-color: #e1e5e9; border-radius: 9px; }
+.admin-main .admin-notification:hover { background: #f2f4f6; border-color: #cbd2d9; }
+.admin-main .admin-header-avatar { background: #182230; }
+.admin-main .admin-header-profile strong { color: #293542; }
+.admin-main .admin-header-profile span { color: #89939e; }
+
+.admin-main .admin-welcome-card {
+  min-height: 290px;
+  padding: 36px 42px;
+  margin-bottom: 38px;
+  border-radius: 15px;
+  background-image:
+    linear-gradient(90deg, rgba(24, 34, 48, .96) 0%, rgba(24, 34, 48, .86) 43%, rgba(24, 34, 48, .43) 100%),
+    url("../assets/resident-community.jpg");
+  background-position: center, center 53%;
+  background-size: cover;
+  box-shadow: 0 12px 30px rgba(24, 34, 48, .15);
+}
+
+.admin-main .admin-welcome-card::before {
+  width: 380px;
+  height: 380px;
+  right: -105px;
+  top: -205px;
+  background: rgba(255, 255, 255, .06);
+}
+
+.admin-main .welcome-text { max-width: 650px; }
+.admin-main .welcome-text > span { color: #b6c0ca; font-size: 10px; letter-spacing: 1px; }
+.admin-main .welcome-text h2 { font-size: 30px; line-height: 1.2; letter-spacing: -.5px; }
+.admin-main .welcome-text p { max-width: 540px; color: #d3d9df; font-size: 13px; line-height: 1.65; }
+
+.admin-main .admin-section { margin-bottom: 34px; }
+.admin-main .admin-section-header { margin-bottom: 17px; }
+.admin-main .admin-section-header h2,
+.admin-main .overview-header h2 { color: #1d2733; font-size: 20px; }
+
+.admin-main .stats-grid { gap: 13px; }
+.admin-main .stat-card {
+  min-height: 164px;
+  padding: 19px;
+  border-color: #e4e8ec;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 4px 16px rgba(20, 30, 45, .04);
+}
+
+.admin-main .stat-card:hover { transform: translateY(-2px); border-color: #cbd2d9; box-shadow: 0 8px 20px rgba(20, 30, 45, .075); }
+.admin-main .stat-icon { border-radius: 9px; background: #f0f2f4; }
+.admin-main .stat-arrow { color: #98a2ad; }
+.admin-main .stat-card:hover .stat-arrow { color: #182230; }
+.admin-main .stat-title { color: #7d8793; font-size: 10px; }
+.admin-main .stat-content h3 { color: #182230; font-size: 23px; }
+.admin-main .stat-change { color: #7d8793; font-size: 10px; }
+
+.admin-main .admin-card-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 13px; }
+.admin-main .admin-management-card {
+  min-height: 105px;
+  padding: 16px;
+  border-color: #e4e8ec;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 4px 16px rgba(20, 30, 45, .04);
+}
+
+.admin-main .admin-management-card:hover { transform: translateY(-2px); border-color: #cbd2d9; box-shadow: 0 8px 18px rgba(20, 30, 45, .07); }
+.admin-main .admin-management-card:first-child { border-color: #182230; background: #182230; }
+.admin-main .admin-management-card:first-child .management-icon { background: rgba(255,255,255,.12); }
+.admin-main .admin-management-card:first-child .management-content h3 { color: #fff; }
+.admin-main .admin-management-card:first-child .management-content p,
+.admin-main .admin-management-card:first-child .management-arrow { color: #c0c8d0; }
+.admin-main .management-icon { border-radius: 9px; background: #f0f2f4; }
+.admin-main .management-content h3 { color: #25313d; }
+.admin-main .management-content p { color: #87919d; }
+.admin-main .admin-management-card:hover .management-arrow { color: #182230; }
+
+.admin-main .view-all-button { color: #53606d; }
+.admin-main .view-all-button:hover { background: #f0f2f4; color: #182230; }
+.admin-main .activity-card,
+.admin-main .admin-overview {
+  border-color: #e4e8ec;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 4px 16px rgba(20, 30, 45, .04);
+}
+
+.admin-main .activity-row { border-color: #edf0f2; }
+.admin-main .activity-row:hover { background: #f8f9fa; }
+.admin-main .activity-icon,
+.admin-main .community-icon { background: #f0f2f4; }
+.admin-main .community-item { border-color: #e4e8ec; background: #fff; }
+.admin-main .community-item strong { color: #182230; }
+.admin-main .admin-overview { padding: 22px; }
+.admin-main .overview-header button { border-radius: 8px; background: #182230; }
+.admin-main .overview-header button:hover { background: #293542; }
+.admin-main .admin-footer { color: #89939e; }
+.admin-main .dashboard-load-error { border-color: #f0c4c4; background: #fff4f4; }
+
+@media (max-width: 1100px) {
+  .admin-main > .admin-dashboard-content { padding: 25px; }
+  .admin-main .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .admin-main .admin-card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 768px) {
+  .admin-main > .admin-dashboard-content { padding: 20px 16px 30px; }
+  .admin-main .admin-welcome-card { min-height: 240px; padding: 28px; }
+  .admin-main .admin-welcome-card { background-position: center, 62% center; }
+  .admin-main .welcome-text h2 { font-size: 25px; }
+}
+
+@media (max-width: 520px) {
+  .admin-main .admin-header { gap: 10px; }
+  .admin-main .admin-header-actions { gap: 8px; }
+  .admin-main .stats-grid,
+  .admin-main .admin-card-grid { grid-template-columns: 1fr; }
+  .admin-main .admin-welcome-card { padding: 23px; }
+  .admin-main .welcome-text h2 { font-size: 22px; }
+  .admin-main .community-grid { grid-template-columns: 1fr 1fr; }
+  .admin-main .admin-footer { align-items: flex-start; gap: 5px; }
+}

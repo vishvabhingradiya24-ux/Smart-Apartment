@@ -24,7 +24,7 @@ const authMiddleware = (req, res, next) => {
 
     const decoded = jwt.verify(
       token,
-      process.env.JWT_SECRET
+      process.env.JWT_SECRET || "my_smart_apartment_secret_key_12345"
     );
 
     req.user = decoded;

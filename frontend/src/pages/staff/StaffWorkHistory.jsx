@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import "../../css/staff/staff_work_history.css";
+import "../../css/staff/staff_shared_theme.css";
 import { useNavigate } from "react-router-dom";
 
 function StaffWorkHistory() {
@@ -286,6 +287,12 @@ function StaffWorkHistory() {
             </div>
           </div>
         </header>
+
+        <section className="staff-page-intro staff-page-intro--history">
+          <div><span className="staff-page-intro-kicker">COMPLETED OPERATIONS</span><h2>A record of the work you’ve completed.</h2><p>Look back through finished repairs and tasks to find outcomes and service details.</p></div>
+          <div className="staff-page-intro-aside"><span>COMPLETED RECORDS</span><strong>{totalCompleted}</strong><small>logged in your work history</small><i aria-hidden="true">↗</i></div>
+          <span className="staff-page-intro-art" aria-hidden="true">◷</span>
+        </section>
 
         {/* ================= STATS ================= */}
 

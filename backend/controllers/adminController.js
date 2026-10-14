@@ -77,9 +77,12 @@ const loginAdmin = async (req, res) => {
   }
 };
 
+const isAdminUser = (user) =>
+  String(user?.role || user?.user_type || "").trim().toLowerCase() === "admin";
+
 const getAdminDashboard = async (req, res) => {
   try {
-    if (req.user?.role !== "Admin") {
+    if (!isAdminUser(req.user)) {
       return res.status(403).json({ message: "Admin access required" });
     }
 
@@ -186,7 +189,7 @@ const getAdminDashboard = async (req, res) => {
 };
 
 const requireAdmin = (req, res) => {
-  if (req.user?.role !== "Admin") {
+  if (!isAdminUser(req.user)) {
     res.status(403).json({ message: "Admin access required" });
     return false;
   }

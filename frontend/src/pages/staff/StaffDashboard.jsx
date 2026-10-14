@@ -1,6 +1,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import "../../css/staff/staff_dashboard.css";
+import "../../css/staff/staff_shared_theme.css";
 import { useNavigate } from "react-router-dom";
 
 function StaffDashboard() {
@@ -629,10 +630,6 @@ function StaffDashboard() {
 
             <div className="welcome-circle large"></div>
             <div className="welcome-circle medium"></div>
-
-            <div className="welcome-building">
-              🏢
-            </div>
 
             <div className="welcome-user-card">
 

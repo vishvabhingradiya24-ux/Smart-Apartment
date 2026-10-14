@@ -117,8 +117,10 @@
 
   color: var(--admin-text);
 
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 700;
+  letter-spacing: -0.3px;
+  white-space: nowrap;
 }
 
 .admin-logo span {
@@ -1038,8 +1040,33 @@
 .admin-records-state button:hover { background: #effaf7; }
 
 .admin-records-state { padding: 38px 18px; color: #71849a; font-size: 13px; text-align: center; }
-.admin-records-state.error { color: #b42318; }
-.admin-records-state p { margin: 6px 0 12px; }
+.admin-records-state.error {
+  min-height: 190px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 28px 20px;
+  color: #334e68;
+  background: linear-gradient(180deg, #fff, #fffafa);
+}
+.admin-records-error-icon {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 3px;
+  border: 1px solid #fecaca;
+  border-radius: 50%;
+  background: #fff1f0;
+  color: #c0392b;
+  font-size: 21px;
+  font-weight: 800;
+}
+.admin-records-state.error strong { color: #17324f; font-size: 15px; }
+.admin-records-state.error p { max-width: 460px; margin: 0; color: #71849a; line-height: 1.5; }
+.admin-records-state.error button { margin-top: 5px; padding: 9px 14px; border-color: #cfe8e1; background: #f2fbf8; color: #087f69; }
 
 @media (max-width: 900px) {
   .admin-records-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -1534,4 +1561,121 @@
 
 @media (max-width: 600px) {
   .admin-records-header { padding-bottom: 14px; }
+}
+
+/* Let the main flex column shrink around wide admin tables. */
+.admin-layout > .admin-main {
+  min-width: 0;
+  flex: 1 1 0;
+  overflow-x: clip;
+}
+
+/* Residents page layout: use the full workspace and fit its three summary cards. */
+.admin-residents-page {
+  --records-accent: #079879;
+  --records-soft: #e8f8f3;
+  width: 100%;
+  max-width: none;
+  min-height: 100vh;
+  padding: 28px 32px 36px;
+  background: linear-gradient(145deg, #f4fbf8 0%, #f7f9fc 48%, #f2f7fa 100%);
+}
+
+.admin-residents-page .admin-records-header {
+  align-items: center;
+  margin: 0 0 24px;
+  padding: 0 0 20px;
+  border-color: #dcebe6;
+}
+
+.admin-residents-page .admin-records-header h1 {
+  margin: 7px 0;
+  color: #123c38;
+  font-size: clamp(28px, 3vw, 36px);
+  letter-spacing: -1px;
+}
+
+.admin-residents-page .admin-records-header p { color: #66817e; font-size: 14px; }
+.admin-residents-page .admin-records-eyebrow { color: #07866d; }
+
+.admin-residents-page .admin-records-refresh {
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1px solid #bde4d8;
+  border-radius: 11px;
+  background: #ffffff;
+  color: #087f69;
+  transition: background .18s ease, transform .18s ease, box-shadow .18s ease;
+}
+
+.admin-residents-page .admin-records-refresh:hover {
+  transform: translateY(-1px);
+  background: #effaf6;
+  box-shadow: 0 5px 14px rgba(8, 127, 105, .12);
+}
+
+.admin-residents-page .admin-records-stats {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.admin-residents-page .admin-records-stats article {
+  min-height: 96px;
+  padding: 19px 20px;
+  border-color: #dcece6;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, .94);
+  box-shadow: 0 8px 24px rgba(19, 72, 61, .055);
+}
+
+.admin-residents-page .admin-records-stats article::before { width: 4px; }
+.admin-residents-page .admin-records-stats article > span { width: 48px; height: 48px; border-radius: 14px; font-size: 21px; }
+.admin-residents-page .admin-records-stats small { color: #68827d; font-size: 12px; }
+.admin-residents-page .admin-records-stats strong { color: #123c38; font-size: 25px; }
+
+.admin-residents-page .admin-records-card {
+  border-color: #dcebe6;
+  border-radius: 17px;
+  box-shadow: 0 10px 28px rgba(19, 72, 61, .065);
+}
+
+.admin-residents-page .admin-records-card-header {
+  min-height: 84px;
+  padding: 18px 22px;
+  background: linear-gradient(110deg, #ffffff, #f2fbf7);
+}
+
+.admin-residents-page .admin-records-card-header h2 { color: #123c38; font-size: 19px; }
+.admin-residents-page .admin-records-card-header p { font-size: 12px; }
+
+.admin-residents-page .admin-records-search {
+  min-width: min(340px, 40vw);
+  padding: 0 12px;
+  border-color: #d5e7e1;
+  border-radius: 11px;
+}
+
+.admin-residents-page .admin-records-search input { min-height: 42px; }
+.admin-residents-page .admin-records-table { min-width: 720px; }
+.admin-residents-page .admin-records-table th { padding: 15px 20px; background: #eff8f5; color: #54716b; font-size: 11px; }
+.admin-residents-page .admin-records-table td { padding: 16px 20px; border-color: #edf3f0; font-size: 13px; }
+.admin-residents-page .admin-records-table tbody tr:nth-child(even) { background: #fbfdfc; }
+.admin-residents-page .admin-records-table tbody tr:hover { background: #effaf6; }
+.admin-residents-page .admin-records-person > span { width: 40px; height: 40px; flex-basis: 40px; background: #e5f6ef; color: #087f69; }
+.admin-residents-page .admin-records-person strong { color: #173b38; font-size: 13px; }
+.admin-residents-page .admin-records-person small { font-size: 11px; }
+.admin-residents-page .admin-records-badge { padding: 6px 10px; background: #e9f7f1; color: #087f69; font-size: 11px; }
+
+@media (max-width: 900px) {
+  .admin-residents-page { padding: 24px 20px; }
+  .admin-residents-page .admin-records-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 600px) {
+  .admin-residents-page { padding: 20px 14px 28px; }
+  .admin-residents-page .admin-records-header { align-items: flex-start; gap: 14px; }
+  .admin-residents-page .admin-records-stats { grid-template-columns: 1fr; gap: 11px; }
+  .admin-residents-page .admin-records-card-header { gap: 13px; }
+  .admin-residents-page .admin-records-search { min-width: 0; width: 100%; }
 }

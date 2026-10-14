@@ -2544,3 +2544,91 @@ html {
 
   color: #07556a;
 }
+
+/* Resident and Admin dashboard visual alignment */
+:root {
+  --staff-primary: #263443;
+  --staff-primary-dark: #182230;
+  --staff-primary-hover: #344456;
+  --staff-primary-light: #eef2f5;
+  --staff-secondary: #526779;
+  --staff-secondary-light: #eef2f5;
+  --staff-bg: #f6f7f9;
+  --staff-text: #344252;
+  --staff-text-dark: #182230;
+  --staff-muted: #7d8793;
+  --staff-border: #e1e6eb;
+  --sidebar-width: 250px;
+}
+
+.modern-staff-layout {
+  background: #f6f7f9;
+}
+
+.modern-staff-layout .modern-sidebar {
+  background: #123746;
+  border-right-color: rgba(255, 255, 255, .08);
+}
+
+.modern-staff-layout .brand-header { border-bottom-color: rgba(255, 255, 255, .1); }
+.modern-staff-layout .brand-icon { background: #d9f5ef; color: #123746; box-shadow: none; }
+.modern-staff-layout .brand-info h3 { color: #fff; }
+.modern-staff-layout .brand-info span,
+.modern-staff-layout .sidebar-section-title { color: #b8d0d5; }
+.modern-staff-layout .sidebar-nav::-webkit-scrollbar-thumb { background: #426575; }
+.modern-staff-layout .nav-btn { color: #d2e0e4; }
+.modern-staff-layout .nav-btn:hover { background: rgba(255, 255, 255, .09); color: #fff; }
+.modern-staff-layout .nav-btn.active {
+  background: #fff;
+  color: #123746;
+  border-color: transparent;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, .12);
+}
+.modern-staff-layout .nav-icon { background: rgba(255, 255, 255, .12); }
+.modern-staff-layout .nav-btn.active .nav-icon { background: #e8f7f3; box-shadow: none; }
+.modern-staff-layout .sidebar-footer { border-top-color: rgba(255, 255, 255, .12); }
+.modern-staff-layout .user-details strong { color: #fff; }
+.modern-staff-layout .user-details small { color: #b8d0d5; }
+.modern-staff-layout .avatar-circle { background: #d9f5ef; color: #123746; box-shadow: none; }
+.modern-staff-layout .logout-btn {
+  background: rgba(255, 255, 255, .04);
+  border-color: rgba(255, 255, 255, .12);
+  color: #d5dfeb;
+}
+.modern-staff-layout .logout-btn:hover { background: rgba(255, 255, 255, .11); }
+
+.staff-welcome-banner {
+  background-image:
+    linear-gradient(90deg, rgba(12, 37, 49, .96) 0%, rgba(12, 37, 49, .83) 47%, rgba(12, 37, 49, .38) 100%),
+    url("../../assets/staff-community.jpg");
+  background-position: center, center 53%;
+  background-size: cover;
+  box-shadow: 0 12px 30px rgba(24, 34, 48, .16);
+}
+
+.welcome-banner-content > span { color: #d0d8e0; }
+.welcome-user-card {
+  background: rgba(255, 255, 255, .88);
+  backdrop-filter: blur(12px);
+}
+.welcome-user-avatar { background: #123746; }
+.primary-action-btn { color: #123746; }
+.secondary-action-btn { border-color: rgba(255, 255, 255, .42); }
+
+.stat-card,
+.dashboard-panel,
+.service-card,
+.activity-panel {
+  border-color: #e1e6eb;
+  border-radius: 13px;
+  box-shadow: 0 4px 16px rgba(20, 30, 45, .045);
+}
+
+.stat-card:hover,
+.service-card:hover { border-color: #cbd2d9; }
+
+@media (max-width: 768px) {
+  .staff-welcome-banner {
+    background-position: center, 62% center;
+  }
+}

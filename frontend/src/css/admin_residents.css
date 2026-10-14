@@ -1,0 +1,70 @@
+.admin-residents-page {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --resident-accent: #344252;
+  --resident-accent-soft: #eef2f5;
+}
+
+.admin-residents-page .admin-residents-hero {
+  position: relative;
+  display: flex;
+  min-height: 190px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin: 0 0 22px;
+  padding: 25px 30px;
+  overflow: hidden;
+  border-radius: 16px;
+  background: radial-gradient(circle at 84% 10%, rgba(255, 255, 255, .12), transparent 28%), linear-gradient(115deg, #182230, #2d3a48);
+  box-shadow: 0 12px 26px rgba(24, 34, 48, .16);
+  color: #fff;
+}
+
+.admin-residents-page .admin-residents-hero-copy { position: relative; z-index: 1; max-width: 620px; }
+.admin-residents-page .admin-residents-hero-copy > span { color: #c0cad4; font-size: 9px; font-weight: 800; letter-spacing: 1.4px; }
+.admin-residents-page .admin-residents-hero-copy h2 { margin: 9px 0 6px; color: #fff; font-size: clamp(22px, 2.4vw, 29px); line-height: 1.18; letter-spacing: -.55px; }
+.admin-residents-page .admin-residents-hero-copy p { max-width: 540px; margin: 0; color: #d3d9df; font-size: 12px; line-height: 1.6; }
+.admin-residents-page .admin-residents-hero-prompt { display: inline-flex; align-items: center; gap: 8px; margin-top: 14px; padding: 7px 10px; border: 1px solid rgba(255,255,255,.16); border-radius: 9px; background: rgba(255,255,255,.08); color: #e5e9ed; font-size: 10px; }
+.admin-residents-page .admin-residents-hero-prompt span { color: #d6dee5; font-size: 16px; }
+.admin-residents-page .admin-residents-hero-art { position: relative; z-index: 1; display: flex; width: 225px; min-width: 200px; height: 135px; align-items: center; justify-content: center; gap: 12px; border: 1px solid rgba(255,255,255,.17); border-radius: 14px; background: rgba(255,255,255,.09); backdrop-filter: blur(8px); }
+.admin-residents-page .resident-building-mark { display: grid; width: 75px; height: 85px; place-items: center; border: 1px solid rgba(255,255,255,.2); border-radius: 12px; background: rgba(255,255,255,.11); color: #e0e5e9; font-size: 50px; line-height: 1; }
+.admin-residents-page .resident-building-caption { display: flex; flex-direction: column; }
+.admin-residents-page .resident-building-caption strong { color: #fff; font-size: 28px; }
+.admin-residents-page .resident-building-caption span { color: #d3d9df; font-size: 10px; line-height: 1.35; }
+.admin-residents-page .admin-residents-hero-art i,
+.admin-residents-page .admin-residents-hero-art b { position: absolute; z-index: -1; border: 1px solid rgba(255,255,255,.11); border-radius: 50%; }
+.admin-residents-page .admin-residents-hero-art i { width: 160px; height: 160px; right: -38px; top: -84px; }
+.admin-residents-page .admin-residents-hero-art b { width: 100px; height: 100px; left: -40px; bottom: -60px; }
+
+.admin-residents-page .admin-records-table { min-width: 810px; }
+.admin-residents-page .admin-records-table tbody tr { transition: background .18s ease; }
+.admin-residents-page .admin-records-table tbody tr:hover { background: #f4f6f8; }
+.admin-residents-page .admin-resident-open { display: inline-flex; align-items: center; gap: 7px; padding: 7px 10px; border: 1px solid #d8dfe5; border-radius: 8px; background: #fff; color: #344252; font-size: 11px; font-weight: 700; cursor: pointer; transition: .18s ease; }
+.admin-residents-page .admin-resident-open:hover { border-color: #8794a1; background: #eef2f5; transform: translateY(-1px); }
+.admin-residents-page .admin-resident-open span { font-size: 14px; }
+
+.admin-resident-drawer-backdrop { position: fixed; inset: 0; z-index: 1500; display: flex; justify-content: flex-end; background: rgba(13, 28, 37, .42); backdrop-filter: blur(3px); animation: resident-backdrop-in .18s ease-out; }
+.admin-resident-drawer { display: flex; width: min(440px, 100%); height: 100%; flex-direction: column; padding: 26px; overflow-y: auto; background: #f6f7f9; box-shadow: -16px 0 45px rgba(15, 28, 40, .2); animation: resident-drawer-in .24s ease-out; }
+.admin-resident-drawer-top { display: flex; align-items: center; justify-content: space-between; color: #596674; font-size: 9px; font-weight: 800; letter-spacing: 1.3px; }
+.admin-resident-drawer-top button { width: 34px; height: 34px; border: 1px solid #dce2e8; border-radius: 9px; background: #fff; color: #344252; font-size: 22px; cursor: pointer; }
+.admin-resident-drawer-profile { display: flex; align-items: center; gap: 15px; margin: 28px 0 22px; padding: 19px; border-radius: 14px; background: linear-gradient(120deg, #182230, #2d3a48); color: #fff; }
+.admin-resident-drawer-profile > span { display: grid; width: 54px; height: 54px; flex: 0 0 54px; place-items: center; border: 2px solid rgba(255,255,255,.5); border-radius: 50%; background: rgba(255,255,255,.15); font-size: 22px; font-weight: 800; }
+.admin-resident-drawer-profile h2 { margin: 0 0 4px; color: #fff; font-size: 18px; }
+.admin-resident-drawer-profile p { margin: 0; color: #d3d9df; font-size: 11px; }
+.admin-resident-drawer-details { display: grid; gap: 10px; }
+.admin-resident-drawer-details > div { padding: 13px 14px; border: 1px solid #e0eae4; border-radius: 10px; background: #fff; }
+.admin-resident-drawer-details small { display: block; margin-bottom: 5px; color: #84968e; font-size: 8px; font-weight: 800; letter-spacing: .9px; }
+.admin-resident-drawer-details strong { display: block; color: #233b34; font-size: 12px; overflow-wrap: anywhere; }
+.admin-resident-drawer-actions { display: flex; flex-wrap: wrap; gap: 9px; margin-top: auto; padding-top: 22px; }
+.admin-resident-drawer-actions a { display: inline-flex; align-items: center; gap: 7px; padding: 10px 12px; border: 1px solid #d8dfe5; border-radius: 9px; background: #eef2f5; color: #344252; font-size: 11px; font-weight: 700; text-decoration: none; }
+.admin-resident-drawer-actions a:hover { background: #e1e6eb; }
+.admin-resident-drawer-actions p { color: #71847c; font-size: 11px; }
+
+@keyframes resident-backdrop-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes resident-drawer-in { from { opacity: .6; transform: translateX(28px); } to { opacity: 1; transform: translateX(0); } }
+
+@media (max-width: 700px) {
+  .admin-residents-page .admin-residents-hero { align-items: flex-start; flex-direction: column; padding: 22px; }
+  .admin-residents-page .admin-residents-hero-art { width: 100%; justify-content: flex-start; padding-left: 18px; }
+  .admin-resident-drawer { padding: 20px; }
+}

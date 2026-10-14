@@ -86,7 +86,7 @@ const [user] = useState(() => {
             className="resident-brand sidebar-brand"
           >
             <div className="resident-brand-icon brand-mark">
-              ⌂
+              🏢
             </div>
 
             <div className="resident-brand-text brand-text">

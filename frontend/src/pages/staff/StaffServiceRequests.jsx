@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import "../../css/staff/staff_service_requests.css";
+import "../../css/staff/staff_shared_theme.css";
 import { useNavigate } from "react-router-dom";
 
 function StaffServiceRequests() {
@@ -457,6 +458,12 @@ function StaffServiceRequests() {
           </div>
 
         </header>
+
+        <section className="staff-page-intro staff-page-intro--requests">
+          <div><span className="staff-page-intro-kicker">RESIDENT SUPPORT DESK</span><h2>Every request deserves a clear next step.</h2><p>Track new service needs, coordinate follow-up and keep residents informed.</p></div>
+          <div className="staff-page-intro-aside"><span>OPEN QUEUE</span><strong>{pendingRequests}</strong><small>requests awaiting action</small><i aria-hidden="true">⌁</i></div>
+          <span className="staff-page-intro-art" aria-hidden="true">⌂</span>
+        </section>
 
         {/* ================= STATS ================= */}
         <section className="stats-grid">

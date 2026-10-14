@@ -6,6 +6,7 @@ import React, {
   useState,
 } from "react";
 import "../../css/staff/staff_tasks.css";
+import "../../css/staff/staff_shared_theme.css";
 import { useNavigate } from "react-router-dom";
 
 function StaffTasks() {
@@ -614,6 +615,12 @@ function StaffTasks() {
           </div>
 
         </header>
+
+        <section className="staff-page-intro staff-page-intro--tasks">
+          <div><span className="staff-page-intro-kicker">DAILY EXECUTION BOARD</span><h2>Plan the work. Make steady progress.</h2><p>Your task queue brings today’s priorities and completion status together.</p></div>
+          <div className="staff-page-intro-aside"><span>TASKS TO REVIEW</span><strong>{pendingTasks}</strong><small>of {totalTasks} assigned tasks</small><i aria-hidden="true">✓</i></div>
+          <span className="staff-page-intro-art" aria-hidden="true">☑</span>
+        </section>
 
         {/* ================= STATS ================= */}
 
