@@ -7,6 +7,10 @@ const {
   getAllTasks,
   getStaffForTask,
 } = require("../controllers/adminTaskController");
+const authMiddleware = require("../middleware/authMiddleware");
+const requireAdmin = require("../middleware/requireAdmin");
+
+router.use(authMiddleware, requireAdmin);
 
 // ==========================================
 // CREATE NEW TASK

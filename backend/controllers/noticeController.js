@@ -1,4 +1,4 @@
-const db = require("../config/db");
+const { pool } = require("../config/db");
 
 const createNotice = async (req, res) => {
   try {
@@ -15,7 +15,7 @@ const createNotice = async (req, res) => {
 
     const postedBy = req.user.id;
 
-    const [result] = await db.query(
+    const [result] = await pool.query(
       `INSERT INTO notices
       (title, description, notice_type, posted_by, publish_date, expiry_date, status)
       VALUES (?, ?, ?, ?, ?, ?, ?)`,
@@ -48,7 +48,7 @@ const createNotice = async (req, res) => {
 const getAllNotices = async (req, res) => {
   try {
     if (req.user?.role !== "Admin") return res.status(403).json({ success: false, message: "Admin access required" });
-    const [rows] = await db.query(`
+    const [rows] = await pool.query(`
       SELECT
         n.notice_id,
         n.title,
@@ -80,7 +80,7 @@ const getAllNotices = async (req, res) => {
 
 const getActiveNotices = async (req, res) => {
   try {
-    const [rows] = await db.query(`
+    const [rows] = await pool.query(`
       SELECT
         n.notice_id,
         n.title,
@@ -129,7 +129,7 @@ const updateNotice = async (req, res) => {
       return res.status(400).json({ success: false, message: "Valid title, description, type and status are required" });
     }
 
-    await db.query(
+    await pool.query(
       `UPDATE notices
        SET title = ?,
            description = ?,
@@ -168,7 +168,7 @@ const deleteNotice = async (req, res) => {
     if (req.user?.role !== "Admin") return res.status(403).json({ success: false, message: "Admin access required" });
     const { id } = req.params;
 
-    await db.query(
+    await pool.query(
       "DELETE FROM notices WHERE notice_id = ?",
       [id]
     );

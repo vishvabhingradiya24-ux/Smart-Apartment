@@ -55,6 +55,19 @@
   opacity: 0.92;
 }
 
+.amenity-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.add-amenity-btn.secondary {
+  background: #475569;
+}
+
+.amenity-admin-form { margin-bottom: 20px; }
+.addon-admin-card { margin-top: 20px; }
+
 .add-amenity-btn span {
   font-size: 20px;
 }

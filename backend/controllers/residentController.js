@@ -19,6 +19,7 @@ const registerResident = async (req, res) => {
       user_type,
       block_wing,
       flat_number,
+      ownership_type,
       password
     } = req.body;
 
@@ -48,10 +49,16 @@ const registerResident = async (req, res) => {
     }
 
     if (user_type === "Resident") {
-      if (!block_wing || !flat_number) {
+      if (!block_wing || !flat_number || !ownership_type) {
         return res.status(400).json({
           message:
-            "Block/Wing and Flat Number are required for residents"
+            "Block/Wing, Flat Number, and Owner/Rent status are required for residents"
+        });
+      }
+
+      if (!["Owner", "Rent"].includes(ownership_type)) {
+        return res.status(400).json({
+          message: "Owner/Rent status must be Owner or Rent"
         });
       }
     }
@@ -82,9 +89,10 @@ const registerResident = async (req, res) => {
         user_type,
         block_wing,
         flat_number,
+        ownership_type,
         password
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         first_name,
         last_name,
@@ -96,6 +104,9 @@ const registerResident = async (req, res) => {
           : null,
         user_type === "Resident"
           ? flat_number
+          : null,
+        user_type === "Resident"
+          ? ownership_type
           : null,
         hashedPassword
       ]

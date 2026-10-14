@@ -18,11 +18,6 @@ const AdminLayout = ({ children }) => {
       path: "/admin/residents",
     },
     {
-      label: "Security",
-      icon: "🛡️",
-      path: "/admin/security",
-    },
-    {
       label: "Staff",
       icon: "👨‍💼",
       path: "/admin/staff",

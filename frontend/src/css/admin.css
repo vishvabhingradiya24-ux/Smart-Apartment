@@ -1068,6 +1068,17 @@
 .admin-records-state.error p { max-width: 460px; margin: 0; color: #71849a; line-height: 1.5; }
 .admin-records-state.error button { margin-top: 5px; padding: 9px 14px; border-color: #cfe8e1; background: #f2fbf8; color: #087f69; }
 
+.admin-staff-create-card { margin-bottom: 20px; }
+.admin-staff-create-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; padding: 20px; }
+.admin-staff-create-form label { display: flex; flex-direction: column; gap: 7px; color: #36536f; font-size: 12px; font-weight: 700; }
+.admin-staff-create-form input,
+.admin-staff-create-form select { min-height: 40px; padding: 0 11px; border: 1px solid #dce5ed; border-radius: 8px; background: #fff; color: #17324f; font: inherit; font-size: 13px; }
+.admin-staff-create-form input:focus,
+.admin-staff-create-form select:focus { outline: 2px solid #cfe8e1; border-color: #087f69; }
+.admin-staff-form-error { grid-column: 1 / -1; margin: 0; color: #b42318; font-size: 13px; }
+.admin-staff-form-actions { grid-column: 1 / -1; display: flex; justify-content: flex-end; gap: 10px; }
+.admin-staff-success { margin: 0 0 16px; padding: 12px 15px; border: 1px solid #b7e4d8; border-radius: 9px; background: #effaf7; color: #087f69; font-size: 13px; font-weight: 650; }
+
 @media (max-width: 900px) {
   .admin-records-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .admin-records-card-header { align-items: flex-start; flex-direction: column; }
@@ -1085,6 +1096,9 @@
   .admin-records-stats article > span { width: 34px; height: 34px; flex-basis: 34px; font-size: 16px; }
   .admin-records-stats strong { font-size: 18px; }
   .admin-records-controls { align-items: stretch; flex-direction: column; }
+  .admin-staff-create-form { grid-template-columns: 1fr; }
+  .admin-staff-form-actions { flex-direction: column-reverse; }
+  .admin-staff-form-actions button { width: 100%; }
 }
 
 .activity-row {
@@ -1666,6 +1680,80 @@
 .admin-residents-page .admin-records-person strong { color: #173b38; font-size: 13px; }
 .admin-residents-page .admin-records-person small { font-size: 11px; }
 .admin-residents-page .admin-records-badge { padding: 6px 10px; background: #e9f7f1; color: #087f69; font-size: 11px; }
+.admin-ownership-select {
+  min-height: 34px;
+  padding: 0 9px;
+  border: 1px solid #dce5ed;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #36536f;
+  font: inherit;
+  font-size: 12px;
+}
+.admin-ownership-select:disabled { opacity: .65; cursor: wait; }
+
+.admin-data-form {
+  margin: 0 0 20px;
+  padding: 21px;
+  border: 1px solid #e1e8ef;
+  border-radius: 13px;
+  background: #ffffff;
+  box-shadow: 0 3px 12px rgba(23, 50, 79, .035);
+}
+.admin-data-form h2 { margin: 0 0 17px; color: #17324f; font-size: 17px; }
+.admin-data-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 15px;
+}
+.admin-data-form-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  color: #36536f;
+  font-size: 12px;
+  font-weight: 700;
+}
+.admin-data-form-grid input,
+.admin-data-form-grid select,
+.admin-data-form-grid textarea {
+  min-height: 40px;
+  padding: 8px 11px;
+  border: 1px solid #dce5ed;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #17324f;
+  font: inherit;
+  font-size: 13px;
+}
+.admin-data-form-grid textarea { resize: vertical; }
+.admin-data-form-grid input:focus,
+.admin-data-form-grid select:focus,
+.admin-data-form-grid textarea:focus { outline: 2px solid #cfe8e1; border-color: #087f69; }
+.admin-data-form-grid input:disabled { background: #f2f5f7; }
+.admin-data-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}
+.admin-data-form-actions button,
+.admin-row-action {
+  min-height: 34px;
+  padding: 7px 11px;
+  border: 1px solid #d8e8e3;
+  border-radius: 7px;
+  background: #ffffff;
+  color: #087f69;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.admin-data-form-actions button[type="submit"] { background: #087f69; color: #ffffff; }
+.admin-data-form-actions button:disabled { opacity: .6; cursor: wait; }
+.admin-row-action:hover,
+.admin-data-form-actions button:not(:disabled):hover { background: #effaf7; }
 
 @media (max-width: 900px) {
   .admin-residents-page { padding: 24px 20px; }
@@ -1678,4 +1766,5 @@
   .admin-residents-page .admin-records-stats { grid-template-columns: 1fr; gap: 11px; }
   .admin-residents-page .admin-records-card-header { gap: 13px; }
   .admin-residents-page .admin-records-search { min-width: 0; width: 100%; }
+  .admin-data-form-grid { grid-template-columns: 1fr; }
 }

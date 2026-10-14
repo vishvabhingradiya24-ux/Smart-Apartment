@@ -309,6 +309,40 @@
   color: #a0a9b7;
 }
 
+.visitor-status-filter {
+  min-width: 145px;
+  min-height: 40px;
+  padding: 0 10px;
+  border: 1px solid #dfe4eb;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #27344d;
+  font-size: 12px;
+}
+
+.visitor-row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.visitor-row-actions button {
+  min-height: 29px;
+  padding: 5px 8px;
+  border: 1px solid #dce5ed;
+  border-radius: 7px;
+  background: #ffffff;
+  color: #36536f;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.visitor-row-actions button:hover {
+  background: #f0f7f5;
+  border-color: #b7dcd2;
+}
+
 .visitor-filter {
   display: flex;
   align-items: center;
@@ -345,7 +379,7 @@
 
 .visitors-table {
   width: 100%;
-  min-width: 1200px;
+  min-width: 1450px;
   border-collapse: collapse;
 }
 

@@ -17,7 +17,7 @@ const getStaffTasks = async (req, res) => {
         priority,
         status,
         due_date,
-        complate_date,
+        completed_date,
         created_at
       FROM tasks
       WHERE assigned_to = ?
@@ -57,7 +57,7 @@ const getTaskById = async (req, res) => {
         priority,
         status,
         due_date,
-        complate_date,
+        completed_date,
         created_at
       FROM tasks
       WHERE task_id = ?
@@ -134,7 +134,7 @@ const updateTaskStatus = async (req, res) => {
       `UPDATE tasks
        SET
          status = ?,
-         complate_date = ?
+         completed_date = ?
        WHERE task_id = ?
        AND assigned_to = ?`,
       [

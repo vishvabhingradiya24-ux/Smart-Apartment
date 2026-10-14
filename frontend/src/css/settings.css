@@ -43,6 +43,16 @@
   font-weight: 600;
 }
 
+.settings-message {
+  margin: 0 0 16px;
+  padding: 11px 14px;
+  border: 1px solid;
+  border-radius: 9px;
+  font-size: 13px;
+}
+.settings-message.error { border-color: #f2c2c2; background: #fff5f5; color: #a92929; }
+.settings-message.success { border-color: #b9e3d2; background: #f0fbf6; color: #26744f; }
+
 /* MAIN LAYOUT */
 
 .settings-layout {
@@ -395,6 +405,26 @@
   font-size: 11px;
 }
 
+.settings-password-fields {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(140px, 1fr));
+  gap: 9px;
+  width: min(100%, 740px);
+}
+
+.settings-password-fields input {
+  min-height: 38px;
+  min-width: 0;
+  padding: 0 10px;
+  border: 1px solid #dfe5eb;
+  border-radius: 8px;
+  font: inherit;
+  font-size: 12px;
+}
+
+.settings-password-fields button { grid-column: 1 / -1; justify-self: end; }
+.settings-password-fields button:disabled { opacity: .6; cursor: wait; }
+
 /* BACKUP */
 
 .backup-grid {
@@ -449,6 +479,8 @@
   font-weight: 700;
   white-space: nowrap;
 }
+
+.backup-unavailable { color: #b42318 !important; }
 
 .system-status-card {
   margin-top: 18px;
@@ -559,6 +591,13 @@
     align-items: flex-start;
     flex-direction: column;
   }
+
+  .settings-password-fields {
+    grid-template-columns: 1fr;
+    width: 100%;
+  }
+
+  .settings-password-fields button { grid-column: auto; }
 
   .system-status-list {
     grid-template-columns: 1fr;

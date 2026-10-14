@@ -59,7 +59,7 @@ const AdminTask = () => {
       const token = localStorage.getItem("token");
 
       const response = await fetch(
-        "http://localhost:5000/api/staff/all",
+        "http://localhost:5000/api/admin/tasks/staff",
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -70,11 +70,11 @@ const AdminTask = () => {
 
       const data = await response.json();
 
-      if (response.ok) {
-        setStaffList(data || []);
-      }
+      if (!response.ok) throw new Error(data?.message || "Unable to fetch staff");
+      setStaffList(data?.staff || []);
     } catch (error) {
       console.error("Fetch Staff Error:", error);
+      setError(error.message || "Unable to load staff");
     }
   };
 

@@ -92,12 +92,6 @@ const AdminDashboard = () => {
       path: "/admin/residents",
     },
     {
-      title: "Security",
-      description: "Manage security activities",
-      icon: "🛡️",
-      path: "/admin/security",
-    },
-    {
       title: "Staff",
       description: "Manage staff and tasks",
       icon: "👨‍🔧",
@@ -206,7 +200,7 @@ const AdminDashboard = () => {
           </h2>
 
           <p>
-            Manage residents, security, complaints, payments,
+            Manage residents, complaints, payments,
             visitors and community services from your dashboard.
           </p>
 

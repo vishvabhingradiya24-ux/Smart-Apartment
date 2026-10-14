@@ -59,7 +59,6 @@ import StaffProfile from "./pages/staff/StaffProfile";
 
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import Residents from "./pages/admin/Residents";
-import Security from "./pages/admin/Security";
 import AdminLayout from "./pages/admin/AdminLayout";
 import Staff from "./pages/admin/Staff";
 import Complaints from "./pages/admin/Complaints";
@@ -133,14 +132,6 @@ function App() {
           element={
             <AdminLayout>
               <Residents />
-            </AdminLayout>
-          }
-        />
-        <Route
-          path="/admin/security"
-          element={
-            <AdminLayout>
-              <Security />
             </AdminLayout>
           }
         />

@@ -16,6 +16,7 @@ const Register = () => {
     user_type: "",
     block_wing: "",
     flat_number: "",
+    ownership_type: "",
     staff_type: "",
     password: "",
     confirm_password: "",
@@ -43,6 +44,7 @@ const Register = () => {
       user_type: userType,
       block_wing: "",
       flat_number: "",
+      ownership_type: "",
       staff_type: ""
     }));
   };
@@ -84,6 +86,10 @@ const Register = () => {
       formValues.get("flat_number") || ""
     ).trim();
 
+    const ownership_type = String(
+      formValues.get("ownership_type") || ""
+    ).trim();
+
     const staff_type = String(
       formValues.get("staff_type") || ""
     ).trim();
@@ -112,8 +118,8 @@ const Register = () => {
     }
 
     if (user_type === "Resident") {
-      if (!block_wing || !flat_number) {
-        setError("Please fill Block/Wing and Flat Number.");
+      if (!block_wing || !flat_number || !ownership_type) {
+        setError("Please fill Block/Wing, Flat Number, and Owner/Rent status.");
         return;
       }
     }
@@ -160,6 +166,7 @@ const Register = () => {
             user_type,
             block_wing,
             flat_number,
+            ownership_type,
             password
           }
         : {
@@ -426,7 +433,9 @@ const Register = () => {
 
             {formData.user_type === "Resident" && (
 
-              <div className="register-row">
+              <>
+
+                <div className="register-row">
 
                 <div className="register-form-group">
 
@@ -462,9 +471,9 @@ const Register = () => {
 
                   </select>
 
-                </div>
+                  </div>
 
-                <div className="register-form-group">
+                  <div className="register-form-group">
 
                   <label>Flat Number</label>
 
@@ -480,6 +489,28 @@ const Register = () => {
                 </div>
 
               </div>
+
+              <div className="register-form-group">
+
+                <label>Flat Ownership</label>
+
+                <select
+                  className="register-select"
+                  name="ownership_type"
+                  value={formData.ownership_type}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="" disabled>
+                    Select owner or rent
+                  </option>
+                  <option value="Owner">Owner</option>
+                  <option value="Rent">Rent</option>
+                </select>
+
+                </div>
+
+              </>
 
             )}
 

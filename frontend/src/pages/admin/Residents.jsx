@@ -1,6 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import "../../css/admin.css";
 
+const flatNumberCollator = new Intl.Collator("en", {
+  numeric: true,
+  sensitivity: "base",
+});
+
 const formatDate = (value) => {
   if (!value) return "—";
   const date = new Date(value);
@@ -18,6 +23,7 @@ const Residents = () => {
   const [residents, setResidents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [savingOwnershipId, setSavingOwnershipId] = useState(null);
 
   const fetchResidents = useCallback(async (signal) => {
     const response = await fetch("http://localhost:5000/api/admin/residents", {
@@ -46,6 +52,33 @@ const Residents = () => {
     }
   };
 
+  const updateOwnership = async (residentId, ownershipType) => {
+    setSavingOwnershipId(residentId);
+    setError("");
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/admin/residents/${residentId}/ownership`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ ownership_type: ownershipType }),
+        },
+      );
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Unable to update ownership type.");
+      setResidents((current) => current.map((resident) => (
+        resident.id === residentId ? { ...resident, ownership_type: ownershipType } : resident
+      )));
+    } catch (err) {
+      setError(err.message || "Unable to update ownership type.");
+    } finally {
+      setSavingOwnershipId(null);
+    }
+  };
+
   useEffect(() => {
     const controller = new AbortController();
     const loadResidents = async () => {
@@ -66,18 +99,31 @@ const Residents = () => {
 
   const filteredResidents = useMemo(() => {
     const query = searchTerm.trim().toLowerCase();
-    if (!query) return residents;
-    return residents.filter((resident) =>
-      [
-        resident.first_name,
-        resident.last_name,
-        resident.email,
-        resident.phone,
-        resident.block_wing,
-        resident.flat_number,
-        resident.id,
-      ].some((value) => String(value || "").toLowerCase().includes(query)),
-    );
+    return [...residents]
+      .sort((first, second) => {
+        const blockOrder = flatNumberCollator.compare(
+          first.block_wing || "",
+          second.block_wing || "",
+        );
+        if (blockOrder !== 0) return blockOrder;
+
+        const flatOrder = flatNumberCollator.compare(
+          first.flat_number || "",
+          second.flat_number || "",
+        );
+        return flatOrder || Number(first.id) - Number(second.id);
+      })
+      .filter((resident) =>
+        [
+          resident.first_name,
+          resident.last_name,
+          resident.email,
+          resident.phone,
+          resident.block_wing,
+          resident.flat_number,
+          resident.id,
+        ].some((value) => String(value || "").toLowerCase().includes(query)),
+      );
   }, [residents, searchTerm]);
 
   const occupiedFlats = new Set(
@@ -179,8 +225,9 @@ const Residents = () => {
             <table className="admin-records-table">
               <thead>
                 <tr>
+                  <th>Flat No.</th>
                   <th>Resident</th>
-                  <th>Flat</th>
+                  <th>Rent / Owner</th>
                   <th>Phone</th>
                   <th>Registered</th>
                 </tr>
@@ -193,6 +240,13 @@ const Residents = () => {
                   return (
                     <tr key={resident.id}>
                       <td>
+                        <span className="admin-records-badge">
+                          {[resident.block_wing, resident.flat_number]
+                            .filter(Boolean)
+                            .join(" - ") || "Not assigned"}
+                        </span>
+                      </td>
+                      <td>
                         <div className="admin-records-person">
                           <span>{name.charAt(0).toUpperCase()}</span>
                           <div>
@@ -202,11 +256,17 @@ const Residents = () => {
                         </div>
                       </td>
                       <td>
-                        <span className="admin-records-badge">
-                          {[resident.block_wing, resident.flat_number]
-                            .filter(Boolean)
-                            .join(" - ") || "Not assigned"}
-                        </span>
+                        <select
+                          className="admin-ownership-select"
+                          aria-label={`Ownership type for ${name}`}
+                          value={resident.ownership_type || ""}
+                          disabled={savingOwnershipId === resident.id}
+                          onChange={(event) => updateOwnership(resident.id, event.target.value)}
+                        >
+                          <option value="" disabled>Not specified</option>
+                          <option value="Owner">Owner</option>
+                          <option value="Rent">Rent</option>
+                        </select>
                       </td>
                       <td>{resident.phone || "—"}</td>
                       <td>{formatDate(resident.created_at)}</td>
