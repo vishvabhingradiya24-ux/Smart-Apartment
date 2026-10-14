@@ -22,7 +22,9 @@
   align-items: flex-end;
   justify-content: space-between;
   gap: 25px;
-  margin-bottom: 24px;
+  padding: 24px;
+  margin-bottom: 30px;
+  border-radius: 15px;
 }
 
 .sr-header-content {
@@ -32,7 +34,7 @@
 .sr-eyebrow {
   display: block;
   margin-bottom: 7px;
-  color: #08ad8d;
+  color: #ffffff;
   font-size: 10px;
   font-weight: 800;
   letter-spacing: 1.8px;
@@ -70,15 +72,14 @@
   background: #ffffff;
   color: #078b73;
   text-decoration: none;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 700;
   box-shadow: 0 4px 12px rgba(6, 75, 112, 0.04);
   transition: all 0.2s ease;
 }
 
 .sr-dashboard-btn span {
-  font-size: 16px;
-  line-height: 1;
+ 
 }
 
 .sr-dashboard-btn:hover {
@@ -188,7 +189,7 @@
   display: block;
   margin-bottom: 5px;
   color: #08ad8d;
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 800;
   letter-spacing: 1.5px;
 }
@@ -196,7 +197,7 @@
 .sr-overview-title h2 {
   margin: 0;
   color: #064b70;
-  font-size: 17px;
+  font-size: 24px;
   font-weight: 700;
 }
 

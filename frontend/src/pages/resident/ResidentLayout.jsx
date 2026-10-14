@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { NavLink, Link, Outlet, useNavigate } from "react-router-dom";
-import "../../css/resident/resident_Dashboard.css";
+import "../../css/resident/resident_dashboard.css";
 
 function ResidentLayout() {
   const navigate = useNavigate();
