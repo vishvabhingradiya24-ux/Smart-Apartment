@@ -378,6 +378,23 @@
   gap: 10px;
 
   padding-left: 8px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.admin-header-profile:hover .admin-header-avatar,
+.admin-header-profile:focus-visible .admin-header-avatar {
+  outline: 3px solid #bfdbfe;
+  outline-offset: 2px;
+}
+
+.admin-header-profile:focus-visible {
+  border-radius: 8px;
+  outline: 2px solid var(--admin-primary);
+  outline-offset: 4px;
 }
 
 .admin-header-avatar {
@@ -1629,7 +1646,7 @@
 }
 
 .admin-residents-page .admin-records-stats {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 18px;
   margin-bottom: 24px;
 }
@@ -1671,7 +1688,7 @@
 }
 
 .admin-residents-page .admin-records-search input { min-height: 42px; }
-.admin-residents-page .admin-records-table { min-width: 720px; }
+.admin-residents-page .admin-records-table { min-width: 1040px; }
 .admin-residents-page .admin-records-table th { padding: 15px 20px; background: #eff8f5; color: #54716b; font-size: 11px; }
 .admin-residents-page .admin-records-table td { padding: 16px 20px; border-color: #edf3f0; font-size: 13px; }
 .admin-residents-page .admin-records-table tbody tr:nth-child(even) { background: #fbfdfc; }
@@ -1691,6 +1708,33 @@
   font-size: 12px;
 }
 .admin-ownership-select:disabled { opacity: .65; cursor: wait; }
+.resident-account-status {
+  display: inline-block;
+  padding: 5px 9px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 700;
+}
+.resident-account-status.active { background: #e9f7ef; color: #26744f; }
+.resident-account-status.archived { background: #f1f3f5; color: #64748b; }
+.admin-records-actions .resident-archive-action {
+  border-color: #f3caca;
+  color: #b42318;
+}
+.admin-records-actions .resident-archive-action:hover { background: #fff5f5; }
+.admin-resident-form-card { margin-bottom: 20px; }
+.admin-residents-page .admin-records-card-header { gap: 18px; }
+.admin-residents-page .admin-records-controls { flex: 1; }
+.admin-residents-page .admin-records-controls select {
+  min-height: 42px;
+  padding: 0 10px;
+  border: 1px solid #d5e7e1;
+  border-radius: 9px;
+  background: #ffffff;
+  color: #36536f;
+  font: inherit;
+  font-size: 12px;
+}
 
 .admin-data-form {
   margin: 0 0 20px;

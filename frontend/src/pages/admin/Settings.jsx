@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import "../../css/settings.css";
 
 const defaultNotifications = {
@@ -15,7 +16,13 @@ const emptyAdmin = { name: "", email: "", phone: "" };
 const emptyPassword = { currentPassword: "", newPassword: "", confirmPassword: "" };
 
 const Settings = () => {
-  const [activeTab, setActiveTab] = useState("society");
+  const [searchParams] = useSearchParams();
+  const initialTab = searchParams.get("tab");
+  const [activeTab, setActiveTab] = useState(
+    ["society", "profile", "notifications", "security", "backup"].includes(initialTab)
+      ? initialTab
+      : "society",
+  );
   const [societyData, setSocietyData] = useState(emptySociety);
   const [adminData, setAdminData] = useState(emptyAdmin);
   const [notifications, setNotifications] = useState(defaultNotifications);

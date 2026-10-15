@@ -15,6 +15,7 @@ const Payments = () => {
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [removingId, setRemovingId] = useState(null);
   const [error, setError] = useState("");
   const token = localStorage.getItem("token");
 
@@ -93,6 +94,28 @@ const Payments = () => {
     }
   };
 
+  const removePayment = async (payment) => {
+    const residentName = [payment.first_name, payment.last_name].filter(Boolean).join(" ") || "this resident";
+    if (!window.confirm(`Remove the pending payment due for ${residentName}? The payment record will be kept as Cancelled.`)) {
+      return;
+    }
+
+    setRemovingId(payment.payment_id);
+    setError("");
+    try {
+      const response = await request(`/api/admin/payments/${payment.payment_id}/cancel`, {
+        method: "PATCH",
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Payment due could not be removed");
+      await loadData();
+    } catch (err) {
+      setError(err.message || "Payment due could not be removed");
+    } finally {
+      setRemovingId(null);
+    }
+  };
+
   const filteredPayments = useMemo(() => payments.filter((payment) => {
     const search = searchTerm.toLowerCase();
     const name = [payment.first_name, payment.last_name].filter(Boolean).join(" ");
@@ -162,7 +185,7 @@ const Payments = () => {
       <div className="payments-section-header"><div><h2>Payment Records</h2><p>Payment status, amounts, residents and transaction IDs.</p></div><span className="record-count">{filteredPayments.length} Records</span></div>
       <div className="payments-toolbar">
         <div className="payment-search"><span>🔍</span><input placeholder="Search payment, resident, flat or transaction..." value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} /></div>
-        <div className="payment-filter"><label>Status</label><select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}><option>All</option><option>Success</option><option>Pending</option></select></div>
+        <div className="payment-filter"><label>Status</label><select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}><option>All</option><option>Success</option><option>Pending</option><option>Cancelled</option></select></div>
       </div>
       {error && <p className="page-error" role="alert">{error}</p>}
       <div className="payments-table-wrapper"><table className="payments-table">
@@ -178,13 +201,18 @@ const Payments = () => {
             <td><strong className="payment-amount">₹{Number(payment.amount || 0).toLocaleString("en-IN")}</strong></td>
             <td>{formatDate(payment.paid_date || payment.due_date || payment.created_at)}</td>
             <td><span className="transaction-id">{payment.transaction_id || "—"}</span></td>
-            <td><span className={`payment-status ${status === "Success" ? "status-success" : "status-pending"}`}>{status === "Success" ? "✓" : "⏳"} {status}</span></td>
-            <td>{payment.status === "Pending" && <button className="admin-row-action" type="button" onClick={() => openEdit(payment)}>Edit</button>}</td>
+            <td><span className={`payment-status ${status === "Success" ? "status-success" : status === "Cancelled" ? "status-cancelled" : "status-pending"}`}>{status === "Success" ? "✓" : status === "Cancelled" ? "⊘" : "⏳"} {status}</span></td>
+            <td>{payment.status === "Pending" && !payment.razorpay_order_id && <div className="payment-record-actions">
+              <button className="admin-row-action" type="button" onClick={() => openEdit(payment)}>Edit</button>
+              <button className="admin-row-action payment-remove-action" type="button" disabled={removingId === payment.payment_id} onClick={() => removePayment(payment)}>
+                {removingId === payment.payment_id ? "Removing…" : "Remove"}
+              </button>
+            </div>}{payment.status === "Pending" && payment.razorpay_order_id && <span className="payment-checkout-note">Checkout started</span>}</td>
           </tr>;
         }) : <tr><td colSpan="9" className="no-payment-data">{error ? "Payment records could not be loaded." : "No payments found."}</td></tr>}</tbody>
       </table></div>
     </section>
-    <section className="payment-info-card"><div className="payment-info-icon">ℹ️</div><div><h3>Payment Management</h3><p>Only pending payment dues can be edited. Paid status and transaction details are set by verified payment processing.</p></div></section>
+    <section className="payment-info-card"><div className="payment-info-icon">ℹ️</div><div><h3>Payment Management</h3><p>Pending dues can be edited or removed before checkout starts. Removed dues remain in the records as Cancelled; paid status and transaction details are set by verified payment processing.</p></div></section>
   </div>;
 };
 

@@ -86,9 +86,6 @@ const isValidDateOnly = (value) =>
   !Number.isNaN(Date.parse(`${value}T00:00:00Z`)) &&
   new Date(`${value}T00:00:00Z`).toISOString().slice(0, 10) === value;
 
-const isValidTime = (value) =>
-  typeof value === "string" && /^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/.test(value);
-
 const isValidMoney = (value, allowZero = false) => {
   const amount = String(value ?? "");
   return /^\d{1,8}(?:\.\d{1,2})?$/.test(amount) &&
@@ -104,7 +101,8 @@ const getAdminDashboard = async (req, res) => {
     const [residentRows] = await pool.query(
       `SELECT COUNT(*) AS total_residents,
               COUNT(DISTINCT CONCAT_WS('-', block_wing, flat_number)) AS total_flats
-       FROM residents`
+       FROM residents
+       WHERE user_type = 'Resident' AND is_active = 1`
     );
     const [complaintRows] = await pool.query(
       `SELECT COUNT(*) AS total_complaints,
@@ -215,9 +213,11 @@ const getAdminResidents = async (req, res) => {
   try {
     if (!requireAdmin(req, res)) return;
     const [residents] = await pool.query(
-      `SELECT id, first_name, last_name, email, phone, block_wing, flat_number, ownership_type, created_at
+      `SELECT id, first_name, last_name, email, phone, block_wing, flat_number,
+              ownership_type, is_active, created_at
        FROM residents
-       ORDER BY block_wing ASC, CAST(flat_number AS UNSIGNED) ASC, flat_number ASC`
+       WHERE user_type = 'Resident'
+       ORDER BY is_active DESC, block_wing ASC, CAST(flat_number AS UNSIGNED) ASC, flat_number ASC`
     );
     res.status(200).json({ residents });
   } catch (error) {
@@ -225,6 +225,175 @@ const getAdminResidents = async (req, res) => {
     res.status(500).json({ message: "Unable to fetch residents" });
   }
 };
+
+const validateResidentDetails = (body, includePassword = false) => {
+  const firstName = body.first_name?.trim();
+  const lastName = body.last_name?.trim();
+  const email = body.email?.trim().toLowerCase();
+  const phone = body.phone?.trim();
+  const blockWing = body.block_wing?.trim();
+  const flatNumber = body.flat_number?.trim();
+  const ownershipType = body.ownership_type;
+  const password = body.password;
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  if (!firstName || !lastName || !email || !emailPattern.test(email) ||
+      !phone || !blockWing || !flatNumber || !["Owner", "Rent"].includes(ownershipType)) {
+    return { error: "Enter valid resident, contact, flat and ownership details" };
+  }
+  if (firstName.length > 100 || lastName.length > 100 || email.length > 150 ||
+      phone.length > 20 || blockWing.length > 50 || flatNumber.length > 20) {
+    return { error: "One or more resident fields exceed the allowed length" };
+  }
+  if (includePassword && (typeof password !== "string" || password.length < 6)) {
+    return { error: "Password must be at least 6 characters" };
+  }
+  if (!includePassword && password && (typeof password !== "string" || password.length < 6)) {
+    return { error: "New password must be at least 6 characters" };
+  }
+
+  return {
+    value: {
+      firstName,
+      lastName,
+      email,
+      phone,
+      blockWing,
+      flatNumber,
+      ownershipType,
+      password: password || "",
+    },
+  };
+};
+
+const createAdminResident = async (req, res) => {
+  try {
+    if (!requireAdmin(req, res)) return;
+    const validation = validateResidentDetails(req.body, true);
+    if (validation.error) return res.status(400).json({ message: validation.error });
+    const resident = validation.value;
+
+    const [existingResidents] = await pool.query(
+      "SELECT id FROM residents WHERE email = ? LIMIT 1",
+      [resident.email]
+    );
+    if (existingResidents.length) return res.status(409).json({ message: "Email is already registered" });
+
+    const hashedPassword = await bcrypt.hash(resident.password, 10);
+    const [result] = await pool.query(
+      `INSERT INTO residents
+         (first_name, last_name, email, phone, user_type, block_wing, flat_number,
+          ownership_type, password, is_active)
+       VALUES (?, ?, ?, ?, 'Resident', ?, ?, ?, ?, 1)`,
+      [
+        resident.firstName,
+        resident.lastName,
+        resident.email,
+        resident.phone,
+        resident.blockWing,
+        resident.flatNumber,
+        resident.ownershipType,
+        hashedPassword,
+      ]
+    );
+    res.status(201).json({ message: "Resident added successfully", residentId: result.insertId });
+  } catch (error) {
+    console.error("Create Admin Resident Error:", error);
+    res.status(500).json({ message: "Unable to add resident" });
+  }
+};
+
+const updateAdminResident = async (req, res) => {
+  try {
+    if (!requireAdmin(req, res)) return;
+    const validation = validateResidentDetails(req.body);
+    if (validation.error) return res.status(400).json({ message: validation.error });
+    const resident = validation.value;
+
+    const [existingResidents] = await pool.query(
+      "SELECT id FROM residents WHERE email = ? AND id <> ? LIMIT 1",
+      [resident.email, req.params.id]
+    );
+    if (existingResidents.length) return res.status(409).json({ message: "Email is already registered" });
+
+    const [rows] = await pool.query(
+      "SELECT id FROM residents WHERE id = ? AND user_type = 'Resident'",
+      [req.params.id]
+    );
+    if (!rows.length) return res.status(404).json({ message: "Resident not found" });
+
+    if (resident.password) {
+      const hashedPassword = await bcrypt.hash(resident.password, 10);
+      await pool.query(
+        `UPDATE residents
+         SET first_name = ?, last_name = ?, email = ?, phone = ?, block_wing = ?,
+             flat_number = ?, ownership_type = ?, password = ?
+         WHERE id = ? AND user_type = 'Resident'`,
+        [
+          resident.firstName,
+          resident.lastName,
+          resident.email,
+          resident.phone,
+          resident.blockWing,
+          resident.flatNumber,
+          resident.ownershipType,
+          hashedPassword,
+          req.params.id,
+        ]
+      );
+    } else {
+      await pool.query(
+        `UPDATE residents
+         SET first_name = ?, last_name = ?, email = ?, phone = ?, block_wing = ?,
+             flat_number = ?, ownership_type = ?
+         WHERE id = ? AND user_type = 'Resident'`,
+        [
+          resident.firstName,
+          resident.lastName,
+          resident.email,
+          resident.phone,
+          resident.blockWing,
+          resident.flatNumber,
+          resident.ownershipType,
+          req.params.id,
+        ]
+      );
+    }
+    res.status(200).json({ message: "Resident updated successfully" });
+  } catch (error) {
+    console.error("Update Admin Resident Error:", error);
+    res.status(500).json({ message: "Unable to update resident" });
+  }
+};
+
+const setAdminResidentArchived = async (req, res, archived) => {
+  try {
+    if (!requireAdmin(req, res)) return;
+    const [residents] = await pool.query(
+      "SELECT id, is_active FROM residents WHERE id = ? AND user_type = 'Resident' LIMIT 1",
+      [req.params.id]
+    );
+    if (!residents.length) return res.status(404).json({ message: "Resident not found" });
+    const activeValue = archived ? 0 : 1;
+    if (Number(residents[0].is_active) === activeValue) {
+      return res.status(200).json({
+        message: archived ? "Resident is already archived" : "Resident is already active",
+        is_active: activeValue,
+      });
+    }
+    await pool.query("UPDATE residents SET is_active = ? WHERE id = ?", [activeValue, req.params.id]);
+    res.status(200).json({
+      message: archived ? "Resident archived; existing records were preserved" : "Resident restored",
+      is_active: activeValue,
+    });
+  } catch (error) {
+    console.error(`${archived ? "Archive" : "Restore"} Admin Resident Error:`, error);
+    res.status(500).json({ message: `Unable to ${archived ? "archive" : "restore"} resident` });
+  }
+};
+
+const archiveAdminResident = (req, res) => setAdminResidentArchived(req, res, true);
+const restoreAdminResident = (req, res) => setAdminResidentArchived(req, res, false);
 
 const updateResidentOwnership = async (req, res) => {
   try {
@@ -235,7 +404,7 @@ const updateResidentOwnership = async (req, res) => {
     }
 
     const [result] = await pool.query(
-      "UPDATE residents SET ownership_type = ? WHERE id = ?",
+      "UPDATE residents SET ownership_type = ? WHERE id = ? AND user_type = 'Resident'",
       [ownership_type, req.params.id]
     );
     if (result.affectedRows === 0) {
@@ -358,7 +527,7 @@ const getAdminPayments = async (req, res) => {
     const [payments] = await pool.query(
       `SELECT p.id AS payment_id, p.resident_id, p.amount, p.billing_month,
               p.due_date, p.paid_date, p.status, p.payment_method,
-              p.transaction_id, p.created_at,
+              p.transaction_id, p.razorpay_order_id, p.created_at,
               r.first_name, r.last_name, r.block_wing, r.flat_number
        FROM payments p LEFT JOIN residents r ON r.id = p.resident_id
        ORDER BY COALESCE(p.paid_date, p.created_at, p.due_date) DESC, p.id DESC`
@@ -392,8 +561,10 @@ const getAdminNotifications = async (req, res) => {
   try {
     if (!requireAdmin(req, res)) return;
     const [notices] = await pool.query(
-      `SELECT notice_id, title, description, notice_type, publish_date AS happened_at
-       FROM notices ORDER BY publish_date DESC LIMIT 10`
+      `SELECT n.notice_id, n.title, n.description, n.notice_type, n.publish_date AS happened_at,
+              a.name AS admin_name
+       FROM notices n LEFT JOIN admins a ON a.id = n.posted_by
+       ORDER BY n.publish_date DESC LIMIT 10`
     );
     const [payments] = await pool.query(
       `SELECT p.id, p.amount, p.status, p.created_at AS happened_at,
@@ -429,18 +600,69 @@ const getAdminNotifications = async (req, res) => {
     );
 
     const notifications = [
-      ...notices.map((item) => ({ id: `notice-${item.notice_id}`, title: item.title, message: item.description, type: item.notice_type || "Notice", date: item.happened_at, priority: "Normal" })),
-      ...payments.map((item) => ({ id: `payment-${item.id}`, title: `Payment ${item.status || "updated"}`, message: `₹${Number(item.amount || 0).toLocaleString("en-IN")}${item.first_name ? ` from ${item.first_name} ${item.last_name || ""}` : ""}`, type: "Payment", date: item.happened_at, userId: item.resident_id, priority: "Normal" })),
-      ...complaints.map((item) => ({ id: `complaint-${item.complaint_id}`, title: item.complaint_title || "Complaint update", message: `${item.status || "Pending"}${item.first_name ? ` · ${item.first_name} ${item.last_name || ""}${item.flat_number ? ` · Flat ${item.flat_number}` : ""}` : ""}`, type: "Complaint", date: item.happened_at, userId: item.resident_id, priority: "Normal" })),
-      ...visitors.map((item) => ({ id: `visitor-${item.visitor_id}`, title: `${item.visitor_name || "Visitor"} · ${item.status || "Pending"}`, message: `${item.purpose || "Visitor request"}${item.first_name ? ` for ${item.first_name} ${item.last_name || ""}${item.flat_number ? ` · Flat ${item.flat_number}` : ""}` : ""}`, type: "Visitor", date: item.happened_at, userId: item.resident_id, priority: "Normal" })),
-      ...tasks.map((item) => ({ id: `task-${item.task_id}`, title: item.task_name || "Staff task", message: `${item.status || "Pending"}${item.first_name ? ` · Assigned to ${item.first_name} ${item.last_name || ""}` : ""}`, type: "Task", date: item.happened_at, priority: "Normal" })),
-      ...bookings.map((item) => ({ id: `booking-${item.booking_id}`, title: `${item.facility_name || "Facility"} booking · ${item.status || "Pending"}`, message: `${item.first_name ? `${item.first_name} ${item.last_name || ""}${item.flat_number ? ` · Flat ${item.flat_number}` : ""}` : "Resident booking request"}`, type: "Booking", date: item.happened_at, userId: item.resident_id, priority: "Normal" })),
+      ...notices.map((item) => ({ id: `notice-${item.notice_id}`, title: item.title, message: item.description, type: item.notice_type || "Notice", date: item.happened_at, actorName: item.admin_name || "System", actorType: item.admin_name ? "Admin" : "System" })),
+      ...payments.map((item) => ({ id: `payment-${item.id}`, title: `Payment ${item.status || "updated"}`, message: `₹${Number(item.amount || 0).toLocaleString("en-IN")}${item.first_name ? ` from ${item.first_name} ${item.last_name || ""}` : ""}`, type: "Payment", date: item.happened_at, userId: item.resident_id, actorName: [item.first_name, item.last_name].filter(Boolean).join(" ") || `Resident #${item.resident_id}`, actorType: "Resident" })),
+      ...complaints.map((item) => ({ id: `complaint-${item.complaint_id}`, title: item.complaint_title || "Complaint update", message: `${item.status || "Pending"}${item.first_name ? ` · ${item.first_name} ${item.last_name || ""}${item.flat_number ? ` · Flat ${item.flat_number}` : ""}` : ""}`, type: "Complaint", date: item.happened_at, userId: item.resident_id, actorName: [item.first_name, item.last_name].filter(Boolean).join(" ") || `Resident #${item.resident_id}`, actorType: "Resident" })),
+      ...visitors.map((item) => ({ id: `visitor-${item.visitor_id}`, title: `${item.visitor_name || "Visitor"} · ${item.status || "Pending"}`, message: `${item.purpose || "Visitor request"}${item.first_name ? ` for ${item.first_name} ${item.last_name || ""}${item.flat_number ? ` · Flat ${item.flat_number}` : ""}` : ""}`, type: "Visitor", date: item.happened_at, userId: item.resident_id, actorName: [item.first_name, item.last_name].filter(Boolean).join(" ") || `Resident #${item.resident_id}`, actorType: "Resident" })),
+      ...tasks.map((item) => ({ id: `task-${item.task_id}`, title: item.task_name || "Staff task", message: `${item.status || "Pending"}${item.first_name ? ` · Assigned to ${item.first_name} ${item.last_name || ""}` : ""}`, type: "Task", date: item.happened_at, actorName: [item.first_name, item.last_name].filter(Boolean).join(" ") || "Unassigned", actorType: "Staff" })),
+      ...bookings.map((item) => ({ id: `booking-${item.booking_id}`, title: `${item.facility_name || "Facility"} booking · ${item.status || "Pending"}`, message: `${item.first_name ? `${item.first_name} ${item.last_name || ""}${item.flat_number ? ` · Flat ${item.flat_number}` : ""}` : "Resident booking request"}`, type: "Booking", date: item.happened_at, userId: item.resident_id, actorName: [item.first_name, item.last_name].filter(Boolean).join(" ") || `Resident #${item.resident_id}`, actorType: "Resident" })),
     ].sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0)).slice(0, 30);
 
-    res.status(200).json({ notifications });
+    const [readRows] = await pool.query(
+      "SELECT notification_id FROM admin_notification_reads WHERE admin_id = ?",
+      [req.user.id]
+    );
+    const readIds = new Set(readRows.map((row) => row.notification_id));
+    res.status(200).json({
+      notifications: notifications.map((item) => ({ ...item, isRead: readIds.has(item.id) })),
+    });
   } catch (error) {
     console.error("Get Admin Notifications Error:", error);
     res.status(500).json({ message: "Unable to fetch recent system activity" });
+  }
+};
+
+const updateAdminNotificationReadState = async (req, res) => {
+  try {
+    if (!requireAdmin(req, res)) return;
+    const match = /^([a-z]+)-(\d+)$/.exec(req.params.id || "");
+    const source = match && ({
+      notice: { table: "notices", idColumn: "notice_id" },
+      payment: { table: "payments", idColumn: "id" },
+      complaint: { table: "complaints", idColumn: "complaint_id" },
+      visitor: { table: "visitors", idColumn: "visitor_id" },
+      task: { table: "tasks", idColumn: "task_id" },
+      booking: { table: "facility_bookings", idColumn: "booking_id" },
+    })[match[1]];
+    const isRead = req.body?.isRead;
+    if (!source || !Number.isSafeInteger(Number(match[2])) || ![true, false].includes(isRead)) {
+      return res.status(400).json({ message: "Invalid notification read status request" });
+    }
+
+    const [records] = await pool.query(
+      `SELECT 1 FROM ${source.table} WHERE ${source.idColumn} = ? LIMIT 1`,
+      [Number(match[2])]
+    );
+    if (!records.length) return res.status(404).json({ message: "Notification activity not found" });
+
+    if (isRead) {
+      await pool.query(
+        `INSERT INTO admin_notification_reads (admin_id, notification_id)
+         VALUES (?, ?)
+         ON DUPLICATE KEY UPDATE read_at = CURRENT_TIMESTAMP`,
+        [req.user.id, req.params.id]
+      );
+    } else {
+      await pool.query(
+        "DELETE FROM admin_notification_reads WHERE admin_id = ? AND notification_id = ?",
+        [req.user.id, req.params.id]
+      );
+    }
+
+    res.status(200).json({ message: `Notification marked as ${isRead ? "read" : "unread"}`, isRead });
+  } catch (error) {
+    console.error("Update Admin Notification Read State Error:", error);
+    res.status(500).json({ message: "Unable to update notification read status" });
   }
 };
 
@@ -638,7 +860,7 @@ const getAdminPaymentResidents = async (req, res) => {
     if (!requireAdmin(req, res)) return;
     const [residents] = await pool.query(
       `SELECT id, first_name, last_name, block_wing, flat_number
-       FROM residents WHERE user_type = 'Resident'
+       FROM residents WHERE user_type = 'Resident' AND is_active = 1
        ORDER BY block_wing, CAST(flat_number AS UNSIGNED), flat_number`
     );
     res.status(200).json({ residents });
@@ -659,7 +881,7 @@ const createAdminPayment = async (req, res) => {
       return res.status(400).json({ message: "Resident, positive amount, billing month and due date are required" });
     }
     const [residents] = await pool.query(
-      "SELECT id FROM residents WHERE id = ? AND user_type = 'Resident'",
+      "SELECT id FROM residents WHERE id = ? AND user_type = 'Resident' AND is_active = 1",
       [residentId]
     );
     if (!residents.length) return res.status(404).json({ message: "Resident not found" });
@@ -684,21 +906,68 @@ const updateAdminPayment = async (req, res) => {
     if (!Number.isFinite(paymentAmount) || !isValidMoney(amount) || !billing_month?.trim() || !isValidDateOnly(due_date)) {
       return res.status(400).json({ message: "Positive amount, billing month and due date are required" });
     }
-    const [payments] = await pool.query("SELECT status FROM payments WHERE id = ? LIMIT 1", [req.params.id]);
+    const [payments] = await pool.query(
+      "SELECT status, razorpay_order_id FROM payments WHERE id = ? LIMIT 1",
+      [req.params.id]
+    );
     if (!payments.length) return res.status(404).json({ message: "Payment record not found" });
     if (payments[0].status !== "Pending") {
       return res.status(409).json({ message: "Only pending payments can be edited" });
     }
-    await pool.query(
+    if (payments[0].razorpay_order_id) {
+      return res.status(409).json({ message: "Payment cannot be edited after checkout has started" });
+    }
+    const [result] = await pool.query(
       `UPDATE payments
        SET amount = ?, billing_month = ?, due_date = ?
-       WHERE id = ? AND status = 'Pending'`,
+       WHERE id = ? AND status = 'Pending' AND razorpay_order_id IS NULL`,
       [paymentAmount.toFixed(2), billing_month.trim(), due_date, req.params.id]
     );
+    if (!result.affectedRows) {
+      const [currentPayments] = await pool.query(
+        "SELECT status, razorpay_order_id FROM payments WHERE id = ? LIMIT 1",
+        [req.params.id]
+      );
+      if (!currentPayments.length) return res.status(404).json({ message: "Payment record not found" });
+      if (currentPayments[0].status !== "Pending" || currentPayments[0].razorpay_order_id) {
+        return res.status(409).json({ message: "Payment changed and can no longer be edited" });
+      }
+    }
     res.status(200).json({ message: "Pending payment updated" });
   } catch (error) {
     console.error("Update Admin Payment Error:", error);
     res.status(500).json({ message: "Unable to update payment record" });
+  }
+};
+
+const cancelAdminPayment = async (req, res) => {
+  try {
+    if (!requireAdmin(req, res)) return;
+    const [payments] = await pool.query(
+      "SELECT status, razorpay_order_id FROM payments WHERE id = ? LIMIT 1",
+      [req.params.id]
+    );
+    if (!payments.length) return res.status(404).json({ message: "Payment record not found" });
+    if (payments[0].status !== "Pending") {
+      return res.status(409).json({ message: "Only pending payment dues can be removed" });
+    }
+    if (payments[0].razorpay_order_id) {
+      return res.status(409).json({ message: "This payment has a checkout attempt and cannot be removed" });
+    }
+
+    const [result] = await pool.query(
+      `UPDATE payments
+       SET status = 'Cancelled'
+       WHERE id = ? AND status = 'Pending' AND razorpay_order_id IS NULL`,
+      [req.params.id]
+    );
+    if (!result.affectedRows) {
+      return res.status(409).json({ message: "Payment changed and can no longer be removed" });
+    }
+    res.status(200).json({ message: "Pending payment removed from dues; its record was preserved" });
+  } catch (error) {
+    console.error("Remove Admin Payment Error:", error);
+    res.status(500).json({ message: "Unable to remove payment due" });
   }
 };
 
@@ -831,150 +1100,14 @@ const updateAdminAmenityAddon = async (req, res) => {
   }
 };
 
-const getAdminVisitorResidents = async (req, res) => {
-  try {
-    if (!requireAdmin(req, res)) return;
-    const [residents] = await pool.query(
-      `SELECT id, first_name, last_name, block_wing, flat_number
-       FROM residents WHERE user_type = 'Resident'
-       ORDER BY block_wing, CAST(flat_number AS UNSIGNED), flat_number`
-    );
-    res.status(200).json({ residents });
-  } catch (error) {
-    console.error("Get Admin Visitor Residents Error:", error);
-    res.status(500).json({ message: "Unable to fetch residents for visitors" });
-  }
-};
-
-const validateVisitor = (body) => {
-  const residentId = Number(body.resident_id);
-  if (!Number.isInteger(residentId) || residentId <= 0 || !body.visitor_name?.trim() ||
-      !body.contact_number?.trim() || !body.purpose?.trim() || !isValidDateOnly(body.visit_date) ||
-      !isValidTime(body.expected_time)) return null;
-  return {
-    residentId,
-    visitorName: body.visitor_name.trim(),
-    contactNumber: body.contact_number.trim(),
-    purpose: body.purpose.trim(),
-    visitDate: body.visit_date,
-    expectedTime: body.expected_time,
-  };
-};
-
-const createAdminVisitor = async (req, res) => {
-  try {
-    if (!requireAdmin(req, res)) return;
-    const visitor = validateVisitor(req.body);
-    if (!visitor) return res.status(400).json({ message: "Enter all visitor details" });
-    const [residents] = await pool.query(
-      "SELECT id FROM residents WHERE id = ? AND user_type = 'Resident'",
-      [visitor.residentId]
-    );
-    if (!residents.length) return res.status(404).json({ message: "Resident not found" });
-    const [result] = await pool.query(
-      `INSERT INTO visitors (resident_id, visitor_name, contact_number, purpose, visit_date, expected_time, status)
-       VALUES (?, ?, ?, ?, ?, ?, 'Pending')`,
-      [visitor.residentId, visitor.visitorName, visitor.contactNumber, visitor.purpose, visitor.visitDate, visitor.expectedTime]
-    );
-    res.status(201).json({ message: "Visitor record created", visitorId: result.insertId });
-  } catch (error) {
-    console.error("Create Admin Visitor Error:", error);
-    res.status(500).json({ message: "Unable to create visitor record" });
-  }
-};
-
-const updateAdminVisitor = async (req, res) => {
-  try {
-    if (!requireAdmin(req, res)) return;
-    const visitor = validateVisitor(req.body);
-    if (!visitor) return res.status(400).json({ message: "Enter all visitor details" });
-    const [residents] = await pool.query(
-      "SELECT id FROM residents WHERE id = ? AND user_type = 'Resident'",
-      [visitor.residentId]
-    );
-    if (!residents.length) return res.status(404).json({ message: "Resident not found" });
-    const [existingVisitors] = await pool.query(
-      `SELECT visitor_id FROM visitors
-       WHERE visitor_id = ? AND status = 'Pending' AND entry_time IS NULL`,
-      [req.params.id]
-    );
-    if (!existingVisitors.length) {
-      const [rows] = await pool.query("SELECT visitor_id FROM visitors WHERE visitor_id = ?", [req.params.id]);
-      if (!rows.length) return res.status(404).json({ message: "Visitor record not found" });
-      return res.status(409).json({ message: "Only pending visitors without a gate entry can be edited" });
-    }
-    await pool.query(
-      `UPDATE visitors
-       SET resident_id = ?, visitor_name = ?, contact_number = ?, purpose = ?, visit_date = ?, expected_time = ?
-       WHERE visitor_id = ? AND status = 'Pending' AND entry_time IS NULL`,
-      [visitor.residentId, visitor.visitorName, visitor.contactNumber, visitor.purpose, visitor.visitDate, visitor.expectedTime, req.params.id]
-    );
-    res.status(200).json({ message: "Visitor record updated" });
-  } catch (error) {
-    console.error("Update Admin Visitor Error:", error);
-    res.status(500).json({ message: "Unable to update visitor record" });
-  }
-};
-
-const updateAdminVisitorStatus = async (req, res) => {
-  try {
-    if (!requireAdmin(req, res)) return;
-    const { status } = req.body;
-    if (!["Approved", "Rejected"].includes(status)) {
-      return res.status(400).json({ message: "Visitor status must be Approved or Rejected" });
-    }
-    const [result] = await pool.query(
-      "UPDATE visitors SET status = ? WHERE visitor_id = ? AND status = 'Pending'",
-      [status, req.params.id]
-    );
-    if (!result.affectedRows) {
-      const [rows] = await pool.query("SELECT visitor_id FROM visitors WHERE visitor_id = ?", [req.params.id]);
-      if (!rows.length) return res.status(404).json({ message: "Visitor record not found" });
-      return res.status(409).json({ message: "Only pending visitors can be approved or rejected" });
-    }
-    res.status(200).json({ message: `Visitor ${status.toLowerCase()}` });
-  } catch (error) {
-    console.error("Update Admin Visitor Status Error:", error);
-    res.status(500).json({ message: "Unable to update visitor status" });
-  }
-};
-
-const updateAdminVisitorGate = async (req, res) => {
-  try {
-    if (!requireAdmin(req, res)) return;
-    const { action } = req.body;
-    let result;
-    if (action === "entry") {
-      [result] = await pool.query(
-        `UPDATE visitors SET entry_time = NOW()
-         WHERE visitor_id = ? AND status = 'Approved' AND entry_time IS NULL AND exit_time IS NULL`,
-        [req.params.id]
-      );
-    } else if (action === "exit") {
-      [result] = await pool.query(
-        `UPDATE visitors SET exit_time = NOW(), status = 'Completed'
-         WHERE visitor_id = ? AND status = 'Approved' AND entry_time IS NOT NULL AND exit_time IS NULL`,
-        [req.params.id]
-      );
-    } else {
-      return res.status(400).json({ message: "Gate action must be entry or exit" });
-    }
-    if (!result.affectedRows) {
-      const [rows] = await pool.query("SELECT visitor_id FROM visitors WHERE visitor_id = ?", [req.params.id]);
-      if (!rows.length) return res.status(404).json({ message: "Visitor record not found" });
-      return res.status(409).json({ message: "Visitor status does not allow this gate action" });
-    }
-    res.status(200).json({ message: `Visitor ${action} recorded` });
-  } catch (error) {
-    console.error("Update Admin Visitor Gate Error:", error);
-    res.status(500).json({ message: "Unable to update visitor gate record" });
-  }
-};
-
 module.exports = {
   loginAdmin,
   getAdminDashboard,
   getAdminResidents,
+  createAdminResident,
+  updateAdminResident,
+  archiveAdminResident,
+  restoreAdminResident,
   getAdminStaff,
   createAdminStaff,
   getAdminSecurity,
@@ -982,6 +1115,7 @@ module.exports = {
   getAdminVisitors,
   getAdminAmenities,
   getAdminNotifications,
+  updateAdminNotificationReadState,
   updateResidentOwnership,
   getAdminSettings,
   updateAdminSocietySettings,
@@ -992,14 +1126,10 @@ module.exports = {
   getAdminPaymentResidents,
   createAdminPayment,
   updateAdminPayment,
+  cancelAdminPayment,
   getAdminAmenities,
   createAdminAmenity,
   updateAdminAmenity,
   createAdminAmenityAddon,
   updateAdminAmenityAddon,
-  getAdminVisitorResidents,
-  createAdminVisitor,
-  updateAdminVisitor,
-  updateAdminVisitorStatus,
-  updateAdminVisitorGate
 };

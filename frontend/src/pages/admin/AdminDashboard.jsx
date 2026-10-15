@@ -163,7 +163,13 @@ const AdminDashboard = () => {
             <span className="notification-dot"></span>
           </button>
 
-          <div className="admin-header-profile">
+          <button
+            type="button"
+            className="admin-header-profile"
+            onClick={() => navigate("/admin/settings?tab=profile")}
+            aria-label="Open administrator profile"
+            title="Open administrator profile"
+          >
             <div className="admin-header-avatar">
               {adminName.charAt(0).toUpperCase()}
             </div>
@@ -172,7 +178,7 @@ const AdminDashboard = () => {
               <strong>{adminName}</strong>
               <span>Administrator</span>
             </div>
-          </div>
+          </button>
 
         </div>
       </header>

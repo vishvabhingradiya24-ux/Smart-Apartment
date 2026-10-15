@@ -52,6 +52,7 @@ DELIMITER ;
 CALL ensure_admin_schema_column('admins', 'phone', 'VARCHAR(30) NULL AFTER email');
 CALL ensure_admin_schema_column('admins', 'society_id', 'INT NULL AFTER phone');
 CALL ensure_admin_schema_column('residents', 'ownership_type', "ENUM('Owner', 'Rent') NULL AFTER flat_number");
+CALL ensure_admin_schema_column('residents', 'is_active', 'TINYINT(1) NOT NULL DEFAULT 1 AFTER ownership_type');
 DROP PROCEDURE ensure_admin_schema_column;
 
 UPDATE admins
@@ -88,6 +89,16 @@ CREATE TABLE IF NOT EXISTS admin_preferences (
   updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (admin_id),
   CONSTRAINT fk_admin_preferences_admin
+    FOREIGN KEY (admin_id) REFERENCES admins(id)
+    ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS admin_notification_reads (
+  admin_id INT NOT NULL,
+  notification_id VARCHAR(100) NOT NULL,
+  read_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (admin_id, notification_id),
+  CONSTRAINT fk_admin_notification_reads_admin
     FOREIGN KEY (admin_id) REFERENCES admins(id)
     ON DELETE CASCADE
 );

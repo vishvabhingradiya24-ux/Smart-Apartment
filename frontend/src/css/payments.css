@@ -415,6 +415,11 @@
   color: #c87900;
 }
 
+.status-cancelled {
+  background: #f1f3f5;
+  color: #64748b;
+}
+
 /* =========================================
    ACTIONS
    ========================================= */
@@ -423,6 +428,31 @@
   display: flex;
   align-items: center;
   gap: 6px;
+}
+
+.payment-record-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.payment-remove-action {
+  color: #b42318;
+}
+
+.payment-remove-action:hover {
+  background: #fff1f0;
+  border-color: #f3b5b0;
+}
+
+.payment-remove-action:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.payment-checkout-note {
+  color: #69768a;
+  font-size: 11px;
 }
 
 .payment-action {

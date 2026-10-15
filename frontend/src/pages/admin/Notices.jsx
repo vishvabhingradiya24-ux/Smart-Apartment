@@ -56,7 +56,7 @@ const Notices = () => {
     catch (err) { setError(err.message); }
   };
   const deleteNotice = async (notice) => {
-    if (!window.confirm(`“${notice.title}” notice delete કરવી છે?`)) return;
+    if (!window.confirm(`Are you sure you want to delete the notice “${notice.title}”?`)) return;
     try { const response = await request(`/api/notices/${notice.id}`, { method: "DELETE" }); const data = await response.json(); if (!response.ok) throw new Error(data.message || "Notice delete થઈ શકી નહીં"); await loadNotices(); }
     catch (err) { setError(err.message); }
   };

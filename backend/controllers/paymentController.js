@@ -144,9 +144,9 @@ const createPaymentOrder = async (req, res) => {
     // Already paid check
     // --------------------------------------
 
-    if (payment.status === "Paid") {
+    if (payment.status !== "Pending") {
       return res.status(400).json({
-        message: "This payment has already been paid",
+        message: "This payment is no longer available for checkout",
       });
     }
 
@@ -186,17 +186,25 @@ const createPaymentOrder = async (req, res) => {
     // Save Razorpay order ID in database
     // --------------------------------------
 
-    await pool.query(
+    const [updateResult] = await pool.query(
       `UPDATE payments
        SET razorpay_order_id = ?
        WHERE id = ?
-       AND resident_id = ?`,
+       AND resident_id = ?
+       AND status = 'Pending'
+       AND razorpay_order_id IS NULL`,
       [
         order.id,
         payment.id,
         residentId,
       ]
     );
+
+    if (!updateResult.affectedRows) {
+      return res.status(409).json({
+        message: "This payment changed and is no longer available for checkout",
+      });
+    }
 
     res.status(200).json({
       message: "Payment order created successfully",
@@ -285,6 +293,12 @@ const verifyPayment = async (req, res) => {
 
     const payment = payments[0];
 
+    if (payment.status !== "Pending") {
+      return res.status(409).json({
+        message: "This payment is no longer pending",
+      });
+    }
+
     // --------------------------------------
     // Check order ID
     // --------------------------------------
@@ -366,7 +380,7 @@ const verifyPayment = async (req, res) => {
     // Update payment record
     // --------------------------------------
 
-    await pool.query(
+    const [updateResult] = await pool.query(
       `UPDATE payments
        SET
         status = 'Paid',
@@ -374,14 +388,23 @@ const verifyPayment = async (req, res) => {
         payment_method = ?,
         transaction_id = ?
        WHERE id = ?
-       AND resident_id = ?`,
+       AND resident_id = ?
+       AND status = 'Pending'
+       AND razorpay_order_id = ?`,
       [
         razorpayPayment.method || "Razorpay",
         razorpay_payment_id,
         payment_id,
         residentId,
+        razorpay_order_id,
       ]
     );
+
+    if (!updateResult.affectedRows) {
+      return res.status(409).json({
+        message: "Payment status changed before verification completed",
+      });
+    }
 
     // --------------------------------------
     // Success response

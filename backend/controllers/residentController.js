@@ -161,7 +161,8 @@ const loginResident = async (req, res) => {
         password,
         created_at
       FROM residents
-      WHERE email = ?`,
+      WHERE email = ?
+      AND is_active = 1`,
       [email]
     );
 
