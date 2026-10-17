@@ -21,7 +21,6 @@ function StaffComplaints() {
   const firstName = staff?.first_name || staff?.name || "Staff";
   const lastName = staff?.last_name || "";
   const fullName = `${firstName} ${lastName}`.trim();
-  const staffType = staff?.staff_type || "Maintenance Staff";
 
   const initials =
     `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase() || "S";
@@ -520,7 +519,7 @@ function StaffComplaints() {
 
             <div className="complaints-user-info">
               <strong>{fullName}</strong>
-              <small>{staffType}</small>
+              <small>Staff Member</small>
             </div>
 
           </div>
@@ -600,7 +599,7 @@ function StaffComplaints() {
               </strong>
 
               <span>
-                {staffType}
+                Staff Member
               </span>
 
             </div>
@@ -615,7 +614,7 @@ function StaffComplaints() {
 
         <section className="complaints-hero" aria-label="Complaint workbench overview">
           <div className="complaints-hero-copy">
-            <span className="complaints-hero-kicker">FIELD OPERATIONS · {staffType.toUpperCase()}</span>
+            <span className="complaints-hero-kicker">FIELD OPERATIONS · STAFF MEMBER</span>
             <h2>Resolve issues.<br />Keep the community moving.</h2>
             <p>Your assigned cases, progress and resident follow-up in one focused workspace.</p>
             <div className="complaints-workflow" aria-label="Complaint workflow">

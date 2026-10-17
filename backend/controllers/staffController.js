@@ -11,7 +11,6 @@ const registerStaff = async (req, res) => {
       last_name,
       email,
       phone,
-      staff_type,
       password
     } = req.body;
 
@@ -20,25 +19,10 @@ const registerStaff = async (req, res) => {
       !last_name ||
       !email ||
       !phone ||
-      !staff_type ||
       !password
     ) {
       return res.status(400).json({
         message: "All fields are required"
-      });
-    }
-
-    const allowedStaffTypes = [
-      "Security Staff",
-      "Maintenance Staff",
-      "Housekeeping Staff",
-      "Reception Staff",
-      "Other"
-    ];
-
-    if (!allowedStaffTypes.includes(staff_type)) {
-      return res.status(400).json({
-        message: "Invalid staff type"
       });
     }
 
@@ -57,14 +41,13 @@ const registerStaff = async (req, res) => {
 
     const [result] = await pool.query(
       `INSERT INTO staff
-      (first_name, last_name, email, phone, staff_type, password)
-      VALUES (?, ?, ?, ?, ?, ?)`,
+      (first_name, last_name, email, phone, password)
+      VALUES (?, ?, ?, ?, ?)`,
       [
         first_name,
         last_name,
         email,
         phone,
-        staff_type,
         hashedPassword
       ]
     );
@@ -100,7 +83,6 @@ const loginStaff = async (req, res) => {
         last_name,
         email,
         phone,
-        staff_type,
         password,
         created_at
       FROM staff
@@ -131,8 +113,7 @@ const loginStaff = async (req, res) => {
       {
         id: staff.id,
         email: staff.email,
-        role: "Staff",
-        staff_type: staff.staff_type
+        role: "Staff"
       },
       process.env.JWT_SECRET,
       {
@@ -167,7 +148,6 @@ const getAllStaff = async (req, res) => {
         last_name,
         email,
         phone,
-        staff_type,
         created_at
       FROM staff
       ORDER BY first_name ASC, last_name ASC`

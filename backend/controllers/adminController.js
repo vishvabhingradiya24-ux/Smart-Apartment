@@ -229,7 +229,8 @@ const getAdminResidents = async (req, res) => {
 const validateResidentContactDetails = (body = {}) => {
   const firstName = typeof body.first_name === "string" ? body.first_name.trim() : "";
   const lastName = typeof body.last_name === "string" ? body.last_name.trim() : "";
-  const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
+  const enteredEmail = typeof body.email === "string" ? body.email.trim() : "";
+  const email = enteredEmail.toLowerCase();
   const phone = typeof body.phone === "string" ? body.phone.trim() : "";
   const namePattern = /^[\p{L}\p{M}][\p{L}\p{M} .'-]*$/u;
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -250,9 +251,9 @@ const validateResidentContactDetails = (body = {}) => {
   if (!namePattern.test(firstName) || !namePattern.test(lastName)) {
     return { error: "Names can contain letters, spaces, apostrophes, periods and hyphens" };
   }
-  if (email.length > 150 || !emailPattern.test(email)) {
-    return { error: "Enter a valid email address (maximum 150 characters)" };
-  }
+  if (/[A-Z]/.test(enteredEmail)) return { error: "Email must not contain uppercase letters" };
+  if (email.length > 150) return { error: "Email must be 150 characters or fewer" };
+  if (!emailPattern.test(email)) return { error: "Enter a valid email address" };
   if (!phonePattern.test(phone)) {
     return { error: "Enter a phone number with exactly 10 digits" };
   }
@@ -309,6 +310,14 @@ const createAdminResident = async (req, res) => {
     );
     if (existingResidents.length) return res.status(409).json({ message: "Email is already registered" });
 
+    const [existingFlatResidents] = await pool.query(
+      "SELECT id FROM residents WHERE user_type = 'Resident' AND block_wing = ? AND flat_number = ? LIMIT 1",
+      [resident.blockWing, resident.flatNumber]
+    );
+    if (existingFlatResidents.length) {
+      return res.status(409).json({ message: "A resident is already registered in this flat" });
+    }
+
     const hashedPassword = await bcrypt.hash(resident.password, 10);
     const [result] = await pool.query(
       `INSERT INTO residents
@@ -330,6 +339,9 @@ const createAdminResident = async (req, res) => {
   } catch (error) {
     console.error("Create Admin Resident Error:", error);
     if (error.code === "ER_DUP_ENTRY") {
+      if (error.message.includes("uq_residents_flat")) {
+        return res.status(409).json({ message: "A resident is already registered in this flat" });
+      }
       return res.status(409).json({ message: "Email is already registered" });
     }
     if (error.errno === 3819 || error.code === "ER_CHECK_CONSTRAINT_VIOLATED") {
@@ -438,7 +450,7 @@ const getAdminStaff = async (req, res) => {
   try {
     if (!requireAdmin(req, res)) return;
     const [staff] = await pool.query(
-      `SELECT id, first_name, last_name, email, phone, staff_type, created_at
+      `SELECT id, first_name, last_name, email, phone, created_at
        FROM staff ORDER BY first_name ASC, last_name ASC`
     );
     res.status(200).json({ staff });
@@ -452,28 +464,16 @@ const createAdminStaff = async (req, res) => {
   try {
     if (!requireAdmin(req, res)) return;
 
-    const { first_name, last_name, email, phone, staff_type, password } = req.body;
-    const allowedStaffTypes = [
-      "Security Staff",
-      "Maintenance Staff",
-      "Housekeeping Staff",
-      "Reception Staff",
-      "Other",
-    ];
+    const { first_name, last_name, email, phone, password } = req.body;
 
     if (
       !first_name?.trim() ||
       !last_name?.trim() ||
       !email?.trim() ||
       !phone?.trim() ||
-      !staff_type ||
       !password
     ) {
       return res.status(400).json({ message: "All fields are required" });
-    }
-
-    if (!allowedStaffTypes.includes(staff_type)) {
-      return res.status(400).json({ message: "Invalid staff type" });
     }
 
     if (password.length < 6) {
@@ -491,14 +491,13 @@ const createAdminStaff = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const [result] = await pool.query(
-      `INSERT INTO staff (first_name, last_name, email, phone, staff_type, password)
-       VALUES (?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO staff (first_name, last_name, email, phone, password)
+       VALUES (?, ?, ?, ?, ?)`,
       [
         first_name.trim(),
         last_name.trim(),
         normalizedEmail,
         phone.trim(),
-        staff_type,
         hashedPassword,
       ]
     );
@@ -517,8 +516,8 @@ const getAdminSecurity = async (req, res) => {
   try {
     if (!requireAdmin(req, res)) return;
     const [guards] = await pool.query(
-      `SELECT id, first_name, last_name, email, phone, staff_type, created_at
-       FROM staff WHERE LOWER(staff_type) LIKE '%security%'
+      `SELECT id, first_name, last_name, email, phone, created_at
+       FROM staff
        ORDER BY first_name ASC, last_name ASC`
     );
     const [visitorStats] = await pool.query(

@@ -17,7 +17,6 @@ const Register = () => {
     block_wing: "",
     flat_number: "",
     ownership_type: "",
-    staff_type: "",
     password: "",
     confirm_password: "",
     terms: false
@@ -44,8 +43,7 @@ const Register = () => {
       user_type: userType,
       block_wing: "",
       flat_number: "",
-      ownership_type: "",
-      staff_type: ""
+      ownership_type: ""
     }));
   };
 
@@ -90,10 +88,6 @@ const Register = () => {
       formValues.get("ownership_type") || ""
     ).trim();
 
-    const staff_type = String(
-      formValues.get("staff_type") || ""
-    ).trim();
-
     const password = String(
       formValues.get("password") || ""
     );
@@ -120,13 +114,6 @@ const Register = () => {
     if (user_type === "Resident") {
       if (!block_wing || !flat_number || !ownership_type) {
         setError("Please fill Block/Wing, Flat Number, and Owner/Rent status.");
-        return;
-      }
-    }
-
-    if (user_type === "Staff") {
-      if (!staff_type) {
-        setError("Please select Staff Type.");
         return;
       }
     }
@@ -175,7 +162,6 @@ const Register = () => {
             email,
             phone,
             user_type,
-            staff_type,
             password
           };
 
@@ -511,50 +497,6 @@ const Register = () => {
                 </div>
 
               </>
-
-            )}
-
-            {formData.user_type === "Staff" && (
-
-              <div className="register-form-group">
-
-                <label>Staff Type</label>
-
-                <select
-                  className="register-select"
-                  name="staff_type"
-                  value={formData.staff_type}
-                  onChange={handleChange}
-                  required
-                >
-
-                  <option value="" disabled>
-                    Select staff type
-                  </option>
-
-                  <option value="Security Staff">
-                    Security Staff
-                  </option>
-
-                  <option value="Maintenance Staff">
-                    Maintenance Staff
-                  </option>
-
-                  <option value="Housekeeping Staff">
-                    Housekeeping Staff
-                  </option>
-
-                  <option value="Reception Staff">
-                    Reception Staff
-                  </option>
-
-                  <option value="Other">
-                    Other
-                  </option>
-
-                </select>
-
-              </div>
 
             )}
 

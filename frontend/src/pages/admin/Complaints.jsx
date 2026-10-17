@@ -892,7 +892,6 @@ const handleConfirmAssign = async () => {
               {staffList.map((staff) => (
                 <option key={staff.id} value={staff.id}>
                   {staff.first_name} {staff.last_name}
-                  {staff.staff_type ? ` - ${staff.staff_type}` : ""}
                 </option>
               ))}
             </select>

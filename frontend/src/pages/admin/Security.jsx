@@ -51,7 +51,7 @@ const Security = () => {
   const filteredGuards = useMemo(() => {
     const query = searchTerm.trim().toLowerCase();
     if (!query) return guards;
-    return guards.filter((guard) => [guard.id, guard.first_name, guard.last_name, guard.email, guard.phone, guard.staff_type]
+    return guards.filter((guard) => [guard.id, guard.first_name, guard.last_name, guard.email, guard.phone]
       .some((value) => String(value || "").toLowerCase().includes(query)));
   }, [guards, searchTerm]);
 
@@ -64,14 +64,14 @@ const Security = () => {
   return (
     <div className="admin-records-page admin-security-page">
       <header className="admin-records-header">
-        <div><span className="admin-records-eyebrow">SECURITY MANAGEMENT</span><h1>Security Guards</h1><p>Security team records and today’s visitor activity.</p></div>
+        <div><span className="admin-records-eyebrow">STAFF & SECURITY</span><h1>Staff Contacts</h1><p>Staff contact records and today’s visitor activity.</p></div>
         <div className="admin-records-header-actions">
           <button type="button" className="admin-records-refresh" onClick={refreshSecurity} disabled={loading}>↻ Refresh</button>
         </div>
       </header>
 
       <section className="admin-records-stats">
-        <article><span><Shield size={18} strokeWidth={1.8} aria-hidden="true" /></span><div><small>Security staff</small><strong>{loading ? "—" : guards.length}</strong></div></article>
+        <article><span><Shield size={18} strokeWidth={1.8} aria-hidden="true" /></span><div><small>Total staff</small><strong>{loading ? "—" : guards.length}</strong></div></article>
         <article><span><DoorOpen size={18} strokeWidth={1.8} aria-hidden="true" /></span><div><small>Visitor requests today</small><strong>{loading ? "—" : visitorStats.visitorsToday}</strong></div></article>
         <article><span><Check size={18} strokeWidth={1.8} aria-hidden="true" /></span><div><small>Checked in today</small><strong>{loading ? "—" : visitorStats.checkedInToday}</strong></div></article>
         <article><span><UserRoundPlus size={18} strokeWidth={1.8} aria-hidden="true" /></span><div><small>Guards joined this month</small><strong>{loading ? "—" : joinedThisMonth}</strong></div></article>
@@ -79,21 +79,20 @@ const Security = () => {
 
       <section className="admin-records-card">
         <div className="admin-records-card-header">
-          <div><h2>Security Team</h2><p>{filteredGuards.length} of {guards.length} guards</p></div>
+          <div><h2>Staff Directory</h2><p>{filteredGuards.length} of {guards.length} staff members</p></div>
           <label className="admin-records-search"><Search size={16} aria-hidden="true" /><input value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} placeholder="Search name, phone or email" /></label>
         </div>
 
-        {loading ? <div className="admin-records-state">Loading security staff from database...</div> : error ? (
-          <div className="admin-records-state error"><strong>Unable to load security staff</strong><p>{error}</p><button type="button" onClick={() => fetchSecurity()}>Try again</button></div>
-        ) : filteredGuards.length === 0 ? <div className="admin-records-state">No security staff records found.</div> : (
+        {loading ? <div className="admin-records-state">Loading staff from database...</div> : error ? (
+          <div className="admin-records-state error"><strong>Unable to load staff</strong><p>{error}</p><button type="button" onClick={() => fetchSecurity()}>Try again</button></div>
+        ) : filteredGuards.length === 0 ? <div className="admin-records-state">No staff records found.</div> : (
           <div className="admin-records-table-wrap">
             <table className="admin-records-table">
-              <thead><tr><th>Security staff</th><th>Role</th><th>Phone</th><th>Email</th><th>Joined</th></tr></thead>
+              <thead><tr><th>Staff member</th><th>Phone</th><th>Email</th><th>Joined</th></tr></thead>
               <tbody>{filteredGuards.map((guard) => {
-                const name = `${guard.first_name || ""} ${guard.last_name || ""}`.trim() || "Security staff";
+                const name = `${guard.first_name || ""} ${guard.last_name || ""}`.trim() || "Staff member";
                 return <tr key={guard.id}>
                   <td><div className="admin-records-person"><span>{name.charAt(0).toUpperCase()}</span><div><strong>{name}</strong><small>Staff ID #{guard.id}</small></div></div></td>
-                  <td><span className="admin-records-badge">{guard.staff_type || "Security Staff"}</span></td>
                   <td>{guard.phone || "—"}</td><td>{guard.email || "—"}</td><td>{formatDate(guard.created_at)}</td>
                 </tr>;
               })}</tbody>

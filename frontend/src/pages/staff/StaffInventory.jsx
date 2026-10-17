@@ -17,7 +17,6 @@ function StaffAssets() {
   const firstName = staff?.first_name || staff?.name || "Staff";
   const lastName = staff?.last_name || "";
   const fullName = `${firstName} ${lastName}`.trim();
-  const staffType = staff?.staff_type || "Maintenance Staff";
 
   const initials =
     `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase() || "S";
@@ -237,7 +236,7 @@ function StaffAssets() {
 
             <div className="user-details">
               <strong>{fullName}</strong>
-              <small>{staffType}</small>
+              <small>Staff Member</small>
             </div>
           </div>
 

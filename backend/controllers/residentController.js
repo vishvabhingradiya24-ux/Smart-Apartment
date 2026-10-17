@@ -61,6 +61,16 @@ const registerResident = async (req, res) => {
           message: "Owner/Rent status must be Owner or Rent"
         });
       }
+
+      const [existingFlatResidents] = await pool.query(
+        "SELECT id FROM residents WHERE user_type = 'Resident' AND block_wing = ? AND flat_number = ? LIMIT 1",
+        [block_wing, flat_number]
+      );
+      if (existingFlatResidents.length > 0) {
+        return res.status(409).json({
+          message: "A resident is already registered in this flat"
+        });
+      }
     }
 
     const [existingUser] = await pool.query(
@@ -123,9 +133,13 @@ const registerResident = async (req, res) => {
       error
     );
 
-    res.status(500).json({
-      message: "Registration failed"
-    });
+    if (error.code === "ER_DUP_ENTRY" && error.message.includes("uq_residents_flat")) {
+      return res.status(409).json({
+        message: "A resident is already registered in this flat"
+      });
+    }
+
+    res.status(500).json({ message: "Registration failed" });
   }
 };
 

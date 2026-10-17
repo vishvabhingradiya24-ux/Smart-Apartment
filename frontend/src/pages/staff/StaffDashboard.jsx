@@ -25,7 +25,6 @@ function StaffDashboard() {
   const lastName = staff?.last_name || "";
   const fullName = `${firstName} ${lastName}`.trim();
 
-  const staffType = staff?.staff_type || "Maintenance Staff";
 
   const initials =
     `${firstName.charAt(0)}${lastName.charAt(0)}`
@@ -356,7 +355,7 @@ function StaffDashboard() {
 
             <div className="user-details">
               <strong>{fullName}</strong>
-              <small>{staffType}</small>
+              <small>Staff Member</small>
             </div>
 
           </div>
@@ -518,7 +517,7 @@ function StaffDashboard() {
 
               <div className="profile-pill-info">
                 <strong>{fullName}</strong>
-                <span>{staffType}</span>
+                <span>Staff Member</span>
               </div>
 
               <span className="profile-arrow">
@@ -948,7 +947,7 @@ function StaffDashboard() {
                 </h2>
 
                 <p>
-                  {staffType}
+                  Staff Member
                 </p>
 
               </div>

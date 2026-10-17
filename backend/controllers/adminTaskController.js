@@ -21,7 +21,7 @@ const createTask = async (req, res) => {
 
     // Check staff exists
     const [staff] = await pool.query(
-      `SELECT id, first_name, last_name, staff_type
+      `SELECT id, first_name, last_name
        FROM staff
        WHERE id = ?`,
       [assigned_to]
@@ -82,8 +82,7 @@ const getAllTasks = async (req, res) => {
         t.due_date,
         t.completed_date,
         t.created_at,
-        CONCAT(s.first_name, ' ', s.last_name) AS staff_name,
-        s.staff_type
+        CONCAT(s.first_name, ' ', s.last_name) AS staff_name
       FROM tasks t
       LEFT JOIN staff s
         ON t.assigned_to = s.id
@@ -112,8 +111,7 @@ const getStaffForTask = async (req, res) => {
         id,
         first_name,
         last_name,
-        email,
-        staff_type
+        email
       FROM staff
       ORDER BY first_name ASC, last_name ASC`
     );

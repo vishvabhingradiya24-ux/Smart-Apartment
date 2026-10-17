@@ -597,8 +597,7 @@ const AdminTask = () => {
                         value={staff.id}
                       >
                         {staff.first_name}{" "}
-                        {staff.last_name} —{" "}
-                        {staff.staff_type}
+                        {staff.last_name}
                       </option>
 
                     ))}

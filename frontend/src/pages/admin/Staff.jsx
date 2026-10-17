@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Broom, Search, Shield, UsersRound, Wrench } from "lucide-react";
+import { CalendarDays, Search, UsersRound } from "lucide-react";
 import AdminFormModal from "./AdminFormModal";
 import "../../css/admin.css";
 
@@ -13,7 +13,6 @@ const formatDate = (value) => {
 const Staff = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
-  const [typeFilter, setTypeFilter] = useState("All");
   const [staffList, setStaffList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -26,7 +25,6 @@ const Staff = () => {
     last_name: "",
     email: "",
     phone: "",
-    staff_type: "",
     password: "",
   });
 
@@ -87,7 +85,6 @@ const Staff = () => {
         last_name: "",
         email: "",
         phone: "",
-        staff_type: "",
         password: "",
       });
       setShowAddForm(false);
@@ -100,26 +97,28 @@ const Staff = () => {
     }
   };
 
-  const staffTypes = useMemo(() => [...new Set(staffList.map((person) => person.staff_type).filter(Boolean))].sort(), [staffList]);
   const filteredStaff = useMemo(() => {
     const query = searchTerm.trim().toLowerCase();
     return staffList.filter((person) => {
-      const matchesSearch = [person.id, person.first_name, person.last_name, person.email, person.phone, person.staff_type]
+      const matchesSearch = [person.id, person.first_name, person.last_name, person.email, person.phone]
         .some((value) => String(value || "").toLowerCase().includes(query));
-      return matchesSearch && (typeFilter === "All" || person.staff_type === typeFilter);
+      return matchesSearch;
     });
-  }, [staffList, searchTerm, typeFilter]);
-
-  const countType = (fragment) => staffList.filter((person) => (person.staff_type || "").toLowerCase().includes(fragment)).length;
+  }, [staffList, searchTerm]);
+  const joinedThisMonth = staffList.filter((person) => {
+    const date = new Date(person.created_at);
+    const now = new Date();
+    return !Number.isNaN(date.getTime()) && date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
+  }).length;
 
   const viewStaff = (person) => {
-    alert(`Staff Details\n\nName: ${person.first_name || ""} ${person.last_name || ""}\nStaff ID: ${person.id}\nType: ${person.staff_type || "—"}\nEmail: ${person.email || "—"}\nPhone: ${person.phone || "—"}\nJoined: ${formatDate(person.created_at)}`);
+    alert(`Staff Details\n\nName: ${person.first_name || ""} ${person.last_name || ""}\nStaff ID: ${person.id}\nEmail: ${person.email || "—"}\nPhone: ${person.phone || "—"}\nJoined: ${formatDate(person.created_at)}`);
   };
 
   return (
     <div className="admin-records-page admin-staff-page">
       <header className="admin-records-header">
-        <div><span className="admin-records-eyebrow">STAFF MANAGEMENT</span><h1>Staff Members</h1><p>Staff directory from your database, including roles and contact details.</p></div>
+        <div><span className="admin-records-eyebrow">STAFF MANAGEMENT</span><h1>Staff Members</h1><p>Staff directory from your database, including contact details.</p></div>
         <div className="admin-records-header-actions">
           <button
             type="button"
@@ -180,21 +179,6 @@ const Staff = () => {
               />
             </label>
             <label>
-              Staff type
-              <select
-                required
-                value={newStaff.staff_type}
-                onChange={(event) => setNewStaff({ ...newStaff, staff_type: event.target.value })}
-              >
-                <option value="">Select staff type</option>
-                <option value="Security Staff">Security Staff</option>
-                <option value="Maintenance Staff">Maintenance Staff</option>
-                <option value="Housekeeping Staff">Housekeeping Staff</option>
-                <option value="Reception Staff">Reception Staff</option>
-                <option value="Other">Other</option>
-              </select>
-            </label>
-            <label>
               Initial password
               <input
                 type="password"
@@ -218,9 +202,8 @@ const Staff = () => {
 
       <section className="admin-records-stats">
         <article><span><UsersRound size={18} strokeWidth={1.8} aria-hidden="true" /></span><div><small>Total staff</small><strong>{loading ? "—" : staffList.length}</strong></div></article>
-        <article><span><Wrench size={18} strokeWidth={1.8} aria-hidden="true" /></span><div><small>Maintenance</small><strong>{loading ? "—" : countType("maintenance")}</strong></div></article>
-        <article><span><Broom size={18} strokeWidth={1.8} aria-hidden="true" /></span><div><small>Housekeeping</small><strong>{loading ? "—" : countType("housekeeping")}</strong></div></article>
-        <article><span><Shield size={18} strokeWidth={1.8} aria-hidden="true" /></span><div><small>Security</small><strong>{loading ? "—" : countType("security")}</strong></div></article>
+        <article><span><CalendarDays size={18} strokeWidth={1.8} aria-hidden="true" /></span><div><small>Joined this month</small><strong>{loading ? "—" : joinedThisMonth}</strong></div></article>
+        <article><span><Search size={18} strokeWidth={1.8} aria-hidden="true" /></span><div><small>Matching search</small><strong>{loading ? "—" : filteredStaff.length}</strong></div></article>
       </section>
 
       <section className="admin-records-card">
@@ -228,10 +211,6 @@ const Staff = () => {
           <div><h2>Staff Directory</h2><p>{filteredStaff.length} of {staffList.length} staff members</p></div>
           <div className="admin-records-controls">
             <label className="admin-records-search"><Search size={16} aria-hidden="true" /><input value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} placeholder="Search name, phone or email" /></label>
-            <select value={typeFilter} onChange={(event) => setTypeFilter(event.target.value)} aria-label="Filter by staff type">
-              <option value="All">All staff types</option>
-              {staffTypes.map((type) => <option key={type} value={type}>{type}</option>)}
-            </select>
           </div>
         </div>
 
@@ -240,12 +219,11 @@ const Staff = () => {
         ) : filteredStaff.length === 0 ? <div className="admin-records-state">No staff members match this search.</div> : (
           <div className="admin-records-table-wrap">
             <table className="admin-records-table">
-              <thead><tr><th>Staff member</th><th>Staff type</th><th>Phone</th><th>Email</th><th>Joined</th><th>Actions</th></tr></thead>
+              <thead><tr><th>Staff member</th><th>Phone</th><th>Email</th><th>Joined</th><th>Actions</th></tr></thead>
               <tbody>{filteredStaff.map((person) => {
                 const name = `${person.first_name || ""} ${person.last_name || ""}`.trim() || "Staff member";
                 return <tr key={person.id}>
                   <td><div className="admin-records-person"><span>{name.charAt(0).toUpperCase()}</span><div><strong>{name}</strong><small>Staff ID #{person.id}</small></div></div></td>
-                  <td><span className="admin-records-badge">{person.staff_type || "—"}</span></td>
                   <td>{person.phone || "—"}</td><td>{person.email || "—"}</td><td>{formatDate(person.created_at)}</td>
                   <td><div className="admin-records-actions"><button type="button" onClick={() => viewStaff(person)}>View</button><button type="button" onClick={() => navigate("/admin/task")}>Tasks</button></div></td>
                 </tr>;

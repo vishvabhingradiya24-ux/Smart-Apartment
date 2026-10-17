@@ -139,11 +139,12 @@ const Residents = () => {
     setFormError("");
     setSuccessMessage("");
 
+    const enteredEmail = form.email.trim();
     const normalizedForm = {
       ...form,
       first_name: form.first_name.trim(),
       last_name: form.last_name.trim(),
-      email: form.email.trim().toLowerCase(),
+      email: enteredEmail.toLowerCase(),
       phone: form.phone.trim(),
       block_wing: form.block_wing.trim(),
       flat_number: form.flat_number.trim(),
@@ -170,8 +171,16 @@ const Residents = () => {
       setFormError("Names can contain letters, spaces, apostrophes, periods and hyphens.");
       return;
     }
-    if (normalizedForm.email.length > 150 || !emailPattern.test(normalizedForm.email)) {
-      setFormError("Enter a valid email address (maximum 150 characters).");
+    if (/[A-Z]/.test(enteredEmail)) {
+      setFormError("Email must not contain uppercase letters.");
+      return;
+    }
+    if (normalizedForm.email.length > 150) {
+      setFormError("Email must be 150 characters or fewer.");
+      return;
+    }
+    if (!emailPattern.test(normalizedForm.email)) {
+      setFormError("Enter a valid email address.");
       return;
     }
     if (!phonePattern.test(normalizedForm.phone)) {

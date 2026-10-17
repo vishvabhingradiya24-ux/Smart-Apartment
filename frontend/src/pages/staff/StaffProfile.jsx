@@ -19,8 +19,6 @@ function StaffProfile() {
 
   const fullName = `${firstName} ${lastName}`.trim();
 
-  const staffType = staff?.staff_type || "Maintenance Staff";
-
   const initials =
     `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase() || "S";
 
@@ -35,7 +33,6 @@ function StaffProfile() {
     last_name: staff?.last_name || lastName,
     email: staff?.email || "",
     phone: staff?.phone || staff?.mobile || "",
-    staff_type: staff?.staff_type || "Maintenance Staff",
     department: staff?.department || "Maintenance",
     employee_id: staff?.employee_id || staff?.staff_id || "STF-001",
     address: staff?.address || "",
@@ -99,7 +96,6 @@ function StaffProfile() {
       last_name: staff?.last_name || lastName,
       email: staff?.email || "",
       phone: staff?.phone || staff?.mobile || "",
-      staff_type: staff?.staff_type || "Maintenance Staff",
       department: staff?.department || "Maintenance",
       employee_id: staff?.employee_id || staff?.staff_id || "STF-001",
       address: staff?.address || "",
@@ -244,7 +240,7 @@ function StaffProfile() {
 
             <div className="user-details">
               <strong>{fullName}</strong>
-              <small>{staffType}</small>
+              <small>Staff Member</small>
             </div>
 
           </div>
@@ -286,6 +282,15 @@ function StaffProfile() {
 
           <div className="header-actions">
 
+            {isEditing ? (
+              <div className="edit-actions">
+                <button type="button" className="cancel-btn" onClick={handleCancelEdit}>Cancel</button>
+                <button type="button" className="save-btn" onClick={handleSaveProfile}>Save</button>
+              </div>
+            ) : (
+              <button type="button" className="edit-profile-btn" onClick={() => setIsEditing(true)}>Edit Profile</button>
+            )}
+
             <div
               className="profile-pill"
               onClick={() => handleNavigation("/staff/profile")}
@@ -317,9 +322,7 @@ function StaffProfile() {
 
             <div className="profile-name-section">
 
-              <span className="profile-role-badge">
-                {staffType}
-              </span>
+              <span className="profile-role-badge">Staff Member</span>
 
               <h2>
                 {profileData.first_name} {profileData.last_name}
@@ -336,43 +339,6 @@ function StaffProfile() {
             </div>
 
           </div>
-
-          <div className="profile-actions">
-
-            {!isEditing ? (
-              <button
-                className="edit-profile-btn"
-                onClick={() => setIsEditing(true)}
-              >
-                ✏️ Edit Profile
-              </button>
-            ) : (
-              <div className="edit-actions">
-
-                <button
-                  className="cancel-btn"
-                  onClick={handleCancelEdit}
-                >
-                  Cancel
-                </button>
-
-                <button
-                  className="save-btn"
-                  onClick={handleSaveProfile}
-                >
-                  💾 Save Changes
-                </button>
-
-              </div>
-            )}
-
-          </div>
-
-        </section>
-
-        {/* ================= PROFILE CONTENT ================= */}
-
-        <div className="profile-content-grid">
 
           {/* PERSONAL INFORMATION */}
 
@@ -530,51 +496,6 @@ function StaffProfile() {
             </div>
 
             <div className="profile-form-grid">
-
-              <div className="form-group">
-
-                <label>
-                  Staff Type
-                </label>
-
-                <select
-                  name="staff_type"
-                  value={profileData.staff_type}
-                  onChange={handleInputChange}
-                  disabled={!isEditing}
-                >
-
-                  <option>
-                    Maintenance Staff
-                  </option>
-
-                  <option>
-                    Housekeeping Staff
-                  </option>
-
-                  <option>
-                    Electrician
-                  </option>
-
-                  <option>
-                    Plumber
-                  </option>
-
-                  <option>
-                    Security Staff
-                  </option>
-
-                  <option>
-                    Gardener
-                  </option>
-
-                  <option>
-                    Technician
-                  </option>
-
-                </select>
-
-              </div>
 
               <div className="form-group">
 
@@ -865,7 +786,7 @@ function StaffProfile() {
 
           </section>
 
-        </div>
+        </section>
 
       </main>
 

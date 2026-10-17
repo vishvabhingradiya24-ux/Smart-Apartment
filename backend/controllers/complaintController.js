@@ -108,7 +108,6 @@ const getMyComplaints = async (req, res) => {
 
         s.first_name AS staff_first_name,
         s.last_name AS staff_last_name,
-        s.staff_type,
 
         c.resolution_details,
 
@@ -172,7 +171,6 @@ const getComplaintById = async (req, res) => {
 
         s.first_name AS staff_first_name,
         s.last_name AS staff_last_name,
-        s.staff_type,
 
         c.resolution_details,
 
@@ -251,7 +249,6 @@ const getAdminComplaints = async (req, res) => {
 
         s.first_name AS staff_first_name,
         s.last_name AS staff_last_name,
-        s.staff_type,
 
         c.resolution_details,
 
@@ -335,8 +332,7 @@ const assignComplaintToStaff = async (req, res) => {
       `SELECT
         id,
         first_name,
-        last_name,
-        staff_type
+        last_name
        FROM staff
        WHERE id = ?`,
       [staff_id]
@@ -373,8 +369,7 @@ const assignComplaintToStaff = async (req, res) => {
       assignedStaff: {
         id: staff[0].id,
         name:
-          `${staff[0].first_name} ${staff[0].last_name}`,
-        staffType: staff[0].staff_type
+          `${staff[0].first_name} ${staff[0].last_name}`
       }
     });
 
@@ -429,7 +424,6 @@ const getStaffComplaints = async (req, res) => {
 
         s.first_name AS staff_first_name,
         s.last_name AS staff_last_name,
-        s.staff_type,
 
         c.resolution_details,
 
