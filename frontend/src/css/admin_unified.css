@@ -1,0 +1,510 @@
+.admin-layout {
+  --admin-unified-ink: #202d35;
+  --admin-unified-muted: #69777d;
+  --admin-unified-canvas: #f3f6f5;
+  --admin-unified-surface: #ffffff;
+  --admin-unified-border: #dfe7e4;
+  --admin-unified-accent: #157461;
+  --admin-unified-accent-dark: #105e4f;
+  --admin-unified-accent-soft: #e8f3ef;
+  --admin-unified-shadow: 0 2px 10px rgba(31, 49, 44, 0.045);
+  background: var(--admin-unified-canvas);
+  color: var(--admin-unified-ink);
+  font-family: "Segoe UI", Arial, sans-serif;
+}
+
+.admin-layout button,
+.admin-layout input,
+.admin-layout select,
+.admin-layout textarea {
+  font-family: inherit;
+}
+
+.admin-layout .admin-sidebar {
+  width: 248px;
+  background: #182a2b;
+  border-right-color: rgba(255, 255, 255, 0.08);
+  scrollbar-color: #526866 #182a2b;
+}
+
+.admin-layout .admin-logo {
+  min-height: 84px;
+  padding: 18px 20px;
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+.admin-layout .admin-logo-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 8px;
+  background: #e8f3ef;
+  color: var(--admin-unified-accent-dark);
+}
+
+.admin-layout .admin-logo h2 { color: #f7fbfa; font-size: 16px; letter-spacing: 0; }
+.admin-layout .admin-logo span { color: #aabbb7; }
+.admin-layout .admin-nav { gap: 3px; padding: 16px 11px; }
+
+.admin-layout .admin-nav-item {
+  min-height: 42px;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 7px;
+  color: #c0cfcb;
+  font-size: 13px;
+  font-weight: 550;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+.admin-layout .admin-nav-item .admin-nav-label {
+  display: block;
+  width: auto;
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+  font-size: 13px;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-layout .admin-nav-item svg { flex: 0 0 18px; color: #9eb4ae; }
+.admin-layout .admin-nav-item:hover { background: rgba(255, 255, 255, 0.08); color: #fff; }
+.admin-layout .admin-nav-item:hover svg { color: #d7e7e2; }
+.admin-layout .admin-nav-item.active { background: #dcefe8; color: #165c4d; box-shadow: none; font-weight: 700; }
+.admin-layout .admin-nav-item.active svg { color: #165c4d; }
+
+.admin-layout .admin-logout {
+  min-height: 42px;
+  margin: 10px 11px 14px;
+  padding: 10px 12px;
+  gap: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #d4dfdc;
+  font-size: 13px;
+}
+
+.admin-layout .admin-logout:hover { background: rgba(255, 255, 255, 0.1); }
+
+.admin-layout .admin-main {
+  width: calc(100% - 248px);
+  min-width: 0;
+  margin-left: 248px;
+  background: var(--admin-unified-canvas);
+}
+
+.admin-main > :is(
+  .admin-dashboard-content,
+  .admin-records-page,
+  .admin-task-page,
+  .complaints-page,
+  .payments-page,
+  .visitors-page,
+  .amenities-page,
+  .notices-page,
+  .notifications-page,
+  .settings-page
+) {
+  width: 100%;
+  min-height: 100vh;
+  padding: 28px 32px 40px;
+  background: var(--admin-unified-canvas);
+  color: var(--admin-unified-ink);
+  font-family: inherit;
+}
+
+.admin-main :is(
+  .admin-header,
+  .admin-records-header,
+  .task-page-header,
+  .complaints-header,
+  .payments-header,
+  .visitors-header,
+  .amenities-header,
+  .notices-header,
+  .notifications-header,
+  .settings-header
+) {
+  min-height: 0;
+  margin: 0 0 24px;
+  padding: 0 0 18px;
+  align-items: flex-start;
+  gap: 18px;
+  border-bottom: 1px solid var(--admin-unified-border);
+}
+
+.admin-main :is(
+  .admin-header-content h1,
+  .admin-records-header h1,
+  .task-page-header h1,
+  .complaints-header h1,
+  .payments-header h1,
+  .visitors-header h1,
+  .amenities-header h1,
+  .notices-header h1,
+  .notifications-header h1,
+  .settings-header h1
+) {
+  margin: 0;
+  color: var(--admin-unified-ink);
+  font-size: 25px;
+  font-weight: 720;
+  line-height: 1.25;
+  letter-spacing: 0;
+}
+
+.admin-main :is(
+  .admin-header-content p,
+  .admin-records-header p,
+  .task-page-header p,
+  .complaints-header p,
+  .payments-header p,
+  .visitors-header p,
+  .amenities-header p,
+  .notices-header p,
+  .notifications-header p,
+  .settings-header p
+) {
+  margin: 6px 0 0;
+  color: var(--admin-unified-muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.admin-main :is(
+  .admin-overline,
+  .admin-records-eyebrow,
+  .task-overline,
+  .complaints-overline,
+  .payments-overline,
+  .visitors-overline,
+  .amenities-overline,
+  .notices-overline,
+  .notifications-overline,
+  .settings-overline
+) {
+  display: block;
+  margin: 0 0 6px;
+  color: var(--admin-unified-accent);
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: 1px;
+}
+
+.admin-main :is(
+  .admin-section,
+  .admin-records-stats,
+  .task-stats-grid,
+  .complaints-stats,
+  .payment-stats-grid,
+  .visitor-stats-grid,
+  .amenity-stats-grid,
+  .notice-stats-grid,
+  .notification-stats
+) {
+  margin-bottom: 22px;
+  gap: 14px;
+}
+
+.admin-main :is(
+  .admin-records-stats article,
+  .stat-card,
+  .task-stat-card,
+  .complaint-stat-card,
+  .payment-stat-card,
+  .payment-overview-card,
+  .visitor-stat-card,
+  .amenity-stat-card,
+  .notice-stat-card,
+  .notification-stat-card,
+  .admin-management-card,
+  .admin-records-card,
+  .task-table-card,
+  .complaints-table-card,
+  .payments-section,
+  .visitors-section,
+  .amenities-card,
+  .notices-card,
+  .notification-filter-card,
+  .notification-section,
+  .settings-content,
+  .security-info-card,
+  .backup-card,
+  .admin-overview,
+  .activity-card
+) {
+  border: 1px solid var(--admin-unified-border);
+  border-radius: 8px;
+  background: var(--admin-unified-surface);
+  box-shadow: var(--admin-unified-shadow);
+}
+
+.admin-main :is(
+  .admin-records-stats article,
+  .stat-card,
+  .task-stat-card,
+  .complaint-stat-card,
+  .payment-stat-card,
+  .visitor-stat-card,
+  .amenity-stat-card,
+  .notice-stat-card,
+  .notification-stat-card
+) {
+  min-height: 94px;
+  padding: 16px;
+  gap: 12px;
+}
+
+.admin-main :is(
+  .stat-icon,
+  .task-stat-icon,
+  .complaint-stat-icon,
+  .payment-stat-icon,
+  .visitor-stat-icon,
+  .amenity-stat-icon,
+  .notice-stat-icon,
+  .notification-stat-icon,
+  .community-icon,
+  .management-icon
+) {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  border-radius: 7px;
+  background: var(--admin-unified-accent-soft);
+  color: var(--admin-unified-accent-dark);
+  font-size: 17px;
+}
+
+.admin-main :is(.stat-title, .task-stat-card span, .complaint-stat-card span, .payment-stat-card p, .visitor-stat-card p, .amenity-stat-card span, .notice-stat-card span, .notification-stat-card span) {
+  color: var(--admin-unified-muted);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.admin-main :is(.stat-content h3, .task-stat-card strong, .complaint-stat-card strong, .payment-stat-card h2, .visitor-stat-card h2, .amenity-stat-card strong, .notice-stat-card strong, .notification-stat-card strong) {
+  color: var(--admin-unified-ink);
+  font-size: 22px;
+  font-weight: 720;
+}
+
+.admin-main :is(
+  .admin-records-card-header,
+  .task-table-top,
+  .complaints-table-header,
+  .payments-section-header,
+  .visitors-section-header,
+  .amenities-card-header,
+  .notices-card-header,
+  .notification-section-header,
+  .settings-content-header
+) {
+  gap: 14px;
+  padding: 17px 18px;
+  border-color: var(--admin-unified-border);
+}
+
+.admin-main :is(
+  .admin-records-card-header h2,
+  .task-table-top h2,
+  .complaints-table-header h2,
+  .payments-section-header h2,
+  .visitors-section-header h2,
+  .amenities-card-header h2,
+  .notices-card-header h2,
+  .notification-section-header h2,
+  .settings-content-header h2
+) {
+  margin: 0;
+  color: var(--admin-unified-ink);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.admin-main :is(
+  .admin-records-card-header p,
+  .task-table-top p,
+  .complaints-table-header p,
+  .payments-section-header p,
+  .visitors-section-header p,
+  .amenities-card-header p,
+  .notices-card-header p,
+  .notification-section-header p,
+  .settings-content-header p
+) {
+  margin: 4px 0 0;
+  color: var(--admin-unified-muted);
+  font-size: 12px;
+}
+
+.admin-main :is(.admin-records-controls, .task-controls, .complaints-toolbar, .payments-toolbar, .visitors-toolbar, .amenity-toolbar, .notice-toolbar) {
+  gap: 10px;
+}
+
+.admin-main input:not([type="checkbox"]):not([type="radio"]),
+.admin-main textarea,
+.admin-main select {
+  border-color: var(--admin-unified-border);
+  border-radius: 6px;
+  color: var(--admin-unified-ink);
+  font-size: 13px;
+}
+
+.admin-main input:focus,
+.admin-main textarea:focus,
+.admin-main select:focus {
+  border-color: var(--admin-unified-accent);
+  outline: 2px solid rgba(21, 116, 97, 0.15);
+  outline-offset: 0;
+}
+
+.admin-main :is(.admin-records-search, .task-search, .complaints-search, .payment-search, .visitor-search, .amenity-search, .notice-search, .notification-search) {
+  border-color: var(--admin-unified-border);
+  border-radius: 6px;
+}
+
+.admin-main :is(.admin-records-table-wrap, .task-table-wrapper, .complaints-table-wrapper, .payments-table-wrapper, .visitors-table-wrapper, .amenities-table-wrapper, .notices-table-wrapper, .notification-list) {
+  overflow-x: auto;
+}
+
+.admin-main :is(.admin-records-table, .admin-task-table, .complaints-table, .payments-table, .visitors-table, .amenities-table, .notices-table, .notification-table) {
+  width: 100%;
+  border-collapse: collapse;
+  color: var(--admin-unified-ink);
+  font-size: 12px;
+}
+
+.admin-main :is(.admin-records-table, .admin-task-table, .complaints-table, .payments-table, .visitors-table, .amenities-table, .notices-table, .notification-table) th {
+  padding: 11px 13px;
+  border-bottom: 1px solid var(--admin-unified-border);
+  background: #f5f8f7;
+  color: #586a68;
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: 0.45px;
+  text-align: left;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.admin-main :is(.admin-records-table, .admin-task-table, .complaints-table, .payments-table, .visitors-table, .amenities-table, .notices-table, .notification-table) td {
+  padding: 12px 13px;
+  border-bottom: 1px solid #edf1ef;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.admin-main :is(.admin-records-table, .admin-task-table, .complaints-table, .payments-table, .visitors-table, .amenities-table, .notices-table, .notification-table) tbody tr:hover {
+  background: #f8fbfa;
+}
+
+.admin-main :is(.admin-records-secondary, .admin-records-refresh, .create-task-btn, .task-refresh-btn, .add-amenity-btn, .add-notice-btn, .payments-report-btn, .primary-settings-button, .admin-records-header-actions button, .task-header-actions button) {
+  min-height: 38px;
+  padding: 8px 13px;
+  border: 1px solid var(--admin-unified-accent);
+  border-radius: 6px;
+  background: var(--admin-unified-accent);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+  transition: background-color 150ms ease, border-color 150ms ease;
+}
+
+.admin-main :is(.admin-records-secondary, .admin-records-refresh, .create-task-btn, .task-refresh-btn, .add-amenity-btn, .add-notice-btn, .payments-report-btn, .primary-settings-button, .admin-records-header-actions button, .task-header-actions button):hover {
+  border-color: var(--admin-unified-accent-dark);
+  background: var(--admin-unified-accent-dark);
+  color: #fff;
+}
+
+.admin-main :is(.admin-records-actions button, .admin-row-action, .view-all-button, .notification-read-button, .secondary-settings-button) {
+  border-radius: 6px;
+  font-size: 11px;
+}
+
+.admin-main .admin-welcome-card {
+  border-radius: 8px;
+  box-shadow: 0 8px 22px rgba(24, 42, 43, 0.12);
+}
+
+.admin-main :is(.admin-section, .payments-section, .visitors-section, .amenities-card, .notices-card, .notification-section, .settings-content) {
+  margin-bottom: 18px;
+}
+
+.admin-main .settings-menu button.active {
+  background: var(--admin-unified-accent-soft);
+  color: var(--admin-unified-accent-dark);
+}
+
+@media (max-width: 1100px) {
+  .admin-main > :is(.admin-dashboard-content, .admin-records-page, .admin-task-page, .complaints-page, .payments-page, .visitors-page, .amenities-page, .notices-page, .notifications-page, .settings-page) {
+    padding: 24px;
+  }
+}
+
+@media (max-width: 760px) {
+  .admin-layout .admin-sidebar {
+    width: 60px;
+  }
+
+  .admin-layout .admin-logo {
+    min-height: 70px;
+    justify-content: center;
+    padding: 12px 5px;
+  }
+
+  .admin-layout .admin-logo-text,
+  .admin-layout .admin-logout-label {
+    display: none;
+  }
+
+  .admin-layout .admin-nav-item .admin-nav-label { display: none; }
+
+  .admin-layout .admin-nav {
+    padding: 14px 6px;
+  }
+
+  .admin-layout .admin-nav-item {
+    justify-content: center;
+    gap: 0;
+    padding-inline: 0;
+    font-size: 0;
+  }
+
+  .admin-layout .admin-logout {
+    justify-content: center;
+    margin-inline: 6px;
+    padding-inline: 0;
+    font-size: 0;
+  }
+
+  .admin-layout .admin-main {
+    width: calc(100% - 60px);
+    margin-left: 60px;
+  }
+
+  .admin-main > :is(.admin-dashboard-content, .admin-records-page, .admin-task-page, .complaints-page, .payments-page, .visitors-page, .amenities-page, .notices-page, .notifications-page, .settings-page) {
+    padding: 20px 16px 28px;
+  }
+
+  .admin-main :is(.admin-header, .admin-records-header, .task-page-header, .complaints-header, .payments-header, .visitors-header, .amenities-header, .notices-header, .notifications-header, .settings-header) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .admin-main :is(.admin-records-stats, .stats-grid, .task-stats-grid, .complaints-stats, .payment-stats-grid, .visitor-stats-grid, .amenity-stats-grid, .notice-stats-grid, .notification-stats) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 420px) {
+  .admin-main > :is(.admin-dashboard-content, .admin-records-page, .admin-task-page, .complaints-page, .payments-page, .visitors-page, .amenities-page, .notices-page, .notifications-page, .settings-page) {
+    padding-inline: 12px;
+  }
+
+  .admin-main :is(.admin-records-stats, .stats-grid, .task-stats-grid, .complaints-stats, .payment-stats-grid, .visitor-stats-grid, .amenity-stats-grid, .notice-stats-grid, .notification-stats) {
+    grid-template-columns: 1fr;
+  }
+}

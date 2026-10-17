@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { Check, Clock3, DoorOpen, Search, UsersRound } from "lucide-react";
 import "../../css/visitors.css";
 
 const formatDateTime = (value) => value ? new Date(value).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" }) : "—";
@@ -61,16 +62,16 @@ const Visitors = () => {
     </div>
 
     <div className="visitor-stats-grid">
-      <div className="visitor-stat-card"><div className="visitor-stat-icon blue">👥</div><div><p>Total Visitors</p><h2>{visitors.length}</h2><span>Database records</span></div></div>
-      <div className="visitor-stat-card"><div className="visitor-stat-icon green">✓</div><div><p>Approved</p><h2>{approved}</h2><span>Approved visitors</span></div></div>
-      <div className="visitor-stat-card"><div className="visitor-stat-icon orange">⏳</div><div><p>Pending Verification</p><h2>{pending}</h2><span>Awaiting approval</span></div></div>
-      <div className="visitor-stat-card"><div className="visitor-stat-icon purple">🚪</div><div><p>Currently Inside</p><h2>{inside}</h2><span>Entry recorded, exit pending</span></div></div>
+      <div className="visitor-stat-card"><div className="visitor-stat-icon blue"><UsersRound size={18} strokeWidth={1.8} aria-hidden="true" /></div><div><p>Total Visitors</p><h2>{visitors.length}</h2><span>Database records</span></div></div>
+      <div className="visitor-stat-card"><div className="visitor-stat-icon green"><Check size={18} strokeWidth={1.8} aria-hidden="true" /></div><div><p>Approved</p><h2>{approved}</h2><span>Approved visitors</span></div></div>
+      <div className="visitor-stat-card"><div className="visitor-stat-icon orange"><Clock3 size={18} strokeWidth={1.8} aria-hidden="true" /></div><div><p>Pending Verification</p><h2>{pending}</h2><span>Awaiting approval</span></div></div>
+      <div className="visitor-stat-card"><div className="visitor-stat-icon purple"><DoorOpen size={18} strokeWidth={1.8} aria-hidden="true" /></div><div><p>Currently Inside</p><h2>{inside}</h2><span>Entry recorded, exit pending</span></div></div>
     </div>
 
     <section className="visitors-section">
       <div className="visitors-section-header"><div><h2>Visitor Records</h2><p>Visitor details, resident, purpose and gate timestamps.</p></div><span className="record-count">{filteredVisitors.length} Records</span></div>
       <div className="visitors-toolbar">
-        <div className="visitor-search"><span>🔍</span><input placeholder="Search visitor, resident, flat or purpose..." value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} /></div>
+        <div className="visitor-search"><Search size={16} aria-hidden="true" /><input placeholder="Search visitor, resident, flat or purpose..." value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} /></div>
         <select className="visitor-status-filter" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}><option>All</option><option>Pending</option><option>Approved</option><option>Rejected</option><option>Completed</option></select>
       </div>
       {error && <p className="page-error" role="alert">{error}</p>}

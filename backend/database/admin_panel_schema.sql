@@ -55,6 +55,99 @@ CALL ensure_admin_schema_column('residents', 'ownership_type', "ENUM('Owner', 'R
 CALL ensure_admin_schema_column('residents', 'is_active', 'TINYINT(1) NOT NULL DEFAULT 1 AFTER ownership_type');
 DROP PROCEDURE ensure_admin_schema_column;
 
+DELIMITER $$
+DROP PROCEDURE IF EXISTS ensure_resident_validation_constraints$$
+CREATE PROCEDURE ensure_resident_validation_constraints()
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.table_constraints
+    WHERE constraint_schema = DATABASE()
+      AND table_name = 'residents'
+      AND constraint_name = 'chk_residents_names'
+      AND constraint_type = 'CHECK'
+  ) THEN
+    ALTER TABLE residents
+      ADD CONSTRAINT chk_residents_names CHECK (
+        COALESCE(user_type, '') <> 'Resident'
+        OR (
+          first_name IS NOT NULL AND CHAR_LENGTH(TRIM(first_name)) BETWEEN 1 AND 100
+          AND last_name IS NOT NULL AND CHAR_LENGTH(TRIM(last_name)) BETWEEN 1 AND 100
+          AND TRIM(first_name) REGEXP '^[[:alpha:]][[:alpha:] .''-]*$'
+          AND TRIM(last_name) REGEXP '^[[:alpha:]][[:alpha:] .''-]*$'
+        )
+      );
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.table_constraints
+    WHERE constraint_schema = DATABASE()
+      AND table_name = 'residents'
+      AND constraint_name = 'chk_residents_email'
+      AND constraint_type = 'CHECK'
+  ) THEN
+    ALTER TABLE residents
+      ADD CONSTRAINT chk_residents_email CHECK (
+        COALESCE(user_type, '') <> 'Resident'
+        OR (
+          email IS NOT NULL
+          AND CHAR_LENGTH(TRIM(email)) BETWEEN 3 AND 150
+          AND TRIM(email) REGEXP '^[^[:space:]@]+@[^[:space:]@]+[.][^[:space:]@]+$'
+        )
+      );
+  END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM information_schema.table_constraints
+    WHERE constraint_schema = DATABASE()
+      AND table_name = 'residents'
+      AND constraint_name = 'chk_residents_phone'
+      AND constraint_type = 'CHECK'
+  ) THEN
+    ALTER TABLE residents DROP CHECK chk_residents_phone;
+  END IF;
+  ALTER TABLE residents
+    ADD CONSTRAINT chk_residents_phone CHECK (
+      COALESCE(user_type, '') <> 'Resident'
+      OR (
+        phone IS NOT NULL
+        AND CHAR_LENGTH(phone) = 10
+        AND phone REGEXP '^[0-9]{10}$'
+      )
+    );
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.table_constraints
+    WHERE constraint_schema = DATABASE()
+      AND table_name = 'residents'
+      AND constraint_name = 'chk_residents_assignment'
+      AND constraint_type = 'CHECK'
+  ) THEN
+    ALTER TABLE residents
+      ADD CONSTRAINT chk_residents_assignment CHECK (
+        COALESCE(user_type, '') <> 'Resident'
+        OR (
+          block_wing IS NOT NULL AND block_wing IN ('A', 'B', 'C', 'D')
+          AND flat_number IS NOT NULL AND flat_number REGEXP '^[1-5]0[1-4]$'
+          AND ownership_type IS NOT NULL AND ownership_type IN ('Owner', 'Rent')
+        )
+      );
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT index_name
+    FROM information_schema.statistics
+    WHERE table_schema = DATABASE() AND table_name = 'residents'
+    GROUP BY index_name, non_unique
+    HAVING non_unique = 0 AND COUNT(*) = 1 AND MAX(column_name = 'email') = 1
+  ) THEN
+    ALTER TABLE residents ADD UNIQUE KEY uq_residents_email (email);
+  END IF;
+END$$
+DELIMITER ;
+
+CALL ensure_resident_validation_constraints();
+DROP PROCEDURE ensure_resident_validation_constraints;
+
 UPDATE admins
 SET society_id = (SELECT society_id FROM societies ORDER BY society_id LIMIT 1)
 WHERE society_id IS NULL;

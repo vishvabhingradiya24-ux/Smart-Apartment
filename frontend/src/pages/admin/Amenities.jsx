@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { Building2, CalendarDays, Check, Search, Wrench } from "lucide-react";
 import AdminFormModal from "./AdminFormModal";
 import "../../css/amenities.css";
 
@@ -142,10 +143,10 @@ const Amenities = () => {
     </div>
 
     <div className="amenity-stats-grid">
-      <div className="amenity-stat-card"><div className="amenity-stat-icon">🏢</div><div><span>Total Amenities</span><strong>{amenities.length}</strong></div></div>
-      <div className="amenity-stat-card"><div className="amenity-stat-icon">✅</div><div><span>Available</span><strong>{available}</strong></div></div>
-      <div className="amenity-stat-card"><div className="amenity-stat-icon">🔧</div><div><span>Unavailable</span><strong>{unavailable}</strong></div></div>
-      <div className="amenity-stat-card"><div className="amenity-stat-icon">📅</div><div><span>Total Bookings</span><strong>{bookingCount}</strong></div></div>
+      <div className="amenity-stat-card"><div className="amenity-stat-icon"><Building2 size={18} strokeWidth={1.8} aria-hidden="true" /></div><div><span>Total Amenities</span><strong>{amenities.length}</strong></div></div>
+      <div className="amenity-stat-card"><div className="amenity-stat-icon"><Check size={18} strokeWidth={1.8} aria-hidden="true" /></div><div><span>Available</span><strong>{available}</strong></div></div>
+      <div className="amenity-stat-card"><div className="amenity-stat-icon"><Wrench size={18} strokeWidth={1.8} aria-hidden="true" /></div><div><span>Unavailable</span><strong>{unavailable}</strong></div></div>
+      <div className="amenity-stat-card"><div className="amenity-stat-icon"><CalendarDays size={18} strokeWidth={1.8} aria-hidden="true" /></div><div><span>Total Bookings</span><strong>{bookingCount}</strong></div></div>
     </div>
 
     {formType && <AdminFormModal title={`${editingId ? "Edit" : "Add"} ${isFacilityForm ? "Amenity" : "Booking Add-on"}`} onClose={() => setFormType(null)} saving={saving}>
@@ -174,7 +175,7 @@ const Amenities = () => {
     {error && !formType && <p className="page-error" role="alert">{error}</p>}
 
     <div className="amenity-toolbar">
-      <div className="amenity-search"><span>🔍</span><input placeholder="Search amenity, ID or location..." value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} /></div>
+      <div className="amenity-search"><Search size={16} aria-hidden="true" /><input placeholder="Search amenity, ID or location..." value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} /></div>
       <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)} className="amenity-filter"><option>All</option><option>Available</option><option>Unavailable</option></select>
     </div>
 

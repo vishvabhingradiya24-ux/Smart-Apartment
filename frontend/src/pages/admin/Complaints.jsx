@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Check, ClipboardList, Clock3, Search, Wrench } from "lucide-react";
 import "../../css/complaints.css";
 
 const Complaints = () => {
@@ -305,7 +306,7 @@ const handleConfirmAssign = async () => {
 
         <div className="complaint-stat-card">
           <div className="complaint-stat-icon">
-            📝
+            <ClipboardList size={18} strokeWidth={1.8} aria-hidden="true" />
           </div>
 
           <div>
@@ -317,7 +318,7 @@ const handleConfirmAssign = async () => {
 
         <div className="complaint-stat-card">
           <div className="complaint-stat-icon">
-            ⏳
+            <Clock3 size={18} strokeWidth={1.8} aria-hidden="true" />
           </div>
 
           <div>
@@ -329,7 +330,7 @@ const handleConfirmAssign = async () => {
 
         <div className="complaint-stat-card">
           <div className="complaint-stat-icon">
-            🔧
+            <Wrench size={18} strokeWidth={1.8} aria-hidden="true" />
           </div>
 
           <div>
@@ -341,7 +342,7 @@ const handleConfirmAssign = async () => {
 
         <div className="complaint-stat-card">
           <div className="complaint-stat-icon">
-            ✅
+            <Check size={18} strokeWidth={1.8} aria-hidden="true" />
           </div>
 
           <div>
@@ -359,7 +360,7 @@ const handleConfirmAssign = async () => {
 
         <div className="complaints-search">
 
-          <span>🔍</span>
+          <Search size={16} aria-hidden="true" />
 
           <input
             type="text"

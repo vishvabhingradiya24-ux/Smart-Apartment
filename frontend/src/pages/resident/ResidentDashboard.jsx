@@ -1,5 +1,15 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import {
+  Activity,
+  ClipboardList,
+  CreditCard,
+  DoorOpen,
+  Megaphone,
+  Waves,
+  Wallet,
+  Wrench,
+} from "lucide-react";
 import "../../css/resident/resident_dashboard.css";
 
 function ResidentDashboard() {
@@ -94,8 +104,8 @@ function ResidentDashboard() {
           <div className="services-grid">
             <Link to="/resident/payment" className="service-card service-primary">
               <div className="service-top">
-                <div className="service-icon">₹</div>
-                <span className="service-arrow">↗</span>
+                <div className="service-icon"><CreditCard size={18} strokeWidth={1.8} aria-hidden="true" /></div>
+                <span className="service-arrow" aria-hidden="true">↗</span>
               </div>
               <div className="service-content">
                 <h3>Payments</h3>
@@ -105,8 +115,8 @@ function ResidentDashboard() {
 
             <Link to="/resident/complaints" className="service-card">
               <div className="service-top">
-                <div className="service-icon">⚒</div>
-                <span className="service-arrow">↗</span>
+                <div className="service-icon"><ClipboardList size={18} strokeWidth={1.8} aria-hidden="true" /></div>
+                <span className="service-arrow" aria-hidden="true">↗</span>
               </div>
               <div className="service-content">
                 <h3>Complaints</h3>
@@ -116,8 +126,8 @@ function ResidentDashboard() {
 
             <Link to="/resident/requests" className="service-card">
               <div className="service-top">
-                <div className="service-icon">≡</div>
-                <span className="service-arrow">↗</span>
+                <div className="service-icon"><Wrench size={18} strokeWidth={1.8} aria-hidden="true" /></div>
+                <span className="service-arrow" aria-hidden="true">↗</span>
               </div>
               <div className="service-content">
                 <h3>Service Requests</h3>
@@ -127,8 +137,8 @@ function ResidentDashboard() {
 
             <Link to="/resident/visitors" className="service-card">
               <div className="service-top">
-                <div className="service-icon">◉</div>
-                <span className="service-arrow">↗</span>
+                <div className="service-icon"><DoorOpen size={18} strokeWidth={1.8} aria-hidden="true" /></div>
+                <span className="service-arrow" aria-hidden="true">↗</span>
               </div>
               <div className="service-content">
                 <h3>Visitors</h3>
@@ -138,8 +148,8 @@ function ResidentDashboard() {
 
             <Link to="/resident/facilities" className="service-card">
               <div className="service-top">
-                <div className="service-icon">□</div>
-                <span className="service-arrow">↗</span>
+                <div className="service-icon"><Waves size={18} strokeWidth={1.8} aria-hidden="true" /></div>
+                <span className="service-arrow" aria-hidden="true">↗</span>
               </div>
               <div className="service-content">
                 <h3>Amenity Booking</h3>
@@ -160,7 +170,7 @@ function ResidentDashboard() {
             </div>
 
             <div className="empty-community">
-              <div className="empty-icon">+</div>
+              <div className="empty-icon"><Megaphone size={18} strokeWidth={1.8} aria-hidden="true" /></div>
               <h3>No community updates yet</h3>
               <p>Notices, events and community announcements will appear here.</p>
             </div>
@@ -176,7 +186,7 @@ function ResidentDashboard() {
             </div>
 
             <div className="payment-empty">
-              <div className="payment-symbol">₹</div>
+              <div className="payment-symbol"><Wallet size={18} strokeWidth={1.8} aria-hidden="true" /></div>
               <div>
                 <h3>No payment information</h3>
                 <p>Your maintenance and payment information will appear here.</p>
@@ -196,7 +206,7 @@ function ResidentDashboard() {
           <div className="activity-empty">
             <div className="activity-line"></div>
             <div className="activity-empty-content">
-              <div className="activity-empty-icon">•</div>
+              <div className="activity-empty-icon"><Activity size={18} strokeWidth={1.8} aria-hidden="true" /></div>
               <div>
                 <h3>No recent activity</h3>
                 <p>

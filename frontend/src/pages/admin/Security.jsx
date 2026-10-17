@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { Check, DoorOpen, Search, Shield, UserRoundPlus } from "lucide-react";
 import "../../css/admin.css";
 
 const formatDate = (value) => {
@@ -70,16 +71,16 @@ const Security = () => {
       </header>
 
       <section className="admin-records-stats">
-        <article><span>🛡️</span><div><small>Security staff</small><strong>{loading ? "—" : guards.length}</strong></div></article>
-        <article><span>🚪</span><div><small>Visitor requests today</small><strong>{loading ? "—" : visitorStats.visitorsToday}</strong></div></article>
-        <article><span>✅</span><div><small>Checked in today</small><strong>{loading ? "—" : visitorStats.checkedInToday}</strong></div></article>
-        <article><span>🆕</span><div><small>Guards joined this month</small><strong>{loading ? "—" : joinedThisMonth}</strong></div></article>
+        <article><span><Shield size={18} strokeWidth={1.8} aria-hidden="true" /></span><div><small>Security staff</small><strong>{loading ? "—" : guards.length}</strong></div></article>
+        <article><span><DoorOpen size={18} strokeWidth={1.8} aria-hidden="true" /></span><div><small>Visitor requests today</small><strong>{loading ? "—" : visitorStats.visitorsToday}</strong></div></article>
+        <article><span><Check size={18} strokeWidth={1.8} aria-hidden="true" /></span><div><small>Checked in today</small><strong>{loading ? "—" : visitorStats.checkedInToday}</strong></div></article>
+        <article><span><UserRoundPlus size={18} strokeWidth={1.8} aria-hidden="true" /></span><div><small>Guards joined this month</small><strong>{loading ? "—" : joinedThisMonth}</strong></div></article>
       </section>
 
       <section className="admin-records-card">
         <div className="admin-records-card-header">
           <div><h2>Security Team</h2><p>{filteredGuards.length} of {guards.length} guards</p></div>
-          <label className="admin-records-search"><span>🔍</span><input value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} placeholder="Search name, phone or email" /></label>
+          <label className="admin-records-search"><Search size={16} aria-hidden="true" /><input value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} placeholder="Search name, phone or email" /></label>
         </div>
 
         {loading ? <div className="admin-records-state">Loading security staff from database...</div> : error ? (

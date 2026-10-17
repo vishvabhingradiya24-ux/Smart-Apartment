@@ -1,5 +1,22 @@
 import { useEffect, useState } from "react";
 import { NavLink, Link, Outlet, useNavigate } from "react-router-dom";
+import {
+  Bell,
+  Building2,
+  ClipboardList,
+  CreditCard,
+  DoorOpen,
+  LayoutDashboard,
+  LogOut,
+  Megaphone,
+  Menu,
+  PhoneCall,
+  UserRound,
+  Vote,
+  Waves,
+  Wrench,
+  X,
+} from "lucide-react";
 import "../../css/resident/resident_dashboard.css";
 
 function ResidentLayout() {
@@ -87,7 +104,7 @@ const [user] = useState(() => {
             className="resident-brand sidebar-brand"
           >
             <div className="resident-brand-icon brand-mark">
-              🏢
+              <Building2 size={21} strokeWidth={1.8} aria-hidden="true" />
             </div>
 
             <div className="resident-brand-text brand-text">
@@ -109,7 +126,7 @@ const [user] = useState(() => {
             aria-controls="resident-navigation"
             onClick={() => setMobileMenuOpen((open) => !open)}
           >
-            {mobileMenuOpen ? "×" : "☰"}
+            {mobileMenuOpen ? <X size={20} aria-hidden="true" /> : <Menu size={20} aria-hidden="true" />}
           </button>
 
 
@@ -128,9 +145,10 @@ const [user] = useState(() => {
               to="/resident"
               end
               className={({ isActive }) => `resident-nav-item nav-item ${isActive ? "active" : ""}`}
+              title="Dashboard"
             >
               <span className="resident-nav-icon nav-icon">
-                ⌂
+                <LayoutDashboard size={17} strokeWidth={1.8} aria-hidden="true" />
               </span>
 
               <span>
@@ -142,9 +160,10 @@ const [user] = useState(() => {
             <NavLink
               to="/resident/profile"
               className={({ isActive }) => `resident-nav-item nav-item ${isActive ? "active" : ""}`}
+              title="My Profile"
             >
               <span className="resident-nav-icon nav-icon">
-                ◯
+                <UserRound size={17} strokeWidth={1.8} aria-hidden="true" />
               </span>
 
               <span>
@@ -156,9 +175,10 @@ const [user] = useState(() => {
             <NavLink
               to="/resident/flat-details"
               className={({ isActive }) => `resident-nav-item nav-item ${isActive ? "active" : ""}`}
+              title="Flat Details"
             >
               <span className="resident-nav-icon nav-icon">
-                ▦
+                <Building2 size={17} strokeWidth={1.8} aria-hidden="true" />
               </span>
 
               <span>
@@ -170,9 +190,10 @@ const [user] = useState(() => {
             <NavLink
               to="/resident/payment"
               className={({ isActive }) => `resident-nav-item nav-item ${isActive ? "active" : ""}`}
+              title="Payments"
             >
               <span className="resident-nav-icon nav-icon">
-                ₹
+                <CreditCard size={17} strokeWidth={1.8} aria-hidden="true" />
               </span>
 
               <span>
@@ -184,9 +205,10 @@ const [user] = useState(() => {
             <NavLink
               to="/resident/complaints"
               className={({ isActive }) => `resident-nav-item nav-item ${isActive ? "active" : ""}`}
+              title="Complaints"
             >
               <span className="resident-nav-icon nav-icon">
-                ⚒
+                <ClipboardList size={17} strokeWidth={1.8} aria-hidden="true" />
               </span>
 
               <span>
@@ -198,9 +220,10 @@ const [user] = useState(() => {
             <NavLink
               to="/resident/requests"
               className={({ isActive }) => `resident-nav-item nav-item ${isActive ? "active" : ""}`}
+              title="Service Requests"
             >
               <span className="resident-nav-icon nav-icon">
-                ≡
+                <Wrench size={17} strokeWidth={1.8} aria-hidden="true" />
               </span>
 
               <span>
@@ -212,9 +235,10 @@ const [user] = useState(() => {
             <NavLink
               to="/resident/visitors"
               className={({ isActive }) => `resident-nav-item nav-item ${isActive ? "active" : ""}`}
+              title="Visitors"
             >
               <span className="resident-nav-icon nav-icon">
-                ◉
+                <DoorOpen size={17} strokeWidth={1.8} aria-hidden="true" />
               </span>
 
               <span>
@@ -226,9 +250,10 @@ const [user] = useState(() => {
             <NavLink
               to="/resident/facilities"
               className={({ isActive }) => `resident-nav-item nav-item ${isActive ? "active" : ""}`}
+              title="Amenity Booking"
             >
               <span className="resident-nav-icon nav-icon">
-                □
+                <Waves size={17} strokeWidth={1.8} aria-hidden="true" />
               </span>
 
               <span>
@@ -240,9 +265,10 @@ const [user] = useState(() => {
             <NavLink
               to="/resident/notices"
               className={({ isActive }) => `resident-nav-item nav-item ${isActive ? "active" : ""}`}
+              title="Notices & Events"
             >
               <span className="resident-nav-icon nav-icon">
-                !
+                <Megaphone size={17} strokeWidth={1.8} aria-hidden="true" />
               </span>
 
               <span>
@@ -254,9 +280,10 @@ const [user] = useState(() => {
             <NavLink
               to="/resident/polls"
               className={({ isActive }) => `resident-nav-item nav-item ${isActive ? "active" : ""}`}
+              title="Polls & Voting"
             >
               <span className="resident-nav-icon nav-icon">
-                ✓
+                <Vote size={17} strokeWidth={1.8} aria-hidden="true" />
               </span>
 
               <span>
@@ -267,9 +294,10 @@ const [user] = useState(() => {
             <NavLink
               to="/resident/notifications"
               className={({ isActive }) => `resident-nav-item nav-item ${isActive ? "active" : ""}`}
+              title="Notifications"
             >
               <span className="resident-nav-icon nav-icon">
-                ○
+                <Bell size={17} strokeWidth={1.8} aria-hidden="true" />
               </span>
 
               <span>
@@ -280,9 +308,10 @@ const [user] = useState(() => {
             <NavLink
               to="/resident/emergency"
               className={({ isActive }) => `resident-nav-item nav-item emergency-nav ${isActive ? "active" : ""}`}
+              title="Emergency Contacts"
             >
               <span className="resident-nav-icon nav-icon">
-                !
+                <PhoneCall size={17} strokeWidth={1.8} aria-hidden="true" />
               </span>
 
               <span>
@@ -323,10 +352,7 @@ const [user] = useState(() => {
             className="resident-logout logout-button"
             onClick={handleLogout}
           >
-            <span>
-              ↪
-            </span>
-
+            <LogOut size={17} strokeWidth={1.8} aria-hidden="true" />
             Logout
           </button>
 
@@ -364,9 +390,7 @@ const [user] = useState(() => {
               className="header-notification"
               aria-label="Notifications"
             >
-              <span>
-                ○
-              </span>
+              <Bell size={17} strokeWidth={1.8} aria-hidden="true" />
             </Link>
 
             <Link

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { Bell, Building2, Database, HardDrive, Shield, UserRound } from "lucide-react";
 import "../../css/settings.css";
 
 const defaultNotifications = {
@@ -144,7 +145,7 @@ const Settings = () => {
   const renderSecurity = () => (
     <div className="settings-content">
       <div className="settings-content-header"><div><h2>Security Settings</h2><p>Saved account preferences and password controls.</p></div></div>
-      <div className="security-info-card"><div className="security-icon">🔐</div><div><h3>Account Security</h3><p>Security preferences are stored with your administrator account.</p></div></div>
+      <div className="security-info-card"><div className="security-icon"><Shield size={19} strokeWidth={1.8} aria-hidden="true" /></div><div><h3>Account Security</h3><p>Security preferences are stored with your administrator account.</p></div></div>
       <div className="settings-options">
         <div className="setting-option"><div><strong>Two-Factor Authentication</strong><span>Save your preference for an additional verification step.</span></div><button type="button" aria-label="Toggle two-factor authentication preference" aria-pressed={security.twoFactor} className={`toggle ${security.twoFactor ? "active" : ""}`} onClick={() => setSecurity({ ...security, twoFactor: !security.twoFactor })}><span /></button></div>
         <div className="setting-option"><div><strong>Login Alerts</strong><span>Save your preference for new login alerts.</span></div><button type="button" aria-label="Toggle login alerts" aria-pressed={security.loginAlerts} className={`toggle ${security.loginAlerts ? "active" : ""}`} onClick={() => setSecurity({ ...security, loginAlerts: !security.loginAlerts })}><span /></button></div>
@@ -177,8 +178,8 @@ const Settings = () => {
     <div className="settings-content">
       <div className="settings-content-header"><div><h2>System & Backup</h2><p>Current database connectivity and backup configuration.</p></div></div>
       <div className="backup-grid">
-        <div className="backup-card"><div className="backup-card-icon">🗄️</div><div><span>Database</span><strong>MySQL</strong><small>Connection checked from the backend</small></div><span className={`backup-success ${databaseStatus !== "Connected" ? "backup-unavailable" : ""}`}>● {databaseStatus}</span></div>
-        <div className="backup-card"><div className="backup-card-icon">💾</div><div><span>Database Backups</span><strong>Not configured</strong><small>This application does not run scheduled backups.</small></div></div>
+        <div className="backup-card"><div className="backup-card-icon"><Database size={18} strokeWidth={1.8} aria-hidden="true" /></div><div><span>Database</span><strong>MySQL</strong><small>Connection checked from the backend</small></div><span className={`backup-success ${databaseStatus !== "Connected" ? "backup-unavailable" : ""}`}>● {databaseStatus}</span></div>
+        <div className="backup-card"><div className="backup-card-icon"><HardDrive size={18} strokeWidth={1.8} aria-hidden="true" /></div><div><span>Database Backups</span><strong>Not configured</strong><small>This application does not run scheduled backups.</small></div></div>
       </div>
       <div className="backup-note"><span>ℹ️</span><p>Configure MySQL backups in your hosting or database environment; no backup completion is reported unless one is actually configured.</p></div>
     </div>
@@ -194,11 +195,11 @@ const Settings = () => {
       {success && <p className="settings-message success" role="status">{success}</p>}
       <div className="settings-layout">
         <aside className="settings-menu">
-          <button className={activeTab === "society" ? "active" : ""} onClick={() => setActiveTab("society")}><span>🏢</span>Society Profile</button>
-          <button className={activeTab === "profile" ? "active" : ""} onClick={() => setActiveTab("profile")}><span>👤</span>Admin Profile</button>
-          <button className={activeTab === "notifications" ? "active" : ""} onClick={() => setActiveTab("notifications")}><span>🔔</span>Notifications</button>
-          <button className={activeTab === "security" ? "active" : ""} onClick={() => setActiveTab("security")}><span>🔐</span>Security</button>
-          <button className={activeTab === "backup" ? "active" : ""} onClick={() => setActiveTab("backup")}><span>💾</span>System & Backup</button>
+          <button className={activeTab === "society" ? "active" : ""} onClick={() => setActiveTab("society")}><Building2 size={17} aria-hidden="true" />Society Profile</button>
+          <button className={activeTab === "profile" ? "active" : ""} onClick={() => setActiveTab("profile")}><UserRound size={17} aria-hidden="true" />Admin Profile</button>
+          <button className={activeTab === "notifications" ? "active" : ""} onClick={() => setActiveTab("notifications")}><Bell size={17} aria-hidden="true" />Notifications</button>
+          <button className={activeTab === "security" ? "active" : ""} onClick={() => setActiveTab("security")}><Shield size={17} aria-hidden="true" />Security</button>
+          <button className={activeTab === "backup" ? "active" : ""} onClick={() => setActiveTab("backup")}><HardDrive size={17} aria-hidden="true" />System & Backup</button>
         </aside>
         <main className="settings-main">
           {loading ? <div className="settings-content">Loading settings from database…</div> : <>

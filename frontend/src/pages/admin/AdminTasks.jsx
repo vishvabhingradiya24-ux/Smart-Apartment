@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Check, ClipboardList, Clock3, RotateCw, Search } from "lucide-react";
 import "../../css/admin_task.css";
 
 const AdminTask = () => {
@@ -233,7 +234,7 @@ const AdminTask = () => {
 
         <div className="task-stat-card">
           <div className="task-stat-icon total">
-            📋
+            <ClipboardList size={18} strokeWidth={1.8} aria-hidden="true" />
           </div>
 
           <div>
@@ -245,7 +246,7 @@ const AdminTask = () => {
 
         <div className="task-stat-card">
           <div className="task-stat-icon pending">
-            ⏳
+            <Clock3 size={18} strokeWidth={1.8} aria-hidden="true" />
           </div>
 
           <div>
@@ -257,7 +258,7 @@ const AdminTask = () => {
 
         <div className="task-stat-card">
           <div className="task-stat-icon progress">
-            🔄
+            <RotateCw size={18} strokeWidth={1.8} aria-hidden="true" />
           </div>
 
           <div>
@@ -269,7 +270,7 @@ const AdminTask = () => {
 
         <div className="task-stat-card">
           <div className="task-stat-icon completed">
-            ✅
+            <Check size={18} strokeWidth={1.8} aria-hidden="true" />
           </div>
 
           <div>
@@ -306,7 +307,7 @@ const AdminTask = () => {
         <div className="task-controls">
 
           <div className="task-search">
-            🔍
+            <Search size={16} aria-hidden="true" />
 
             <input
               type="text"

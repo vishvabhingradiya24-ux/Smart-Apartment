@@ -1,5 +1,17 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import {
+  Bell,
+  Building2,
+  ClipboardList,
+  CreditCard,
+  DoorOpen,
+  House,
+  Megaphone,
+  UsersRound,
+  Wrench,
+  Waves,
+} from "lucide-react";
 import "../../css/admin.css";
 import "../../css/admin_dashboard.css";
 
@@ -57,28 +69,28 @@ const AdminDashboard = () => {
     {
       title: "Total Residents",
       value: statsData.residents ?? "—",
-      icon: "👥",
+      icon: UsersRound,
       change: loading ? "Loading from database..." : "Registered residents",
       path: "/admin/residents",
     },
     {
       title: "Complaints",
       value: statsData.complaints ?? "—",
-      icon: "📋",
+      icon: ClipboardList,
       change: `${statsData.pendingComplaints ?? 0} pending`,
       path: "/admin/complaints",
     },
     {
       title: "Payments",
       value: statsData.paidTotal === undefined ? "—" : `₹${Number(statsData.paidTotal).toLocaleString("en-IN")}`,
-      icon: "💳",
+      icon: CreditCard,
       change: `${statsData.pendingPayments ?? 0} pending`,
       path: "/admin/payments",
     },
     {
       title: "Visitors Today",
       value: statsData.visitorsToday ?? "—",
-      icon: "🚪",
+      icon: DoorOpen,
       change: `${statsData.checkedInToday ?? 0} checked in today`,
       path: "/admin/visitors",
     },
@@ -88,49 +100,49 @@ const AdminDashboard = () => {
     {
       title: "Residents",
       description: "Manage society residents",
-      icon: "👥",
+      icon: UsersRound,
       path: "/admin/residents",
     },
     {
       title: "Staff",
       description: "Manage staff and tasks",
-      icon: "👨‍🔧",
+      icon: Wrench,
       path: "/admin/staff",
     },
     {
       title: "Complaints",
       description: "Review resident complaints",
-      icon: "📋",
+      icon: ClipboardList,
       path: "/admin/complaints",
     },
     {
     title: "Tasks",
     description: "Create and assign tasks to staff",
-    icon: "✅",
+    icon: ClipboardList,
     path: "/admin/task",
   },
     {
       title: "Payments",
       description: "Track maintenance payments",
-      icon: "💳",
+      icon: CreditCard,
       path: "/admin/payments",
     },
     {
       title: "Visitors",
       description: "Monitor visitor activity",
-      icon: "🚪",
+      icon: DoorOpen,
       path: "/admin/visitors",
     },
     {
       title: "Amenities",
       description: "Manage society amenities",
-      icon: "🏊",
+      icon: Waves,
       path: "/admin/amenities",
     },
     {
       title: "Notices",
       description: "Manage notices and events",
-      icon: "📢",
+      icon: Megaphone,
       path: "/admin/notices",
     },
   ];
@@ -159,7 +171,7 @@ const AdminDashboard = () => {
             onClick={() => navigate("/admin/notifications")}
             title="Notifications"
           >
-            🔔
+            <Bell size={18} strokeWidth={1.8} aria-hidden="true" />
             <span className="notification-dot"></span>
           </button>
 
@@ -238,7 +250,7 @@ const AdminDashboard = () => {
               <div className="stat-card-top">
 
                 <div className="stat-icon">
-                  {stat.icon}
+                  <stat.icon size={18} strokeWidth={1.8} aria-hidden="true" />
                 </div>
 
                 <span className="stat-arrow">
@@ -292,7 +304,7 @@ const AdminDashboard = () => {
             >
 
               <div className="management-icon">
-                {item.icon}
+                <item.icon size={18} strokeWidth={1.8} aria-hidden="true" />
               </div>
 
               <div className="management-content">
@@ -403,7 +415,7 @@ const AdminDashboard = () => {
         <div className="community-grid">
 
           <div className="community-item">
-            <span className="community-icon">🏠</span>
+            <span className="community-icon"><House size={18} strokeWidth={1.8} aria-hidden="true" /></span>
 
             <div>
               <strong>{community.residents ?? "—"}</strong>
@@ -412,7 +424,7 @@ const AdminDashboard = () => {
           </div>
 
           <div className="community-item">
-            <span className="community-icon">🏢</span>
+            <span className="community-icon"><Building2 size={18} strokeWidth={1.8} aria-hidden="true" /></span>
 
             <div>
               <strong>{community.flats ?? "—"}</strong>
@@ -421,7 +433,7 @@ const AdminDashboard = () => {
           </div>
 
           <div className="community-item">
-            <span className="community-icon">👨‍🔧</span>
+            <span className="community-icon"><Wrench size={18} strokeWidth={1.8} aria-hidden="true" /></span>
 
             <div>
               <strong>{community.staff ?? "—"}</strong>
@@ -430,7 +442,7 @@ const AdminDashboard = () => {
           </div>
 
           <div className="community-item">
-            <span className="community-icon">🎯</span>
+            <span className="community-icon"><Waves size={18} strokeWidth={1.8} aria-hidden="true" /></span>
 
             <div>
               <strong>{community.amenities ?? "—"}</strong>

@@ -226,42 +226,72 @@ const getAdminResidents = async (req, res) => {
   }
 };
 
-const validateResidentDetails = (body, includePassword = false) => {
-  const firstName = body.first_name?.trim();
-  const lastName = body.last_name?.trim();
-  const email = body.email?.trim().toLowerCase();
-  const phone = body.phone?.trim();
-  const blockWing = body.block_wing?.trim();
-  const flatNumber = body.flat_number?.trim();
-  const ownershipType = body.ownership_type;
-  const password = body.password;
+const validateResidentContactDetails = (body = {}) => {
+  const firstName = typeof body.first_name === "string" ? body.first_name.trim() : "";
+  const lastName = typeof body.last_name === "string" ? body.last_name.trim() : "";
+  const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
+  const phone = typeof body.phone === "string" ? body.phone.trim() : "";
+  const namePattern = /^[\p{L}\p{M}][\p{L}\p{M} .'-]*$/u;
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const phonePattern = /^[0-9]{10}$/;
+  const allowedWings = ["A", "B", "C", "D"];
+  const allowedFlats = new Set(
+    Array.from({ length: 5 }, (_, floorIndex) =>
+      [1, 2, 3, 4].map((unit) => String((floorIndex + 1) * 100 + unit)),
+    ).flat(),
+  );
 
-  if (!firstName || !lastName || !email || !emailPattern.test(email) ||
-      !phone || !blockWing || !flatNumber || !["Owner", "Rent"].includes(ownershipType)) {
-    return { error: "Enter valid resident, contact, flat and ownership details" };
+  if (!firstName || !lastName || !email || !phone) {
+    return { error: "First name, last name, email and phone are required" };
   }
-  if (firstName.length > 100 || lastName.length > 100 || email.length > 150 ||
-      phone.length > 20 || blockWing.length > 50 || flatNumber.length > 20) {
-    return { error: "One or more resident fields exceed the allowed length" };
+  if (firstName.length > 100 || lastName.length > 100) {
+    return { error: "Names must be 100 characters or fewer" };
   }
-  if (includePassword && (typeof password !== "string" || password.length < 6)) {
-    return { error: "Password must be at least 6 characters" };
+  if (!namePattern.test(firstName) || !namePattern.test(lastName)) {
+    return { error: "Names can contain letters, spaces, apostrophes, periods and hyphens" };
   }
-  if (!includePassword && password && (typeof password !== "string" || password.length < 6)) {
-    return { error: "New password must be at least 6 characters" };
+  if (email.length > 150 || !emailPattern.test(email)) {
+    return { error: "Enter a valid email address (maximum 150 characters)" };
+  }
+  if (!phonePattern.test(phone)) {
+    return { error: "Enter a phone number with exactly 10 digits" };
+  }
+
+  return { value: { firstName, lastName, email, phone } };
+};
+
+const validateResidentDetails = (body = {}) => {
+  const contactValidation = validateResidentContactDetails(body);
+  if (contactValidation.error) return contactValidation;
+
+  const blockWing = typeof body.block_wing === "string" ? body.block_wing.trim() : "";
+  const flatNumber = typeof body.flat_number === "string" ? body.flat_number.trim() : "";
+  const ownershipType = typeof body.ownership_type === "string" ? body.ownership_type.trim() : "";
+  const password = body.password;
+  if (
+    !allowedWings.includes(blockWing) ||
+    !allowedFlats.has(flatNumber) ||
+    !["Owner", "Rent"].includes(ownershipType)
+  ) {
+    return { error: "Block/Wing, flat number and ownership type are required" };
+  }
+  if (
+    typeof password !== "string" ||
+    password.length < 5 ||
+    (password.match(/[0-9]/g) || []).length < 3 ||
+    !/[^A-Za-z0-9\s]/.test(password) ||
+    Buffer.byteLength(password, "utf8") > 72
+  ) {
+    return { error: "Password must have at least 5 characters, 3 digits, 1 special character and be no more than 72 bytes" };
   }
 
   return {
     value: {
-      firstName,
-      lastName,
-      email,
-      phone,
+      ...contactValidation.value,
       blockWing,
       flatNumber,
       ownershipType,
-      password: password || "",
+      password,
     },
   };
 };
@@ -299,6 +329,12 @@ const createAdminResident = async (req, res) => {
     res.status(201).json({ message: "Resident added successfully", residentId: result.insertId });
   } catch (error) {
     console.error("Create Admin Resident Error:", error);
+    if (error.code === "ER_DUP_ENTRY") {
+      return res.status(409).json({ message: "Email is already registered" });
+    }
+    if (error.errno === 3819 || error.code === "ER_CHECK_CONSTRAINT_VIOLATED") {
+      return res.status(400).json({ message: "Resident details do not meet database validation rules" });
+    }
     res.status(500).json({ message: "Unable to add resident" });
   }
 };
@@ -306,7 +342,12 @@ const createAdminResident = async (req, res) => {
 const updateAdminResident = async (req, res) => {
   try {
     if (!requireAdmin(req, res)) return;
-    const validation = validateResidentDetails(req.body);
+    const allowedFields = ["first_name", "last_name", "email", "phone"];
+    if (Object.keys(req.body || {}).some((field) => !allowedFields.includes(field))) {
+      return res.status(400).json({ message: "Only resident name, email and phone can be updated" });
+    }
+
+    const validation = validateResidentContactDetails(req.body);
     if (validation.error) return res.status(400).json({ message: validation.error });
     const resident = validation.value;
 
@@ -322,46 +363,21 @@ const updateAdminResident = async (req, res) => {
     );
     if (!rows.length) return res.status(404).json({ message: "Resident not found" });
 
-    if (resident.password) {
-      const hashedPassword = await bcrypt.hash(resident.password, 10);
-      await pool.query(
-        `UPDATE residents
-         SET first_name = ?, last_name = ?, email = ?, phone = ?, block_wing = ?,
-             flat_number = ?, ownership_type = ?, password = ?
-         WHERE id = ? AND user_type = 'Resident'`,
-        [
-          resident.firstName,
-          resident.lastName,
-          resident.email,
-          resident.phone,
-          resident.blockWing,
-          resident.flatNumber,
-          resident.ownershipType,
-          hashedPassword,
-          req.params.id,
-        ]
-      );
-    } else {
-      await pool.query(
-        `UPDATE residents
-         SET first_name = ?, last_name = ?, email = ?, phone = ?, block_wing = ?,
-             flat_number = ?, ownership_type = ?
-         WHERE id = ? AND user_type = 'Resident'`,
-        [
-          resident.firstName,
-          resident.lastName,
-          resident.email,
-          resident.phone,
-          resident.blockWing,
-          resident.flatNumber,
-          resident.ownershipType,
-          req.params.id,
-        ]
-      );
-    }
+    await pool.query(
+      `UPDATE residents
+       SET first_name = ?, last_name = ?, email = ?, phone = ?
+       WHERE id = ? AND user_type = 'Resident'`,
+      [resident.firstName, resident.lastName, resident.email, resident.phone, req.params.id]
+    );
     res.status(200).json({ message: "Resident updated successfully" });
   } catch (error) {
     console.error("Update Admin Resident Error:", error);
+    if (error.code === "ER_DUP_ENTRY") {
+      return res.status(409).json({ message: "Email is already registered" });
+    }
+    if (error.errno === 3819 || error.code === "ER_CHECK_CONSTRAINT_VIOLATED") {
+      return res.status(400).json({ message: "Resident details do not meet database validation rules" });
+    }
     res.status(500).json({ message: "Unable to update resident" });
   }
 };

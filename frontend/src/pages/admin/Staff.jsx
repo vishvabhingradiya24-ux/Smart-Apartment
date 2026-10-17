@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Broom, Search, Shield, UsersRound, Wrench } from "lucide-react";
 import AdminFormModal from "./AdminFormModal";
 import "../../css/admin.css";
 
@@ -216,17 +217,17 @@ const Staff = () => {
       )}
 
       <section className="admin-records-stats">
-        <article><span>👨‍💼</span><div><small>Total staff</small><strong>{loading ? "—" : staffList.length}</strong></div></article>
-        <article><span>🔧</span><div><small>Maintenance</small><strong>{loading ? "—" : countType("maintenance")}</strong></div></article>
-        <article><span>🧹</span><div><small>Housekeeping</small><strong>{loading ? "—" : countType("housekeeping")}</strong></div></article>
-        <article><span>🛡️</span><div><small>Security</small><strong>{loading ? "—" : countType("security")}</strong></div></article>
+        <article><span><UsersRound size={18} strokeWidth={1.8} aria-hidden="true" /></span><div><small>Total staff</small><strong>{loading ? "—" : staffList.length}</strong></div></article>
+        <article><span><Wrench size={18} strokeWidth={1.8} aria-hidden="true" /></span><div><small>Maintenance</small><strong>{loading ? "—" : countType("maintenance")}</strong></div></article>
+        <article><span><Broom size={18} strokeWidth={1.8} aria-hidden="true" /></span><div><small>Housekeeping</small><strong>{loading ? "—" : countType("housekeeping")}</strong></div></article>
+        <article><span><Shield size={18} strokeWidth={1.8} aria-hidden="true" /></span><div><small>Security</small><strong>{loading ? "—" : countType("security")}</strong></div></article>
       </section>
 
       <section className="admin-records-card">
         <div className="admin-records-card-header">
           <div><h2>Staff Directory</h2><p>{filteredStaff.length} of {staffList.length} staff members</p></div>
           <div className="admin-records-controls">
-            <label className="admin-records-search"><span>🔍</span><input value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} placeholder="Search name, phone or email" /></label>
+            <label className="admin-records-search"><Search size={16} aria-hidden="true" /><input value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} placeholder="Search name, phone or email" /></label>
             <select value={typeFilter} onChange={(event) => setTypeFilter(event.target.value)} aria-label="Filter by staff type">
               <option value="All">All staff types</option>
               {staffTypes.map((type) => <option key={type} value={type}>{type}</option>)}

@@ -1,4 +1,19 @@
 import { useEffect, useMemo, useState } from "react";
+import {
+  Activity,
+  Bell,
+  CalendarDays,
+  ClipboardList,
+  CreditCard,
+  Database,
+  DoorOpen,
+  Megaphone,
+  Pin,
+  RefreshCw,
+  Search,
+  Waves,
+  Wrench,
+} from "lucide-react";
 import "../../css/notifications.css";
 
 const formatDate = (value) => value
@@ -43,7 +58,18 @@ const Notifications = () => {
   }), [notifications, search, typeFilter]);
   const types = [...new Set(notifications.map((item) => item.type))];
   const todayCount = notifications.filter((item) => item.date && new Date(item.date).toDateString() === new Date().toDateString()).length;
-  const getIcon = (type) => ({ Payment: "💳", Complaint: "📝", Booking: "🏊", Notice: "📢", Visitor: "🚪", Task: "🔧" }[type] || "🔔");
+  const getIcon = (type) => {
+    const icons = {
+      Payment: CreditCard,
+      Complaint: ClipboardList,
+      Booking: Waves,
+      Notice: Megaphone,
+      Visitor: DoorOpen,
+      Task: Wrench,
+    };
+    const Icon = icons[type] || Bell;
+    return <Icon size={16} strokeWidth={1.8} aria-hidden="true" />;
+  };
 
   const toggleRead = async (notification) => {
     const isRead = !notification.isRead;
@@ -80,14 +106,14 @@ const Notifications = () => {
       <div className="notifications-live"><span /> Live activity feed</div>
     </header>
     <div className="notification-stats">
-      <div className="notification-stat-card stat-total"><div className="notification-stat-icon">🔔</div><div><span>Total Activity</span><strong>{notifications.length}</strong></div></div>
-      <div className="notification-stat-card stat-today"><div className="notification-stat-icon">📅</div><div><span>Today</span><strong>{todayCount}</strong></div></div>
-      <div className="notification-stat-card stat-types"><div className="notification-stat-icon">📂</div><div><span>Activity Types</span><strong>{types.length}</strong></div></div>
-      <div className="notification-stat-card stat-showing"><div className="notification-stat-icon">🗂️</div><div><span>Matching Results</span><strong>{filtered.length}</strong></div></div>
+      <div className="notification-stat-card stat-total"><div className="notification-stat-icon"><Bell size={18} strokeWidth={1.8} aria-hidden="true" /></div><div><span>Total Activity</span><strong>{notifications.length}</strong></div></div>
+      <div className="notification-stat-card stat-today"><div className="notification-stat-icon"><CalendarDays size={18} strokeWidth={1.8} aria-hidden="true" /></div><div><span>Today</span><strong>{todayCount}</strong></div></div>
+      <div className="notification-stat-card stat-types"><div className="notification-stat-icon"><Activity size={18} strokeWidth={1.8} aria-hidden="true" /></div><div><span>Activity Types</span><strong>{types.length}</strong></div></div>
+      <div className="notification-stat-card stat-showing"><div className="notification-stat-icon"><ClipboardList size={18} strokeWidth={1.8} aria-hidden="true" /></div><div><span>Matching Results</span><strong>{filtered.length}</strong></div></div>
     </div>
     <div className="notification-filter-card">
       <div className="notification-filter-heading"><div><strong>Activity feed</strong><span>Find an update by keyword or type</span></div></div>
-      <div className="notification-search"><span>⌕</span><input aria-label="Search activity" placeholder="Search title, details, resident or staff..." value={search} onChange={(event) => setSearch(event.target.value)} /></div>
+      <div className="notification-search"><Search size={16} aria-hidden="true" /><input aria-label="Search activity" placeholder="Search title, details, resident or staff..." value={search} onChange={(event) => setSearch(event.target.value)} /></div>
       <select aria-label="Filter by activity type" value={typeFilter} onChange={(event) => setTypeFilter(event.target.value)}><option value="All">All activity types</option>{types.map((type) => <option key={type}>{type}</option>)}</select>
     </div>
     {error && <p className="page-error" role="alert">{error}</p>}
@@ -117,9 +143,9 @@ const Notifications = () => {
       </div>
     </div>
     <div className="notification-info-grid">
-      <div className="notification-info-card"><div className="info-icon">📌</div><div><h3>Activity sources</h3><p>Updates come from notices, payments, complaints, visitors, staff tasks, and amenity bookings.</p></div></div>
-      <div className="notification-info-card"><div className="info-icon">🗄️</div><div><h3>Database-backed</h3><p>This feed reflects saved database activity. Read status is saved for your admin account.</p></div></div>
-      <div className="notification-info-card"><div className="info-icon">🔄</div><div><h3>Stay current</h3><p>Reopen or refresh this page to load the newest activity records.</p></div></div>
+      <div className="notification-info-card"><div className="info-icon"><Pin size={17} aria-hidden="true" /></div><div><h3>Activity sources</h3><p>Updates come from notices, payments, complaints, visitors, staff tasks, and amenity bookings.</p></div></div>
+      <div className="notification-info-card"><div className="info-icon"><Database size={17} aria-hidden="true" /></div><div><h3>Database-backed</h3><p>This feed reflects saved database activity. Read status is saved for your admin account.</p></div></div>
+      <div className="notification-info-card"><div className="info-icon"><RefreshCw size={17} aria-hidden="true" /></div><div><h3>Stay current</h3><p>Reopen or refresh this page to load the newest activity records.</p></div></div>
     </div>
   </div>;
 };

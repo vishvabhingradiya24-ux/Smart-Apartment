@@ -72,6 +72,7 @@ import AdminTasks from "./pages/admin/AdminTasks";
 
 // Keep personal/project-wide CSS overrides last so they can override page styles.
 import "./css/admin_residents.css";
+import "./css/admin_unified.css";
 // import "./css/custom-overrides.css";
 
 function App() {

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { Check, Clock3, CreditCard, ReceiptText, Search, Wallet } from "lucide-react";
 import AdminFormModal from "./AdminFormModal";
 import "../../css/payments.css";
 
@@ -149,16 +150,16 @@ const Payments = () => {
     </div>
 
     <div className="payment-stats-grid">
-      <div className="payment-stat-card"><div className="payment-stat-icon blue">💳</div><div><p>Total Payments</p><h2>{payments.length}</h2><span>Database records</span></div></div>
-      <div className="payment-stat-card"><div className="payment-stat-icon green">✓</div><div><p>Successful</p><h2>{successful.length}</h2><span>Paid payments</span></div></div>
-      <div className="payment-stat-card"><div className="payment-stat-icon orange">⏳</div><div><p>Pending</p><h2>{pending.length}</h2><span>Awaiting payment</span></div></div>
-      <div className="payment-stat-card"><div className="payment-stat-icon purple">₹</div><div><p>Total Collected</p><h2>₹{totalCollected.toLocaleString("en-IN")}</h2><span>Successful payments</span></div></div>
+      <div className="payment-stat-card"><div className="payment-stat-icon blue"><CreditCard size={18} strokeWidth={1.8} aria-hidden="true" /></div><div><p>Total Payments</p><h2>{payments.length}</h2><span>Database records</span></div></div>
+      <div className="payment-stat-card"><div className="payment-stat-icon green"><Check size={18} strokeWidth={1.8} aria-hidden="true" /></div><div><p>Successful</p><h2>{successful.length}</h2><span>Paid payments</span></div></div>
+      <div className="payment-stat-card"><div className="payment-stat-icon orange"><Clock3 size={18} strokeWidth={1.8} aria-hidden="true" /></div><div><p>Pending</p><h2>{pending.length}</h2><span>Awaiting payment</span></div></div>
+      <div className="payment-stat-card"><div className="payment-stat-icon purple"><Wallet size={18} strokeWidth={1.8} aria-hidden="true" /></div><div><p>Total Collected</p><h2>₹{totalCollected.toLocaleString("en-IN")}</h2><span>Successful payments</span></div></div>
     </div>
 
     <div className="payment-overview">
-      <div className="payment-overview-card"><div className="overview-icon">💰</div><div><p>Collected Amount</p><h3>₹{totalCollected.toLocaleString("en-IN")}</h3></div></div>
-      <div className="payment-overview-card"><div className="overview-icon pending-icon">⏰</div><div><p>Pending Amount</p><h3>₹{pendingAmount.toLocaleString("en-IN")}</h3></div></div>
-      <div className="payment-overview-card"><div className="overview-icon receipt-icon">🧾</div><div><p>Transactions</p><h3>{successful.length}</h3></div></div>
+      <div className="payment-overview-card"><div className="overview-icon"><Wallet size={18} strokeWidth={1.8} aria-hidden="true" /></div><div><p>Collected Amount</p><h3>₹{totalCollected.toLocaleString("en-IN")}</h3></div></div>
+      <div className="payment-overview-card"><div className="overview-icon pending-icon"><Clock3 size={18} strokeWidth={1.8} aria-hidden="true" /></div><div><p>Pending Amount</p><h3>₹{pendingAmount.toLocaleString("en-IN")}</h3></div></div>
+      <div className="payment-overview-card"><div className="overview-icon receipt-icon"><ReceiptText size={18} strokeWidth={1.8} aria-hidden="true" /></div><div><p>Transactions</p><h3>{successful.length}</h3></div></div>
     </div>
 
     {showForm && <AdminFormModal title={editingId ? "Edit Pending Payment" : "Add Resident Payment Due"} onClose={() => setShowForm(false)} saving={saving}>
@@ -187,7 +188,7 @@ const Payments = () => {
     <section className="payments-section">
       <div className="payments-section-header"><div><h2>Payment Records</h2><p>Payment status, amounts, residents and transaction IDs.</p></div><span className="record-count">{filteredPayments.length} Records</span></div>
       <div className="payments-toolbar">
-        <div className="payment-search"><span>🔍</span><input placeholder="Search payment, resident, flat or transaction..." value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} /></div>
+        <div className="payment-search"><Search size={16} aria-hidden="true" /><input placeholder="Search payment, resident, flat or transaction..." value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} /></div>
         <div className="payment-filter"><label>Status</label><select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}><option>All</option><option>Success</option><option>Pending</option><option>Cancelled</option></select></div>
       </div>
       {error && !showForm && <p className="page-error" role="alert">{error}</p>}

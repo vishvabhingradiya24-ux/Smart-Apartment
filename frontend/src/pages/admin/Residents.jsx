@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { Search } from "lucide-react";
 import "../../css/admin.css";
 
 const flatNumberCollator = new Intl.Collator("en", {
@@ -30,6 +31,7 @@ const Residents = () => {
   const [error, setError] = useState("");
   const [savingResidentId, setSavingResidentId] = useState(null);
   const [showForm, setShowForm] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState("");
@@ -98,6 +100,7 @@ const Residents = () => {
 
   const openAddForm = () => {
     setEditingId(null);
+    setShowPassword(false);
     setForm({
       first_name: "",
       last_name: "",
@@ -115,6 +118,7 @@ const Residents = () => {
 
   const openEditForm = (resident) => {
     setEditingId(resident.id);
+    setShowPassword(false);
     setForm({
       first_name: resident.first_name || "",
       last_name: resident.last_name || "",
@@ -132,15 +136,72 @@ const Residents = () => {
 
   const saveResident = async (event) => {
     event.preventDefault();
-    setSaving(true);
     setFormError("");
     setSuccessMessage("");
+
+    const normalizedForm = {
+      ...form,
+      first_name: form.first_name.trim(),
+      last_name: form.last_name.trim(),
+      email: form.email.trim().toLowerCase(),
+      phone: form.phone.trim(),
+      block_wing: form.block_wing.trim(),
+      flat_number: form.flat_number.trim(),
+    };
+    const requiredFields = editingId
+      ? ["first_name", "last_name", "email", "phone"]
+      : Object.keys(normalizedForm);
+    const namePattern = /^[\p{L}\p{M}][\p{L}\p{M} .'-]*$/u;
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phonePattern = /^[0-9]{10}$/;
+    const passwordBytes = new TextEncoder().encode(normalizedForm.password).length;
+    const passwordDigits = (normalizedForm.password.match(/[0-9]/g) || []).length;
+    const hasPasswordSpecialCharacter = /[^A-Za-z0-9\s]/.test(normalizedForm.password);
+
+    if (requiredFields.some((field) => !normalizedForm[field])) {
+      setFormError("Please fill in all required fields.");
+      return;
+    }
+    if (normalizedForm.first_name.length > 100 || normalizedForm.last_name.length > 100) {
+      setFormError("Names must be 100 characters or fewer.");
+      return;
+    }
+    if (!namePattern.test(normalizedForm.first_name) || !namePattern.test(normalizedForm.last_name)) {
+      setFormError("Names can contain letters, spaces, apostrophes, periods and hyphens.");
+      return;
+    }
+    if (normalizedForm.email.length > 150 || !emailPattern.test(normalizedForm.email)) {
+      setFormError("Enter a valid email address (maximum 150 characters).");
+      return;
+    }
+    if (!phonePattern.test(normalizedForm.phone)) {
+      setFormError("Enter a phone number with exactly 10 digits.");
+      return;
+    }
+    if (
+      !editingId &&
+      (normalizedForm.password.length < 5 || passwordDigits < 3 || !hasPasswordSpecialCharacter || passwordBytes > 72)
+    ) {
+      setFormError("Password must have at least 5 characters, 3 digits, 1 special character and be no more than 72 bytes.");
+      return;
+    }
+
+    const payload = editingId
+      ? {
+          first_name: normalizedForm.first_name,
+          last_name: normalizedForm.last_name,
+          email: normalizedForm.email,
+          phone: normalizedForm.phone,
+        }
+      : normalizedForm;
+
+    setSaving(true);
     try {
       const response = await request(
         editingId ? `/api/admin/residents/${editingId}` : "/api/admin/residents",
         {
           method: editingId ? "PUT" : "POST",
-          body: JSON.stringify(form),
+          body: JSON.stringify(payload),
         },
       );
       const data = await response.json();
@@ -276,7 +337,6 @@ const Residents = () => {
         </div>
         <div className="admin-records-header-actions">
           <button type="button" className="admin-records-secondary" onClick={openAddForm}>＋ Add Resident</button>
-          <button type="button" className="admin-records-refresh" onClick={refreshResidents} disabled={loading}>↻ Refresh</button>
         </div>
       </header>
 
@@ -298,7 +358,7 @@ const Residents = () => {
             <div className="admin-records-card-header admin-resident-modal-header">
               <div>
                 <h2 id="resident-form-title">{editingId ? "Edit Resident" : "Add Resident"}</h2>
-                <p>{editingId ? "Update resident details; leave password blank to keep it unchanged." : "Create a resident login account and assign the resident's flat."}</p>
+                <p>{editingId ? "Update resident name and contact information." : "Create a resident login account and assign the resident's flat."}</p>
               </div>
               <button
                 type="button"
@@ -311,14 +371,63 @@ const Residents = () => {
               </button>
             </div>
             <form className="admin-staff-create-form" onSubmit={saveResident}>
-              <label>First name<input required autoFocus maxLength="100" autoComplete="given-name" value={form.first_name} onChange={(event) => setForm({ ...form, first_name: event.target.value })} /></label>
-              <label>Last name<input required maxLength="100" autoComplete="family-name" value={form.last_name} onChange={(event) => setForm({ ...form, last_name: event.target.value })} /></label>
-              <label>Email<input required type="email" maxLength="150" autoComplete="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} /></label>
-              <label>Phone<input required type="tel" maxLength="20" autoComplete="tel" value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} /></label>
-              <label>Block / Wing<select required value={form.block_wing} onChange={(event) => setForm({ ...form, block_wing: event.target.value })}><option value="">Select wing</option>{wingOptions.map((wing) => <option key={wing} value={wing}>{wing}</option>)}</select></label>
-              <label>Flat number<select required value={form.flat_number} onChange={(event) => setForm({ ...form, flat_number: event.target.value })}><option value="">Select flat</option>{flatNumberOptions.map((flatNumber) => <option key={flatNumber} value={flatNumber}>{flatNumber}</option>)}</select></label>
-              <label>Ownership type<select required value={form.ownership_type} onChange={(event) => setForm({ ...form, ownership_type: event.target.value })}><option value="">Select ownership</option><option value="Owner">Owner</option><option value="Rent">Rent</option></select></label>
-              <label>{editingId ? "New password (optional)" : "Initial password"}<input required={!editingId} minLength="6" type="password" autoComplete="new-password" value={form.password} onChange={(event) => setForm({ ...form, password: event.target.value })} /></label>
+              <label>
+                First name
+                <input required autoFocus maxLength="100" autoComplete="given-name" value={form.first_name} onChange={(event) => setForm({ ...form, first_name: event.target.value })} />
+              </label>
+              <label>
+                Last name
+                <input required maxLength="100" autoComplete="family-name" value={form.last_name} onChange={(event) => setForm({ ...form, last_name: event.target.value })} />
+              </label>
+              <label>
+                Email
+                <input required type="email" maxLength="150" autoComplete="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} />
+              </label>
+              <label>
+                Phone
+                <input required type="tel" inputMode="numeric" pattern="[0-9]{10}" minLength="10" maxLength="10" autoComplete="tel" value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} />
+              </label>
+              {!editingId && (
+                <>
+                  <label>
+                    Block / Wing
+                    <select required value={form.block_wing} onChange={(event) => setForm({ ...form, block_wing: event.target.value })}>
+                      <option value="">Select wing</option>
+                      {wingOptions.map((wing) => <option key={wing} value={wing}>{wing}</option>)}
+                    </select>
+                  </label>
+                  <label>
+                    Flat number
+                    <select required value={form.flat_number} onChange={(event) => setForm({ ...form, flat_number: event.target.value })}>
+                      <option value="">Select flat</option>
+                      {flatNumberOptions.map((flatNumber) => <option key={flatNumber} value={flatNumber}>{flatNumber}</option>)}
+                    </select>
+                  </label>
+                  <label>
+                    Ownership type
+                    <select required value={form.ownership_type} onChange={(event) => setForm({ ...form, ownership_type: event.target.value })}>
+                      <option value="">Select ownership</option>
+                      <option value="Owner">Owner</option>
+                      <option value="Rent">Rent</option>
+                    </select>
+                  </label>
+                  <label>
+                    Initial password
+                    <div className="admin-resident-password-control">
+                      <input required minLength="5" maxLength="72" type={showPassword ? "text" : "password"} autoComplete="new-password" value={form.password} onChange={(event) => setForm({ ...form, password: event.target.value })} />
+                      <button
+                        type="button"
+                        className="admin-resident-password-toggle"
+                        aria-label={showPassword ? "Hide password" : "Show password"}
+                        aria-pressed={showPassword}
+                        onClick={() => setShowPassword((visible) => !visible)}
+                      >
+                        {showPassword ? "Hide" : "Show"}
+                      </button>
+                    </div>
+                  </label>
+                </>
+              )}
               {formError && <p className="admin-staff-form-error" role="alert">{formError}</p>}
               <div className="admin-staff-form-actions">
                 <button type="button" className="admin-records-secondary" onClick={() => setShowForm(false)} disabled={saving}>Cancel</button>
@@ -370,7 +479,7 @@ const Residents = () => {
           </div>
           <div className="admin-records-controls">
             <label className="admin-records-search">
-              <span>🔍</span>
+              <Search size={16} aria-hidden="true" />
               <input value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} placeholder="Search name, flat, phone or email" />
             </label>
             <select aria-label="Resident account status" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>

@@ -1,5 +1,19 @@
 
 import { useNavigate, useLocation } from "react-router-dom";
+import {
+  Bell,
+  BriefcaseBusiness,
+  Building2,
+  ClipboardList,
+  CreditCard,
+  DoorOpen,
+  LayoutDashboard,
+  LogOut,
+  Megaphone,
+  Settings2,
+  UsersRound,
+  Waves,
+} from "lucide-react";
 import "../../css/admin.css";
 
 const AdminLayout = ({ children }) => {
@@ -9,58 +23,57 @@ const AdminLayout = ({ children }) => {
   const menuItems = [
     {
       label: "Dashboard",
-      icon: "📊",
+      icon: LayoutDashboard,
       path: "/admin",
     },
     {
       label: "Residents",
-      icon: "👥",
+      icon: UsersRound,
       path: "/admin/residents",
     },
     {
       label: "Staff",
-      icon: "👨‍💼",
+      icon: BriefcaseBusiness,
       path: "/admin/staff",
     },
     {
       label: "Complaints",
-      icon: "📝",
+      icon: ClipboardList,
       path: "/admin/complaints",
     },
-    { 
-  label: "Tasks", 
-  icon: "✅", 
-  path: "/admin/task", 
-},
-    
+    {
+      label: "Tasks",
+      icon: ClipboardList,
+      path: "/admin/task",
+    },
     {
       label: "Payments",
-      icon: "💳",
+      icon: CreditCard,
       path: "/admin/payments",
     },
     {
       label: "Visitors",
-      icon: "🚪",
+      icon: DoorOpen,
       path: "/admin/visitors",
     },
     {
       label: "Amenities",
-      icon: "🏊",
+      icon: Waves,
       path: "/admin/amenities",
     },
     {
       label: "Notices",
-      icon: "📢",
+      icon: Megaphone,
       path: "/admin/notices",
     },
     {
       label: "Notifications",
-      icon: "🔔",
+      icon: Bell,
       path: "/admin/notifications",
     },
     {
       label: "Settings",
-      icon: "⚙️",
+      icon: Settings2,
       path: "/admin/settings",
     },
   ];
@@ -74,12 +87,11 @@ const AdminLayout = ({ children }) => {
 
   return (
     <div className="admin-layout">
-      {/* COMMON SIDEBAR */}
       <aside className="admin-sidebar">
         <div className="admin-logo">
-          <div className="admin-logo-icon">🏢</div>
+          <div className="admin-logo-icon"><Building2 size={21} strokeWidth={1.8} /></div>
 
-          <div>
+          <div className="admin-logo-text">
             <h2>Smart Apartment</h2>
             <span>Admin Panel</span>
           </div>
@@ -99,21 +111,23 @@ const AdminLayout = ({ children }) => {
                   isActive ? "active" : ""
                 }`}
                 onClick={() => navigate(item.path)}
+                aria-current={isActive ? "page" : undefined}
+                aria-label={item.label}
+                title={item.label}
               >
-                <span>{item.icon}</span>
-                {item.label}
+                <item.icon size={18} strokeWidth={1.8} aria-hidden="true" />
+                <span className="admin-nav-label">{item.label}</span>
               </button>
             );
           })}
         </nav>
 
         <button className="admin-logout" onClick={handleLogout}>
-          <span>🚪</span>
-          Logout
+          <LogOut size={18} strokeWidth={1.8} aria-hidden="true" />
+          <span className="admin-logout-label">Logout</span>
         </button>
       </aside>
 
-      {/* PAGE CONTENT */}
       <main className="admin-main">{children}</main>
     </div>
   );
