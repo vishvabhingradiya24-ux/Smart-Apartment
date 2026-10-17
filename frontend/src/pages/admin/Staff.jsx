@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import AdminFormModal from "./AdminFormModal";
 import "../../css/admin.css";
 
 const formatDate = (value) => {
@@ -123,12 +124,12 @@ const Staff = () => {
             type="button"
             className="admin-records-secondary"
             onClick={() => {
-              setShowAddForm((visible) => !visible);
+              setShowAddForm(true);
               setFormError("");
               setSuccessMessage("");
             }}
           >
-            {showAddForm ? "Cancel" : "+ Add Staff"}
+            + Add Staff
           </button>
           <button type="button" className="admin-records-refresh" onClick={refreshStaff} disabled={loading}>↻ Refresh</button>
         </div>
@@ -137,13 +138,7 @@ const Staff = () => {
       {successMessage && <p className="admin-staff-success" role="status">{successMessage}</p>}
 
       {showAddForm && (
-        <section className="admin-records-card admin-staff-create-card">
-          <div className="admin-records-card-header">
-            <div>
-              <h2>Add Staff Member</h2>
-              <p>Enter staff details and set an initial login password.</p>
-            </div>
-          </div>
+        <AdminFormModal title="Add Staff Member" onClose={() => setShowAddForm(false)} saving={saving}>
           <form className="admin-staff-create-form" onSubmit={handleAddStaff}>
             <label>
               First name
@@ -217,7 +212,7 @@ const Staff = () => {
               </button>
             </div>
           </form>
-        </section>
+        </AdminFormModal>
       )}
 
       <section className="admin-records-stats">

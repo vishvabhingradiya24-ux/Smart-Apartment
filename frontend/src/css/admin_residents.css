@@ -60,11 +60,24 @@
 .admin-resident-drawer-actions a:hover { background: #e1e6eb; }
 .admin-resident-drawer-actions p { color: #71847c; font-size: 11px; }
 
+.admin-resident-modal-backdrop { position: fixed; inset: 0; z-index: 1600; display: flex; align-items: center; justify-content: center; padding: 20px; background: rgba(19, 31, 43, .55); backdrop-filter: blur(3px); animation: resident-backdrop-in .18s ease-out; }
+.admin-residents-page .admin-resident-form-card { width: min(680px, 100%); max-height: calc(100vh - 40px); margin: 0; overflow-y: auto; box-shadow: 0 22px 70px rgba(13, 28, 37, .28); animation: resident-modal-in .2s ease-out; }
+.admin-residents-page .admin-resident-modal-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.admin-resident-modal-close { display: grid; width: 36px; height: 36px; flex: 0 0 36px; place-items: center; border: 1px solid #dce5ed; border-radius: 8px; background: #fff; color: #344252; font: inherit; font-size: 23px; line-height: 1; cursor: pointer; }
+.admin-resident-modal-close:hover { background: #f2f5f7; }
+.admin-resident-modal-close:disabled { cursor: not-allowed; opacity: .55; }
+
 @keyframes resident-backdrop-in { from { opacity: 0; } to { opacity: 1; } }
 @keyframes resident-drawer-in { from { opacity: .6; transform: translateX(28px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes resident-modal-in { from { opacity: .7; transform: translateY(10px) scale(.99); } to { opacity: 1; transform: translateY(0) scale(1); } }
 
 @media (max-width: 700px) {
   .admin-residents-page .admin-residents-hero { align-items: flex-start; flex-direction: column; padding: 22px; }
   .admin-residents-page .admin-residents-hero-art { width: 100%; justify-content: flex-start; padding-left: 18px; }
   .admin-resident-drawer { padding: 20px; }
+}
+
+@media (max-width: 600px) {
+  .admin-resident-modal-backdrop { padding: 12px; }
+  .admin-residents-page .admin-resident-form-card { max-height: calc(100vh - 24px); }
 }

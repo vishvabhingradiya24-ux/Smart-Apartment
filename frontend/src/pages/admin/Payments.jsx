@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import AdminFormModal from "./AdminFormModal";
 import "../../css/payments.css";
 
 const emptyForm = { resident_id: "", amount: "", billing_month: "", due_date: "" };
@@ -160,8 +161,8 @@ const Payments = () => {
       <div className="payment-overview-card"><div className="overview-icon receipt-icon">🧾</div><div><p>Transactions</p><h3>{successful.length}</h3></div></div>
     </div>
 
-    {showForm && <form className="admin-data-form" onSubmit={savePayment}>
-      <h2>{editingId ? "Edit Pending Payment" : "Add Resident Payment Due"}</h2>
+    {showForm && <AdminFormModal title={editingId ? "Edit Pending Payment" : "Add Resident Payment Due"} onClose={() => setShowForm(false)} saving={saving}>
+      <form className="admin-data-form" onSubmit={savePayment}>
       <div className="admin-data-form-grid">
         <label>Resident
           <select required value={form.resident_id} disabled={Boolean(editingId)} onChange={(event) => setForm({ ...form, resident_id: event.target.value })}>
@@ -175,11 +176,13 @@ const Payments = () => {
         <label>Billing month<input required maxLength="40" placeholder="e.g. July 2026" value={form.billing_month} onChange={(event) => setForm({ ...form, billing_month: event.target.value })} /></label>
         <label>Due date<input required type="date" value={form.due_date} onChange={(event) => setForm({ ...form, due_date: event.target.value })} /></label>
       </div>
+      {error && <p className="page-error" role="alert">{error}</p>}
       <div className="admin-data-form-actions">
         <button type="button" onClick={() => setShowForm(false)}>Cancel</button>
         <button type="submit" disabled={saving || (!editingId && residents.length === 0)}>{saving ? "Saving…" : "Save Payment"}</button>
       </div>
-    </form>}
+      </form>
+    </AdminFormModal>}
 
     <section className="payments-section">
       <div className="payments-section-header"><div><h2>Payment Records</h2><p>Payment status, amounts, residents and transaction IDs.</p></div><span className="record-count">{filteredPayments.length} Records</span></div>
@@ -187,7 +190,7 @@ const Payments = () => {
         <div className="payment-search"><span>🔍</span><input placeholder="Search payment, resident, flat or transaction..." value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} /></div>
         <div className="payment-filter"><label>Status</label><select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}><option>All</option><option>Success</option><option>Pending</option><option>Cancelled</option></select></div>
       </div>
-      {error && <p className="page-error" role="alert">{error}</p>}
+      {error && !showForm && <p className="page-error" role="alert">{error}</p>}
       <div className="payments-table-wrapper"><table className="payments-table">
         <thead><tr><th>Payment ID</th><th>Resident</th><th>Flat</th><th>Billing Month</th><th>Amount</th><th>Due / Paid</th><th>Transaction ID</th><th>Status</th><th>Actions</th></tr></thead>
         <tbody>{loading ? <tr><td colSpan="9">Loading payments…</td></tr> : filteredPayments.length ? filteredPayments.map((payment) => {

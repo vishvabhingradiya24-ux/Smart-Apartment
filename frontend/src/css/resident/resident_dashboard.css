@@ -1266,3 +1266,203 @@
   .resident-dashboard-content .residence-content h2 { font-size: 25px; }
   .resident-dashboard-content .residence-description { font-size: 12px; }
 }
+
+/* Resident dashboard layout refresh */
+.resident-layout.resident-dashboard {
+  display: grid;
+  grid-template-columns: 250px minmax(0, 1fr);
+  min-height: 100vh;
+  background: #f4f6f3;
+  color: #20332f;
+}
+
+.resident-layout .resident-sidebar {
+  position: sticky;
+  top: 0;
+  width: 250px;
+  min-width: 0;
+  height: 100vh;
+  border-right: 1px solid rgba(255, 255, 255, .08);
+  background: #173b37 !important;
+}
+
+.resident-layout .resident-sidebar-top { min-height: 0; }
+.resident-layout .resident-sidebar .resident-brand.sidebar-brand { min-height: 82px; }
+.resident-layout .resident-sidebar .resident-brand-text strong { white-space: normal; overflow-wrap: anywhere; }
+.resident-layout .resident-sidebar .sidebar-section-label { color: #9bb9b0; }
+.resident-layout .resident-sidebar .nav-item { width: 100%; color: #d0ded9; }
+.resident-layout .resident-sidebar .nav-item:hover { background: rgba(255, 255, 255, .1); color: #fff; }
+.resident-layout .resident-sidebar .nav-item.active { background: #d9f0e5; color: #173b37; }
+.resident-layout .resident-sidebar .nav-item.active .nav-icon { color: #087c68; }
+.resident-layout .resident-sidebar .emergency-nav { color: #f4c8b8; }
+.resident-layout .resident-sidebar .sidebar-bottom { background: #173b37; }
+.resident-mobile-menu-toggle { display: none; }
+
+.resident-layout .resident-main {
+  width: auto;
+  min-width: 0;
+  min-height: 100vh;
+  margin: 0;
+  padding: 28px 34px 36px;
+  box-sizing: border-box;
+}
+
+.resident-layout .resident-content { width: 100%; max-width: 1440px; margin: 0 auto; }
+.resident-dashboard-content { width: 100%; min-width: 0; }
+.resident-layout .resident-header { min-height: 76px; margin-bottom: 26px; }
+.resident-layout .resident-header .header-left h1 { color: #20332f; font-size: 27px; line-height: 1.2; letter-spacing: 0; }
+.resident-layout .resident-header .header-left p { color: #66766f; font-size: 13px; line-height: 1.5; }
+.resident-layout .resident-header .header-overline { color: #687a72; letter-spacing: 1px; }
+.resident-layout .header-notification,
+.resident-layout .header-profile { border-color: #dce5df; box-shadow: 0 2px 8px rgba(20, 50, 42, .04); }
+.resident-layout .header-avatar { background: #0d806d; }
+
+.resident-dashboard-content .residence-hero {
+  min-height: 310px;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 310px);
+  margin-bottom: 32px;
+  border: 1px solid rgba(20, 48, 42, .15);
+  border-radius: 15px;
+  background: #183b36;
+  box-shadow: 0 12px 26px rgba(25, 48, 42, .12);
+}
+
+.resident-dashboard-content .residence-photo {
+  background-image: linear-gradient(90deg, rgba(17, 44, 39, .84), rgba(17, 44, 39, .26)), url("../../assets/resident-community.jpg");
+  background-position: center 55%;
+}
+
+.resident-dashboard-content .residence-photo-overlay { background: linear-gradient(0deg, rgba(17, 44, 39, .18), transparent 70%); }
+.resident-dashboard-content .residence-content { max-width: 640px; padding: 38px; }
+.resident-dashboard-content .residence-content .section-eyebrow { color: #c9e1d7; letter-spacing: 1.2px; }
+.resident-dashboard-content .residence-content h2 { font-size: 32px; line-height: 1.16; letter-spacing: 0; }
+.resident-dashboard-content .residence-description { color: #e0ebe6; font-size: 13px; line-height: 1.65; }
+.resident-dashboard-content .residence-button { min-height: 42px; border-radius: 7px; background: #f4d27e; color: #273d37; }
+.resident-dashboard-content .residence-button:hover { background: #ffe19a; }
+
+.resident-dashboard-content .residence-info {
+  margin: 18px;
+  padding: 20px;
+  border-color: rgba(255, 255, 255, .25);
+  border-radius: 11px;
+  background: rgba(18, 50, 44, .82);
+  backdrop-filter: blur(8px);
+}
+
+.resident-dashboard-content .large-avatar { background: #f4d27e; color: #20332f; }
+.resident-dashboard-content .residence-details { gap: 12px; }
+.resident-dashboard-content .residence-detail span { color: #c6d8d0; }
+.resident-dashboard-content .residence-detail strong { color: #fff; font-size: 12px; }
+
+.resident-dashboard-content .services-section { margin-bottom: 32px; }
+.resident-dashboard-content .section-heading { margin-bottom: 16px; }
+.resident-dashboard-content .section-heading .section-eyebrow { color: #0c806b; }
+.resident-dashboard-content .section-heading h2,
+.resident-dashboard-content .panel-heading h2 { color: #20332f; font-size: 20px; line-height: 1.3; letter-spacing: 0; }
+.resident-dashboard-content .section-heading > p { color: #718078; font-size: 12px; }
+.resident-dashboard-content .services-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+
+.resident-dashboard-content .service-card {
+  min-width: 0;
+  min-height: 166px;
+  padding: 17px;
+  border: 1px solid #dfe7e1;
+  border-radius: 10px;
+  background: #fff;
+  color: #20332f;
+  box-shadow: 0 3px 10px rgba(22, 50, 42, .035);
+}
+
+.resident-dashboard-content .service-card:hover { border-color: #a7c8bb; box-shadow: 0 8px 20px rgba(22, 50, 42, .09); }
+.resident-dashboard-content .service-primary { border-color: #173b37; background: #173b37; color: #fff; }
+.resident-dashboard-content .service-primary:hover { border-color: #24554c; background: #24554c; }
+.resident-dashboard-content .service-icon { background: #e1f1e9; color: #087c68; }
+.resident-dashboard-content .service-primary .service-icon { background: rgba(255, 255, 255, .14); color: #f4d27e; }
+.resident-dashboard-content .service-arrow { color: #718078; }
+.resident-dashboard-content .service-primary .service-arrow { color: #d8e9e2; }
+.resident-dashboard-content .service-content { margin-top: 15px; }
+.resident-dashboard-content .service-content h3 { margin-bottom: 5px; color: #20332f; font-size: 14px; line-height: 1.35; letter-spacing: 0; }
+.resident-dashboard-content .service-primary .service-content h3 { color: #fff; }
+.resident-dashboard-content .service-content p { color: #6d7c75; font-size: 11px; line-height: 1.5; }
+.resident-dashboard-content .service-primary .service-content p { color: #d8e9e2; }
+
+.resident-dashboard-content .dashboard-lower-grid { gap: 14px; margin-bottom: 22px; }
+.resident-dashboard-content .dashboard-section-panel,
+.resident-dashboard-content .activity-section { border-color: #dfe7e1; border-radius: 10px; background: #fff; box-shadow: 0 3px 10px rgba(22, 50, 42, .035); }
+.resident-dashboard-content .dashboard-section-panel { min-height: 225px; padding: 19px; }
+.resident-dashboard-content .panel-heading { border-color: #e8eee9; }
+.resident-dashboard-content .panel-heading a { color: #087c68; font-size: 11px; }
+.resident-dashboard-content .empty-icon,
+.resident-dashboard-content .payment-symbol,
+.resident-dashboard-content .activity-empty-icon { background: #e1f1e9; color: #087c68; }
+.resident-dashboard-content .empty-community h3,
+.resident-dashboard-content .payment-empty h3,
+.resident-dashboard-content .activity-empty-content h3 { color: #31463f; font-size: 13px; letter-spacing: 0; }
+.resident-dashboard-content .empty-community p,
+.resident-dashboard-content .payment-empty p,
+.resident-dashboard-content .activity-empty-content p { color: #708078; font-size: 11px; line-height: 1.55; }
+.resident-dashboard-content .activity-section { padding: 19px; }
+.resident-layout .resident-footer { color: #78877f; }
+
+@media (max-width: 1200px) {
+  .resident-layout .resident-main { padding-right: 25px; padding-left: 25px; }
+  .resident-dashboard-content .services-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+@media (max-width: 950px) and (min-width: 701px) {
+  .resident-layout.resident-dashboard { grid-template-columns: 220px minmax(0, 1fr); }
+  .resident-layout .resident-sidebar { width: 220px; }
+  .resident-layout .resident-main { padding: 22px; }
+  .resident-dashboard-content .residence-hero { grid-template-columns: minmax(0, 1fr) 260px; }
+  .resident-dashboard-content .residence-content { padding: 28px; }
+  .resident-dashboard-content .services-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+@media (max-width: 700px) {
+  .resident-layout.resident-dashboard { display: grid; grid-template-columns: minmax(0, 1fr); }
+  .resident-layout .resident-sidebar { position: sticky; top: 0; width: 100%; min-width: 0; height: auto; max-height: none; padding: 0 14px; }
+  .resident-layout .resident-sidebar-top { display: grid; grid-template-columns: minmax(0, 1fr) 42px; align-items: center; }
+  .resident-layout .resident-sidebar .resident-brand.sidebar-brand { grid-column: 1; height: 62px; min-height: 62px; padding: 0; border: 0; }
+  .resident-layout .resident-sidebar .resident-brand-icon.brand-mark { width: 38px; height: 38px; flex-basis: 38px; }
+  .resident-layout .resident-sidebar .resident-brand-text strong { font-size: 14px; }
+  .resident-layout .resident-sidebar .resident-brand-text span { font-size: 10px; }
+  .resident-mobile-menu-toggle { display: grid; grid-column: 2; grid-row: 1; width: 40px; height: 40px; place-items: center; border: 1px solid rgba(255, 255, 255, .24); border-radius: 8px; background: rgba(255, 255, 255, .08); color: #fff; font-size: 20px; cursor: pointer; }
+  .resident-layout .resident-sidebar .sidebar-section-label { display: none; }
+  .resident-layout .resident-sidebar .resident-nav { display: none; grid-column: 1 / -1; flex: none; max-height: min(70vh, 540px); padding: 0 0 10px; overflow-y: auto; }
+  .resident-layout .resident-sidebar .resident-nav.mobile-open { display: flex; flex-direction: column; }
+  .resident-layout .resident-sidebar .nav-item { height: 40px; flex: 0 0 40px; margin: 0; }
+  .resident-layout .resident-sidebar .sidebar-bottom { display: none; }
+  .resident-layout .resident-main { width: 100%; min-height: 0; padding: 18px 16px 28px; }
+  .resident-layout .resident-header { min-height: 0; align-items: center; gap: 10px; margin-bottom: 18px; }
+  .resident-layout .resident-header .header-left { flex: 1; }
+  .resident-layout .resident-header .header-left h1 { font-size: 22px; }
+  .resident-layout .resident-header .header-left p { display: none; }
+  .resident-layout .resident-header .header-right { width: auto; flex: 0 0 auto; gap: 7px; }
+  .resident-layout .resident-header .header-notification { width: 36px; height: 36px; }
+  .resident-dashboard-content .residence-hero { min-height: 0; grid-template-columns: minmax(0, 1fr); margin-bottom: 24px; }
+  .resident-dashboard-content .residence-content { padding: 27px 22px 22px; }
+  .resident-dashboard-content .residence-content h2 { font-size: 27px; }
+  .resident-dashboard-content .residence-description { margin: 11px 0 17px; font-size: 12px; }
+  .resident-dashboard-content .residence-info { margin: 0 14px 14px; padding: 16px; }
+  .resident-dashboard-content .residence-user { padding-bottom: 13px; }
+  .resident-dashboard-content .residence-details { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 14px; }
+  .resident-dashboard-content .residence-detail { align-items: flex-start; flex-direction: column; gap: 5px; }
+  .resident-dashboard-content .residence-detail span { font-size: 7px; line-height: 1.3; }
+  .resident-dashboard-content .section-heading { align-items: flex-start; flex-direction: column; gap: 6px; }
+  .resident-dashboard-content .section-heading > p { max-width: none; text-align: left; }
+  .resident-dashboard-content .services-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+  .resident-dashboard-content .service-card { min-height: 158px; padding: 13px; }
+  .resident-dashboard-content .service-content h3 { font-size: 13px; }
+  .resident-dashboard-content .service-content p { font-size: 10px; }
+  .resident-dashboard-content .dashboard-lower-grid { grid-template-columns: minmax(0, 1fr); gap: 11px; }
+  .resident-layout .resident-footer { flex-direction: row; flex-wrap: wrap; gap: 7px 15px; font-size: 10px; }
+}
+
+@media (max-width: 400px) {
+  .resident-layout .resident-main { padding-right: 12px; padding-left: 12px; }
+  .resident-layout .resident-header .header-left h1 { font-size: 20px; }
+  .resident-layout .resident-header .header-profile { min-height: 36px; }
+  .resident-dashboard-content .residence-content { padding-right: 18px; padding-left: 18px; }
+  .resident-dashboard-content .service-card { min-height: 150px; padding: 11px; }
+  .resident-dashboard-content .service-content h3 { font-size: 12px; }
+}

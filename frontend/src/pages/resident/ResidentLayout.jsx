@@ -4,6 +4,7 @@ import "../../css/resident/resident_dashboard.css";
 
 function ResidentLayout() {
   const navigate = useNavigate();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 const [user] = useState(() => {
     try {
       const storedUser = localStorage.getItem("user");
@@ -100,13 +101,28 @@ const [user] = useState(() => {
             </div>
           </Link>
 
+          <button
+            type="button"
+            className="resident-mobile-menu-toggle"
+            aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+            aria-expanded={mobileMenuOpen}
+            aria-controls="resident-navigation"
+            onClick={() => setMobileMenuOpen((open) => !open)}
+          >
+            {mobileMenuOpen ? "×" : "☰"}
+          </button>
+
 
           <div className="resident-menu-label sidebar-section-label">
             MAIN MENU
           </div>
 
 
-          <nav className="resident-navigation resident-nav">
+          <nav
+            id="resident-navigation"
+            className={`resident-navigation resident-nav ${mobileMenuOpen ? "mobile-open" : ""}`}
+            onClick={() => setMobileMenuOpen(false)}
+          >
 
             <NavLink
               to="/resident"

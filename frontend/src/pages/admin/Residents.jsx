@@ -5,6 +5,10 @@ const flatNumberCollator = new Intl.Collator("en", {
   numeric: true,
   sensitivity: "base",
 });
+const wingOptions = ["A", "B", "C", "D"];
+const flatNumberOptions = Array.from({ length: 5 }, (_, floorIndex) =>
+  [1, 2, 3, 4].map((unit) => String((floorIndex + 1) * 100 + unit)),
+).flat();
 
 const formatDate = (value) => {
   if (!value) return "—";
@@ -195,6 +199,17 @@ const Residents = () => {
     return () => controller.abort();
   }, [fetchResidents]);
 
+  useEffect(() => {
+    if (!showForm) return undefined;
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape" && !saving) setShowForm(false);
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [showForm, saving]);
+
   const filteredResidents = useMemo(() => {
     const query = searchTerm.trim().toLowerCase();
     return [...residents]
@@ -268,29 +283,50 @@ const Residents = () => {
       {successMessage && <p className="admin-staff-success" role="status">{successMessage}</p>}
 
       {showForm && (
-        <section className="admin-records-card admin-resident-form-card">
-          <div className="admin-records-card-header">
-            <div>
-              <h2>{editingId ? "Edit Resident" : "Add Resident"}</h2>
-              <p>{editingId ? "Update resident details; leave password blank to keep it unchanged." : "Create a resident login account and assign the resident's flat."}</p>
+        <div
+          className="admin-resident-modal-backdrop"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget && !saving) setShowForm(false);
+          }}
+        >
+          <section
+            className="admin-records-card admin-resident-form-card"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="resident-form-title"
+          >
+            <div className="admin-records-card-header admin-resident-modal-header">
+              <div>
+                <h2 id="resident-form-title">{editingId ? "Edit Resident" : "Add Resident"}</h2>
+                <p>{editingId ? "Update resident details; leave password blank to keep it unchanged." : "Create a resident login account and assign the resident's flat."}</p>
+              </div>
+              <button
+                type="button"
+                className="admin-resident-modal-close"
+                aria-label="Close resident form"
+                onClick={() => setShowForm(false)}
+                disabled={saving}
+              >
+                ×
+              </button>
             </div>
-          </div>
-          <form className="admin-staff-create-form" onSubmit={saveResident}>
-            <label>First name<input required maxLength="100" autoComplete="given-name" value={form.first_name} onChange={(event) => setForm({ ...form, first_name: event.target.value })} /></label>
-            <label>Last name<input required maxLength="100" autoComplete="family-name" value={form.last_name} onChange={(event) => setForm({ ...form, last_name: event.target.value })} /></label>
-            <label>Email<input required type="email" maxLength="150" autoComplete="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} /></label>
-            <label>Phone<input required type="tel" maxLength="20" autoComplete="tel" value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} /></label>
-            <label>Block / Wing<input required maxLength="50" value={form.block_wing} onChange={(event) => setForm({ ...form, block_wing: event.target.value })} /></label>
-            <label>Flat number<input required maxLength="20" value={form.flat_number} onChange={(event) => setForm({ ...form, flat_number: event.target.value })} /></label>
-            <label>Ownership type<select required value={form.ownership_type} onChange={(event) => setForm({ ...form, ownership_type: event.target.value })}><option value="">Select ownership</option><option value="Owner">Owner</option><option value="Rent">Rent</option></select></label>
-            <label>{editingId ? "New password (optional)" : "Initial password"}<input required={!editingId} minLength="6" type="password" autoComplete="new-password" value={form.password} onChange={(event) => setForm({ ...form, password: event.target.value })} /></label>
-            {formError && <p className="admin-staff-form-error" role="alert">{formError}</p>}
-            <div className="admin-staff-form-actions">
-              <button type="button" className="admin-records-secondary" onClick={() => setShowForm(false)} disabled={saving}>Cancel</button>
-              <button type="submit" className="admin-records-secondary" disabled={saving}>{saving ? "Saving…" : editingId ? "Save Changes" : "Add Resident"}</button>
-            </div>
-          </form>
-        </section>
+            <form className="admin-staff-create-form" onSubmit={saveResident}>
+              <label>First name<input required autoFocus maxLength="100" autoComplete="given-name" value={form.first_name} onChange={(event) => setForm({ ...form, first_name: event.target.value })} /></label>
+              <label>Last name<input required maxLength="100" autoComplete="family-name" value={form.last_name} onChange={(event) => setForm({ ...form, last_name: event.target.value })} /></label>
+              <label>Email<input required type="email" maxLength="150" autoComplete="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} /></label>
+              <label>Phone<input required type="tel" maxLength="20" autoComplete="tel" value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} /></label>
+              <label>Block / Wing<select required value={form.block_wing} onChange={(event) => setForm({ ...form, block_wing: event.target.value })}><option value="">Select wing</option>{wingOptions.map((wing) => <option key={wing} value={wing}>{wing}</option>)}</select></label>
+              <label>Flat number<select required value={form.flat_number} onChange={(event) => setForm({ ...form, flat_number: event.target.value })}><option value="">Select flat</option>{flatNumberOptions.map((flatNumber) => <option key={flatNumber} value={flatNumber}>{flatNumber}</option>)}</select></label>
+              <label>Ownership type<select required value={form.ownership_type} onChange={(event) => setForm({ ...form, ownership_type: event.target.value })}><option value="">Select ownership</option><option value="Owner">Owner</option><option value="Rent">Rent</option></select></label>
+              <label>{editingId ? "New password (optional)" : "Initial password"}<input required={!editingId} minLength="6" type="password" autoComplete="new-password" value={form.password} onChange={(event) => setForm({ ...form, password: event.target.value })} /></label>
+              {formError && <p className="admin-staff-form-error" role="alert">{formError}</p>}
+              <div className="admin-staff-form-actions">
+                <button type="button" className="admin-records-secondary" onClick={() => setShowForm(false)} disabled={saving}>Cancel</button>
+                <button type="submit" className="admin-records-secondary" disabled={saving}>{saving ? "Saving…" : editingId ? "Save Changes" : "Add Resident"}</button>
+              </div>
+            </form>
+          </section>
+        </div>
       )}
 
       <section className="admin-records-stats">

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import AdminFormModal from "./AdminFormModal";
 import "../../css/amenities.css";
 
 const emptyFacility = { facility_name: "", description: "", location: "", base_charge: "0", charge_period: "Per Booking", availability_status: "Available" };
@@ -147,8 +148,8 @@ const Amenities = () => {
       <div className="amenity-stat-card"><div className="amenity-stat-icon">📅</div><div><span>Total Bookings</span><strong>{bookingCount}</strong></div></div>
     </div>
 
-    {formType && <form className="admin-data-form amenity-admin-form" onSubmit={saveRecord}>
-      <h2>{editingId ? "Edit" : "Add"} {isFacilityForm ? "Amenity" : "Booking Add-on"}</h2>
+    {formType && <AdminFormModal title={`${editingId ? "Edit" : "Add"} ${isFacilityForm ? "Amenity" : "Booking Add-on"}`} onClose={() => setFormType(null)} saving={saving}>
+      <form className="admin-data-form amenity-admin-form" onSubmit={saveRecord}>
       <div className="admin-data-form-grid">
         <label>{isFacilityForm ? "Amenity name" : "Add-on name"}
           <input required maxLength="150" value={isFacilityForm ? form.facility_name : form.addon_name} onChange={(event) => setForm({ ...form, [isFacilityForm ? "facility_name" : "addon_name"]: event.target.value })} />
@@ -165,10 +166,12 @@ const Amenities = () => {
           <label>Status<select value={form.status} onChange={(event) => setForm({ ...form, status: event.target.value })}><option>Available</option><option>Unavailable</option></select></label>
         </>}
       </div>
+      {error && <p className="page-error" role="alert">{error}</p>}
       <div className="admin-data-form-actions"><button type="button" onClick={() => setFormType(null)}>Cancel</button><button type="submit" disabled={saving}>{saving ? "Saving…" : "Save"}</button></div>
-    </form>}
+      </form>
+    </AdminFormModal>}
 
-    {error && <p className="page-error" role="alert">{error}</p>}
+    {error && !formType && <p className="page-error" role="alert">{error}</p>}
 
     <div className="amenity-toolbar">
       <div className="amenity-search"><span>🔍</span><input placeholder="Search amenity, ID or location..." value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} /></div>
