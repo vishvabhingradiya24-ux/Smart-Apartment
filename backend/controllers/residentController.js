@@ -274,25 +274,10 @@ const forgotPassword = async (req, res) => {
     );
 
     await pool.query(
-      `DELETE FROM password_reset_otps
-       WHERE email = ?`,
-      [email]
-    );
-
-    await pool.query(
-      `INSERT INTO password_reset_otps
-      (
-        email,
-        otp_hash,
-        expires_at,
-        attempts
-      )
-      VALUES (?, ?, ?, 0)`,
-      [
-        email,
-        otpHash,
-        expiresAt
-      ]
+      `UPDATE residents
+       SET reset_otp_hash = ?, reset_otp_expires_at = ?, reset_otp_attempts = 0
+       WHERE id = ?`,
+      [otpHash, expiresAt, users[0].id]
     );
 
     console.log(
@@ -395,10 +380,11 @@ const verifyOTP = async (req, res) => {
     }
 
     const [records] = await pool.query(
-      `SELECT *
-       FROM password_reset_otps
-       WHERE email = ?
-       ORDER BY id DESC
+      `SELECT id, reset_otp_hash AS otp_hash,
+              reset_otp_expires_at AS expires_at,
+              reset_otp_attempts AS attempts
+       FROM residents
+       WHERE email = ? AND reset_otp_hash IS NOT NULL
        LIMIT 1`,
       [email]
     );
@@ -437,8 +423,8 @@ const verifyOTP = async (req, res) => {
 
     if (!otpMatch) {
       await pool.query(
-        `UPDATE password_reset_otps
-         SET attempts = attempts + 1
+        `UPDATE residents
+         SET reset_otp_attempts = reset_otp_attempts + 1
          WHERE id = ?`,
         [otpRecord.id]
       );
@@ -450,7 +436,8 @@ const verifyOTP = async (req, res) => {
     }
 
     await pool.query(
-      `DELETE FROM password_reset_otps
+      `UPDATE residents
+       SET reset_otp_hash = NULL, reset_otp_expires_at = NULL, reset_otp_attempts = 0
        WHERE id = ?`,
       [otpRecord.id]
     );

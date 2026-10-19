@@ -51,9 +51,72 @@ DELIMITER ;
 
 CALL ensure_admin_schema_column('admins', 'phone', 'VARCHAR(30) NULL AFTER email');
 CALL ensure_admin_schema_column('admins', 'society_id', 'INT NULL AFTER phone');
+CALL ensure_admin_schema_column('admins', 'notification_preferences', 'JSON NULL AFTER society_id');
+CALL ensure_admin_schema_column('admins', 'security_preferences', 'JSON NULL AFTER notification_preferences');
 CALL ensure_admin_schema_column('residents', 'ownership_type', "ENUM('Owner', 'Rent') NULL AFTER flat_number");
 CALL ensure_admin_schema_column('residents', 'is_active', 'TINYINT(1) NOT NULL DEFAULT 1 AFTER ownership_type');
+CALL ensure_admin_schema_column('residents', 'reset_otp_hash', 'VARCHAR(255) NULL AFTER is_active');
+CALL ensure_admin_schema_column('residents', 'reset_otp_expires_at', 'DATETIME NULL AFTER reset_otp_hash');
+CALL ensure_admin_schema_column('residents', 'reset_otp_attempts', 'INT NOT NULL DEFAULT 0 AFTER reset_otp_expires_at');
 DROP PROCEDURE ensure_admin_schema_column;
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS migrate_admin_preferences$$
+CREATE PROCEDURE migrate_admin_preferences()
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.tables
+    WHERE table_schema = DATABASE() AND table_name = 'admin_preferences'
+  ) THEN
+    SET @admin_preferences_migration_sql =
+      'UPDATE admins a
+       INNER JOIN admin_preferences p ON p.admin_id = a.id
+       SET a.notification_preferences = COALESCE(a.notification_preferences, p.notification_preferences),
+           a.security_preferences = COALESCE(a.security_preferences, p.security_preferences)';
+    PREPARE admin_preferences_migration_statement FROM @admin_preferences_migration_sql;
+    EXECUTE admin_preferences_migration_statement;
+    DEALLOCATE PREPARE admin_preferences_migration_statement;
+  END IF;
+END$$
+DELIMITER ;
+
+CALL migrate_admin_preferences();
+DROP PROCEDURE migrate_admin_preferences;
+DROP TABLE IF EXISTS admin_preferences;
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS migrate_password_reset_otps$$
+CREATE PROCEDURE migrate_password_reset_otps()
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.tables
+    WHERE table_schema = DATABASE() AND table_name = 'password_reset_otps'
+  ) THEN
+    SET @password_reset_otp_migration_sql =
+      'UPDATE residents r
+       INNER JOIN (
+         SELECT p.email, p.otp_hash, p.expires_at, p.attempts
+         FROM password_reset_otps p
+         INNER JOIN (
+           SELECT email, MAX(id) AS id
+           FROM password_reset_otps
+           GROUP BY email
+         ) latest ON latest.id = p.id
+       ) otp ON otp.email = r.email
+       SET r.reset_otp_hash = COALESCE(r.reset_otp_hash, otp.otp_hash),
+           r.reset_otp_expires_at = COALESCE(r.reset_otp_expires_at, otp.expires_at),
+           r.reset_otp_attempts = otp.attempts
+       WHERE r.reset_otp_hash IS NULL';
+    PREPARE password_reset_otp_migration_statement FROM @password_reset_otp_migration_sql;
+    EXECUTE password_reset_otp_migration_statement;
+    DEALLOCATE PREPARE password_reset_otp_migration_statement;
+  END IF;
+END$$
+DELIMITER ;
+
+CALL migrate_password_reset_otps();
+DROP PROCEDURE migrate_password_reset_otps;
+DROP TABLE IF EXISTS password_reset_otps;
 
 DELIMITER $$
 DROP PROCEDURE IF EXISTS ensure_resident_validation_constraints$$
@@ -198,17 +261,6 @@ DELIMITER ;
 CALL ensure_admin_society_foreign_key();
 DROP PROCEDURE ensure_admin_society_foreign_key;
 
-CREATE TABLE IF NOT EXISTS admin_preferences (
-  admin_id INT NOT NULL,
-  notification_preferences JSON NULL,
-  security_preferences JSON NULL,
-  updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (admin_id),
-  CONSTRAINT fk_admin_preferences_admin
-    FOREIGN KEY (admin_id) REFERENCES admins(id)
-    ON DELETE CASCADE
-);
-
 CREATE TABLE IF NOT EXISTS admin_notification_reads (
   admin_id INT NOT NULL,
   notification_id VARCHAR(100) NOT NULL,
@@ -218,25 +270,6 @@ CREATE TABLE IF NOT EXISTS admin_notification_reads (
     FOREIGN KEY (admin_id) REFERENCES admins(id)
     ON DELETE CASCADE
 );
-
-INSERT IGNORE INTO admin_preferences
-  (admin_id, notification_preferences, security_preferences)
-SELECT
-  id,
-  JSON_OBJECT(
-    'complaints', TRUE,
-    'payments', TRUE,
-    'bookings', TRUE,
-    'notices', TRUE,
-    'security', TRUE,
-    'events', FALSE
-  ),
-  JSON_OBJECT(
-    'twoFactor', FALSE,
-    'sessionTimeout', '30',
-    'loginAlerts', TRUE
-  )
-FROM admins;
 
 CREATE TABLE IF NOT EXISTS complaints (
   complaint_id INT NOT NULL AUTO_INCREMENT,
