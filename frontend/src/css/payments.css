@@ -544,6 +544,20 @@
   line-height: 1.6;
 }
 
+.admin-main .payments-page :is(.payment-stat-card, .payment-overview-card, .payments-section, .payment-info-card) {
+  position: relative;
+}
+
+.admin-main .payments-page :is(.payment-stat-card, .payment-overview-card, .payments-section, .payment-info-card)::before {
+  position: absolute;
+  inset: 1px auto 1px 1px;
+  width: 4px;
+  border-radius: 7px 0 0 7px;
+  background: #157461;
+  content: "";
+  pointer-events: none;
+}
+
 /* =========================================
    RESPONSIVE
    ========================================= */

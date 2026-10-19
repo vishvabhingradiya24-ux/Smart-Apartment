@@ -241,6 +241,29 @@
   box-shadow: var(--admin-unified-shadow);
 }
 
+.admin-main :is(.task-stat-card, .payment-stat-card, .visitor-stat-card, .notice-stat-card) {
+  position: relative;
+  overflow: hidden;
+}
+
+.admin-main :is(.task-stat-card, .payment-stat-card, .visitor-stat-card, .notice-stat-card)::before {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: var(--admin-unified-accent);
+  content: "";
+}
+
+.admin-main :is(.admin-staff-page, .admin-residents-page) .admin-action-column,
+.admin-main .complaints-table .admin-action-column {
+  text-align: center;
+}
+
+.admin-main :is(.admin-staff-page, .admin-residents-page) .admin-records-actions,
+.admin-main .complaint-actions {
+  justify-content: center;
+}
+
 .admin-main :is(
   .admin-records-stats article,
   .stat-card,
@@ -507,4 +530,547 @@
   .admin-main :is(.admin-records-stats, .stats-grid, .task-stats-grid, .complaints-stats, .payment-stats-grid, .visitor-stats-grid, .amenity-stats-grid, .notice-stats-grid, .notification-stats) {
     grid-template-columns: 1fr;
   }
+}
+
+/* Keep every Resident route on the same neutral and navy palette as Admin. */
+.resident-layout {
+  --resident-background: #f3f6f5;
+  --resident-text: #202d35;
+  --resident-muted: #69777d;
+  --resident-primary: #157461;
+  --resident-border: #dfe7e4;
+  --resident-primary-dark: #105e4f;
+  --resident-primary-soft: #e8f3ef;
+}
+
+.resident-layout.resident-dashboard,
+.resident-layout .resident-main {
+  background: #f3f6f5;
+  color: #202d35;
+}
+
+.resident-layout .resident-sidebar {
+  background: #182a2b !important;
+  border-right-color: rgba(255, 255, 255, .08);
+  scrollbar-color: #526866 #182a2b;
+}
+
+.resident-layout .resident-sidebar .resident-brand-icon.brand-mark,
+.resident-layout .resident-sidebar .sidebar-avatar {
+  background: #e8f3ef;
+  color: #105e4f;
+}
+
+.resident-layout .resident-sidebar .resident-brand-text span { color: #aabbb7; }
+.resident-layout .resident-sidebar .sidebar-section-label { color: #9aada8; }
+.resident-layout .resident-sidebar .nav-item { color: #c0cfcb; }
+.resident-layout .resident-sidebar .nav-item:hover { background: rgba(255, 255, 255, .08); color: #fff; }
+.resident-layout .resident-sidebar .nav-item.active { background: #dcefe8; color: #165c4d; box-shadow: none; font-weight: 700; }
+.resident-layout .resident-sidebar .nav-item.active .nav-icon { color: #165c4d; }
+.resident-layout .resident-sidebar .sidebar-bottom { background: #182a2b; }
+.resident-layout .resident-sidebar .logout-button { color: #d4dfdc; }
+
+.resident-layout .resident-header {
+  border-bottom-color: #dfe7e4;
+}
+
+.resident-layout .header-notification,
+.resident-layout .header-profile {
+  border-color: #dfe7e4;
+}
+
+.resident-layout .header-avatar { background: #157461; }
+
+.resident-layout :is(.flat-page, .payment-page, .complaints-page, .service-requests-page,
+  .visitors-page, .resident-visitors-page, .facilities-page, .notice-page,
+  .resident-polls-page, .resident-notifications-page, .profile-page) {
+  background-color: #f3f6f5;
+  color: #202d35;
+}
+
+.resident-layout :is(.flat-page, .payment-page, .complaints-page, .service-requests-page,
+  .visitors-page, .resident-visitors-page, .facilities-page, .notice-page,
+  .resident-polls-page, .resident-notifications-page, .profile-page) :is(h1, h2, h3) {
+  color: #202d35;
+}
+
+.resident-layout :is(.flat-overline, .payment-overline, .complaints-eyebrow, .sr-eyebrow,
+  .visitors-eyebrow, .resident-visitors-eyebrow, .facilities-overline, .notice-overline,
+  .notice-eyebrow, .resident-polls-overline, .resident-notifications-eyebrow, .profile-overline) {
+  color: #157461;
+}
+
+.resident-layout :is(.flat-topbar p, .payment-header p, .complaints-header-content p,
+  .sr-header-content p, .visitors-page-header p, .resident-visitors-page-header p,
+  .facilities-page-header p, .notice-header p, .resident-polls-header p,
+  .resident-notifications-header p, .profile-subtitle) {
+  color: #69777d;
+}
+
+.resident-layout :is(.flat-card, .flat-quick-card, .payment-summary-card, .summary-card,
+  .current-payment-card, .history-card, .complaint-card, .complaint-form-card, .complaints-stat,
+  .sr-card, .sr-stat, .sr-form-card, .visitor-stat-card, .visitor-card,
+  .resident-visitors-stat, .resident-visitors-form-card, .resident-visitors-history,
+  .resident-visitor-card, .facility-card, .booking-history-card, .notice-card,
+  .resident-poll-card, .resident-notification-card, .resident-notifications-summary,
+  .resident-notifications-state, .profile-main-card, .profile-security-card,
+  .profile-stat, .info-card, .flat-overview-details) {
+  border-color: #dfe7e4;
+  background-color: #fff;
+  box-shadow: 0 2px 10px rgba(31, 49, 44, .045);
+}
+
+.resident-layout :is(.flat-page, .payment-page, .complaints-page, .service-requests-page,
+  .visitors-page, .resident-visitors-page, .facilities-page, .notice-page,
+  .resident-polls-page, .resident-notifications-page, .profile-page) :is(input, select, textarea) {
+  border-color: #dfe7e4;
+  background-color: #fff;
+  color: #202d35;
+}
+
+.resident-layout :is(.flat-dashboard-btn, .flat-back-btn, .back-dashboard, .pay-now-btn,
+  .complaints-dashboard-btn, .complaints-new-btn, .complaint-submit-btn,
+  .complaints-refresh-btn, .sr-dashboard-btn, .sr-submit-btn, .sr-refresh-btn,
+  .visitor-back-button, .visitor-new-button,
+  .visitor-refresh-button, .visitor-submit-button, .resident-visitors-back,
+  .resident-visitors-new, .resident-visitors-refresh, .resident-visitors-submit,
+  .facilities-dashboard-button, .facilities-back-button, .availability-main-button,
+  .continue-booking-button, .book-button,
+  .submit-booking-button, .notice-back-button, .notice-retry-button,
+  .resident-poll-vote-button, .resident-notifications-header button,
+  .resident-notifications-state button, .profile-dashboard-btn, .profile-back-btn) {
+  border-color: #157461;
+  background-color: #157461;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(21, 116, 97, .12);
+}
+
+.resident-layout :is(.flat-dashboard-btn, .flat-back-btn, .back-dashboard, .pay-now-btn,
+  .complaints-dashboard-btn, .complaints-new-btn, .complaint-submit-btn,
+  .complaints-refresh-btn, .sr-dashboard-btn, .sr-submit-btn, .sr-refresh-btn,
+  .visitor-back-button, .visitor-new-button,
+  .visitor-refresh-button, .visitor-submit-button, .resident-visitors-back,
+  .resident-visitors-new, .resident-visitors-refresh, .resident-visitors-submit,
+  .facilities-dashboard-button, .facilities-back-button, .availability-main-button,
+  .continue-booking-button, .book-button,
+  .submit-booking-button, .notice-back-button, .notice-retry-button,
+  .resident-poll-vote-button, .resident-notifications-header button,
+  .resident-notifications-state button, .profile-dashboard-btn, .profile-back-btn):hover:not(:disabled) {
+  border-color: #105e4f;
+  background-color: #105e4f;
+  color: #fff;
+}
+
+.resident-layout :is(.flat-overview, .complaints-page-header, .sr-page-header,
+  .facilities-intro, .resident-polls-hero) {
+  border-color: #182a2b;
+  background: linear-gradient(120deg, #182a2b 0%, #157461 100%);
+  color: #fff;
+}
+
+.resident-layout :is(.flat-overview, .complaints-page-header, .sr-page-header,
+  .facilities-intro, .resident-polls-hero) :is(h1, h2, h3, p, span, strong) {
+  color: inherit;
+}
+
+.resident-layout :is(.flat-icon, .summary-icon, .bill-icon, .complaint-icon, .sr-icon,
+  .resident-visitors-stat-icon, .facility-icon, .notice-icon, .resident-poll-icon,
+  .resident-notification-icon, .resident-notifications-summary-icon, .profile-icon) {
+  background-color: #e8f3ef;
+  color: #105e4f;
+}
+
+.resident-layout :is(.profile-avatar, .resident-badge, .active-pill, .security-icon,
+  .resident-polls-count) {
+  background-color: #e8f3ef;
+  color: #105e4f;
+}
+
+.resident-layout .profile-cover {
+  background: linear-gradient(110deg, #182a2b 0%, #157461 100%);
+}
+
+.resident-layout :is(.profile-dashboard-btn, .profile-back-btn):hover {
+  background-color: #105e4f;
+  color: #fff;
+}
+
+.resident-layout :is(.flat-page, .payment-page, .complaints-page, .service-requests-page,
+  .visitors-page, .resident-visitors-page, .facilities-page, .notice-page,
+  .resident-polls-page, .resident-notifications-page, .profile-page) :is(input, select, textarea):focus {
+  border-color: #157461;
+  outline: 2px solid rgba(21, 116, 97, .15);
+  outline-offset: 0;
+}
+
+.resident-layout .resident-polls-sidebar {
+  background: #182a2b;
+  border-right-color: rgba(255, 255, 255, .08);
+}
+
+.resident-layout .resident-polls-brand,
+.resident-layout .resident-polls-sidebar-bottom {
+  border-color: rgba(255, 255, 255, .09);
+}
+
+.resident-layout .resident-polls-brand-mark,
+.resident-layout .resident-polls-nav-item.active,
+.resident-layout .resident-polls-nav-item:hover {
+  background: #dcefe8;
+  color: #165c4d;
+}
+
+.resident-layout .resident-polls-brand h2,
+.resident-layout .resident-polls-user strong { color: #fff; }
+.resident-layout .resident-polls-brand span,
+.resident-layout .resident-polls-user span { color: #aeb9c7; }
+.resident-layout .resident-polls-nav-item { color: #c4cfdb; }
+.resident-layout .resident-polls-avatar { background: rgba(255, 255, 255, .12); color: #fff; }
+.resident-layout .resident-polls-logout { border-color: rgba(255, 255, 255, .12); background: rgba(255, 255, 255, .04); color: #d5dfeb; }
+
+.resident-layout .notice-count,
+.resident-layout .resident-notifications-footer,
+.resident-layout .resident-polls-sidebar .resident-polls-nav-item:hover {
+  background-color: #e8f3ef;
+  color: #105e4f;
+}
+
+.resident-layout :is(.resident-notification-meta span, .resident-notifications-footer a,
+  .resident-polls-overline) {
+  color: #157461;
+}
+
+/* Resident navigation and page typography */
+.resident-layout .resident-sidebar .nav-item .nav-icon {
+  flex: 0 0 30px;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, .08);
+  color: #d7e5df;
+}
+
+.resident-layout .resident-sidebar .nav-item .nav-icon svg {
+  display: block;
+  flex: 0 0 auto;
+}
+
+.resident-layout .resident-sidebar .nav-item.active .nav-icon {
+  background: #c6e8d8;
+  color: #105e4f;
+}
+
+.resident-layout .resident-mobile-menu-toggle svg {
+  display: block;
+  flex: 0 0 auto;
+}
+
+.resident-dashboard-content .services-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.resident-dashboard-content .service-content h3 { font-size: 15px; }
+.resident-dashboard-content .service-content p { font-size: 12px; }
+
+.resident-layout :is(.profile-page, .complaints-page, .facilities-page,
+  .resident-visitors-page, .resident-notifications-page) {
+  font-size: 14px;
+}
+
+.resident-layout .profile-topbar h1,
+.resident-layout .resident-visitors-top h1,
+.resident-layout .resident-notifications-header h1,
+.resident-layout .complaints-header-content h1 { font-size: 32px; }
+
+.resident-layout .profile-topbar p,
+.resident-layout .complaints-header-content p,
+.resident-layout .resident-visitors-top p,
+.resident-layout .resident-visitors-history-header p,
+.resident-layout .resident-notifications-header p,
+.resident-layout .resident-notification-content p { font-size: 14px; }
+
+.resident-layout .complaints-page {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.resident-layout .complaints-page-header {
+  min-height: 126px;
+  padding: 24px 26px;
+  border-radius: 10px;
+}
+
+.resident-layout .complaints-overview {
+  grid-template-columns: minmax(190px, .8fr) minmax(0, 2fr);
+  gap: 18px;
+}
+
+.resident-layout .complaint-card { border-radius: 10px; }
+.resident-layout .complaint-card-content p { font-size: 13px; }
+.resident-layout .complaint-detail strong { font-size: 12px; }
+.resident-layout .complaint-detail span { font-size: 10px; }
+.resident-layout .complaint-status,
+.resident-layout .complaint-category { font-size: 11px !important; }
+.resident-layout .complaint-form-group label { font-size: 12px; }
+.resident-layout .complaint-form-group :is(input, select, textarea) { font-size: 14px; }
+.resident-layout .complaint-submit-btn,
+.resident-layout .complaint-cancel-btn { min-height: 42px; font-size: 13px; }
+
+.resident-layout .facilities-page {
+  min-height: auto;
+  background: transparent;
+  color: #202d35;
+}
+
+.resident-layout .facilities-header {
+  min-height: 0;
+  padding: 4px 0 18px;
+  border: 0;
+  background: transparent;
+}
+
+.resident-layout .facilities-header h1 { font-size: 30px; }
+.resident-layout .facilities-header p,
+.resident-layout .facilities-intro p,
+.resident-layout .facility-card-body p,
+.resident-layout .facility-location { font-size: 14px; }
+.resident-layout .facilities-content { max-width: none; padding: 15px 0 35px; }
+.resident-layout .facilities-intro { align-items: center; margin-bottom: 22px; }
+.resident-layout .facilities-intro h2,
+.resident-layout .section-heading-row h2 { font-size: 25px; }
+.resident-layout .facility-card { border-radius: 10px; }
+.resident-layout .facility-card-body h3 { font-size: 20px; }
+.resident-layout .facility-charge-box span,
+.resident-layout .facility-card-footer > span { font-size: 12px; }
+.resident-layout .facility-charge-box strong,
+.resident-layout .book-button { font-size: 14px; }
+
+.resident-layout .resident-notifications-page { max-width: none; }
+.resident-layout .resident-notifications-summary strong { font-size: 16px; }
+.resident-layout .resident-notifications-summary p { font-size: 14px; }
+.resident-layout .resident-notification-card { padding: 20px; border-radius: 10px; }
+.resident-layout .resident-notification-content h2 { font-size: 17px; }
+.resident-layout .resident-notification-content small,
+.resident-layout .resident-notification-meta time { font-size: 12px; }
+.resident-layout .resident-notifications-footer { font-size: 13px; }
+
+.resident-layout :is(.payment-page, .service-requests-page, .notice-page, .resident-polls-page)
+  :is(p, label, td, th, li, input, select, textarea, button) {
+  font-size: 14px;
+}
+
+.resident-layout .resident-visitor-decision-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 9px;
+  margin-top: 14px;
+}
+
+.resident-layout .resident-visitor-decision-actions button {
+  min-width: 104px;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  color: #fff;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.resident-layout .resident-visitor-approve { background: #157461; }
+.resident-layout .resident-visitor-reject { background: #a63d3d; }
+.resident-layout .resident-visitor-decision-actions button:disabled { opacity: .65; cursor: wait; }
+
+.resident-layout .profile-edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 9px;
+  margin-top: 16px;
+}
+
+.resident-layout .profile-edit-actions button {
+  min-height: 42px;
+  padding: 0 16px;
+  border: 1px solid #157461;
+  border-radius: 7px;
+  background: #157461;
+  color: #fff;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.resident-layout .profile-edit-actions .profile-cancel-btn {
+  border-color: #d2ded9;
+  background: #fff;
+  color: #344b43;
+}
+
+.resident-layout .profile-edit-actions button:disabled { opacity: .65; cursor: wait; }
+
+.resident-layout .profile-message {
+  margin-bottom: 16px;
+  padding: 13px 16px;
+  border: 1px solid;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.resident-layout .profile-message.success { border-color: #b8e5d5; background: #effaf5; color: #087f5b; }
+.resident-layout .profile-message.error { border-color: #f0c4c4; background: #fff4f4; color: #b42318; }
+.resident-layout .info-fields input {
+  width: 100%;
+  min-height: 42px;
+  box-sizing: border-box;
+  padding: 9px 11px;
+  border: 1px solid #cbd9d4;
+  border-radius: 7px;
+  background: #fff;
+  color: #243b33;
+  font: inherit;
+  font-size: 14px;
+}
+
+.resident-layout .info-fields input:focus { outline: 3px solid #c6e8d8; border-color: #157461; }
+
+@media (max-width: 700px) {
+  .resident-dashboard-content .services-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .resident-dashboard-content .service-card { min-height: 164px; padding: 11px 9px; }
+  .resident-dashboard-content .service-content h3 { font-size: 13px; }
+  .resident-dashboard-content .service-content p { font-size: 11px; }
+  .resident-layout .complaints-page-header { align-items: flex-start; flex-direction: column; }
+  .resident-layout .complaints-overview { grid-template-columns: 1fr; }
+  .resident-layout .complaint-card-details { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .resident-layout .facilities-header h1,
+  .resident-layout .profile-topbar h1,
+  .resident-layout .resident-visitors-top h1,
+  .resident-layout .resident-notifications-header h1 { font-size: 27px; }
+  .resident-layout .resident-visitors-stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 380px) {
+  .resident-dashboard-content .service-content h3 { font-size: 12px; }
+  .resident-dashboard-content .service-content p { font-size: 10px; }
+  .resident-layout .resident-visitors-stat-grid { grid-template-columns: 1fr 1fr; }
+}
+
+.resident-layout .notice-page {
+  min-height: 0;
+  padding: 0;
+  background: transparent;
+}
+
+.resident-layout .notice-header {
+  align-items: flex-end;
+  margin-bottom: 22px;
+  padding: 0 0 17px;
+  border: 0;
+  border-bottom: 1px solid #dfe7e4;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.resident-layout .notice-header h1,
+.resident-layout .resident-polls-header h1,
+.resident-layout .facilities-header h1,
+.resident-layout .resident-visitors-top h1 {
+  margin: 0;
+  color: #202d35;
+  font-size: 30px;
+  font-weight: 750;
+  line-height: 1.2;
+}
+
+.resident-layout .notice-header p,
+.resident-layout .resident-polls-header p,
+.resident-layout .facilities-header p,
+.resident-layout .resident-visitors-top p {
+  margin-top: 7px;
+  color: #69777d;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.resident-layout .notice-content { margin-top: 0; }
+.resident-layout .notice-section-heading { margin-bottom: 15px; }
+.resident-layout .notice-section-heading h2 { font-size: 22px; }
+.resident-layout .notice-grid { gap: 14px; }
+.resident-layout .notice-card { padding: 20px; border-radius: 10px; }
+.resident-layout .notice-card h3 { font-size: 18px; }
+.resident-layout .notice-description { min-height: 0; font-size: 14px; }
+.resident-layout .notice-state { min-height: 220px; border-radius: 10px; }
+
+.resident-layout .resident-polls-page {
+  min-height: 0;
+  background: transparent;
+  font-family: inherit;
+}
+
+.resident-layout .resident-polls-sidebar { display: none; }
+.resident-layout .resident-polls-main { min-height: 0; margin: 0; padding: 0; }
+.resident-layout .resident-polls-header { align-items: flex-end; margin-bottom: 22px; padding-bottom: 17px; border-bottom: 1px solid #dfe7e4; }
+.resident-layout .resident-polls-header-actions,
+.resident-layout .resident-polls-footer { display: none; }
+.resident-layout .resident-polls-overline { color: #157461; font-size: 11px; letter-spacing: 1.2px; }
+.resident-layout .resident-polls-hero { min-height: 0; margin-bottom: 24px; padding: 24px; border-radius: 10px; background: #173b37; }
+.resident-layout .resident-polls-hero-icon { width: 54px; height: 54px; border-radius: 9px; }
+.resident-layout .resident-polls-hero h2 { font-size: 22px; }
+.resident-layout .resident-polls-hero p { font-size: 14px; }
+.resident-layout .resident-polls-section-heading { margin-bottom: 15px; }
+.resident-layout .resident-polls-section-heading > div:first-child span { color: #157461; font-size: 11px; }
+.resident-layout .resident-polls-section-heading h2 { margin-top: 4px; color: #202d35; font-size: 22px; }
+.resident-layout .resident-polls-count { border-radius: 7px; background: #e8f3ef; color: #105e4f; font-size: 13px; }
+.resident-layout .resident-polls-grid { gap: 14px; }
+.resident-layout .resident-poll-card { padding: 20px; border-radius: 10px; box-shadow: 0 3px 10px rgba(22, 50, 42, .04); }
+.resident-layout .resident-poll-card h3 { color: #202d35; font-size: 17px; }
+.resident-layout .resident-poll-description,
+.resident-layout .resident-poll-option { font-size: 14px; }
+.resident-layout .resident-poll-vote-button { border-radius: 7px; background: #157461; font-size: 14px; }
+.resident-layout .resident-polls-info { margin-top: 20px; padding: 16px; border-radius: 10px; }
+
+.resident-layout .resident-visitors-top { align-items: flex-end; margin-bottom: 22px; }
+.resident-layout .resident-visitors-eyebrow,
+.resident-layout .notice-overline,
+.resident-layout .resident-emergency-eyebrow { color: #157461; font-size: 11px; letter-spacing: 1.2px; }
+.resident-layout .resident-visitors-top h1 { margin: 5px 0; }
+.resident-layout .facilities-header { border-bottom: 1px solid #dfe7e4; }
+
+.resident-emergency-page { width: 100%; }
+.resident-emergency-header { margin-bottom: 20px; padding-bottom: 17px; border-bottom: 1px solid #dfe7e4; }
+.resident-emergency-eyebrow { display: block; margin-bottom: 6px; font-weight: 800; }
+.resident-emergency-header h1 { margin: 0; color: #202d35; font-size: 30px; line-height: 1.2; }
+.resident-emergency-header p { margin: 7px 0 0; color: #69777d; font-size: 14px; }
+.resident-emergency-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.resident-emergency-card { display: flex; align-items: center; gap: 14px; min-width: 0; padding: 17px; border: 1px solid #dfe7e4; border-radius: 9px; background: #fff; }
+.resident-emergency-icon { width: 44px; height: 44px; flex: 0 0 44px; display: grid; place-items: center; border-radius: 8px; background: #e8f3ef; color: #105e4f; }
+.resident-emergency-icon.urgent { background: #fce9e7; color: #a63d3d; }
+.resident-emergency-icon.medical { background: #e6f3fa; color: #176889; }
+.resident-emergency-icon.fire { background: #fff0df; color: #a85d17; }
+.resident-emergency-icon.support { background: #f7e9ed; color: #9b4560; }
+.resident-emergency-copy { min-width: 0; flex: 1; }
+.resident-emergency-copy h2 { margin: 0; color: #202d35; font-size: 16px; }
+.resident-emergency-copy p { margin: 4px 0 0; color: #69777d; font-size: 13px; line-height: 1.4; }
+.resident-emergency-call { display: inline-flex; align-items: center; gap: 7px; min-height: 40px; padding: 0 12px; border-radius: 7px; background: #157461; color: #fff; font-size: 15px; font-weight: 750; text-decoration: none; }
+.resident-emergency-call:hover { background: #105e4f; }
+.resident-emergency-note { margin: 15px 0 0; color: #69777d; font-size: 13px; }
+
+@media (max-width: 700px) {
+  .resident-layout .notice-header { align-items: flex-start; }
+  .resident-layout .resident-polls-hero { align-items: flex-start; padding: 18px; }
+  .resident-emergency-grid { grid-template-columns: 1fr; }
+  .resident-emergency-header h1,
+  .resident-layout .notice-header h1,
+  .resident-layout .resident-polls-header h1 { font-size: 27px; }
+}
+
+@media (max-width: 420px) {
+  .resident-emergency-card { gap: 10px; padding: 12px; }
+  .resident-emergency-copy h2 { font-size: 14px; }
+  .resident-emergency-copy p { font-size: 12px; }
+  .resident-emergency-call { gap: 5px; min-height: 38px; padding: 0 9px; font-size: 14px; }
 }

@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
 import "../../css/facilities.css";
 
 const API_URL = "http://localhost:5000/api/resident/facilities";
@@ -450,20 +449,13 @@ const Facilities = () => {
     <div className="facilities-page">
       <header className="facilities-header">
         <div className="facilities-header-left">
-          <Link to="/resident" className="facilities-back-button">
-            ←
-          </Link>
-
           <div>
             <span className="facilities-overline">RESIDENT SERVICES</span>
-            <h1>Facilities & Booking</h1>
+            <h1>Amenity Booking</h1>
             <p>Explore facilities and book your preferred slot.</p>
           </div>
         </div>
 
-        <Link to="/resident" className="facilities-dashboard-button">
-          Dashboard
-        </Link>
       </header>
 
       <main className="facilities-content">

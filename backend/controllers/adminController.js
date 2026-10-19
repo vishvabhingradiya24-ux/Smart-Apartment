@@ -478,8 +478,13 @@ const createAdminStaff = async (req, res) => {
       return res.status(400).json({ message: "All fields and a valid department are required" });
     }
 
-    if (password.length < 6) {
-      return res.status(400).json({ message: "Password must be at least 6 characters" });
+    if (
+      password.length < 5 ||
+      (password.match(/[0-9]/g) || []).length < 3 ||
+      !/[^A-Za-z0-9\s]/.test(password) ||
+      Buffer.byteLength(password, "utf8") > 72
+    ) {
+      return res.status(400).json({ message: "Password must have at least 5 characters, 3 digits, 1 special character and be no more than 72 bytes" });
     }
 
     const normalizedEmail = email.trim().toLowerCase();
@@ -713,7 +718,8 @@ const getAdminSettings = async (req, res) => {
   try {
     if (!requireAdmin(req, res)) return;
     const [admins] = await pool.query(
-      `SELECT a.id, a.name, a.email, a.phone, a.society_id,
+          `SELECT a.id, a.name, a.email, a.phone, a.society_id,
+              a.notification_preferences, a.security_preferences,
               s.society_name AS society_name, s.address AS society_address,
               s.contact_email AS society_email, s.contact_phone AS society_phone,
               s.total_blocks, s.total_flats, s.status AS society_status
@@ -730,11 +736,6 @@ const getAdminSettings = async (req, res) => {
       return res.status(404).json({ message: "No society is assigned to this admin" });
     }
 
-    const [preferences] = await pool.query(
-      `SELECT notification_preferences, security_preferences
-       FROM admin_preferences WHERE admin_id = ? LIMIT 1`,
-      [req.user.id]
-    );
     await pool.query("SELECT 1");
     const admin = admins[0];
     res.status(200).json({
@@ -749,7 +750,7 @@ const getAdminSettings = async (req, res) => {
         status: admin.society_status,
       },
       admin: { id: admin.id, name: admin.name, email: admin.email, phone: admin.phone || "" },
-      notifications: preferences[0]?.notification_preferences || {
+      notifications: admin.notification_preferences || {
         complaints: true,
         payments: true,
         bookings: true,
@@ -757,7 +758,7 @@ const getAdminSettings = async (req, res) => {
         security: true,
         events: false,
       },
-      security: preferences[0]?.security_preferences || {
+      security: admin.security_preferences || {
         twoFactor: false,
         sessionTimeout: "30",
         loginAlerts: true,
@@ -838,8 +839,15 @@ const changeAdminPassword = async (req, res) => {
   try {
     if (!requireAdmin(req, res)) return;
     const { currentPassword, newPassword } = req.body;
-    if (!currentPassword || typeof newPassword !== "string" || newPassword.length < 6) {
-      return res.status(400).json({ message: "Current password and a new password of at least 6 characters are required" });
+    if (
+      !currentPassword ||
+      typeof newPassword !== "string" ||
+      newPassword.length < 5 ||
+      (newPassword.match(/[0-9]/g) || []).length < 3 ||
+      !/[^A-Za-z0-9\s]/.test(newPassword) ||
+      Buffer.byteLength(newPassword, "utf8") > 72
+    ) {
+      return res.status(400).json({ message: "New password must have at least 5 characters, 3 digits, 1 special character and be no more than 72 bytes" });
     }
     const [admins] = await pool.query("SELECT password FROM admins WHERE id = ? LIMIT 1", [req.user.id]);
     if (!admins.length) return res.status(404).json({ message: "Admin account not found" });
@@ -858,10 +866,8 @@ const changeAdminPassword = async (req, res) => {
 const saveAdminPreference = async (req, res, column, value) => {
   if (!requireAdmin(req, res)) return;
   await pool.query(
-    `INSERT INTO admin_preferences (admin_id, ${column})
-     VALUES (?, CAST(? AS JSON))
-     ON DUPLICATE KEY UPDATE ${column} = VALUES(${column})`,
-    [req.user.id, JSON.stringify(value)]
+    `UPDATE admins SET ${column} = CAST(? AS JSON) WHERE id = ?`,
+    [JSON.stringify(value), req.user.id]
   );
   res.status(200).json({ message: "Preferences saved" });
 };

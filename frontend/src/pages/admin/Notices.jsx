@@ -3,7 +3,8 @@ import { Check, FileText, FolderOpen, Megaphone, Pencil, Search, Trash2 } from "
 import AdminFormModal from "./AdminFormModal";
 import "../../css/notices.css";
 
-const blankForm = { title: "", description: "", notice_type: "General", publish_date: new Date().toISOString().slice(0, 10), expiry_date: "", status: "Active" };
+const blankForm = { title: "", description: "", notice_type: "General", publish_date: "", expiry_date: "", status: "Active" };
+const standardCategories = ["General", "Maintenance", "Important", "Meeting", "Security"];
 const Notices = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("All");
@@ -43,9 +44,28 @@ const Notices = () => {
   const openCreate = () => { setEditingId(null); setForm(blankForm); setShowForm(true); };
   const openEdit = (notice) => { setEditingId(notice.id); setForm({ title: notice.title, description: notice.description, notice_type: notice.notice_type || "General", publish_date: String(notice.publish_date || "").slice(0, 10), expiry_date: notice.expiry_date ? String(notice.expiry_date).slice(0, 10) : "", status: notice.status === "Active" ? "Active" : "Inactive" }); setShowForm(true); };
   const submitForm = async (event) => {
-    event.preventDefault(); setSaving(true); setError("");
+    event.preventDefault(); setError("");
+    const normalizedForm = {
+      ...form,
+      title: form.title.trim(),
+      description: form.description.trim(),
+      notice_type: form.notice_type.trim(),
+    };
+    if (!normalizedForm.title || !normalizedForm.description || !normalizedForm.notice_type) {
+      setError("Title, category and description are required.");
+      return;
+    }
+    if (!normalizedForm.publish_date) {
+      setError("Publish date is required.");
+      return;
+    }
+    if (normalizedForm.expiry_date && normalizedForm.expiry_date < normalizedForm.publish_date) {
+      setError("Expiry date must be on or after the publish date.");
+      return;
+    }
+    setSaving(true);
     try {
-      const response = await request(editingId ? `/api/notices/${editingId}` : "/api/notices/", { method: editingId ? "PUT" : "POST", body: JSON.stringify(form) });
+      const response = await request(editingId ? `/api/notices/${editingId}` : "/api/notices/", { method: editingId ? "PUT" : "POST", body: JSON.stringify(normalizedForm) });
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || "Notice save થઈ શકી નહીં");
       setShowForm(false); await loadNotices();
@@ -53,7 +73,7 @@ const Notices = () => {
     finally { setSaving(false); }
   };
   const toggleStatus = async (notice) => {
-    const payload = { title: notice.title, description: notice.description, notice_type: notice.notice_type, publish_date: notice.publish_date, expiry_date: notice.expiry_date, status: notice.status === "Published" ? "Inactive" : "Active" };
+    const payload = { title: notice.title, description: notice.description, notice_type: notice.notice_type, publish_date: String(notice.publish_date || "").slice(0, 10), expiry_date: notice.expiry_date ? String(notice.expiry_date).slice(0, 10) : "", status: notice.status === "Published" ? "Inactive" : "Active" };
     try { const response = await request(`/api/notices/${notice.id}`, { method: "PUT", body: JSON.stringify(payload) }); const data = await response.json(); if (!response.ok) throw new Error(data.message || "Notice update થઈ શકી નહીં"); await loadNotices(); }
     catch (err) { setError(err.message); }
   };
@@ -65,12 +85,13 @@ const Notices = () => {
   const published = notices.filter((notice) => notice.status === "Published").length;
   const drafts = notices.length - published;
   const categories = [...new Set(notices.map((notice) => notice.category))];
+  const formCategories = [...new Set([...standardCategories, ...categories])];
 
   return <div className="notices-page">
     <div className="notices-header"><div><span className="notices-overline">COMMUNICATION MANAGEMENT</span><h1>Notices</h1><p>Create and manage society announcements stored in MySQL.</p></div><button className="add-notice-btn" onClick={openCreate}><span>＋</span> Create Notice</button></div>
     <div className="notice-stats-grid"><div className="notice-stat-card"><div className="notice-stat-icon"><Megaphone size={18} strokeWidth={1.8} aria-hidden="true" /></div><div><span>Total Notices</span><strong>{notices.length}</strong></div></div><div className="notice-stat-card"><div className="notice-stat-icon"><Check size={18} strokeWidth={1.8} aria-hidden="true" /></div><div><span>Published</span><strong>{published}</strong></div></div><div className="notice-stat-card"><div className="notice-stat-icon"><FileText size={18} strokeWidth={1.8} aria-hidden="true" /></div><div><span>Drafts</span><strong>{drafts}</strong></div></div><div className="notice-stat-card"><div className="notice-stat-icon"><FolderOpen size={18} strokeWidth={1.8} aria-hidden="true" /></div><div><span>Categories</span><strong>{categories.length}</strong></div></div></div>
     {showForm && <AdminFormModal title={editingId ? "Edit Notice" : "Create Notice"} onClose={() => setShowForm(false)} saving={saving}>
-      <form className="notice-form" onSubmit={submitForm}><div className="notice-form-grid"><label>Title<input required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} /></label><label>Category<input required value={form.notice_type} onChange={(e) => setForm({ ...form, notice_type: e.target.value })} /></label><label>Publish date<input type="date" required value={form.publish_date} onChange={(e) => setForm({ ...form, publish_date: e.target.value })} /></label><label>Expiry date<input type="date" value={form.expiry_date} onChange={(e) => setForm({ ...form, expiry_date: e.target.value })} /></label><label>Status<select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}><option value="Active">Published</option><option value="Inactive">Draft</option></select></label><label className="notice-description-field">Description<textarea required rows="3" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></label></div>{error && <p className="notice-error" role="alert">{error}</p>}<div className="notice-form-actions"><button type="button" onClick={() => setShowForm(false)}>Cancel</button><button type="submit" disabled={saving}>{saving ? "Saving…" : "Save Notice"}</button></div></form>
+      <form className="notice-form" onSubmit={submitForm}><div className="notice-form-grid"><label>Title<input required maxLength={200} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} /></label><label>Category<select required value={form.notice_type} onChange={(e) => setForm({ ...form, notice_type: e.target.value })}>{formCategories.map((category) => <option key={category} value={category}>{category}</option>)}</select></label><label>Publish date<input type="date" required value={form.publish_date} onChange={(e) => setForm({ ...form, publish_date: e.target.value })} /></label><label>Expiry date<input type="date" min={form.publish_date} value={form.expiry_date} onChange={(e) => setForm({ ...form, expiry_date: e.target.value })} /></label><label>Status<select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}><option value="Active">Published</option><option value="Inactive">Draft</option></select></label><label className="notice-description-field">Description<textarea required maxLength={5000} rows="3" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></label></div>{error && <p className="notice-error" role="alert">{error}</p>}<div className="notice-form-actions"><button type="button" onClick={() => setShowForm(false)}>Cancel</button><button type="submit" disabled={saving}>{saving ? "Saving…" : "Save Notice"}</button></div></form>
     </AdminFormModal>}
     {error && !showForm && <p className="notice-error" role="alert">{error}</p>}
     <div className="notice-toolbar"><div className="notice-search"><Search size={16} aria-hidden="true" /><input placeholder="Search notice, ID or description..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} /></div><select className="notice-filter" value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}><option value="All">All Categories</option>{categories.map((category) => <option key={category}>{category}</option>)}</select><select className="notice-filter" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}><option value="All">All Status</option><option value="Published">Published</option><option value="Draft">Draft</option></select></div>

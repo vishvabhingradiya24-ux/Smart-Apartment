@@ -1,5 +1,8 @@
 const { pool } = require("../config/db");
 
+const isAdminUser = (user) =>
+  String(user?.role || user?.user_type || "").trim().toLowerCase() === "admin";
+
 
 // ======================================================
 // CREATE COMPLAINT - RESIDENT
@@ -224,7 +227,7 @@ const getAdminComplaints = async (req, res) => {
   try {
 
     // Only Admin can access
-    if (req.user.role !== "Admin") {
+    if (!isAdminUser(req.user)) {
       return res.status(403).json({
         message: "Admin access required"
       });
@@ -291,7 +294,7 @@ const assignComplaintToStaff = async (req, res) => {
   try {
 
     // Only Admin
-    if (req.user.role !== "Admin") {
+    if (!isAdminUser(req.user)) {
       return res.status(403).json({
         message: "Admin access required"
       });

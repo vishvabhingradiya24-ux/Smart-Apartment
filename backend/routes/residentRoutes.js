@@ -40,4 +40,10 @@ router.get(
   authMiddleware,
   residentController.getMyProfile
 );
+
+router.put(
+  "/profile",
+  authMiddleware,
+  residentController.updateMyProfile
+);
 module.exports = router;

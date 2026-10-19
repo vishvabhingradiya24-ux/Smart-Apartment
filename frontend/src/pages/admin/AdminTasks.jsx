@@ -15,6 +15,7 @@ const AdminTask = () => {
   const [statusFilter, setStatusFilter] = useState("All");
 
   const [showModal, setShowModal] = useState(false);
+  const [taskFormError, setTaskFormError] = useState("");
 
   const [formData, setFormData] = useState({
     task_name: "",
@@ -102,6 +103,25 @@ const AdminTask = () => {
 
   const handleCreateTask = async (e) => {
     e.preventDefault();
+    setTaskFormError("");
+    const taskName = formData.task_name.trim();
+    if (!taskName) {
+      setTaskFormError("Task name is required.");
+      return;
+    }
+    if (taskName.length > 150) {
+      setTaskFormError("Task name must be 150 characters or fewer.");
+      return;
+    }
+    if (!formData.assigned_to || !formData.due_date) {
+      setTaskFormError("Select a staff member and due date.");
+      return;
+    }
+    const dueDate = new Date(formData.due_date);
+    if (Number.isNaN(dueDate.getTime()) || dueDate.toISOString().slice(0, 10) !== formData.due_date) {
+      setTaskFormError("Enter a valid due date.");
+      return;
+    }
 
     try {
       const token = localStorage.getItem("token");
@@ -116,7 +136,7 @@ const AdminTask = () => {
             "Content-Type": "application/json",
           },
 
-          body: JSON.stringify(formData),
+          body: JSON.stringify({ ...formData, task_name: taskName, description: formData.description.trim() }),
         }
       );
 
@@ -131,6 +151,7 @@ const AdminTask = () => {
       alert("Task created successfully!");
 
       setShowModal(false);
+      setTaskFormError("");
 
       setFormData({
         task_name: "",
@@ -231,7 +252,7 @@ const AdminTask = () => {
 
           <button
             className="create-task-btn"
-            onClick={() => setShowModal(true)}
+            onClick={() => { setTaskFormError(""); setShowModal(true); }}
           >
             + Create Task
           </button>
@@ -547,6 +568,7 @@ const AdminTask = () => {
                 <input
                   type="text"
                   placeholder="Enter task name"
+                  maxLength={150}
                   value={formData.task_name}
                   onChange={(e) =>
                     setFormData({
@@ -558,6 +580,8 @@ const AdminTask = () => {
                 />
 
               </div>
+
+              {taskFormError && <p className="task-form-error" role="alert">{taskFormError}</p>}
 
               <div className="form-group">
 

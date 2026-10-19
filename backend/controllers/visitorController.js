@@ -161,9 +161,49 @@ const getVisitorById = async (req, res) => {
   }
 };
 
+const updateMyVisitorStatus = async (req, res) => {
+  try {
+    if (req.user.user_type !== "Resident") {
+      return res.status(403).json({ message: "Only residents can decide on visitor requests" });
+    }
+
+    const residentId = req.user.id;
+    const visitorId = req.params.id;
+    const { status } = req.body;
+
+    if (!["Approved", "Rejected"].includes(status)) {
+      return res.status(400).json({ message: "Status must be Approved or Rejected" });
+    }
+
+    const [result] = await pool.query(
+      `UPDATE visitors
+       SET status = ?
+       WHERE visitor_id = ? AND resident_id = ? AND status = 'Pending'`,
+      [status, visitorId, residentId]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "Pending visitor request not found" });
+    }
+
+    const [visitors] = await pool.query(
+      `SELECT visitor_id, resident_id, visitor_name, contact_number, purpose,
+              visit_date, expected_time, status, entry_time, exit_time, created_at
+       FROM visitors WHERE visitor_id = ? AND resident_id = ? LIMIT 1`,
+      [visitorId, residentId]
+    );
+
+    res.status(200).json({ message: `Visitor request ${status.toLowerCase()}`, visitor: visitors[0] });
+  } catch (error) {
+    console.error("Update Visitor Status Error:", error);
+    res.status(500).json({ message: "Unable to update visitor status" });
+  }
+};
+
 
 module.exports = {
   getMyVisitors,
   createVisitor,
   getVisitorById,
+  updateMyVisitorStatus,
 };

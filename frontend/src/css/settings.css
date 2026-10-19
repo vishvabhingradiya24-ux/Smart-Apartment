@@ -422,6 +422,29 @@
   font-size: 12px;
 }
 
+.settings-password-input-control {
+  display: flex;
+  min-width: 0;
+  gap: 6px;
+}
+
+.settings-password-input-control input { flex: 1; }
+
+.settings-password-visibility {
+  width: 38px;
+  min-width: 38px;
+  border: 1px solid #dfe5eb;
+  border-radius: 8px;
+  background: #fff;
+  color: #45515e;
+  cursor: pointer;
+}
+
+.settings-password-visibility:focus-visible {
+  outline: 2px solid #9aa5b2;
+  outline-offset: 2px;
+}
+
 .settings-password-fields button { grid-column: 1 / -1; justify-self: end; }
 .settings-password-fields button:disabled { opacity: .6; cursor: wait; }
 

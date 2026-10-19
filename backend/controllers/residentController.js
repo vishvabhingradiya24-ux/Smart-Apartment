@@ -274,25 +274,10 @@ const forgotPassword = async (req, res) => {
     );
 
     await pool.query(
-      `DELETE FROM password_reset_otps
-       WHERE email = ?`,
-      [email]
-    );
-
-    await pool.query(
-      `INSERT INTO password_reset_otps
-      (
-        email,
-        otp_hash,
-        expires_at,
-        attempts
-      )
-      VALUES (?, ?, ?, 0)`,
-      [
-        email,
-        otpHash,
-        expiresAt
-      ]
+      `UPDATE residents
+       SET reset_otp_hash = ?, reset_otp_expires_at = ?, reset_otp_attempts = 0
+       WHERE id = ?`,
+      [otpHash, expiresAt, users[0].id]
     );
 
     console.log(
@@ -395,10 +380,11 @@ const verifyOTP = async (req, res) => {
     }
 
     const [records] = await pool.query(
-      `SELECT *
-       FROM password_reset_otps
-       WHERE email = ?
-       ORDER BY id DESC
+      `SELECT id, reset_otp_hash AS otp_hash,
+              reset_otp_expires_at AS expires_at,
+              reset_otp_attempts AS attempts
+       FROM residents
+       WHERE email = ? AND reset_otp_hash IS NOT NULL
        LIMIT 1`,
       [email]
     );
@@ -437,8 +423,8 @@ const verifyOTP = async (req, res) => {
 
     if (!otpMatch) {
       await pool.query(
-        `UPDATE password_reset_otps
-         SET attempts = attempts + 1
+        `UPDATE residents
+         SET reset_otp_attempts = reset_otp_attempts + 1
          WHERE id = ?`,
         [otpRecord.id]
       );
@@ -450,7 +436,8 @@ const verifyOTP = async (req, res) => {
     }
 
     await pool.query(
-      `DELETE FROM password_reset_otps
+      `UPDATE residents
+       SET reset_otp_hash = NULL, reset_otp_expires_at = NULL, reset_otp_attempts = 0
        WHERE id = ?`,
       [otpRecord.id]
     );
@@ -670,6 +657,59 @@ const getMyProfile = async (req, res) => {
   }
 };
 
+const updateMyProfile = async (req, res) => {
+  try {
+    if (req.user.user_type !== "Resident") {
+      return res.status(403).json({ message: "Only residents can update this profile" });
+    }
+
+    const residentId = req.user.id;
+    const firstName = req.body.first_name?.trim();
+    const lastName = req.body.last_name?.trim();
+    const email = req.body.email?.trim().toLowerCase();
+    const phone = req.body.phone?.trim();
+
+    if (!firstName || !lastName || !email || !phone) {
+      return res.status(400).json({ message: "All profile fields are required" });
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ message: "Please enter a valid email address" });
+    }
+
+    const [existingUsers] = await pool.query(
+      "SELECT id FROM residents WHERE email = ? AND id <> ? LIMIT 1",
+      [email, residentId]
+    );
+
+    if (existingUsers.length > 0) {
+      return res.status(409).json({ message: "Email already registered" });
+    }
+
+    await pool.query(
+      `UPDATE residents
+       SET first_name = ?, last_name = ?, email = ?, phone = ?
+       WHERE id = ?`,
+      [firstName, lastName, email, phone, residentId]
+    );
+
+    const [residents] = await pool.query(
+      `SELECT id, first_name, last_name, email, phone, block_wing, flat_number, created_at
+       FROM residents WHERE id = ?`,
+      [residentId]
+    );
+
+    if (residents.length === 0) {
+      return res.status(404).json({ message: "Resident not found" });
+    }
+
+    res.status(200).json({ ...residents[0], user_type: "Resident" });
+  } catch (error) {
+    console.error("Update Profile Error:", error);
+    res.status(500).json({ message: "Unable to update profile" });
+  }
+};
+
 
 // ==============================
 // EXPORTS
@@ -682,5 +722,6 @@ module.exports = {
   verifyOTP,
   resetPassword,
   getResidents,
-  getMyProfile
+  getMyProfile,
+  updateMyProfile
 };

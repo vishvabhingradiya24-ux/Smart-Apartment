@@ -267,9 +267,6 @@ function Payment() {
           </p>
         </div>
 
-        <Link to="/resident" className="back-dashboard">
-          ← Dashboard
-        </Link>
 
       </header>
 

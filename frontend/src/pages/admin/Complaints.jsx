@@ -9,7 +9,7 @@ const Complaints = () => {
 
   const [complaints, setComplaints] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState("");
+  const [fetchError, setFetchError] = useState("");
   const [staffLoadError, setStaffLoadError] = useState("");
   const [staffList, setStaffList] = useState([]);
 const [showAssignModal, setShowAssignModal] = useState(false);
@@ -22,7 +22,7 @@ const [assigning, setAssigning] = useState(false);
   // ==========================================
   const fetchComplaints = async () => {
     setLoading(true);
-    setLoadError("");
+    setFetchError("");
     try {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -96,8 +96,8 @@ assignedTo:
 
     } catch (error) {
       console.error("Admin Complaints Error:", error);
-      setLoadError(error.message || "Failed to load complaints.");
       setComplaints([]);
+      setFetchError(error.message || "Failed to fetch complaints.");
 
     } finally {
       setLoading(false);
@@ -184,24 +184,6 @@ assignedTo:
   const resolvedCount = complaints.filter(
     (complaint) => complaint.status === "Resolved"
   ).length;
-
-
-  // ==========================================
-  // VIEW COMPLAINT
-  // ==========================================
-  const handleView = (complaint) => {
-    alert(
-      `Complaint Details\n\n` +
-      `Complaint ID: ${complaint.id}\n` +
-      `Resident: ${complaint.residentName}\n` +
-      `Flat: ${complaint.flat}\n` +
-      `Title: ${complaint.title}\n` +
-      `Category: ${complaint.category}\n` +
-      `Status: ${complaint.status}\n` +
-      `Assigned To: ${complaint.assignedTo}\n` +
-      `Date: ${complaint.date}`
-    );
-  };
 
 
   // ==========================================
@@ -321,10 +303,12 @@ const handleConfirmAssign = async () => {
         </button>
       </div>
 
-      {loadError && (
-        <div role="alert" className="complaints-load-error">
-          <span>{loadError}</span>
-          <button type="button" onClick={fetchComplaints} disabled={loading}>Try again</button>
+      {fetchError && (
+        <div className="complaints-load-error" role="alert">
+          <span>{fetchError}</span>
+          <button type="button" onClick={fetchComplaints} disabled={loading}>
+            {loading ? "Loading..." : "Retry"}
+          </button>
         </div>
       )}
 
@@ -513,7 +497,7 @@ const handleConfirmAssign = async () => {
                 <th>Assigned To</th>
                 <th>Status</th>
                 <th>Date</th>
-                <th>Actions</th>
+                <th className="admin-action-column">Actions</th>
               </tr>
 
             </thead>
@@ -548,7 +532,7 @@ const handleConfirmAssign = async () => {
 
                 </tr>
 
-              ) : loadError ? (
+              ) : fetchError ? (
                 <tr>
                   <td colSpan="9" role="alert">
                     Complaints could not be loaded. Use “Try again” above.
@@ -689,21 +673,9 @@ const handleConfirmAssign = async () => {
 
                     {/* ACTIONS */}
 
-                    <td>
+                    <td className="admin-action-column">
 
                       <div className="complaint-actions">
-
-                        <button
-                          className="complaint-action-view"
-                          onClick={() =>
-                            handleView(complaint)
-                          }
-                          title="View"
-                        >
-                          👁️
-                        </button>
-
-
                         <button
                           className="complaint-action-assign"
                           onClick={() =>

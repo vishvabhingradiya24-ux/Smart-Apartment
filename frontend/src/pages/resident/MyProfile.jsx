@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import "../../css/resident/profile.css";
 
 function MyProfile() {
   const [user, setUser] = useState(null);
+  const [formData, setFormData] = useState({ first_name: "", last_name: "", email: "", phone: "" });
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -36,6 +39,12 @@ function MyProfile() {
         }
 
         setUser(data);
+        setFormData({
+          first_name: data.first_name || "",
+          last_name: data.last_name || "",
+          email: data.email || "",
+          phone: data.phone || "",
+        });
       } catch (err) {
         console.error("Profile Error:", err);
         setError(err.message);
@@ -46,6 +55,53 @@ function MyProfile() {
 
     fetchProfile();
   }, []);
+
+  const handleProfileChange = (event) => {
+    const { name, value } = event.target;
+    setFormData((previous) => ({ ...previous, [name]: value }));
+  };
+
+  const handleProfileSubmit = async (event) => {
+    event.preventDefault();
+    setError("");
+    setSuccess("");
+    setSaving(true);
+
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://localhost:5000/api/resident/profile", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(formData),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Unable to update profile");
+
+      setUser(data);
+      setFormData({
+        first_name: data.first_name || "",
+        last_name: data.last_name || "",
+        email: data.email || "",
+        phone: data.phone || "",
+      });
+
+      const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+      if (storedUser.user) storedUser.user = { ...storedUser.user, ...data };
+      else if (storedUser.data?.user) storedUser.data.user = { ...storedUser.data.user, ...data };
+      else Object.assign(storedUser, data);
+      localStorage.setItem("user", JSON.stringify(storedUser));
+
+      setIsEditing(false);
+      setSuccess("Your profile has been updated.");
+    } catch (err) {
+      setError(err.message || "Unable to update profile");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -68,12 +124,6 @@ function MyProfile() {
 
           <p>{error}</p>
 
-          <Link
-            to="/resident"
-            className="profile-back-btn"
-          >
-            Back to Dashboard
-          </Link>
         </div>
       </div>
     );
@@ -129,14 +179,13 @@ function MyProfile() {
           </p>
         </div>
 
-        <Link
-          to="/resident"
-          className="profile-dashboard-btn"
-        >
-          ← Dashboard
-        </Link>
-
       </div>
+
+      {(success || error) && (
+        <div className={`profile-message ${error ? "error" : "success"}`} role="status">
+          {error || success}
+        </div>
+      )}
 
 
       {/* PROFILE MAIN CARD */}
@@ -171,6 +220,25 @@ function MyProfile() {
                 {user?.user_type || "Resident"}
               </span>
 
+            </div>
+
+            <div className="profile-edit-actions">
+              {isEditing ? (
+                <>
+                  <button type="button" className="profile-cancel-btn" onClick={() => {
+                    setFormData({ first_name: user.first_name || "", last_name: user.last_name || "", email: user.email || "", phone: user.phone || "" });
+                    setIsEditing(false);
+                    setError("");
+                  }} disabled={saving}>Cancel</button>
+                  <button type="submit" form="resident-profile-form" className="profile-save-btn" disabled={saving}>
+                    {saving ? "Saving..." : "Save Changes"}
+                  </button>
+                </>
+              ) : (
+                <button type="button" className="profile-save-btn" onClick={() => { setSuccess(""); setIsEditing(true); }}>
+                  Edit Profile
+                </button>
+              )}
             </div>
 
             <div className="profile-divider"></div>
@@ -256,7 +324,7 @@ function MyProfile() {
             </div>
 
 
-            <div className="info-fields">
+            <form id="resident-profile-form" className="info-fields" onSubmit={handleProfileSubmit}>
 
               <div className="info-field">
 
@@ -264,10 +332,7 @@ function MyProfile() {
                   First Name
                 </label>
 
-                <div>
-                  {user?.first_name ||
-                    "Not available"}
-                </div>
+                {isEditing ? <input name="first_name" value={formData.first_name} onChange={handleProfileChange} required maxLength={80} /> : <div>{user?.first_name || "Not available"}</div>}
 
               </div>
 
@@ -278,10 +343,7 @@ function MyProfile() {
                   Last Name
                 </label>
 
-                <div>
-                  {user?.last_name ||
-                    "Not available"}
-                </div>
+                {isEditing ? <input name="last_name" value={formData.last_name} onChange={handleProfileChange} required maxLength={80} /> : <div>{user?.last_name || "Not available"}</div>}
 
               </div>
 
@@ -292,10 +354,7 @@ function MyProfile() {
                   Email Address
                 </label>
 
-                <div>
-                  {user?.email ||
-                    "Not available"}
-                </div>
+                {isEditing ? <input name="email" type="email" value={formData.email} onChange={handleProfileChange} required maxLength={254} /> : <div>{user?.email || "Not available"}</div>}
 
               </div>
 
@@ -306,10 +365,7 @@ function MyProfile() {
                   Phone Number
                 </label>
 
-                <div>
-                  {user?.phone ||
-                    "Not available"}
-                </div>
+                {isEditing ? <input name="phone" type="tel" value={formData.phone} onChange={handleProfileChange} required maxLength={20} /> : <div>{user?.phone || "Not available"}</div>}
 
               </div>
 
@@ -327,7 +383,7 @@ function MyProfile() {
 
               </div>
 
-            </div>
+            </form>
 
           </div>
 

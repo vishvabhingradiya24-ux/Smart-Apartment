@@ -1,4 +1,5 @@
-* {
+.resident-polls-page,
+.resident-polls-page * {
   box-sizing: border-box;
 }
 

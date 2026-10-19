@@ -390,7 +390,7 @@ const Residents = () => {
               </label>
               <label>
                 Email
-                <input required type="email" maxLength="150" autoComplete="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} />
+                <input required type="email" maxLength="150" pattern="[^A-Z]*" title="Email must not contain uppercase letters." autoComplete="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} />
               </label>
               <label>
                 Phone
@@ -526,7 +526,7 @@ const Residents = () => {
                   <th>Phone</th>
                   <th>Registered</th>
                   <th>Account</th>
-                  <th>Actions</th>
+                  <th className="admin-action-column">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -572,7 +572,7 @@ const Residents = () => {
                           {Number(resident.is_active) === 1 ? "Active" : "Archived"}
                         </span>
                       </td>
-                      <td>
+                      <td className="admin-action-column">
                         <div className="admin-records-actions">
                           <button type="button" onClick={() => openEditForm(resident)}>Edit</button>
                           {Number(resident.is_active) === 1 ? (
