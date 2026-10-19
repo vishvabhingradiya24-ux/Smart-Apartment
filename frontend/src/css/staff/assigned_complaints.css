@@ -1297,6 +1297,22 @@ input {
   font-size: 10px;
 }
 
+.no-complaints .complaints-empty-tasks-btn {
+  margin-top: 14px;
+  padding: 9px 14px;
+  border: 0;
+  border-radius: 7px;
+  background: #157461;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.no-complaints .complaints-empty-tasks-btn:hover {
+  background: #105e4f;
+}
+
 
 /* =========================================================
    FOOTER

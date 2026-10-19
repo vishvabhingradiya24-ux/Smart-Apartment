@@ -9,6 +9,8 @@ const Complaints = () => {
 
   const [complaints, setComplaints] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
+  const [staffLoadError, setStaffLoadError] = useState("");
   const [staffList, setStaffList] = useState([]);
 const [showAssignModal, setShowAssignModal] = useState(false);
 const [selectedComplaint, setSelectedComplaint] = useState(null);
@@ -19,8 +21,13 @@ const [assigning, setAssigning] = useState(false);
   // FETCH COMPLAINTS FROM DATABASE
   // ==========================================
   const fetchComplaints = async () => {
+    setLoading(true);
+    setLoadError("");
     try {
       const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("Admin session expired. Please log in again.");
+      }
 
       const response = await fetch(
         "http://localhost:5000/api/resident/complaints/admin/all",
@@ -37,6 +44,9 @@ const [assigning, setAssigning] = useState(false);
         throw new Error(
           data.message || "Failed to fetch complaints"
         );
+      }
+      if (!Array.isArray(data)) {
+        throw new Error("Invalid complaints response from server.");
       }
 
       // Convert backend data to existing UI format
@@ -86,7 +96,7 @@ assignedTo:
 
     } catch (error) {
       console.error("Admin Complaints Error:", error);
-
+      setLoadError(error.message || "Failed to load complaints.");
       setComplaints([]);
 
     } finally {
@@ -96,8 +106,16 @@ assignedTo:
 
   const fetchStaff = async () => {
   try {
-    const response = await fetch(
-      "http://localhost:5000/api/staff/all"
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("Admin session expired. Please log in again.");
+      }
+
+      const response = await fetch(
+        "http://localhost:5000/api/staff/all",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
     );
 
     const data = await response.json();
@@ -112,6 +130,7 @@ assignedTo:
 
   } catch (error) {
     console.error("Fetch Staff Error:", error);
+    setStaffLoadError(error.message || "Failed to fetch staff.");
     setStaffList([]);
   }
 };
@@ -297,7 +316,17 @@ const handleConfirmAssign = async () => {
             Review, assign and monitor resident complaints.
           </p>
         </div>
+        <button type="button" onClick={fetchComplaints} disabled={loading}>
+          {loading ? "Loading..." : "Refresh"}
+        </button>
       </div>
+
+      {loadError && (
+        <div role="alert" className="complaints-load-error">
+          <span>{loadError}</span>
+          <button type="button" onClick={fetchComplaints} disabled={loading}>Try again</button>
+        </div>
+      )}
 
 
       {/* ================= SUMMARY ================= */}
@@ -416,6 +445,10 @@ const handleConfirmAssign = async () => {
             All Categories
           </option>
 
+          <option value="Maintenance">
+            Maintenance
+          </option>
+
           <option value="Plumbing">
             Plumbing
           </option>
@@ -515,6 +548,12 @@ const handleConfirmAssign = async () => {
 
                 </tr>
 
+              ) : loadError ? (
+                <tr>
+                  <td colSpan="9" role="alert">
+                    Complaints could not be loaded. Use “Try again” above.
+                  </td>
+                </tr>
               ) : filteredComplaints.length > 0 ? (
 
                 filteredComplaints.map((complaint) => (
@@ -871,6 +910,10 @@ const handleConfirmAssign = async () => {
             >
               Select Staff
             </label>
+
+            {staffLoadError && (
+              <p className="complaints-load-error" role="alert">{staffLoadError}</p>
+            )}
 
             <select
               value={selectedStaff}

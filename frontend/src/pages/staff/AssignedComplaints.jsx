@@ -3,6 +3,14 @@ import { useNavigate } from "react-router-dom";
 import "../../css/staff/assigned_complaints.css";
 import "../../css/staff/staff_shared_theme.css";
 
+const getNormalizedStatus = (status) =>
+  String(status || "").trim().toLowerCase();
+
+const isPendingStatus = (status) => {
+  const normalizedStatus = getNormalizedStatus(status);
+  return normalizedStatus === "pending" || normalizedStatus === "assigned";
+};
+
 function StaffComplaints() {
   const navigate = useNavigate();
 
@@ -191,7 +199,7 @@ function StaffComplaints() {
   const updateComplaintStatus = async (status) => {
     if (!selectedComplaint) return;
 
-    if (status === "Resolved" && !resolutionDetails.trim()) {
+    if (getNormalizedStatus(status) === "resolved" && !resolutionDetails.trim()) {
       alert("Please enter resolution details before resolving the complaint.");
       return;
     }
@@ -281,7 +289,9 @@ function StaffComplaints() {
 
       const matchesFilter =
         activeFilter === "All" ||
-        complaint.status === activeFilter;
+        (activeFilter === "Pending"
+          ? isPendingStatus(complaint.status)
+          : getNormalizedStatus(complaint.status) === getNormalizedStatus(activeFilter));
 
 
       const search = searchTerm
@@ -303,26 +313,25 @@ function StaffComplaints() {
 
   }, [complaints, activeFilter, searchTerm]);
 
-
   // ======================================================
   // COUNTS
   // ======================================================
 
   const pendingCount = complaints.filter(
     (item) =>
-      String(item.status).toLowerCase() === "pending"
+      isPendingStatus(item.status)
   ).length;
 
 
   const progressCount = complaints.filter(
     (item) =>
-      String(item.status).toLowerCase() === "in progress"
+      getNormalizedStatus(item.status) === "in progress"
   ).length;
 
 
   const resolvedCount = complaints.filter(
     (item) =>
-      String(item.status).toLowerCase() === "resolved"
+      getNormalizedStatus(item.status) === "resolved"
   ).length;
 
 
@@ -333,7 +342,7 @@ function StaffComplaints() {
   const getStatusClass = (status) => {
 
     const normalizedStatus =
-      String(status || "").toLowerCase();
+      String(status || "").trim().toLowerCase();
 
 
     if (normalizedStatus === "pending") {
@@ -1090,7 +1099,11 @@ function StaffComplaints() {
                             className="view-complaint-btn"
                             onClick={() => openComplaint(complaint)}
                           >
-                            View
+                            {getNormalizedStatus(complaint.status) === "in progress"
+                              ? "Mark as Resolved"
+                              : getNormalizedStatus(complaint.status) === "assigned"
+                                ? "Start Work"
+                                : "View"}
                             <span>→</span>
                           </button>
 
@@ -1121,10 +1134,19 @@ function StaffComplaints() {
 
                         <p>
                           {complaints.length === 0
-                            ? "No complaints are currently assigned to you."
+                            ? "No complaints are assigned to your account. Tasks are listed separately in My Tasks."
                             : "Try changing your search or filter."
                           }
                         </p>
+                        {complaints.length === 0 && (
+                          <button
+                            type="button"
+                            className="complaints-empty-tasks-btn"
+                            onClick={() => navigate("/staff/tasks")}
+                          >
+                            View My Tasks
+                          </button>
+                        )}
 
                       </td>
 
@@ -1325,7 +1347,7 @@ function StaffComplaints() {
 
             {/* RESOLUTION DETAILS */}
 
-            {selectedComplaint.status !== "Resolved" && (
+            {getNormalizedStatus(selectedComplaint.status) !== "resolved" && (
               <div className="modal-resolution-box">
 
                 <label htmlFor="resolution-details">
@@ -1361,7 +1383,7 @@ function StaffComplaints() {
               </button>
 
 
-              {selectedComplaint.status === "Assigned" && (
+              {getNormalizedStatus(selectedComplaint.status) === "assigned" && (
                 <button
                   className="modal-primary-btn"
                   onClick={() => updateComplaintStatus("In Progress")}
@@ -1372,7 +1394,7 @@ function StaffComplaints() {
               )}
 
 
-              {selectedComplaint.status === "In Progress" && (
+              {getNormalizedStatus(selectedComplaint.status) === "in progress" && (
                 <button
                   className="modal-primary-btn"
                   onClick={() => updateComplaintStatus("Resolved")}

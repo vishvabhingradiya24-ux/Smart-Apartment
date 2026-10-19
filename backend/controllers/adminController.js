@@ -1,6 +1,7 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { pool } = require("../config/db");
+const { STAFF_DEPARTMENTS } = require("../constants/staffDepartments");
 
 require("dotenv").config();
 
@@ -235,12 +236,6 @@ const validateResidentContactDetails = (body = {}) => {
   const namePattern = /^[\p{L}\p{M}][\p{L}\p{M} .'-]*$/u;
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const phonePattern = /^[0-9]{10}$/;
-  const allowedWings = ["A", "B", "C", "D"];
-  const allowedFlats = new Set(
-    Array.from({ length: 5 }, (_, floorIndex) =>
-      [1, 2, 3, 4].map((unit) => String((floorIndex + 1) * 100 + unit)),
-    ).flat(),
-  );
 
   if (!firstName || !lastName || !email || !phone) {
     return { error: "First name, last name, email and phone are required" };
@@ -265,6 +260,12 @@ const validateResidentDetails = (body = {}) => {
   const contactValidation = validateResidentContactDetails(body);
   if (contactValidation.error) return contactValidation;
 
+  const allowedWings = ["A", "B", "C", "D"];
+  const allowedFlats = new Set(
+    Array.from({ length: 5 }, (_, floorIndex) =>
+      [1, 2, 3, 4].map((unit) => String((floorIndex + 1) * 100 + unit)),
+    ).flat(),
+  );
   const blockWing = typeof body.block_wing === "string" ? body.block_wing.trim() : "";
   const flatNumber = typeof body.flat_number === "string" ? body.flat_number.trim() : "";
   const ownershipType = typeof body.ownership_type === "string" ? body.ownership_type.trim() : "";
@@ -450,7 +451,7 @@ const getAdminStaff = async (req, res) => {
   try {
     if (!requireAdmin(req, res)) return;
     const [staff] = await pool.query(
-      `SELECT id, first_name, last_name, email, phone, created_at
+      `SELECT id, first_name, last_name, email, phone, department, created_at
        FROM staff ORDER BY first_name ASC, last_name ASC`
     );
     res.status(200).json({ staff });
@@ -464,16 +465,17 @@ const createAdminStaff = async (req, res) => {
   try {
     if (!requireAdmin(req, res)) return;
 
-    const { first_name, last_name, email, phone, password } = req.body;
+    const { first_name, last_name, email, phone, department, password } = req.body;
 
     if (
       !first_name?.trim() ||
       !last_name?.trim() ||
       !email?.trim() ||
       !phone?.trim() ||
+      !STAFF_DEPARTMENTS.includes(department) ||
       !password
     ) {
-      return res.status(400).json({ message: "All fields are required" });
+      return res.status(400).json({ message: "All fields and a valid department are required" });
     }
 
     if (password.length < 6) {
@@ -491,13 +493,14 @@ const createAdminStaff = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const [result] = await pool.query(
-      `INSERT INTO staff (first_name, last_name, email, phone, password)
-       VALUES (?, ?, ?, ?, ?)`,
+      `INSERT INTO staff (first_name, last_name, email, phone, department, password)
+       VALUES (?, ?, ?, ?, ?, ?)`,
       [
         first_name.trim(),
         last_name.trim(),
         normalizedEmail,
         phone.trim(),
+        department,
         hashedPassword,
       ]
     );
@@ -509,6 +512,31 @@ const createAdminStaff = async (req, res) => {
   } catch (error) {
     console.error("Create Admin Staff Error:", error);
     res.status(500).json({ message: "Unable to add staff member" });
+  }
+};
+
+const updateAdminStaffDepartment = async (req, res) => {
+  try {
+    if (!requireAdmin(req, res)) return;
+
+    const { department } = req.body;
+    if (!STAFF_DEPARTMENTS.includes(department)) {
+      return res.status(400).json({ message: "Select a valid staff department" });
+    }
+
+    const [staffRows] = await pool.query("SELECT id FROM staff WHERE id = ?", [req.params.id]);
+    if (staffRows.length === 0) {
+      return res.status(404).json({ message: "Staff member not found" });
+    }
+
+    await pool.query(
+      "UPDATE staff SET department = ? WHERE id = ?",
+      [department, req.params.id]
+    );
+    res.status(200).json({ message: "Staff department updated", department });
+  } catch (error) {
+    console.error("Update Admin Staff Department Error:", error);
+    res.status(500).json({ message: "Unable to update staff department" });
   }
 };
 
@@ -1125,6 +1153,7 @@ module.exports = {
   restoreAdminResident,
   getAdminStaff,
   createAdminStaff,
+  updateAdminStaffDepartment,
   getAdminSecurity,
   getAdminPayments,
   getAdminVisitors,

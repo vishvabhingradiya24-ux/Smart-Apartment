@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CalendarDays, Search, UsersRound } from "lucide-react";
 import AdminFormModal from "./AdminFormModal";
+import { STAFF_DEPARTMENTS } from "../../constants/staffDepartments";
 import "../../css/admin.css";
 
 const formatDate = (value) => {
@@ -20,11 +21,13 @@ const Staff = () => {
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [departmentUpdate, setDepartmentUpdate] = useState({ id: null, error: "" });
   const [newStaff, setNewStaff] = useState({
     first_name: "",
     last_name: "",
     email: "",
     phone: "",
+    department: "",
     password: "",
   });
 
@@ -60,6 +63,32 @@ const Staff = () => {
     fetchStaff();
   };
 
+  const updateStaffDepartment = async (staffId, department) => {
+    setDepartmentUpdate({ id: staffId, error: "" });
+    try {
+      const response = await fetch(`http://localhost:5000/api/admin/staff/${staffId}/department`, {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ department }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || "Unable to update staff department.");
+      }
+
+      setStaffList((current) => current.map((person) =>
+        person.id === staffId ? { ...person, department: data.department } : person
+      ));
+    } catch (err) {
+      setDepartmentUpdate({ id: null, error: err.message || "Unable to update staff department." });
+    } finally {
+      setDepartmentUpdate((current) => current.id === staffId ? { ...current, id: null } : current);
+    }
+  };
+
   const handleAddStaff = async (event) => {
     event.preventDefault();
     setSaving(true);
@@ -85,6 +114,7 @@ const Staff = () => {
         last_name: "",
         email: "",
         phone: "",
+        department: "",
         password: "",
       });
       setShowAddForm(false);
@@ -100,7 +130,7 @@ const Staff = () => {
   const filteredStaff = useMemo(() => {
     const query = searchTerm.trim().toLowerCase();
     return staffList.filter((person) => {
-      const matchesSearch = [person.id, person.first_name, person.last_name, person.email, person.phone]
+      const matchesSearch = [person.id, person.first_name, person.last_name, person.email, person.phone, person.department]
         .some((value) => String(value || "").toLowerCase().includes(query));
       return matchesSearch;
     });
@@ -112,7 +142,7 @@ const Staff = () => {
   }).length;
 
   const viewStaff = (person) => {
-    alert(`Staff Details\n\nName: ${person.first_name || ""} ${person.last_name || ""}\nStaff ID: ${person.id}\nEmail: ${person.email || "—"}\nPhone: ${person.phone || "—"}\nJoined: ${formatDate(person.created_at)}`);
+    alert(`Staff Details\n\nName: ${person.first_name || ""} ${person.last_name || ""}\nStaff ID: ${person.id}\nDepartment: ${person.department || "Not assigned"}\nEmail: ${person.email || "—"}\nPhone: ${person.phone || "—"}\nJoined: ${formatDate(person.created_at)}`);
   };
 
   return (
@@ -136,6 +166,7 @@ const Staff = () => {
       </header>
 
       {successMessage && <p className="admin-staff-success" role="status">{successMessage}</p>}
+      {departmentUpdate.error && <p className="admin-staff-form-error" role="alert">{departmentUpdate.error}</p>}
 
       {showAddForm && (
         <AdminFormModal title="Add Staff Member" onClose={() => setShowAddForm(false)} saving={saving}>
@@ -148,6 +179,19 @@ const Staff = () => {
                 onChange={(event) => setNewStaff({ ...newStaff, first_name: event.target.value })}
                 autoComplete="given-name"
               />
+            </label>
+            <label>
+              Department
+              <select
+                required
+                value={newStaff.department}
+                onChange={(event) => setNewStaff({ ...newStaff, department: event.target.value })}
+              >
+                <option value="" disabled>Select department</option>
+                {STAFF_DEPARTMENTS.map((department) => (
+                  <option key={department} value={department}>{department}</option>
+                ))}
+              </select>
             </label>
             <label>
               Last name
@@ -219,12 +263,24 @@ const Staff = () => {
         ) : filteredStaff.length === 0 ? <div className="admin-records-state">No staff members match this search.</div> : (
           <div className="admin-records-table-wrap">
             <table className="admin-records-table">
-              <thead><tr><th>Staff member</th><th>Phone</th><th>Email</th><th>Joined</th><th>Actions</th></tr></thead>
+              <thead><tr><th>Staff member</th><th>Department</th><th>Phone</th><th>Email</th><th>Joined</th><th>Actions</th></tr></thead>
               <tbody>{filteredStaff.map((person) => {
                 const name = `${person.first_name || ""} ${person.last_name || ""}`.trim() || "Staff member";
                 return <tr key={person.id}>
                   <td><div className="admin-records-person"><span>{name.charAt(0).toUpperCase()}</span><div><strong>{name}</strong><small>Staff ID #{person.id}</small></div></div></td>
-                  <td>{person.phone || "—"}</td><td>{person.email || "—"}</td><td>{formatDate(person.created_at)}</td>
+                  <td>
+                    <select
+                      aria-label={`Department for ${name}`}
+                      value={person.department || ""}
+                      disabled={departmentUpdate.id === person.id}
+                      onChange={(event) => updateStaffDepartment(person.id, event.target.value)}
+                    >
+                      <option value="" disabled>Not assigned</option>
+                      {STAFF_DEPARTMENTS.map((department) => (
+                        <option key={department} value={department}>{department}</option>
+                      ))}
+                    </select>
+                  </td><td>{person.phone || "—"}</td><td>{person.email || "—"}</td><td>{formatDate(person.created_at)}</td>
                   <td><div className="admin-records-actions"><button type="button" onClick={() => viewStaff(person)}>View</button><button type="button" onClick={() => navigate("/admin/task")}>Tasks</button></div></td>
                 </tr>;
               })}</tbody>

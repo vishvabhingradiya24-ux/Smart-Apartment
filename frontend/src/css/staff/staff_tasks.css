@@ -143,7 +143,7 @@ body {
 
   border-radius: 8px;
 
-  cursor: pointer;
+  cursor: default;
 
   transition: all 0.2s ease;
 
@@ -865,8 +865,6 @@ body {
 
   cursor: pointer;
 
-  appearance: none;
-
   text-align: center;
 }
 
@@ -890,6 +888,64 @@ body {
 
 .status-select:hover {
   box-shadow: 0 0 0 2px #e2e8f0;
+}
+
+.task-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.task-status-action-btn {
+  padding: 8px 11px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: #fff;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+  transition: background-color .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+
+.task-status-action-btn--start {
+  border-color: #1d4ed8;
+  background: #2563eb;
+}
+
+.task-status-action-btn--start:hover:not(:disabled) {
+  border-color: #1e40af;
+  background: #1d4ed8;
+  box-shadow: 0 2px 7px rgba(37, 99, 235, .2);
+}
+
+.task-status-action-btn--complete {
+  border-color: #15803d;
+  background: #15803d;
+}
+
+.task-status-action-btn--complete:hover:not(:disabled) {
+  border-color: #166534;
+  background: #166534;
+  box-shadow: 0 2px 7px rgba(21, 128, 61, .2);
+}
+
+.task-status-action-btn:focus-visible {
+  outline: 3px solid rgba(21, 128, 61, .25);
+  outline-offset: 2px;
+}
+
+.task-status-action-btn:disabled {
+  opacity: .65;
+  cursor: wait;
+}
+
+.task-completed-label {
+  color: #15803d;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
 /* ============================= */

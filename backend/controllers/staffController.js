@@ -1,6 +1,7 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { pool } = require("../config/db");
+const { STAFF_DEPARTMENTS } = require("../constants/staffDepartments");
 
 require("dotenv").config();
 
@@ -11,6 +12,7 @@ const registerStaff = async (req, res) => {
       last_name,
       email,
       phone,
+      department,
       password
     } = req.body;
 
@@ -19,6 +21,7 @@ const registerStaff = async (req, res) => {
       !last_name ||
       !email ||
       !phone ||
+      !STAFF_DEPARTMENTS.includes(department) ||
       !password
     ) {
       return res.status(400).json({
@@ -41,13 +44,14 @@ const registerStaff = async (req, res) => {
 
     const [result] = await pool.query(
       `INSERT INTO staff
-      (first_name, last_name, email, phone, password)
-      VALUES (?, ?, ?, ?, ?)`,
+      (first_name, last_name, email, phone, department, password)
+      VALUES (?, ?, ?, ?, ?, ?)`,
       [
         first_name,
         last_name,
         email,
         phone,
+        department,
         hashedPassword
       ]
     );
@@ -83,6 +87,7 @@ const loginStaff = async (req, res) => {
         last_name,
         email,
         phone,
+        department,
         password,
         created_at
       FROM staff
@@ -139,8 +144,96 @@ const loginStaff = async (req, res) => {
 
 };
 
+const getStaffDashboard = async (req, res) => {
+  try {
+    if (req.user.role !== "Staff") {
+      return res.status(403).json({ message: "Staff access required" });
+    }
+
+    const staffId = req.user.id;
+    const [staffRows] = await pool.query(
+      `SELECT id, first_name, last_name, department
+       FROM staff
+       WHERE id = ?`,
+      [staffId]
+    );
+    if (staffRows.length === 0) {
+      return res.status(404).json({ message: "Staff account not found" });
+    }
+
+    const [[counts]] = await pool.query(
+      `SELECT
+         (SELECT COUNT(*) FROM complaints
+          WHERE assigned_staff_id = ?) AS complaints_total,
+         (SELECT COUNT(*) FROM complaints
+          WHERE assigned_staff_id = ?
+            AND status NOT IN ('Resolved', 'Completed')) AS complaints_open,
+         (SELECT COUNT(*) FROM service_requests
+          WHERE assigned_to = ?) AS service_requests_total,
+         (SELECT COUNT(*) FROM service_requests
+          WHERE assigned_to = ?
+            AND status NOT IN ('Completed', 'Resolved', 'Cancelled')) AS service_requests_open,
+         (SELECT COUNT(*) FROM tasks
+          WHERE assigned_to = ? AND status = 'Pending') AS tasks_pending,
+         (SELECT COUNT(*) FROM tasks
+          WHERE assigned_to = ? AND status = 'In Progress') AS tasks_in_progress,
+         (SELECT COUNT(*) FROM tasks
+          WHERE assigned_to = ? AND status = 'Completed') AS tasks_completed`,
+      [staffId, staffId, staffId, staffId, staffId, staffId, staffId]
+    );
+
+    const [recentActivity] = await pool.query(
+      `SELECT activity_type, title, details, activity_date, status
+       FROM (
+         SELECT
+           'Complaint' AS activity_type,
+           complaint_title AS title,
+           category AS details,
+           updated_at AS activity_date,
+           status
+         FROM complaints
+         WHERE assigned_staff_id = ?
+         UNION ALL
+         SELECT
+           'Service Request' AS activity_type,
+           service_type AS title,
+           request_description AS details,
+           COALESCE(completed_date, request_date) AS activity_date,
+           status
+         FROM service_requests
+         WHERE assigned_to = ?
+         UNION ALL
+         SELECT
+           'Task' AS activity_type,
+           task_name AS title,
+           description AS details,
+           COALESCE(completed_date, created_at) AS activity_date,
+           status
+         FROM tasks
+         WHERE assigned_to = ?
+       ) AS staff_activity
+       ORDER BY activity_date DESC
+       LIMIT 5`,
+      [staffId, staffId, staffId]
+    );
+
+    res.status(200).json({
+      staff: staffRows[0],
+      counts,
+      recentActivity,
+    });
+  } catch (error) {
+    console.error("Get Staff Dashboard Error:", error);
+    res.status(500).json({ message: "Unable to fetch staff dashboard data" });
+  }
+};
+
 const getAllStaff = async (req, res) => {
   try {
+    if (req.user?.role !== "Admin") {
+      return res.status(403).json({ message: "Admin access required" });
+    }
+
     const [staffList] = await pool.query(
       `SELECT
         id,
@@ -148,6 +241,7 @@ const getAllStaff = async (req, res) => {
         last_name,
         email,
         phone,
+        department,
         created_at
       FROM staff
       ORDER BY first_name ASC, last_name ASC`
@@ -164,30 +258,45 @@ const getAllStaff = async (req, res) => {
   }
 };
 
+const updateStaffDepartment = async (req, res) => {
+  try {
+    if (req.user.role !== "Staff") {
+      return res.status(403).json({ message: "Staff access required" });
+    }
+
+    const { department } = req.body;
+    if (!STAFF_DEPARTMENTS.includes(department)) {
+      return res.status(400).json({ message: "Select a valid staff department" });
+    }
+
+    const [staffRows] = await pool.query("SELECT id FROM staff WHERE id = ?", [req.user.id]);
+    if (staffRows.length === 0) {
+      return res.status(404).json({ message: "Staff account not found" });
+    }
+
+    await pool.query(
+      "UPDATE staff SET department = ? WHERE id = ?",
+      [department, req.user.id]
+    );
+
+    res.status(200).json({ message: "Staff department updated", department });
+  } catch (error) {
+    console.error("Update Staff Department Error:", error);
+    res.status(500).json({ message: "Unable to update staff department" });
+  }
+};
+
 // ==========================================
 // GET TASKS ASSIGNED TO LOGGED-IN STAFF
 // ==========================================
 
 const getStaffTasks = async (req, res) => {
   try {
-    const authHeader = req.headers.authorization;
-
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({
-        message: "Authorization token is required"
-      });
+    if (req.user?.role !== "Staff") {
+      return res.status(403).json({ message: "Staff access required" });
     }
 
-    const token = authHeader.split(" ")[1];
-
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET
-    );
-
-    console.log("DECODED STAFF TOKEN:", decoded);
-
-    const staffId = decoded.id;
+    const staffId = req.user.id;
 
     if (!staffId) {
       return res.status(401).json({
@@ -204,17 +313,13 @@ const getStaffTasks = async (req, res) => {
     priority,
     status,
     due_date,
+    started_at,
     created_at
   FROM tasks
   WHERE assigned_to = ?
   ORDER BY created_at DESC`,
   [staffId]
 );
-
-    console.log(
-      `Tasks found for staff ${staffId}:`,
-      tasks
-    );
 
     res.status(200).json({
       tasks
@@ -225,15 +330,6 @@ const getStaffTasks = async (req, res) => {
       "Get Staff Tasks Error:",
       error
     );
-
-    if (
-      error.name === "JsonWebTokenError" ||
-      error.name === "TokenExpiredError"
-    ) {
-      return res.status(401).json({
-        message: "Invalid or expired token"
-      });
-    }
 
     res.status(500).json({
       message: "Unable to fetch staff tasks"
@@ -248,22 +344,11 @@ const getStaffTasks = async (req, res) => {
 
 const updateStaffTaskStatus = async (req, res) => {
   try {
-    const authHeader = req.headers.authorization;
-
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({
-        message: "Authorization token is required"
-      });
+    if (req.user?.role !== "Staff") {
+      return res.status(403).json({ message: "Staff access required" });
     }
 
-    const token = authHeader.split(" ")[1];
-
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET
-    );
-
-    const staffId = decoded.id;
+    const staffId = req.user.id;
     const { taskId } = req.params;
     const { status, priority } = req.body;
 
@@ -303,6 +388,8 @@ const updateStaffTaskStatus = async (req, res) => {
     if (status !== undefined) {
       updates.push("status = ?");
       values.push(status);
+      updates.push("started_at = CASE WHEN ? = 'In Progress' THEN COALESCE(started_at, CURRENT_TIMESTAMP) ELSE started_at END");
+      values.push(status);
       updates.push("completed_date = CASE WHEN ? = 'Completed' THEN COALESCE(completed_date, CURRENT_TIMESTAMP) ELSE NULL END");
       values.push(status);
     }
@@ -326,15 +413,6 @@ const updateStaffTaskStatus = async (req, res) => {
       error
     );
 
-    if (
-      error.name === "JsonWebTokenError" ||
-      error.name === "TokenExpiredError"
-    ) {
-      return res.status(401).json({
-        message: "Invalid or expired token"
-      });
-    }
-
     res.status(500).json({
       message: "Unable to update task status"
     });
@@ -343,11 +421,9 @@ const updateStaffTaskStatus = async (req, res) => {
 
 const getStaffAssets = async (req, res) => {
   try {
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({ message: "Authorization token is required" });
+    if (req.user?.role !== "Staff") {
+      return res.status(403).json({ message: "Staff access required" });
     }
-    jwt.verify(authHeader.split(" ")[1], process.env.JWT_SECRET);
 
     const [assets] = await pool.query(
       `SELECT asset_id, asset_name, category, quantity, assigned,
@@ -358,20 +434,15 @@ const getStaffAssets = async (req, res) => {
     res.status(200).json({ assets });
   } catch (error) {
     console.error("Get Staff Assets Error:", error);
-    if (error.name === "JsonWebTokenError" || error.name === "TokenExpiredError") {
-      return res.status(401).json({ message: "Invalid or expired token" });
-    }
     res.status(500).json({ message: "Unable to fetch inventory. Check that the assets table exists." });
   }
 };
 
 const updateStaffAssetStatus = async (req, res) => {
   try {
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({ message: "Authorization token is required" });
+    if (req.user?.role !== "Staff") {
+      return res.status(403).json({ message: "Staff access required" });
     }
-    jwt.verify(authHeader.split(" ")[1], process.env.JWT_SECRET);
 
     const { assetId } = req.params;
     const { status } = req.body;
@@ -396,33 +467,31 @@ const updateStaffAssetStatus = async (req, res) => {
     res.status(200).json({ message: "Asset status updated successfully" });
   } catch (error) {
     console.error("Update Staff Asset Error:", error);
-    if (error.name === "JsonWebTokenError" || error.name === "TokenExpiredError") {
-      return res.status(401).json({ message: "Invalid or expired token" });
-    }
     res.status(500).json({ message: "Unable to update asset status" });
   }
 };
 
 const getStaffWorkHistory = async (req, res) => {
   try {
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({ message: "Authorization token is required" });
+    if (req.user?.role !== "Staff") {
+      return res.status(403).json({ message: "Staff access required" });
     }
-    const decoded = jwt.verify(authHeader.split(" ")[1], process.env.JWT_SECRET);
+
     const [works] = await pool.query(
       `SELECT task_id, task_name, description, priority, status,
-              COALESCE(completed_date, created_at) AS completed_at
+              COALESCE(completed_date, created_at) AS completed_at,
+              CASE
+                WHEN started_at IS NOT NULL AND completed_date IS NOT NULL
+                  THEN GREATEST(TIMESTAMPDIFF(SECOND, started_at, completed_date), 0) / 3600
+                ELSE NULL
+              END AS duration_hours
        FROM tasks WHERE assigned_to = ? AND status = 'Completed'
        ORDER BY created_at DESC`,
-      [decoded.id]
+      [req.user.id]
     );
     res.status(200).json({ works });
   } catch (error) {
     console.error("Get Staff Work History Error:", error);
-    if (error.name === "JsonWebTokenError" || error.name === "TokenExpiredError") {
-      return res.status(401).json({ message: "Invalid or expired token" });
-    }
     res.status(500).json({ message: "Unable to fetch work history" });
   }
 };
@@ -432,6 +501,8 @@ const getStaffWorkHistory = async (req, res) => {
 module.exports = {
   registerStaff,
   loginStaff,
+  getStaffDashboard,
+  updateStaffDepartment,
   getAllStaff,
   getStaffTasks,
   updateStaffTaskStatus,

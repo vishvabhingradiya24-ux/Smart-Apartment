@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "../../css/auth.css";
+import { STAFF_DEPARTMENTS } from "../../constants/staffDepartments";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -14,6 +15,7 @@ const Register = () => {
     email: "",
     phone: "",
     user_type: "",
+    department: "",
     block_wing: "",
     flat_number: "",
     ownership_type: "",
@@ -41,6 +43,7 @@ const Register = () => {
     setFormData((prev) => ({
       ...prev,
       user_type: userType,
+      department: "",
       block_wing: "",
       flat_number: "",
       ownership_type: ""
@@ -74,6 +77,10 @@ const Register = () => {
 
     const user_type = String(
       formValues.get("user_type") || ""
+    ).trim();
+
+    const department = String(
+      formValues.get("department") || ""
     ).trim();
 
     const block_wing = String(
@@ -116,6 +123,11 @@ const Register = () => {
         setError("Please fill Block/Wing, Flat Number, and Owner/Rent status.");
         return;
       }
+    }
+
+    if (user_type === "Staff" && !STAFF_DEPARTMENTS.includes(department)) {
+      setError("Please select a valid staff department.");
+      return;
     }
 
     if (password.length < 6) {
@@ -162,10 +174,9 @@ const Register = () => {
             email,
             phone,
             user_type,
+            department,
             password
           };
-
-      console.log("Registration Request:", requestBody);
 
       const response = await fetch(registerURL, {
         method: "POST",
@@ -416,6 +427,24 @@ const Register = () => {
               </select>
 
             </div>
+
+            {formData.user_type === "Staff" && (
+              <div className="register-form-group">
+                <label>Staff Type / Department</label>
+                <select
+                  className="register-select"
+                  name="department"
+                  value={formData.department}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="" disabled>Select staff department</option>
+                  {STAFF_DEPARTMENTS.map((department) => (
+                    <option key={department} value={department}>{department}</option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             {formData.user_type === "Resident" && (
 

@@ -1,13 +1,30 @@
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import "../../css/staff/staff_dashboard.css";
 import "../../css/staff/staff_shared_theme.css";
 import { useNavigate } from "react-router-dom";
 
+const mergeStoredStaff = (serverStaff) => {
+  let currentStaff = {};
+  try {
+    currentStaff = JSON.parse(localStorage.getItem("user") || "{}");
+  } catch (error) {
+    console.error("Unable to read stored staff profile:", error);
+  }
+
+  const updatedStaff = { ...currentStaff, ...serverStaff };
+  try {
+    localStorage.setItem("user", JSON.stringify(updatedStaff));
+  } catch (error) {
+    console.error("Unable to store refreshed staff profile:", error);
+  }
+  return updatedStaff;
+};
+
 function StaffDashboard() {
   const navigate = useNavigate();
 
-  const [staff] = useState(() => {
+  const [staff, setStaff] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem("user") || "{}");
     } catch {
@@ -17,9 +34,11 @@ function StaffDashboard() {
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [showNotifications, setShowNotifications] = useState(false);
   const [showQuickActions, setShowQuickActions] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [dashboard, setDashboard] = useState(null);
+  const [dashboardLoading, setDashboardLoading] = useState(true);
+  const [dashboardError, setDashboardError] = useState("");
 
   const firstName = staff?.first_name || staff?.name || "Staff";
   const lastName = staff?.last_name || "";
@@ -53,6 +72,60 @@ function StaffDashboard() {
     hour: "2-digit",
     minute: "2-digit",
   });
+
+  const requestDashboard = useCallback(async (signal) => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      throw new Error("Login session expired. Please sign in again.");
+    }
+
+      const response = await fetch("http://localhost:5000/api/staff/dashboard", {
+        headers: { Authorization: `Bearer ${token}` },
+        signal,
+      });
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || "Unable to load dashboard data.");
+    }
+    return data;
+  }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    requestDashboard(controller.signal)
+      .then((data) => {
+        setDashboard(data);
+        if (data.staff) {
+          setStaff(mergeStoredStaff(data.staff));
+        }
+      })
+      .catch((error) => {
+        if (controller.signal.aborted) return;
+        setDashboard(null);
+        setDashboardError(error.message || "Unable to load dashboard data.");
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setDashboardLoading(false);
+      });
+    return () => controller.abort();
+  }, [requestDashboard]);
+
+  const retryDashboard = () => {
+    setDashboardLoading(true);
+    setDashboardError("");
+    requestDashboard()
+      .then((data) => {
+        setDashboard(data);
+        if (data.staff) {
+          setStaff(mergeStoredStaff(data.staff));
+        }
+      })
+      .catch((error) => {
+        setDashboard(null);
+        setDashboardError(error.message || "Unable to load dashboard data.");
+      })
+      .finally(() => setDashboardLoading(false));
+  };
 
   /* =========================
      LOGOUT
@@ -90,7 +163,6 @@ function StaffDashboard() {
       description:
         "Track, inspect, and resolve resident reported complaints.",
       path: "/staff/complaints",
-      tag: "04 Pending",
     },
     {
       id: 2,
@@ -99,7 +171,6 @@ function StaffDashboard() {
       description:
         "Manage resident service requests and update their progress.",
       path: "/staff/service-requests",
-      tag: "02 Active",
     },
     {
       id: 3,
@@ -108,7 +179,6 @@ function StaffDashboard() {
       description:
         "View daily tasks, inspections, and assigned activities.",
       path: "/staff/tasks",
-      tag: "Today",
     },
     {
       id: 4,
@@ -117,7 +187,6 @@ function StaffDashboard() {
       description:
         "Manage scheduled maintenance, repairs, and work updates.",
       path: "/staff/maintenance",
-      tag: "03 Scheduled",
     },
     {
       id: 5,
@@ -126,7 +195,6 @@ function StaffDashboard() {
       description:
         "Check equipment status and manage inventory information.",
       path: "/staff/assets",
-      tag: "06 Assigned",
     },
     {
       id: 6,
@@ -135,7 +203,6 @@ function StaffDashboard() {
       description:
         "Review completed tasks and previous monthly activities.",
       path: "/staff/work-history",
-      tag: "18 Completed",
     },
   ];
 
@@ -153,47 +220,52 @@ function StaffDashboard() {
     return services.filter(
       (service) =>
         service.title.toLowerCase().includes(query) ||
-        service.description.toLowerCase().includes(query) ||
-        service.tag.toLowerCase().includes(query)
+        service.description.toLowerCase().includes(query)
     );
   })();
 
-  /* =========================
-     QUICK STATS
-  ========================= */
-
+  const counts = dashboard?.counts;
+  const displayCount = (value) =>
+    dashboardLoading ? "…" : counts ? Number(value || 0) : "—";
+  const hasAssignedWork = counts && (
+    Number(counts.complaints_total || 0) > 0 ||
+    Number(counts.service_requests_total || 0) > 0 ||
+    Number(counts.tasks_pending || 0) > 0 ||
+    Number(counts.tasks_in_progress || 0) > 0 ||
+    Number(counts.tasks_completed || 0) > 0
+  );
   const stats = [
     {
-      title: "Complaints",
-      value: "04",
-      description: "Pending Resolution",
+      title: "Assigned Complaints",
+      value: displayCount(counts?.complaints_total),
+      description: `${displayCount(counts?.complaints_open)} open cases`,
       icon: "🛠️",
       className: "blue",
       path: "/staff/complaints",
     },
     {
       title: "Service Requests",
-      value: "02",
-      description: "In Progress",
+      value: displayCount(counts?.service_requests_total),
+      description: `${displayCount(counts?.service_requests_open)} open requests`,
       icon: "📋",
       className: "orange",
       path: "/staff/service-requests",
     },
     {
-      title: "Completed Tasks",
-      value: "18",
-      description: "This Month",
+      title: "Pending Tasks",
+      value: displayCount(counts?.tasks_pending),
+      description: `${displayCount(counts?.tasks_in_progress)} in progress`,
       icon: "✅",
       className: "green",
       path: "/staff/tasks",
     },
     {
-      title: "Assets Assigned",
-      value: "06",
-      description: "Active Items",
+      title: "Completed Tasks",
+      value: displayCount(counts?.tasks_completed),
+      description: "Assigned tasks completed",
       icon: "📦",
       className: "purple",
-      path: "/staff/assets",
+      path: "/staff/work-history",
     },
   ];
 
@@ -355,7 +427,7 @@ function StaffDashboard() {
 
             <div className="user-details">
               <strong>{fullName}</strong>
-              <small>Staff Member</small>
+              <small>{staff.department || "Department not set"}</small>
             </div>
 
           </div>
@@ -395,7 +467,7 @@ function StaffDashboard() {
             </button>
 
             <span className="badge-tag">
-              STAFF WORKSPACE
+              {staff.department ? `${staff.department.toUpperCase()} DEPARTMENT` : "STAFF WORKSPACE"}
             </span>
 
             <h1>
@@ -403,8 +475,9 @@ function StaffDashboard() {
             </h1>
 
             <p>
-              Manage your daily society tasks and
-              maintenance requests efficiently.
+              {staff.department
+                ? `Manage ${staff.department.toLowerCase()} assignments, requests, and tasks.`
+                : "Set your department in My Profile to complete your staff dashboard."}
             </p>
 
           </div>
@@ -417,88 +490,6 @@ function StaffDashboard() {
             <div className="header-datetime">
               <strong>{formattedTime}</strong>
               <span>{formattedDate}</span>
-            </div>
-
-
-            {/* Notification */}
-
-            <div className="notification-wrapper">
-
-              <button
-                className="notification-btn"
-                onClick={() =>
-                  setShowNotifications(
-                    !showNotifications
-                  )
-                }
-              >
-                🔔
-                <span className="notification-dot"></span>
-              </button>
-
-
-              {showNotifications && (
-                <div className="notification-dropdown">
-
-                  <div className="notification-header">
-                    <strong>Notifications</strong>
-                    <span>2 New</span>
-                  </div>
-
-                  <div className="notification-item">
-
-                    <span className="notification-icon">
-                      🛠️
-                    </span>
-
-                    <div>
-                      <strong>
-                        New complaint assigned
-                      </strong>
-
-                      <small>
-                        A maintenance complaint needs
-                        your attention.
-                      </small>
-                    </div>
-
-                  </div>
-
-
-                  <div className="notification-item">
-
-                    <span className="notification-icon">
-                      📋
-                    </span>
-
-                    <div>
-                      <strong>
-                        Service request updated
-                      </strong>
-
-                      <small>
-                        A resident service request
-                        was updated.
-                      </small>
-                    </div>
-
-                  </div>
-
-
-                  <button
-                    className="view-notifications-btn"
-                    onClick={() =>
-                      handleNavigation(
-                        "/staff/complaints"
-                      )
-                    }
-                  >
-                    View all activity
-                  </button>
-
-                </div>
-              )}
-
             </div>
 
 
@@ -517,7 +508,7 @@ function StaffDashboard() {
 
               <div className="profile-pill-info">
                 <strong>{fullName}</strong>
-                <span>Staff Member</span>
+                <span>{staff.department || "Department not set"}</span>
               </div>
 
               <span className="profile-arrow">
@@ -529,6 +520,34 @@ function StaffDashboard() {
           </div>
 
         </header>
+
+        {dashboardError && (
+          <div className="dashboard-data-error" role="alert">
+            <span>{dashboardError}</span>
+            <button
+              type="button"
+              onClick={retryDashboard}
+            >
+              Retry
+            </button>
+          </div>
+        )}
+
+        {!dashboardLoading && !dashboardError && !staff.department && (
+          <div className="dashboard-data-error" role="status">
+            <span>Select your department to complete your dashboard profile.</span>
+            <button type="button" onClick={() => handleNavigation("/staff/profile")}>
+              Set department
+            </button>
+          </div>
+        )}
+
+        {!dashboardLoading && !dashboardError && counts && !hasAssignedWork && (
+          <div className="dashboard-data-empty" role="status">
+            No complaints, service requests, or tasks are assigned to your account in the database yet.
+            Ask your administrator to assign work; it will appear here automatically.
+          </div>
+        )}
 
 
         {/* =====================================
@@ -637,7 +656,7 @@ function StaffDashboard() {
               </div>
 
               <div>
-                <span>STAFF MEMBER</span>
+                <span>{staff.department?.toUpperCase() || "DEPARTMENT NOT SET"}</span>
                 <strong>{fullName}</strong>
               </div>
 
@@ -799,10 +818,6 @@ function StaffDashboard() {
 
                   <div className="service-card-content">
 
-                    <span className="service-tag">
-                      {service.tag}
-                    </span>
-
                     <h3>
                       {service.title}
                     </h3>
@@ -893,7 +908,7 @@ function StaffDashboard() {
                   <span>Pending</span>
                 </div>
 
-                <strong>04</strong>
+                <strong>{displayCount(counts?.tasks_pending)}</strong>
 
               </div>
 
@@ -905,7 +920,7 @@ function StaffDashboard() {
                   <span>In Progress</span>
                 </div>
 
-                <strong>02</strong>
+                <strong>{displayCount(counts?.tasks_in_progress)}</strong>
 
               </div>
 
@@ -917,7 +932,7 @@ function StaffDashboard() {
                   <span>Completed</span>
                 </div>
 
-                <strong>18</strong>
+                <strong>{displayCount(counts?.tasks_completed)}</strong>
 
               </div>
 
@@ -947,7 +962,7 @@ function StaffDashboard() {
                 </h2>
 
                 <p>
-                  Staff Member
+                  {staff.department || "Department not set"}
                 </p>
 
               </div>
@@ -960,12 +975,13 @@ function StaffDashboard() {
               <span className="online-dot"></span>
 
               <div>
-                <strong>
-                  Available for work
-                </strong>
-
+                <strong>Current assignments</strong>
                 <small>
-                  Ready to receive new assignments
+                  {dashboardLoading
+                    ? "Loading assigned work…"
+                    : counts
+                      ? `${Number(counts.complaints_open || 0) + Number(counts.service_requests_open || 0) + Number(counts.tasks_pending || 0) + Number(counts.tasks_in_progress || 0)} open assignments`
+                      : "Assignment data unavailable"}
                 </small>
               </div>
 
@@ -1021,83 +1037,39 @@ function StaffDashboard() {
 
 
           <div className="activity-card">
-
-            <div className="activity-item">
-
-              <div className="activity-icon">
-                🛠️
-              </div>
-
-              <div className="activity-content">
-
-                <strong>
-                  Complaint #CMP-1042
-                </strong>
-
-                <p>
-                  Electrical maintenance request
-                  is waiting for resolution.
-                </p>
-
-              </div>
-
-              <span className="activity-time">
-                Today
-              </span>
-
-            </div>
-
-
-            <div className="activity-item">
-
-              <div className="activity-icon">
-                📋
-              </div>
-
-              <div className="activity-content">
-
-                <strong>
-                  Service Request #SR-208
-                </strong>
-
-                <p>
-                  Plumbing service request is
-                  currently in progress.
-                </p>
-
-              </div>
-
-              <span className="activity-time">
-                Today
-              </span>
-
-            </div>
-
-
-            <div className="activity-item">
-
-              <div className="activity-icon">
-                ✅
-              </div>
-
-              <div className="activity-content">
-
-                <strong>
-                  Maintenance Task Completed
-                </strong>
-
-                <p>
-                  Previous maintenance work was
-                  marked as completed.
-                </p>
-
-              </div>
-
-              <span className="activity-time">
-                Yesterday
-              </span>
-
-            </div>
+            {dashboardLoading ? (
+              <p className="dashboard-activity-empty">Loading recent work…</p>
+            ) : dashboardError ? (
+              <p className="dashboard-activity-empty">Recent work could not be loaded.</p>
+            ) : dashboard?.recentActivity?.length ? (
+              dashboard.recentActivity.map((activity, index) => (
+                <div className="activity-item" key={`${activity.activity_type}-${index}`}>
+                  <div className="activity-icon">
+                    {activity.activity_type === "Complaint"
+                      ? "🛠️"
+                      : activity.activity_type === "Service Request"
+                        ? "📋"
+                        : "✅"}
+                  </div>
+                  <div className="activity-content">
+                    <strong>{activity.title}</strong>
+                    <p>{activity.details || activity.status}</p>
+                  </div>
+                  <span className="activity-time">
+                    {activity.activity_date
+                      ? new Date(activity.activity_date).toLocaleString("en-IN", {
+                          day: "2-digit",
+                          month: "short",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })
+                      : activity.status}
+                  </span>
+                </div>
+              ))
+            ) : (
+              <p className="dashboard-activity-empty">No assigned work activity yet.</p>
+            )}
 
           </div>
 

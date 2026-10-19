@@ -11,6 +11,7 @@ const {
   restoreAdminResident,
   getAdminStaff,
   createAdminStaff,
+  updateAdminStaffDepartment,
   getAdminSecurity,
   getAdminPayments,
   getAdminVisitors,
@@ -35,6 +36,11 @@ const {
 } = require("../controllers/adminController");
 const authMiddleware = require("../middleware/authMiddleware");
 const requireAdmin = require("../middleware/requireAdmin");
+const {
+  getAdminServiceRequests,
+  assignServiceRequestToStaff,
+} = require("../controllers/serviceRequestController");
+const { getAdminAssets, createAdminAsset } = require("../controllers/adminAssetController");
 
 router.post("/login", loginAdmin);
 router.use(authMiddleware, requireAdmin);
@@ -47,6 +53,11 @@ router.patch("/residents/:id/archive", archiveAdminResident);
 router.patch("/residents/:id/restore", restoreAdminResident);
 router.get("/staff", getAdminStaff);
 router.post("/staff", createAdminStaff);
+router.patch("/staff/:id/department", updateAdminStaffDepartment);
+router.get("/service-requests", getAdminServiceRequests);
+router.put("/service-requests/:id/assign", assignServiceRequestToStaff);
+router.get("/assets", getAdminAssets);
+router.post("/assets", createAdminAsset);
 router.get("/security", getAdminSecurity);
 router.get("/payments", getAdminPayments);
 router.get("/payments/residents", getAdminPaymentResidents);

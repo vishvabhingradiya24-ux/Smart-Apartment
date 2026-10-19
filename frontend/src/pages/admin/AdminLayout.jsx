@@ -10,9 +10,11 @@ import {
   LayoutDashboard,
   LogOut,
   Megaphone,
+  PackageOpen,
   Settings2,
   UsersRound,
   Waves,
+  Wrench,
 } from "lucide-react";
 import "../../css/admin.css";
 
@@ -42,9 +44,19 @@ const AdminLayout = ({ children }) => {
       path: "/admin/complaints",
     },
     {
+      label: "Service Requests",
+      icon: Wrench,
+      path: "/admin/service-requests",
+    },
+    {
       label: "Tasks",
       icon: ClipboardList,
       path: "/admin/task",
+    },
+    {
+      label: "Assets & Inventory",
+      icon: PackageOpen,
+      path: "/admin/assets",
     },
     {
       label: "Payments",

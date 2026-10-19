@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "lucide-react": "^1.59.0",
     "razorpay": "^2.9.8",
     "web-push": "^3.6.7"
   }

@@ -173,6 +173,10 @@ const getServiceRequestById = async (req, res) => {
 // GET ALL SERVICE REQUESTS FOR STAFF
 const getStaffServiceRequests = async (req, res) => {
   try {
+    if (req.user?.role !== "Staff") {
+      return res.status(403).json({ message: "Staff access required" });
+    }
+
     const [requests] = await pool.query(`
       SELECT
         sr.service_request_id,
@@ -189,8 +193,9 @@ const getStaffServiceRequests = async (req, res) => {
       FROM service_requests sr
       INNER JOIN residents r
         ON sr.resident_id = r.id
+      WHERE sr.assigned_to = ?
       ORDER BY sr.request_date DESC
-    `);
+    `, [req.user.id]);
 
     res.status(200).json({
       requests
@@ -205,12 +210,95 @@ const getStaffServiceRequests = async (req, res) => {
   }
 };
 
+const getAdminServiceRequests = async (req, res) => {
+  try {
+    if (req.user?.role !== "Admin") {
+      return res.status(403).json({ message: "Admin access required" });
+    }
+
+    const [requests] = await pool.query(
+      `SELECT
+         sr.service_request_id,
+         sr.resident_id,
+         r.first_name,
+         r.last_name,
+         r.flat_number,
+         sr.service_type,
+         sr.request_description,
+         sr.status,
+         sr.assigned_to,
+         s.first_name AS staff_first_name,
+         s.last_name AS staff_last_name,
+         sr.request_date,
+         sr.completed_date
+       FROM service_requests sr
+       INNER JOIN residents r ON r.id = sr.resident_id
+       LEFT JOIN staff s ON s.id = sr.assigned_to
+       ORDER BY sr.request_date DESC`
+    );
+
+    res.status(200).json({ requests });
+  } catch (error) {
+    console.error("Get Admin Service Requests Error:", error);
+    res.status(500).json({ message: "Unable to fetch service requests" });
+  }
+};
+
+const assignServiceRequestToStaff = async (req, res) => {
+  try {
+    if (req.user?.role !== "Admin") {
+      return res.status(403).json({ message: "Admin access required" });
+    }
+
+    const requestId = Number(req.params.id);
+    const staffId = Number(req.body.staff_id);
+    if (!Number.isInteger(requestId) || requestId < 1 ||
+        !Number.isInteger(staffId) || staffId < 1) {
+      return res.status(400).json({ message: "A valid request and staff member are required" });
+    }
+
+    const [requests] = await pool.query(
+      "SELECT service_request_id FROM service_requests WHERE service_request_id = ?",
+      [requestId]
+    );
+    if (requests.length === 0) {
+      return res.status(404).json({ message: "Service request not found" });
+    }
+
+    const [staff] = await pool.query(
+      "SELECT id FROM staff WHERE id = ?",
+      [staffId]
+    );
+    if (staff.length === 0) {
+      return res.status(404).json({ message: "Staff member not found" });
+    }
+
+    await pool.query(
+      "UPDATE service_requests SET assigned_to = ? WHERE service_request_id = ?",
+      [staffId, requestId]
+    );
+
+    res.status(200).json({
+      message: "Service request assigned successfully",
+      requestId,
+      assigned_to: staffId,
+    });
+  } catch (error) {
+    console.error("Assign Service Request Error:", error);
+    res.status(500).json({ message: "Unable to assign service request" });
+  }
+};
+
 // ==========================================
 // UPDATE SERVICE REQUEST STATUS - STAFF
 // ==========================================
 
 const updateServiceRequestStatus = async (req, res) => {
   try {
+    if (req.user?.role !== "Staff") {
+      return res.status(403).json({ message: "Staff access required" });
+    }
+
     const requestId = req.params.id;
     const { status } = req.body;
 
@@ -227,20 +315,31 @@ const updateServiceRequestStatus = async (req, res) => {
       });
     }
 
-    // Update status
+    const [assignedRequests] = await pool.query(
+      `SELECT service_request_id
+       FROM service_requests
+       WHERE service_request_id = ? AND assigned_to = ?`,
+      [requestId, req.user.id]
+    );
+    if (assignedRequests.length === 0) {
+      return res.status(404).json({
+        message: "Service request not found or not assigned to you",
+      });
+    }
+
     if (status === "Completed") {
       await pool.query(
         `UPDATE service_requests
          SET status = ?, completed_date = NOW()
-         WHERE service_request_id = ?`,
-        [status, requestId]
+         WHERE service_request_id = ? AND assigned_to = ?`,
+        [status, requestId, req.user.id]
       );
     } else {
       await pool.query(
         `UPDATE service_requests
          SET status = ?
-         WHERE service_request_id = ?`,
-        [status, requestId]
+         WHERE service_request_id = ? AND assigned_to = ?`,
+        [status, requestId, req.user.id]
       );
     }
 
@@ -256,8 +355,8 @@ const updateServiceRequestStatus = async (req, res) => {
         request_date,
         completed_date
        FROM service_requests
-       WHERE service_request_id = ?`,
-      [requestId]
+       WHERE service_request_id = ? AND assigned_to = ?`,
+      [requestId, req.user.id]
     );
 
     if (requests.length === 0) {
@@ -290,5 +389,7 @@ module.exports = {
   createServiceRequest,
   getServiceRequestById,
   getStaffServiceRequests,
+  getAdminServiceRequests,
+  assignServiceRequestToStaff,
   updateServiceRequestStatus
 };

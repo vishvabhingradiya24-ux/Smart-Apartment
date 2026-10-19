@@ -39,6 +39,7 @@ function StaffTasks() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [updatingTaskId, setUpdatingTaskId] = useState(null);
 
   // ================= FETCH TASKS =================
 
@@ -48,9 +49,6 @@ function StaffTasks() {
     try {
 
       const token = localStorage.getItem("token");
-
-      console.log("STAFF TOKEN:", token);
-      console.log("STAFF USER:", localStorage.getItem("user"));
 
       if (!token) {
         throw new Error(
@@ -71,8 +69,6 @@ function StaffTasks() {
       );
 
       const data = await response.json();
-
-      console.log("STAFF TASKS RESPONSE:", data);
 
       if (!response.ok) {
         throw new Error(
@@ -256,13 +252,14 @@ function StaffTasks() {
     taskId,
     newStatus
   ) => {
+    setUpdatingTaskId(String(taskId));
     try {
       const token =
         localStorage.getItem("token");
 
       if (!token) {
         alert("Please login again.");
-        return;
+        return false;
       }
 
       const response = await fetch(
@@ -318,6 +315,7 @@ function StaffTasks() {
               : task
           )
       );
+      return true;
     } catch (error) {
       console.error(
         "Update Task Status Error:",
@@ -332,6 +330,9 @@ function StaffTasks() {
       // Database mathi fresh data
       // fari load karo
       fetchTasks();
+      return false;
+    } finally {
+      setUpdatingTaskId(null);
     }
   };
 
@@ -961,7 +962,7 @@ function StaffTasks() {
 
                         <td>
 
-                          <select
+                          <span
                             className={`status-select ${String(
                               task.status
                             )
@@ -970,30 +971,9 @@ function StaffTasks() {
                                 /\s+/g,
                                 "-"
                               )}`}
-                            value={
-                              task.status
-                            }
-                            onChange={(e) =>
-                              updateTaskStatus(
-                                task.id,
-                                e.target.value
-                              )
-                            }
                           >
-
-                            <option value="Pending">
-                              Pending
-                            </option>
-
-                            <option value="In Progress">
-                              In Progress
-                            </option>
-
-                            <option value="Completed">
-                              Completed
-                            </option>
-
-                          </select>
+                            {task.status}
+                          </span>
 
                         </td>
 
@@ -1027,16 +1007,49 @@ function StaffTasks() {
 
                         <td>
 
-                          <button
-                            className="action-btn"
-                            onClick={() =>
-                              handleViewTask(
-                                task
-                              )
-                            }
-                          >
-                            View
-                          </button>
+                          <div className="task-row-actions">
+                            <button
+                              className="action-btn"
+                              type="button"
+                              onClick={() =>
+                                handleViewTask(
+                                  task
+                                )
+                              }
+                            >
+                              View
+                            </button>
+                            {task.status !== "Completed" && (
+                              <button
+                                className={`task-status-action-btn ${
+                                  task.status === "Pending"
+                                    ? "task-status-action-btn--start"
+                                    : "task-status-action-btn--complete"
+                                }`}
+                                type="button"
+                                disabled={updatingTaskId === task.id}
+                                onClick={() =>
+                                  updateTaskStatus(
+                                    task.id,
+                                    task.status === "Pending"
+                                      ? "In Progress"
+                                      : "Completed"
+                                  )
+                                }
+                              >
+                                {updatingTaskId === task.id
+                                  ? "Updating..."
+                                  : task.status === "Pending"
+                                    ? "Work Start"
+                                    : "Work Completed"}
+                              </button>
+                            )}
+                            {task.status === "Completed" && (
+                              <span className="task-completed-label">
+                                ✓ Completed
+                              </span>
+                            )}
+                          </div>
 
                         </td>
 

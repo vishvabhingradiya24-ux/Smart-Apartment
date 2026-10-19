@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import "../../css/staff/staff_service_requests.css";
 import "../../css/staff/staff_shared_theme.css";
 import { useNavigate } from "react-router-dom";
+import { Check, Eye, Play, X } from "lucide-react";
 
 function StaffServiceRequests() {
   const navigate = useNavigate();
@@ -32,6 +33,7 @@ function StaffServiceRequests() {
 
   // Keeps track of the request currently being updated
   const [updatingRequestId, setUpdatingRequestId] = useState(null);
+  const [selectedRequest, setSelectedRequest] = useState(null);
 
   // ================= FETCH SERVICE REQUESTS =================
   useEffect(() => {
@@ -60,8 +62,6 @@ function StaffServiceRequests() {
         );
 
         const data = await response.json();
-
-        console.log("STAFF SERVICE REQUEST RESPONSE:", data);
 
         if (!response.ok) {
           throw new Error(
@@ -199,7 +199,7 @@ function StaffServiceRequests() {
       if (!token) {
         alert("Please login again.");
         navigate("/login");
-        return;
+        return false;
       }
 
       setUpdatingRequestId(String(requestId));
@@ -219,8 +219,6 @@ function StaffServiceRequests() {
       );
 
       const data = await response.json();
-
-      console.log("STATUS UPDATE RESPONSE:", data);
 
       if (!response.ok) {
         throw new Error(
@@ -252,6 +250,7 @@ function StaffServiceRequests() {
       console.log(
         `Service request ${requestId} updated to ${newStatus}`
       );
+      return true;
     } catch (error) {
       console.error(
         "Update Service Request Status Error:",
@@ -262,23 +261,14 @@ function StaffServiceRequests() {
         error?.message ||
           "Unable to update service request status."
       );
+      return false;
     } finally {
       setUpdatingRequestId(null);
     }
   };
 
   // ================= VIEW REQUEST =================
-  const handleViewRequest = (request) => {
-    alert(
-      `Service Request: ${request.id}\n\n` +
-        `Resident: ${request.resident}\n` +
-        `Flat: ${request.flat}\n` +
-        `Service: ${request.service}\n` +
-        `Description: ${request.description}\n` +
-        `Status: ${request.status}\n` +
-        `Date: ${request.date}`
-    );
-  };
+  const handleViewRequest = (request) => setSelectedRequest(request);
 
   // ================= RESET FILTER =================
   const handleReset = () => {
@@ -848,26 +838,17 @@ function StaffServiceRequests() {
                       {/* ACTION */}
                       <td>
 
-                        <div
-                          className="service-action-buttons"
-                          style={{
-                            display: "flex",
-                            flexDirection: "column",
-                            gap: "6px",
-                          }}
-                        >
+                        <div className="service-action-buttons">
 
                           {/* VIEW */}
                           <button
-                            className="action-btn"
+                            className="service-action-btn service-action-btn--view"
+                            type="button"
                             onClick={() =>
                               handleViewRequest(request)
                             }
-                            disabled={
-                              updatingRequestId ===
-                              request.id
-                            }
                           >
+                            <Eye size={15} aria-hidden="true" />
                             View
                           </button>
 
@@ -876,7 +857,8 @@ function StaffServiceRequests() {
                             "Pending" && (
 
                             <button
-                              className="action-btn"
+                              className="service-action-btn service-action-btn--start"
+                              type="button"
                               onClick={() =>
                                 handleStatusUpdate(
                                   request.id,
@@ -892,6 +874,9 @@ function StaffServiceRequests() {
                               request.id
                                 ? "Updating..."
                                 : "Start Work"}
+                              {updatingRequestId !== request.id && (
+                                <Play size={14} aria-hidden="true" />
+                              )}
                             </button>
 
                           )}
@@ -901,7 +886,8 @@ function StaffServiceRequests() {
                             "In Progress" && (
 
                             <button
-                              className="action-btn"
+                              className="service-action-btn service-action-btn--complete"
+                              type="button"
                               onClick={() =>
                                 handleStatusUpdate(
                                   request.id,
@@ -917,6 +903,9 @@ function StaffServiceRequests() {
                               request.id
                                 ? "Updating..."
                                 : "Complete"}
+                              {updatingRequestId !== request.id && (
+                                <Check size={15} aria-hidden="true" />
+                              )}
                             </button>
 
                           )}
@@ -925,14 +914,9 @@ function StaffServiceRequests() {
                           {request.status ===
                             "Completed" && (
 
-                            <span
-                              style={{
-                                fontSize: "12px",
-                                fontWeight: "600",
-                                opacity: 0.7,
-                              }}
-                            >
-                              ✓ Completed
+                            <span className="service-completed-label">
+                              <Check size={14} aria-hidden="true" />
+                              Completed
                             </span>
 
                           )}
@@ -983,6 +967,101 @@ function StaffServiceRequests() {
         </section>
 
       </main>
+
+      {selectedRequest && (
+        <div
+          className="service-request-modal-backdrop"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) {
+              setSelectedRequest(null);
+            }
+          }}
+        >
+          <section
+            className="service-request-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="service-request-modal-title"
+          >
+            <header className="service-request-modal-header">
+              <div>
+                <span>REQUEST DETAILS · #{selectedRequest.id}</span>
+                <h2 id="service-request-modal-title">{selectedRequest.service}</h2>
+              </div>
+              <button
+                className="service-request-modal-close"
+                type="button"
+                aria-label="Close request details"
+                onClick={() => setSelectedRequest(null)}
+              >
+                <X size={19} aria-hidden="true" />
+              </button>
+            </header>
+            <div className="service-request-modal-body">
+              <div className="service-request-modal-meta">
+                <div><span>Resident</span><strong>{selectedRequest.resident}</strong></div>
+                <div><span>Flat</span><strong>{selectedRequest.flat}</strong></div>
+                <div>
+                  <span>Status</span>
+                  <strong className={`status-badge ${String(selectedRequest.status).toLowerCase().replace(/\s+/g, "-")}`}>
+                    {selectedRequest.status}
+                  </strong>
+                </div>
+                <div><span>Submitted</span><strong>{selectedRequest.date}</strong></div>
+              </div>
+              <div className="service-request-modal-description">
+                <span>Request description</span>
+                <p>{selectedRequest.description}</p>
+              </div>
+            </div>
+            <footer className="service-request-modal-footer">
+              <button
+                className="service-action-btn service-action-btn--view"
+                type="button"
+                onClick={() => setSelectedRequest(null)}
+              >
+                Close
+              </button>
+              {selectedRequest.status === "Pending" && (
+                <button
+                  className="service-action-btn service-action-btn--start"
+                  type="button"
+                  disabled={updatingRequestId === selectedRequest.id}
+                  onClick={async () => {
+                    const updated = await handleStatusUpdate(selectedRequest.id, "In Progress");
+                    if (updated) {
+                      setSelectedRequest((current) => current
+                        ? { ...current, status: "In Progress" }
+                        : current);
+                    }
+                  }}
+                >
+                  <Play size={14} aria-hidden="true" />
+                  Start Work
+                </button>
+              )}
+              {selectedRequest.status === "In Progress" && (
+                <button
+                  className="service-action-btn service-action-btn--complete"
+                  type="button"
+                  disabled={updatingRequestId === selectedRequest.id}
+                  onClick={async () => {
+                    const updated = await handleStatusUpdate(selectedRequest.id, "Completed");
+                    if (updated) {
+                      setSelectedRequest((current) => current
+                        ? { ...current, status: "Completed" }
+                        : current);
+                    }
+                  }}
+                >
+                  <Check size={15} aria-hidden="true" />
+                  Complete
+                </button>
+              )}
+            </footer>
+          </section>
+        </div>
+      )}
 
     </div>
   );

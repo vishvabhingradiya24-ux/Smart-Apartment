@@ -69,10 +69,13 @@ import Notices from "./pages/admin/Notices";
 import Notifications from "./pages/admin/Notifications";
 import Settings from "./pages/admin/Settings";
 import AdminTasks from "./pages/admin/AdminTasks";
+import AdminServiceRequests from "./pages/admin/AdminServiceRequests";
+import AdminAssets from "./pages/admin/AdminAssets";
 
 // Keep personal/project-wide CSS overrides last so they can override page styles.
 import "./css/admin_residents.css";
 import "./css/admin_unified.css";
+import "./css/staff_admin_theme.css";
 // import "./css/custom-overrides.css";
 
 function App() {
@@ -149,6 +152,22 @@ function App() {
           element={
             <AdminLayout>
               <Complaints />
+            </AdminLayout>
+          }
+        />
+        <Route
+          path="/admin/service-requests"
+          element={
+            <AdminLayout>
+              <AdminServiceRequests />
+            </AdminLayout>
+          }
+        />
+        <Route
+          path="/admin/assets"
+          element={
+            <AdminLayout>
+              <AdminAssets />
             </AdminLayout>
           }
         />

@@ -1,5 +1,59 @@
--- Run this file against the Smart Apartment database in MySQL Workbench.
--- The migration is repeatable and preserves existing resident, staff and admin records.
+USE `smart_apartment`;
+
+-- Creates the core tables first, then applies the admin and application schema.
+
+CREATE TABLE IF NOT EXISTS admins (
+  id INT NOT NULL AUTO_INCREMENT,
+  name VARCHAR(150) NOT NULL,
+  email VARCHAR(150) NOT NULL,
+  password VARCHAR(255) NOT NULL,
+  phone VARCHAR(30) NULL,
+  society_id INT NULL,
+  created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_admins_email (email)
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS residents (
+  id INT NOT NULL AUTO_INCREMENT,
+  first_name VARCHAR(100) NOT NULL,
+  last_name VARCHAR(100) NOT NULL,
+  email VARCHAR(150) NOT NULL,
+  phone VARCHAR(30) NOT NULL,
+  user_type VARCHAR(30) NOT NULL,
+  block_wing VARCHAR(10) NULL,
+  flat_number VARCHAR(10) NULL,
+  ownership_type ENUM('Owner', 'Rent') NULL,
+  password VARCHAR(255) NOT NULL,
+  is_active TINYINT(1) NOT NULL DEFAULT 1,
+  created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_residents_email (email)
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS staff (
+  id INT NOT NULL AUTO_INCREMENT,
+  first_name VARCHAR(100) NOT NULL,
+  last_name VARCHAR(100) NOT NULL,
+  email VARCHAR(150) NOT NULL,
+  phone VARCHAR(30) NOT NULL,
+  department ENUM('Maintenance', 'Electrical', 'Plumbing', 'Housekeeping', 'Garden Maintenance') NULL,
+  password VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_staff_email (email)
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS password_reset_otps (
+  id INT NOT NULL AUTO_INCREMENT,
+  email VARCHAR(150) NOT NULL,
+  otp_hash VARCHAR(255) NOT NULL,
+  expires_at DATETIME NOT NULL,
+  attempts INT NOT NULL DEFAULT 0,
+  created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY idx_password_reset_otps_email (email)
+) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS societies (
   society_id INT NOT NULL AUTO_INCREMENT,
@@ -136,9 +190,11 @@ BEGIN
   IF NOT EXISTS (
     SELECT index_name
     FROM information_schema.statistics
-    WHERE table_schema = DATABASE() AND table_name = 'residents'
-    GROUP BY index_name, non_unique
-    HAVING non_unique = 0 AND COUNT(*) = 1 AND MAX(column_name = 'email') = 1
+    WHERE table_schema = DATABASE()
+      AND table_name = 'residents'
+      AND non_unique = 0
+    GROUP BY index_name
+    HAVING COUNT(*) = 1 AND MAX(column_name = 'email') = 1
   ) THEN
     ALTER TABLE residents ADD UNIQUE KEY uq_residents_email (email);
   END IF;
@@ -173,7 +229,8 @@ DROP PROCEDURE ensure_resident_validation_constraints;
 
 UPDATE admins
 SET society_id = (SELECT society_id FROM societies ORDER BY society_id LIMIT 1)
-WHERE society_id IS NULL;
+WHERE society_id IS NULL
+  AND id > 0;
 
 DELIMITER $$
 DROP PROCEDURE IF EXISTS ensure_admin_society_foreign_key$$
@@ -393,6 +450,7 @@ CREATE TABLE IF NOT EXISTS tasks (
   priority VARCHAR(30) NOT NULL DEFAULT 'Normal',
   status VARCHAR(30) NOT NULL DEFAULT 'Pending',
   due_date DATE NULL,
+  started_at DATETIME NULL,
   completed_date DATETIME NULL,
   created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (task_id),

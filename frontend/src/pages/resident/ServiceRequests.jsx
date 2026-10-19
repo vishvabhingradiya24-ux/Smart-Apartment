@@ -301,6 +301,10 @@ const ServiceRequests = () => {
                   Electrical Service
                 </option>
 
+                <option value="Maintenance">
+                  Maintenance Service
+                </option>
+
                 <option value="Plumber">
                   Plumbing Service
                 </option>

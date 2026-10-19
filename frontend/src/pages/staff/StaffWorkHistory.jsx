@@ -3,6 +3,17 @@ import "../../css/staff/staff_work_history.css";
 import "../../css/staff/staff_shared_theme.css";
 import { useNavigate } from "react-router-dom";
 
+const formatDuration = (durationHours) => {
+  if (durationHours == null || !Number.isFinite(Number(durationHours))) {
+    return "Not tracked";
+  }
+
+  const totalMinutes = Math.round(Number(durationHours) * 60);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  return `${hours}h ${minutes}m`;
+};
+
 function StaffWorkHistory() {
   const navigate = useNavigate();
 
@@ -44,7 +55,8 @@ function StaffWorkHistory() {
         status: work.status,
         date: work.completed_at ? new Date(work.completed_at).toLocaleDateString() : "—",
         dateValue: work.completed_at,
-        duration: "Not tracked",
+        durationHours: work.duration_hours == null ? null : Number(work.duration_hours),
+        duration: formatDuration(work.duration_hours),
         description: work.description || "No description provided.",
       })));
     } catch (err) {
@@ -86,7 +98,16 @@ function StaffWorkHistory() {
     (work) => work.status === "Completed"
   ).length;
 
-  const totalHours = "—";
+  const trackedHours = workHistory.reduce(
+    (total, work) => total + (work.durationHours ?? 0),
+    0
+  );
+  const trackedWorkCount = workHistory.filter(
+    (work) => work.durationHours != null
+  ).length;
+  const totalHours = trackedWorkCount > 0
+    ? `${trackedHours.toFixed(2)} hrs`
+    : "Not tracked";
 
   const highPriority = workHistory.filter(
     (work) => work.priority === "High"
@@ -119,6 +140,7 @@ function StaffWorkHistory() {
         `Priority: ${work.priority}\n` +
         `Status: ${work.status}\n` +
         `Date: ${work.date}\n` +
+        `Duration: ${work.duration}\n` +
         `Description: ${work.description}`
     );
   };
@@ -131,6 +153,7 @@ function StaffWorkHistory() {
       Priority: work.priority,
       Status: work.status,
       Date: work.date,
+      Duration: work.duration,
     }));
 
     const headers = Object.keys(rows[0]);
@@ -317,7 +340,11 @@ function StaffWorkHistory() {
 
               <span className="stat-value">{totalHours}</span>
 
-              <small>Duration not recorded</small>
+              <small>
+                {trackedWorkCount > 0
+                  ? `Tracked for ${trackedWorkCount} completed ${trackedWorkCount === 1 ? "task" : "tasks"}`
+                  : "Tracked after a task is started"}
+              </small>
             </div>
           </div>
 
@@ -420,6 +447,7 @@ function StaffWorkHistory() {
                     <th>WORK DETAILS</th>
                     <th>PRIORITY</th>
                     <th>DATE</th>
+                    <th>DURATION</th>
                     <th>STATUS</th>
                     <th>ACTION</th>
                   </tr>
@@ -459,6 +487,8 @@ function StaffWorkHistory() {
                           📅 {work.date}
                         </span>
                       </td>
+
+                      <td>{work.duration}</td>
 
                       <td>
                         <span className="status-badge completed">

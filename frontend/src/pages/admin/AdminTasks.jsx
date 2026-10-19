@@ -5,6 +5,8 @@ import "../../css/admin_task.css";
 const AdminTask = () => {
   const [tasks, setTasks] = useState([]);
   const [staffList, setStaffList] = useState([]);
+  const [staffLoading, setStaffLoading] = useState(true);
+  const [staffError, setStaffError] = useState("");
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -56,11 +58,16 @@ const AdminTask = () => {
   // ================= FETCH STAFF =================
 
   const fetchStaff = async () => {
+    setStaffLoading(true);
+    setStaffError("");
     try {
       const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("Admin session expired. Please log in again.");
+      }
 
       const response = await fetch(
-        "http://localhost:5000/api/admin/tasks/staff",
+        "http://localhost:5000/api/admin/staff",
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -71,11 +78,16 @@ const AdminTask = () => {
 
       const data = await response.json();
 
-      if (!response.ok) throw new Error(data?.message || "Unable to fetch staff");
+      if (!response.ok) {
+        throw new Error(data?.message || "Unable to fetch staff");
+      }
       setStaffList(data?.staff || []);
-    } catch (error) {
-      console.error("Fetch Staff Error:", error);
-      setError(error.message || "Unable to load staff");
+    } catch (fetchError) {
+      console.error("Fetch Staff Error:", fetchError);
+      setStaffError(fetchError.message || "Unable to load staff");
+      setStaffList([]);
+    } finally {
+      setStaffLoading(false);
     }
   };
 
@@ -586,8 +598,14 @@ const AdminTask = () => {
                     required
                   >
 
-                    <option value="">
-                      Select Staff
+                    <option value="" disabled>
+                      {staffLoading
+                        ? "Loading staff..."
+                        : staffError
+                          ? "Unable to load staff"
+                          : staffList.length
+                            ? "Select Staff"
+                            : "No staff members available"}
                     </option>
 
                     {staffList.map((staff) => (
@@ -603,6 +621,19 @@ const AdminTask = () => {
                     ))}
 
                   </select>
+
+                  {staffError && (
+                    <small role="alert">
+                      {staffError}{" "}
+                      <button
+                        type="button"
+                        onClick={fetchStaff}
+                        disabled={staffLoading}
+                      >
+                        Retry
+                      </button>
+                    </small>
+                  )}
 
                 </div>
 
