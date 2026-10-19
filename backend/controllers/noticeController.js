@@ -1,15 +1,22 @@
 const { pool } = require("../config/db");
 
+const isValidDateOnly = (value) =>
+  typeof value === "string" &&
+  /^\d{4}-\d{2}-\d{2}$/.test(value) &&
+  !Number.isNaN(Date.parse(`${value}T00:00:00Z`)) &&
+  new Date(`${value}T00:00:00Z`).toISOString().slice(0, 10) === value;
+
 const createNotice = async (req, res) => {
   try {
     if (req.user?.role !== "Admin") return res.status(403).json({ success: false, message: "Admin access required" });
     const { title, description, notice_type, publish_date, expiry_date } =
       req.body;
 
-    if (!title || !description || !notice_type) {
+    if (!title || !description || !notice_type || !isValidDateOnly(publish_date) ||
+        (expiry_date && (!isValidDateOnly(expiry_date) || expiry_date < publish_date))) {
       return res.status(400).json({
         success: false,
-        message: "Title, description and notice type are required",
+        message: "Title, description, notice type and a valid publish date are required; expiry must be on or after publish date",
       });
     }
 
@@ -24,7 +31,7 @@ const createNotice = async (req, res) => {
         description,
         notice_type,
         postedBy,
-        publish_date || new Date(),
+        publish_date,
         expiry_date || null,
         req.body.status === "Inactive" ? "Inactive" : "Active",
       ]
@@ -125,8 +132,10 @@ const updateNotice = async (req, res) => {
       status,
     } = req.body;
 
-    if (!title || !description || !notice_type || !["Active", "Inactive"].includes(status)) {
-      return res.status(400).json({ success: false, message: "Valid title, description, type and status are required" });
+    if (!title || !description || !notice_type || !isValidDateOnly(publish_date) ||
+        (expiry_date && (!isValidDateOnly(expiry_date) || expiry_date < publish_date)) ||
+        !["Active", "Inactive"].includes(status)) {
+      return res.status(400).json({ success: false, message: "Valid title, description, type, publish date and status are required; expiry must be on or after publish date" });
     }
 
     await pool.query(

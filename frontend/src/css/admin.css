@@ -1813,7 +1813,8 @@
 .admin-data-form-actions button[type="submit"] { background: #087f69; color: #ffffff; }
 .admin-data-form-actions button:disabled { opacity: .6; cursor: wait; }
 .admin-row-action:hover,
-.admin-data-form-actions button:not(:disabled):hover { background: #effaf7; }
+.admin-data-form-actions button[type="submit"]:not(:disabled):hover { border-color: #066b58; background: #066b58; color: #ffffff; }
+.admin-data-form-actions button:not([type="submit"]):not(:disabled):hover { background: #effaf7; }
 
 @media (max-width: 900px) {
   .admin-residents-page { padding: 24px 20px; }

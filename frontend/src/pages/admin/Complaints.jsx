@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Check, ClipboardList, Clock3, RefreshCw, Search, Wrench } from "lucide-react";
+import { Check, ClipboardList, Clock3, Search, Wrench } from "lucide-react";
 import "../../css/complaints.css";
 
 const Complaints = () => {
@@ -171,24 +171,6 @@ assignedTo:
 
 
   // ==========================================
-  // VIEW COMPLAINT
-  // ==========================================
-  const handleView = (complaint) => {
-    alert(
-      `Complaint Details\n\n` +
-      `Complaint ID: ${complaint.id}\n` +
-      `Resident: ${complaint.residentName}\n` +
-      `Flat: ${complaint.flat}\n` +
-      `Title: ${complaint.title}\n` +
-      `Category: ${complaint.category}\n` +
-      `Status: ${complaint.status}\n` +
-      `Assigned To: ${complaint.assignedTo}\n` +
-      `Date: ${complaint.date}`
-    );
-  };
-
-
-  // ==========================================
   // EDIT COMPLAINT
   // ==========================================
   const handleEdit = (complaint) => {
@@ -300,10 +282,6 @@ const handleConfirmAssign = async () => {
             Review, assign and monitor resident complaints.
           </p>
         </div>
-        <button className="complaints-refresh-button" type="button" onClick={fetchComplaints} disabled={loading}>
-          <RefreshCw size={16} aria-hidden="true" />
-          {loading ? "Refreshing..." : "Refresh"}
-        </button>
       </div>
 
       {fetchError && (
@@ -496,7 +474,7 @@ const handleConfirmAssign = async () => {
                 <th>Assigned To</th>
                 <th>Status</th>
                 <th>Date</th>
-                <th>Actions</th>
+                <th className="admin-action-column">Actions</th>
               </tr>
 
             </thead>
@@ -666,21 +644,9 @@ const handleConfirmAssign = async () => {
 
                     {/* ACTIONS */}
 
-                    <td>
+                    <td className="admin-action-column">
 
                       <div className="complaint-actions">
-
-                        <button
-                          className="complaint-action-view"
-                          onClick={() =>
-                            handleView(complaint)
-                          }
-                          title="View"
-                        >
-                          👁️
-                        </button>
-
-
                         <button
                           className="complaint-action-assign"
                           onClick={() =>

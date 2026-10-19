@@ -3,7 +3,7 @@ import { Check, FileText, FolderOpen, Megaphone, Pencil, Search, Trash2 } from "
 import AdminFormModal from "./AdminFormModal";
 import "../../css/notices.css";
 
-const blankForm = { title: "", description: "", notice_type: "General", publish_date: new Date().toISOString().slice(0, 10), expiry_date: "", status: "Active" };
+const blankForm = { title: "", description: "", notice_type: "General", publish_date: "", expiry_date: "", status: "Active" };
 const standardCategories = ["General", "Maintenance", "Important", "Meeting", "Security"];
 const Notices = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -55,8 +55,12 @@ const Notices = () => {
       setError("Title, category and description are required.");
       return;
     }
-    if (!normalizedForm.publish_date || (normalizedForm.expiry_date && normalizedForm.expiry_date < normalizedForm.publish_date)) {
-      setError("Enter valid dates. Expiry date must be on or after the publish date.");
+    if (!normalizedForm.publish_date) {
+      setError("Publish date is required.");
+      return;
+    }
+    if (normalizedForm.expiry_date && normalizedForm.expiry_date < normalizedForm.publish_date) {
+      setError("Expiry date must be on or after the publish date.");
       return;
     }
     setSaving(true);
@@ -69,7 +73,7 @@ const Notices = () => {
     finally { setSaving(false); }
   };
   const toggleStatus = async (notice) => {
-    const payload = { title: notice.title, description: notice.description, notice_type: notice.notice_type, publish_date: notice.publish_date, expiry_date: notice.expiry_date, status: notice.status === "Published" ? "Inactive" : "Active" };
+    const payload = { title: notice.title, description: notice.description, notice_type: notice.notice_type, publish_date: String(notice.publish_date || "").slice(0, 10), expiry_date: notice.expiry_date ? String(notice.expiry_date).slice(0, 10) : "", status: notice.status === "Published" ? "Inactive" : "Active" };
     try { const response = await request(`/api/notices/${notice.id}`, { method: "PUT", body: JSON.stringify(payload) }); const data = await response.json(); if (!response.ok) throw new Error(data.message || "Notice update થઈ શકી નહીં"); await loadNotices(); }
     catch (err) { setError(err.message); }
   };

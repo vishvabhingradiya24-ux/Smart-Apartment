@@ -156,10 +156,6 @@ const Staff = () => {
     return !Number.isNaN(date.getTime()) && date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
   }).length;
 
-  const viewStaff = (person) => {
-    alert(`Staff Details\n\nName: ${person.first_name || ""} ${person.last_name || ""}\nStaff ID: ${person.id}\nEmail: ${person.email || "—"}\nPhone: ${person.phone || "—"}\nJoined: ${formatDate(person.created_at)}`);
-  };
-
   return (
     <div className="admin-records-page admin-staff-page">
       <header className="admin-records-header">
@@ -177,7 +173,6 @@ const Staff = () => {
           >
             + Add Staff
           </button>
-          <button type="button" className="admin-records-refresh" onClick={refreshStaff} disabled={loading}>↻ Refresh</button>
         </div>
       </header>
 
@@ -287,13 +282,13 @@ const Staff = () => {
         ) : filteredStaff.length === 0 ? <div className="admin-records-state">No staff members match this search.</div> : (
           <div className="admin-records-table-wrap">
             <table className="admin-records-table">
-              <thead><tr><th>Staff member</th><th>Phone</th><th>Email</th><th>Joined</th><th>Actions</th></tr></thead>
+              <thead><tr><th>Staff member</th><th>Phone</th><th>Email</th><th>Joined</th><th className="admin-action-column">Actions</th></tr></thead>
               <tbody>{filteredStaff.map((person) => {
                 const name = `${person.first_name || ""} ${person.last_name || ""}`.trim() || "Staff member";
                 return <tr key={person.id}>
                   <td><div className="admin-records-person"><span>{name.charAt(0).toUpperCase()}</span><div><strong>{name}</strong><small>Staff ID #{person.id}</small></div></div></td>
                   <td>{person.phone || "—"}</td><td>{person.email || "—"}</td><td>{formatDate(person.created_at)}</td>
-                  <td><div className="admin-records-actions"><button type="button" onClick={() => viewStaff(person)}>View</button><button type="button" onClick={() => navigate("/admin/task")}>Tasks</button></div></td>
+                  <td className="admin-action-column"><div className="admin-records-actions"><button type="button" onClick={() => navigate("/admin/task")}>Tasks</button></div></td>
                 </tr>;
               })}</tbody>
             </table>

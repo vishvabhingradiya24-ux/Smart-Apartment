@@ -534,6 +534,7 @@
 .notice-form-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
 .notice-form-actions button { padding: 10px 16px; border: 1px solid #cbd8df; border-radius: 8px; background: #fff; color: #17344d; cursor: pointer; }
 .notice-form-actions button[type="submit"] { border-color: #08a77f; background: #08a77f; color: #fff; }
+.notice-form-actions button[type="submit"]:not(:disabled):hover { border-color: #066b58; background: #066b58; color: #fff; }
 .notice-form-actions button:disabled { opacity: .65; cursor: wait; }
 .notice-error { margin: 12px 0; padding: 12px 14px; border: 1px solid #f2b8b5; border-radius: 8px; background: #fff2f1; color: #a51e1e; }
 

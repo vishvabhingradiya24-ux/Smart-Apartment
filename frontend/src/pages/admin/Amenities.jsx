@@ -181,12 +181,12 @@ const Amenities = () => {
         <label>Description<input value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} /></label>
         {isFacilityForm ? <>
           <label>Location<input value={form.location} onChange={(event) => setForm({ ...form, location: event.target.value })} /></label>
-          <label>Charge (₹)<input required min="0" step="0.01" type="number" value={form.base_charge} disabled={form.charge_period === "Free"} onChange={(event) => setForm({ ...form, base_charge: event.target.value })} /></label>
+          <label>Charge (₹)<input required min="0" max="99999999.99" step="0.01" type="number" value={form.base_charge} disabled={form.charge_period === "Free"} onChange={(event) => setForm({ ...form, base_charge: event.target.value })} /></label>
           <label>Charge period<select value={form.charge_period} onChange={(event) => setForm({ ...form, charge_period: event.target.value, base_charge: event.target.value === "Free" ? "0" : form.base_charge })}><option>Per Booking</option><option>Free</option></select></label>
-          <label>Status<select value={form.availability_status} onChange={(event) => setForm({ ...form, availability_status: event.target.value })}><option>Available</option><option>Unavailable</option><option>Maintenance</option></select></label>
+          <label>Status<select value={form.availability_status} onChange={(event) => setForm({ ...form, availability_status: event.target.value })}><option>Available</option><option>Unavailable</option><option>Maintenance</option></select>{form.availability_status === "Maintenance" && <small>Temporarily unavailable while repair or service work is in progress.</small>}</label>
         </> : <>
           <label>Charge type<select value={form.charge_type} onChange={(event) => setForm({ ...form, charge_type: event.target.value })}><option>Fixed</option><option>Per Item</option><option>Per Person</option></select></label>
-          <label>Price (₹)<input required min="0" step="0.01" type="number" value={form.price} onChange={(event) => setForm({ ...form, price: event.target.value })} /></label>
+          <label>Price (₹)<input required min="0" max="99999999.99" step="0.01" type="number" value={form.price} onChange={(event) => setForm({ ...form, price: event.target.value })} /></label>
           <label>Status<select value={form.status} onChange={(event) => setForm({ ...form, status: event.target.value })}><option>Available</option><option>Unavailable</option></select></label>
         </>}
       </div>
@@ -202,7 +202,7 @@ const Amenities = () => {
       <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)} className="amenity-filter"><option>All</option><option>Available</option><option>Unavailable</option></select>
     </div>
 
-    <div className="amenities-card"><div className="amenities-card-header"><div><h2>Society Amenities</h2><p>Facility settings and related booking counts.</p></div><span className="record-count">{filteredAmenities.length} Records</span></div>
+    <div className="amenities-card"><div className="amenities-card-header"><div><h2>Society Amenities</h2><p>Bookings shows the number of resident bookings; 0 means none have been made.</p></div><span className="record-count">{filteredAmenities.length} Records</span></div>
       <div className="amenities-table-wrapper"><table className="amenities-table"><thead><tr><th>Amenity ID</th><th>Amenity</th><th>Description</th><th>Location</th><th>Charge</th><th>Status</th><th>Bookings</th><th>Actions</th></tr></thead><tbody>
         {loading ? <tr><td colSpan="8">Loading amenities…</td></tr> : filteredAmenities.length ? filteredAmenities.map((amenity) => <tr key={amenity.facility_id}>
           <td><span className="amenity-id">AM{amenity.facility_id}</span></td>

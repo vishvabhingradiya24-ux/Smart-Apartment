@@ -526,7 +526,7 @@ const Residents = () => {
                   <th>Phone</th>
                   <th>Registered</th>
                   <th>Account</th>
-                  <th>Actions</th>
+                  <th className="admin-action-column">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -572,7 +572,7 @@ const Residents = () => {
                           {Number(resident.is_active) === 1 ? "Active" : "Archived"}
                         </span>
                       </td>
-                      <td>
+                      <td className="admin-action-column">
                         <div className="admin-records-actions">
                           <button type="button" onClick={() => openEditForm(resident)}>Edit</button>
                           {Number(resident.is_active) === 1 ? (

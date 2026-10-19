@@ -241,6 +241,29 @@
   box-shadow: var(--admin-unified-shadow);
 }
 
+.admin-main :is(.task-stat-card, .payment-stat-card, .visitor-stat-card, .notice-stat-card) {
+  position: relative;
+  overflow: hidden;
+}
+
+.admin-main :is(.task-stat-card, .payment-stat-card, .visitor-stat-card, .notice-stat-card)::before {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: var(--admin-unified-accent);
+  content: "";
+}
+
+.admin-main :is(.admin-staff-page, .admin-residents-page) .admin-action-column,
+.admin-main .complaints-table .admin-action-column {
+  text-align: center;
+}
+
+.admin-main :is(.admin-staff-page, .admin-residents-page) .admin-records-actions,
+.admin-main .complaint-actions {
+  justify-content: center;
+}
+
 .admin-main :is(
   .admin-records-stats article,
   .stat-card,
