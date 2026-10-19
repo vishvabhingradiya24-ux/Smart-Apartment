@@ -390,7 +390,7 @@ const Residents = () => {
               </label>
               <label>
                 Email
-                <input required type="email" maxLength="150" autoComplete="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} />
+                <input required type="email" maxLength="150" pattern="[^A-Z]*" title="Email must not contain uppercase letters." autoComplete="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} />
               </label>
               <label>
                 Phone

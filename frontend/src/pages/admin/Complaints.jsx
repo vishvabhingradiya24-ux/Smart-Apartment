@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Check, ClipboardList, Clock3, Search, Wrench } from "lucide-react";
+import { Check, ClipboardList, Clock3, RefreshCw, Search, Wrench } from "lucide-react";
 import "../../css/complaints.css";
 
 const Complaints = () => {
@@ -9,6 +9,7 @@ const Complaints = () => {
 
   const [complaints, setComplaints] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState("");
   const [staffList, setStaffList] = useState([]);
 const [showAssignModal, setShowAssignModal] = useState(false);
 const [selectedComplaint, setSelectedComplaint] = useState(null);
@@ -19,6 +20,8 @@ const [assigning, setAssigning] = useState(false);
   // FETCH COMPLAINTS FROM DATABASE
   // ==========================================
   const fetchComplaints = async () => {
+    setLoading(true);
+    setFetchError("");
     try {
       const token = localStorage.getItem("token");
 
@@ -86,8 +89,8 @@ assignedTo:
 
     } catch (error) {
       console.error("Admin Complaints Error:", error);
-
       setComplaints([]);
+      setFetchError(error.message || "Failed to fetch complaints.");
 
     } finally {
       setLoading(false);
@@ -297,7 +300,20 @@ const handleConfirmAssign = async () => {
             Review, assign and monitor resident complaints.
           </p>
         </div>
+        <button className="complaints-refresh-button" type="button" onClick={fetchComplaints} disabled={loading}>
+          <RefreshCw size={16} aria-hidden="true" />
+          {loading ? "Refreshing..." : "Refresh"}
+        </button>
       </div>
+
+      {fetchError && (
+        <div className="complaints-load-error" role="alert">
+          <span>{fetchError}</span>
+          <button type="button" onClick={fetchComplaints} disabled={loading}>
+            {loading ? "Loading..." : "Retry"}
+          </button>
+        </div>
+      )}
 
 
       {/* ================= SUMMARY ================= */}

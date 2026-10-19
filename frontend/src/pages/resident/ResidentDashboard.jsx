@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  Activity,
+  Bell,
   ClipboardList,
   CreditCard,
   DoorOpen,
   Megaphone,
+  UserRound,
+  Vote,
   Waves,
-  Wallet,
   Wrench,
 } from "lucide-react";
 import "../../css/resident/resident_dashboard.css";
@@ -40,6 +41,17 @@ function ResidentDashboard() {
   const blockWing = user?.block_wing || "";
   const flatNumber = user?.flat_number || "";
   const userType = user?.user_type || "Resident";
+  const services = [
+    { title: "Payments", description: "Manage maintenance payments and payment history.", icon: CreditCard, path: "/resident/payment" },
+    { title: "Complaints", description: "Report and track apartment issues.", icon: ClipboardList, path: "/resident/complaints" },
+    { title: "Service Requests", description: "Request and track residential services.", icon: Wrench, path: "/resident/requests" },
+    { title: "Visitors", description: "Manage visitor approvals and entries.", icon: DoorOpen, path: "/resident/visitors" },
+    { title: "Amenity Booking", description: "Reserve community facilities and amenities.", icon: Waves, path: "/resident/facilities" },
+    { title: "Notices & Events", description: "Read community updates and announcements.", icon: Megaphone, path: "/resident/notices" },
+    { title: "Polls & Voting", description: "Share your opinion on community decisions.", icon: Vote, path: "/resident/polls" },
+    { title: "Notifications", description: "Check the latest updates for your account.", icon: Bell, path: "/resident/notifications" },
+    { title: "My Profile", description: "View and update your resident information.", icon: UserRound, path: "/resident/profile" },
+  ];
 
   return (
     <div className="resident-dashboard-content">
@@ -48,27 +60,32 @@ function ResidentDashboard() {
           <div className="residence-photo-overlay"></div>
 
           <div className="residence-content">
-            <span className="section-eyebrow">MY RESIDENCE</span>
+            <span className="section-eyebrow">YOUR APARTMENT</span>
             <h2>
-              Your home,
+              Home,
               <br />
-              your community.
+              made easier.
             </h2>
             <p className="residence-description">
-              Keep your apartment services, community activities and residential
-              information together in one place.
+              Manage everyday services, stay connected with your community, and
+              keep your residence details close at hand.
             </p>
-            <Link to="/resident/flat-details" className="residence-button">
-              View Flat Details
-              <span>→</span>
-            </Link>
+            <div className="residence-actions">
+              <Link to="/resident/payment" className="residence-button">
+                <CreditCard size={16} aria-hidden="true" />
+                Open payments
+              </Link>
+              <Link to="/resident/profile" className="residence-secondary-button">
+                View profile
+              </Link>
+            </div>
           </div>
 
           <div className="residence-info">
             <div className="residence-user">
               <div className="large-avatar">{initials}</div>
               <div>
-                <span>RESIDENT</span>
+                <span>RESIDENT PROFILE</span>
                 <h3>{fullName}</h3>
               </div>
             </div>
@@ -76,12 +93,12 @@ function ResidentDashboard() {
             <div className="residence-details">
               <div className="residence-detail">
                 <span>BLOCK / WING</span>
-                <strong>{blockWing || "Not available"}</strong>
+                <strong>{blockWing || "—"}</strong>
               </div>
 
               <div className="residence-detail">
                 <span>FLAT NUMBER</span>
-                <strong>{flatNumber || "Not available"}</strong>
+                <strong>{flatNumber || "—"}</strong>
               </div>
 
               <div className="residence-detail">
@@ -89,135 +106,34 @@ function ResidentDashboard() {
                 <strong>{userType}</strong>
               </div>
             </div>
+            <Link to="/resident/profile" className="residence-profile-link">
+              <UserRound size={15} aria-hidden="true" />
+              Manage profile
+            </Link>
           </div>
         </section>
 
-        <section className="services-section">
+        <section className="services-section" id="resident-services">
           <div className="section-heading">
             <div>
               <span className="section-eyebrow">RESIDENT SERVICES</span>
-              <h2>What would you like to manage?</h2>
+              <h2>Quick Access</h2>
             </div>
-            <p>Quick access to your most-used apartment services.</p>
           </div>
 
           <div className="services-grid">
-            <Link to="/resident/payment" className="service-card service-primary">
-              <div className="service-top">
-                <div className="service-icon"><CreditCard size={18} strokeWidth={1.8} aria-hidden="true" /></div>
-                <span className="service-arrow" aria-hidden="true">↗</span>
-              </div>
-              <div className="service-content">
-                <h3>Payments</h3>
-                <p>Manage maintenance payments and payment history.</p>
-              </div>
-            </Link>
-
-            <Link to="/resident/complaints" className="service-card">
-              <div className="service-top">
-                <div className="service-icon"><ClipboardList size={18} strokeWidth={1.8} aria-hidden="true" /></div>
-                <span className="service-arrow" aria-hidden="true">↗</span>
-              </div>
-              <div className="service-content">
-                <h3>Complaints</h3>
-                <p>Report and track apartment issues.</p>
-              </div>
-            </Link>
-
-            <Link to="/resident/requests" className="service-card">
-              <div className="service-top">
-                <div className="service-icon"><Wrench size={18} strokeWidth={1.8} aria-hidden="true" /></div>
-                <span className="service-arrow" aria-hidden="true">↗</span>
-              </div>
-              <div className="service-content">
-                <h3>Service Requests</h3>
-                <p>Request and track residential services.</p>
-              </div>
-            </Link>
-
-            <Link to="/resident/visitors" className="service-card">
-              <div className="service-top">
-                <div className="service-icon"><DoorOpen size={18} strokeWidth={1.8} aria-hidden="true" /></div>
-                <span className="service-arrow" aria-hidden="true">↗</span>
-              </div>
-              <div className="service-content">
-                <h3>Visitors</h3>
-                <p>Manage visitor approvals and entries.</p>
-              </div>
-            </Link>
-
-            <Link to="/resident/facilities" className="service-card">
-              <div className="service-top">
-                <div className="service-icon"><Waves size={18} strokeWidth={1.8} aria-hidden="true" /></div>
-                <span className="service-arrow" aria-hidden="true">↗</span>
-              </div>
-              <div className="service-content">
-                <h3>Amenity Booking</h3>
-                <p>Reserve community facilities and amenities.</p>
-              </div>
-            </Link>
+            {services.map(({ title, description, icon: Icon, path }, index) => (
+              <Link to={path} className={`service-card${index === 0 ? " service-primary" : ""}`} key={path}>
+                <div className="service-icon"><Icon size={18} strokeWidth={1.8} aria-hidden="true" /></div>
+                <div className="service-content">
+                  <h3>{title}</h3>
+                  <p>{description}</p>
+                </div>
+                <span className="service-arrow" aria-hidden="true">→</span>
+              </Link>
+            ))}
           </div>
         </section>
-
-        <section className="dashboard-lower-grid">
-          <div className="dashboard-section-panel">
-            <div className="panel-heading">
-              <div>
-                <span className="section-eyebrow">COMMUNITY</span>
-                <h2>Community Pulse</h2>
-              </div>
-              <Link to="/resident/notices">View All →</Link>
-            </div>
-
-            <div className="empty-community">
-              <div className="empty-icon"><Megaphone size={18} strokeWidth={1.8} aria-hidden="true" /></div>
-              <h3>No community updates yet</h3>
-              <p>Notices, events and community announcements will appear here.</p>
-            </div>
-          </div>
-
-          <div className="dashboard-section-panel">
-            <div className="panel-heading">
-              <div>
-                <span className="section-eyebrow">FINANCE</span>
-                <h2>Maintenance & Payments</h2>
-              </div>
-              <Link to="/resident/payment">Open →</Link>
-            </div>
-
-            <div className="payment-empty">
-              <div className="payment-symbol"><Wallet size={18} strokeWidth={1.8} aria-hidden="true" /></div>
-              <div>
-                <h3>No payment information</h3>
-                <p>Your maintenance and payment information will appear here.</p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="activity-section">
-          <div className="panel-heading">
-            <div>
-              <span className="section-eyebrow">YOUR SPACE</span>
-              <h2>Recent Activity</h2>
-            </div>
-          </div>
-
-          <div className="activity-empty">
-            <div className="activity-line"></div>
-            <div className="activity-empty-content">
-              <div className="activity-empty-icon"><Activity size={18} strokeWidth={1.8} aria-hidden="true" /></div>
-              <div>
-                <h3>No recent activity</h3>
-                <p>
-                  Your apartment activities will appear here as you use the
-                  system.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
     </div>
   );
 }

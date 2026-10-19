@@ -91,16 +91,39 @@ const Amenities = () => {
 
   const saveRecord = async (event) => {
     event.preventDefault();
-    setSaving(true);
     setError("");
     const isFacility = formType === "facility";
+    const name = (isFacility ? form.facility_name : form.addon_name).trim();
+    const amount = isFacility ? form.base_charge : form.price;
+    if (!name) {
+      setError(`${isFacility ? "Amenity" : "Add-on"} name is required.`);
+      return;
+    }
+    if (name.length > 150) {
+      setError("Name must be 150 characters or fewer.");
+      return;
+    }
+    if (!/^[0-9]{1,8}(?:\.[0-9]{1,2})?$/.test(String(amount)) || Number(amount) < 0) {
+      setError("Enter a valid amount with up to 8 digits and 2 decimal places.");
+      return;
+    }
+    if (!isFacility && !["Fixed", "Per Item", "Per Person"].includes(form.charge_type)) {
+      setError("Select a valid add-on charge type.");
+      return;
+    }
+    setSaving(true);
     const endpoint = isFacility
       ? (editingId ? `/api/admin/amenities/${editingId}` : "/api/admin/amenities")
       : (editingId ? `/api/admin/amenities/addons/${editingId}` : "/api/admin/amenities/addons");
     try {
       const response = await request(endpoint, {
         method: editingId ? "PUT" : "POST",
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          ...form,
+          ...(isFacility ? { facility_name: name, base_charge: form.charge_period === "Free" ? "0" : amount } : { addon_name: name, price: amount }),
+          description: form.description.trim(),
+          ...(isFacility ? { location: form.location.trim() } : {}),
+        }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || "Amenity could not be saved");

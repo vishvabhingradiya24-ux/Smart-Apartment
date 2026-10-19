@@ -1,7 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import "../../css/resident/serviceRequests.css";
-import rightArrow from "../../assets/icons/right-arrow.png";
 
 const ServiceRequests = () => {
   const [requests, setRequests] = useState([]);
@@ -167,11 +165,6 @@ const ServiceRequests = () => {
           </p>
         </div>
 
-        <Link to="/resident" className="sr-dashboard-btn">
-          
-          Dashboard
-          <span><img src={rightArrow} alt="" style={{ width: "16px", height: "16px" }} /></span>
-        </Link>
       </section>
 
 

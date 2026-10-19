@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import "../../css/resident/residentComplaints.css";
 
 function ResidentComplaints() {
@@ -271,15 +270,6 @@ function ResidentComplaints() {
         </div>
 
         <div className="complaints-header-actions">
-
-          <Link
-            to="/resident"
-            className="complaints-dashboard-btn"
-          >
-            <span>←</span>
-            Back to Dashboard
-          </Link>
-
           <button
             type="button"
             className="complaints-new-btn"

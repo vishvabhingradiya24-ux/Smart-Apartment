@@ -476,8 +476,13 @@ const createAdminStaff = async (req, res) => {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    if (password.length < 6) {
-      return res.status(400).json({ message: "Password must be at least 6 characters" });
+    if (
+      password.length < 5 ||
+      (password.match(/[0-9]/g) || []).length < 3 ||
+      !/[^A-Za-z0-9\s]/.test(password) ||
+      Buffer.byteLength(password, "utf8") > 72
+    ) {
+      return res.status(400).json({ message: "Password must have at least 5 characters, 3 digits, 1 special character and be no more than 72 bytes" });
     }
 
     const normalizedEmail = email.trim().toLowerCase();
@@ -810,8 +815,15 @@ const changeAdminPassword = async (req, res) => {
   try {
     if (!requireAdmin(req, res)) return;
     const { currentPassword, newPassword } = req.body;
-    if (!currentPassword || typeof newPassword !== "string" || newPassword.length < 6) {
-      return res.status(400).json({ message: "Current password and a new password of at least 6 characters are required" });
+    if (
+      !currentPassword ||
+      typeof newPassword !== "string" ||
+      newPassword.length < 5 ||
+      (newPassword.match(/[0-9]/g) || []).length < 3 ||
+      !/[^A-Za-z0-9\s]/.test(newPassword) ||
+      Buffer.byteLength(newPassword, "utf8") > 72
+    ) {
+      return res.status(400).json({ message: "New password must have at least 5 characters, 3 digits, 1 special character and be no more than 72 bytes" });
     }
     const [admins] = await pool.query("SELECT password FROM admins WHERE id = ? LIMIT 1", [req.user.id]);
     if (!admins.length) return res.status(404).json({ message: "Admin account not found" });

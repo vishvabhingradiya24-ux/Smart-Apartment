@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import "../../css/resident/residentVisitors.css";
 
 const API_URL = "http://localhost:5000/api/resident/visitors";
@@ -7,21 +6,10 @@ const API_URL = "http://localhost:5000/api/resident/visitors";
 function ResidentVisitors() {
   const [visitors, setVisitors] = useState([]);
 
-  const [formData, setFormData] = useState({
-    visitor_name: "",
-    contact_number: "",
-    purpose: "",
-    visit_date: "",
-    expected_time: "",
-  });
-
   const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
-
+  const [updatingVisitorId, setUpdatingVisitorId] = useState(null);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-
-  const [showForm, setShowForm] = useState(false);
 
   const fetchVisitors = async () => {
       const token = localStorage.getItem("token");
@@ -103,100 +91,33 @@ function ResidentVisitors() {
     }
   };
 
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-
-    setFormData((previous) => ({
-      ...previous,
-      [name]: value,
-    }));
-  };
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-
+  const updateVisitorStatus = async (visitorId, status) => {
     setError("");
     setSuccess("");
-
-    const visitorName = formData.visitor_name.trim();
-    const contactNumber = formData.contact_number.trim();
-    const purpose = formData.purpose.trim();
-
-    if (
-      !visitorName ||
-      !contactNumber ||
-      !purpose ||
-      !formData.visit_date ||
-      !formData.expected_time
-    ) {
-      setError("Please fill all visitor details.");
-      return;
-    }
-
-    if (!/^[0-9]{10,15}$/.test(contactNumber)) {
-      setError("Please enter a valid contact number.");
-      return;
-    }
-
+    setUpdatingVisitorId(visitorId);
     try {
-      setSubmitting(true);
-
       const token = localStorage.getItem("token");
-
       if (!token) {
-        setError("Session expired. Please login again.");
-        return;
+        throw new Error("Session expired. Please login again.");
       }
-
-      const response = await fetch(API_URL, {
-        method: "POST",
+      const response = await fetch(`${API_URL}/${visitorId}/status`, {
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          visitor_name: visitorName,
-          contact_number: contactNumber,
-          purpose: purpose,
-          visit_date: formData.visit_date,
-          expected_time: formData.expected_time,
-        }),
+        body: JSON.stringify({ status }),
       });
-
       const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(
-          data.message ||
-            "Unable to submit visitor request."
-        );
-      }
-
-      setSuccess(
-        data.message ||
-          "Visitor request submitted successfully."
-      );
-
-      setFormData({
-        visitor_name: "",
-        contact_number: "",
-        purpose: "",
-        visit_date: "",
-        expected_time: "",
-      });
-
-      setShowForm(false);
-
-      await refreshVisitors();
+      if (!response.ok) throw new Error(data.message || "Unable to update visitor status.");
+      setVisitors((previous) => previous.map((visitor) =>
+        Number(visitor.visitor_id) === Number(visitorId) ? { ...visitor, status } : visitor
+      ));
+      setSuccess(`Visitor request ${status.toLowerCase()}.`);
     } catch (err) {
-      console.error("Create Visitor Error:", err);
-
-      setError(
-        err.message ||
-          "Unable to submit visitor request."
-      );
+      setError(err.message || "Unable to update visitor status.");
     } finally {
-      setSubmitting(false);
+      setUpdatingVisitorId(null);
     }
   };
 
@@ -297,33 +218,7 @@ function ResidentVisitors() {
 
           <h1>Visitors</h1>
 
-          <p>
-            Pre-register your visitors and track
-            their approval status.
-          </p>
-        </div>
-
-        <div className="resident-visitors-actions">
-
-          <Link
-            to="/resident"
-            className="resident-visitors-back"
-          >
-            ← Back to Dashboard
-          </Link>
-
-          <button
-            type="button"
-            className="resident-visitors-new"
-            onClick={() => {
-              setError("");
-              setSuccess("");
-              setShowForm(true);
-            }}
-          >
-            + New Visitor
-          </button>
-
+          <p>Review visitor details and approve or reject pending requests.</p>
         </div>
 
       </section>
@@ -409,179 +304,6 @@ function ResidentVisitors() {
       </section>
 
 
-      {showForm && (
-        <section className="resident-visitors-form-section">
-
-          <div className="resident-visitors-form-card">
-
-            <div className="resident-visitors-form-header">
-
-              <div>
-                <span>NEW VISITOR</span>
-                <h2>Register a Visitor</h2>
-              </div>
-
-              <button
-                type="button"
-                className="resident-visitors-close"
-                onClick={() => {
-                  if (submitting) return;
-
-                  setShowForm(false);
-
-                  setFormData({
-                    visitor_name: "",
-                    contact_number: "",
-                    purpose: "",
-                    visit_date: "",
-                    expected_time: "",
-                  });
-                }}
-              >
-                ×
-              </button>
-
-            </div>
-
-            <p className="resident-visitors-form-description">
-              Enter the visitor details below. The request
-              will remain pending until it is approved.
-            </p>
-
-            <form onSubmit={handleSubmit}>
-
-              <div className="resident-visitors-form-grid">
-
-                <div className="resident-visitors-form-group">
-
-                  <label htmlFor="visitor_name">
-                    Visitor Name
-                  </label>
-
-                  <input
-                    id="visitor_name"
-                    name="visitor_name"
-                    type="text"
-                    value={formData.visitor_name}
-                    onChange={handleChange}
-                    placeholder="Enter visitor name"
-                    maxLength={100}
-                  />
-
-                </div>
-
-
-                <div className="resident-visitors-form-group">
-
-                  <label htmlFor="contact_number">
-                    Contact Number
-                  </label>
-
-                  <input
-                    id="contact_number"
-                    name="contact_number"
-                    type="tel"
-                    value={formData.contact_number}
-                    onChange={handleChange}
-                    placeholder="Enter contact number"
-                    maxLength={15}
-                  />
-
-                </div>
-
-
-                <div className="resident-visitors-form-group">
-
-                  <label htmlFor="purpose">
-                    Purpose
-                  </label>
-
-                  <input
-                    id="purpose"
-                    name="purpose"
-                    type="text"
-                    value={formData.purpose}
-                    onChange={handleChange}
-                    placeholder="Family visit, personal visit..."
-                    maxLength={150}
-                  />
-
-                </div>
-
-
-                <div className="resident-visitors-form-group">
-
-                  <label htmlFor="visit_date">
-                    Visit Date
-                  </label>
-
-                  <input
-                    id="visit_date"
-                    name="visit_date"
-                    type="date"
-                    value={formData.visit_date}
-                    onChange={handleChange}
-                  />
-
-                </div>
-
-
-                <div className="resident-visitors-form-group">
-
-                  <label htmlFor="expected_time">
-                    Expected Time
-                  </label>
-
-                  <input
-                    id="expected_time"
-                    name="expected_time"
-                    type="time"
-                    value={formData.expected_time}
-                    onChange={handleChange}
-                  />
-
-                </div>
-
-              </div>
-
-
-              <div className="resident-visitors-form-actions">
-
-                <button
-                  type="button"
-                  className="resident-visitors-cancel"
-                  onClick={() => {
-                    if (submitting) return;
-
-                    setShowForm(false);
-                  }}
-                  disabled={submitting}
-                >
-                  Cancel
-                </button>
-
-                <button
-                  type="submit"
-                  className="resident-visitors-submit"
-                  disabled={submitting}
-                >
-                  {submitting
-                    ? "Submitting..."
-                    : "Submit Visitor Request"}
-
-                  {!submitting && <span>→</span>}
-                </button>
-
-              </div>
-
-            </form>
-
-          </div>
-
-        </section>
-      )}
-
-
       <section className="resident-visitors-history">
 
         <div className="resident-visitors-history-header">
@@ -592,8 +314,7 @@ function ResidentVisitors() {
             <h2>Visitor History</h2>
 
             <p>
-              View your submitted visitor requests
-              and their current status.
+              Review the visitor information and decide on pending requests.
             </p>
           </div>
 
@@ -627,23 +348,11 @@ function ResidentVisitors() {
               ◉
             </div>
 
-            <h3>No visitors registered</h3>
+            <h3>No visitor requests</h3>
 
             <p>
-              Visitor requests that you create will
-              appear here.
+              Visitor requests for your residence will appear here.
             </p>
-
-            <button
-              type="button"
-              onClick={() => {
-                setError("");
-                setSuccess("");
-                setShowForm(true);
-              }}
-            >
-              + Register Visitor
-            </button>
 
           </div>
 
@@ -762,6 +471,17 @@ function ResidentVisitors() {
 
                 )}
 
+                {visitor.status === "Pending" && (
+                  <div className="resident-visitor-decision-actions">
+                    <button type="button" className="resident-visitor-reject" onClick={() => updateVisitorStatus(visitor.visitor_id, "Rejected")} disabled={updatingVisitorId === visitor.visitor_id}>
+                      {updatingVisitorId === visitor.visitor_id ? "Updating..." : "Reject"}
+                    </button>
+                    <button type="button" className="resident-visitor-approve" onClick={() => updateVisitorStatus(visitor.visitor_id, "Approved")} disabled={updatingVisitorId === visitor.visitor_id}>
+                      {updatingVisitorId === visitor.visitor_id ? "Updating..." : "Approve"}
+                    </button>
+                  </div>
+                )}
+
               </article>
 
             ))}
@@ -785,9 +505,7 @@ function ResidentVisitors() {
           </strong>
 
           <p>
-            New visitor requests are submitted as Pending.
-            Once management approves the request, the
-            visitor status will change to Approved.
+            Review each request and approve or reject it. Decisions are available only while a request is pending.
           </p>
         </div>
 

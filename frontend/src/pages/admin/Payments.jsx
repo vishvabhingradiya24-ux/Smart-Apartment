@@ -54,13 +54,6 @@ const Payments = () => {
     load();
   }, [loadData]);
 
-  const openCreate = () => {
-    setEditingId(null);
-    setForm({ ...emptyForm });
-    setShowForm(true);
-    setError("");
-  };
-
   const openEdit = (payment) => {
     setEditingId(payment.payment_id);
     setForm({
@@ -75,14 +68,29 @@ const Payments = () => {
 
   const savePayment = async (event) => {
     event.preventDefault();
-    setSaving(true);
     setError("");
+    const amount = String(form.amount).trim();
+    const billingMonth = form.billing_month.trim();
+    const dueDate = new Date(form.due_date);
+    if ((!editingId && !form.resident_id) || !/^[0-9]{1,8}(?:\.[0-9]{1,2})?$/.test(amount) || Number(amount) <= 0) {
+      setError("Select a resident and enter a positive amount with up to 2 decimal places.");
+      return;
+    }
+    if (!billingMonth || billingMonth.length > 40) {
+      setError("Billing month is required and must be 40 characters or fewer.");
+      return;
+    }
+    if (!form.due_date || Number.isNaN(dueDate.getTime()) || dueDate.toISOString().slice(0, 10) !== form.due_date) {
+      setError("Enter a valid due date.");
+      return;
+    }
+    setSaving(true);
     try {
       const response = await request(
         editingId ? `/api/admin/payments/${editingId}` : "/api/admin/payments",
         {
           method: editingId ? "PUT" : "POST",
-          body: JSON.stringify(form),
+          body: JSON.stringify({ ...form, amount, billing_month: billingMonth }),
         },
       );
       const data = await response.json();
@@ -146,7 +154,6 @@ const Payments = () => {
         <h1>Payments Management</h1>
         <p className="payments-subtitle">Create resident dues and review database payment records.</p>
       </div>
-      <button className="payments-report-btn" type="button" onClick={openCreate}>＋ Add Payment Due</button>
     </div>
 
     <div className="payment-stats-grid">

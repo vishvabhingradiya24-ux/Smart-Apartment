@@ -670,6 +670,59 @@ const getMyProfile = async (req, res) => {
   }
 };
 
+const updateMyProfile = async (req, res) => {
+  try {
+    if (req.user.user_type !== "Resident") {
+      return res.status(403).json({ message: "Only residents can update this profile" });
+    }
+
+    const residentId = req.user.id;
+    const firstName = req.body.first_name?.trim();
+    const lastName = req.body.last_name?.trim();
+    const email = req.body.email?.trim().toLowerCase();
+    const phone = req.body.phone?.trim();
+
+    if (!firstName || !lastName || !email || !phone) {
+      return res.status(400).json({ message: "All profile fields are required" });
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ message: "Please enter a valid email address" });
+    }
+
+    const [existingUsers] = await pool.query(
+      "SELECT id FROM residents WHERE email = ? AND id <> ? LIMIT 1",
+      [email, residentId]
+    );
+
+    if (existingUsers.length > 0) {
+      return res.status(409).json({ message: "Email already registered" });
+    }
+
+    await pool.query(
+      `UPDATE residents
+       SET first_name = ?, last_name = ?, email = ?, phone = ?
+       WHERE id = ?`,
+      [firstName, lastName, email, phone, residentId]
+    );
+
+    const [residents] = await pool.query(
+      `SELECT id, first_name, last_name, email, phone, block_wing, flat_number, created_at
+       FROM residents WHERE id = ?`,
+      [residentId]
+    );
+
+    if (residents.length === 0) {
+      return res.status(404).json({ message: "Resident not found" });
+    }
+
+    res.status(200).json({ ...residents[0], user_type: "Resident" });
+  } catch (error) {
+    console.error("Update Profile Error:", error);
+    res.status(500).json({ message: "Unable to update profile" });
+  }
+};
+
 
 // ==============================
 // EXPORTS
@@ -682,5 +735,6 @@ module.exports = {
   verifyOTP,
   resetPassword,
   getResidents,
-  getMyProfile
+  getMyProfile,
+  updateMyProfile
 };

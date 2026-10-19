@@ -22,7 +22,6 @@ import ResetPassword from "./pages/auth/ResetPassword";
 
 import ResidentDashboard from "./pages/resident/ResidentDashboard";
 import MyProfile from "./pages/resident/MyProfile";
-import FlatDetails from "./pages/resident/FlatDetails";
 import ResidentComplaints from "./pages/resident/ResidentComplaints";
 import Payment from "./pages/resident/Payment";
 import ServiceRequests from "./pages/resident/ServiceRequests";
@@ -30,6 +29,7 @@ import ResidentVisitors from "./pages/resident/ResidentVisitors";
 import Facilities from "./pages/resident/Facilities";
 import ResidentNotices from "./pages/resident/Notices";
 import ResidentNotifications from "./pages/resident/ResidentNotifications";
+import EmergencyContacts from "./pages/resident/EmergencyContacts";
 import ResidentPolls from "./pages/resident/residentPolls";
 import ResidentLayout from "./pages/resident/ResidentLayout";
 
@@ -95,7 +95,6 @@ function App() {
         <Route path="/resident" element={<ResidentLayout />}>
           <Route index element={<ResidentDashboard />} />
           <Route path="profile" element={<MyProfile />} />
-          <Route path="flat-details" element={<FlatDetails />} />
           <Route path="complaints" element={<ResidentComplaints />} />
           <Route path="payment" element={<Payment />} />
           <Route path="requests" element={<ServiceRequests />} />
@@ -103,6 +102,7 @@ function App() {
           <Route path="facilities" element={<Facilities />} />
           <Route path="notices" element={<ResidentNotices />} />
           <Route path="notifications" element={<ResidentNotifications />} />
+          <Route path="emergency" element={<EmergencyContacts />} />
           <Route path="polls" element={<ResidentPolls />} />
         </Route>
 

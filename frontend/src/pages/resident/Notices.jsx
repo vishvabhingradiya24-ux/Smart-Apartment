@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import "../../css/resident/notice.css";
 
 function Notices() {
@@ -128,9 +127,6 @@ function Notices() {
           </p>
         </div>
 
-        <Link to="/resident" className="notice-back-button">
-          ← Dashboard
-        </Link>
       </header>
 
       <main className="notice-content">

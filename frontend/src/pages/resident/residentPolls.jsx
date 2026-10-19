@@ -52,25 +52,12 @@ const ResidentPolls = () => {
 
         <nav className="resident-polls-nav">
 
-          <Link to="/resident" className="resident-polls-nav-item">
-            <span>⌂</span>
-            Dashboard
-          </Link>
-
           <Link
             to="/resident/profile"
             className="resident-polls-nav-item"
           >
             <span>◯</span>
             My Profile
-          </Link>
-
-          <Link
-            to="/resident/flat-details"
-            className="resident-polls-nav-item"
-          >
-            <span>▦</span>
-            Flat Details
           </Link>
 
           <Link

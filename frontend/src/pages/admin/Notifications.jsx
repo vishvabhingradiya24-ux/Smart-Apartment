@@ -1,15 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import {
-  Activity,
   Bell,
-  CalendarDays,
   ClipboardList,
   CreditCard,
-  Database,
   DoorOpen,
   Megaphone,
-  Pin,
-  RefreshCw,
   Search,
   Waves,
   Wrench,
@@ -57,7 +52,6 @@ const Notifications = () => {
     return matchesSearch && (typeFilter === "All" || item.type === typeFilter);
   }), [notifications, search, typeFilter]);
   const types = [...new Set(notifications.map((item) => item.type))];
-  const todayCount = notifications.filter((item) => item.date && new Date(item.date).toDateString() === new Date().toDateString()).length;
   const getIcon = (type) => {
     const icons = {
       Payment: CreditCard,
@@ -99,36 +93,29 @@ const Notifications = () => {
   return <div className="notifications-page">
     <header className="notifications-header">
       <div>
-        <span className="notifications-overline">ADMIN PANEL <span> / </span> ACTIVITY CENTER</span>
+        <span className="notifications-overline">ADMIN PANEL <span> / </span> NOTIFICATIONS</span>
         <h1>Notifications</h1>
-        <p>Stay up to date with the latest activity across your community.</p>
+        <p>Announcements and updates for your community.</p>
       </div>
-      <div className="notifications-live"><span /> Live activity feed</div>
     </header>
-    <div className="notification-stats">
-      <div className="notification-stat-card stat-total"><div className="notification-stat-icon"><Bell size={18} strokeWidth={1.8} aria-hidden="true" /></div><div><span>Total Activity</span><strong>{notifications.length}</strong></div></div>
-      <div className="notification-stat-card stat-today"><div className="notification-stat-icon"><CalendarDays size={18} strokeWidth={1.8} aria-hidden="true" /></div><div><span>Today</span><strong>{todayCount}</strong></div></div>
-      <div className="notification-stat-card stat-types"><div className="notification-stat-icon"><Activity size={18} strokeWidth={1.8} aria-hidden="true" /></div><div><span>Activity Types</span><strong>{types.length}</strong></div></div>
-      <div className="notification-stat-card stat-showing"><div className="notification-stat-icon"><ClipboardList size={18} strokeWidth={1.8} aria-hidden="true" /></div><div><span>Matching Results</span><strong>{filtered.length}</strong></div></div>
-    </div>
     <div className="notification-filter-card">
-      <div className="notification-filter-heading"><div><strong>Activity feed</strong><span>Find an update by keyword or type</span></div></div>
-      <div className="notification-search"><Search size={16} aria-hidden="true" /><input aria-label="Search activity" placeholder="Search title, details, resident or staff..." value={search} onChange={(event) => setSearch(event.target.value)} /></div>
-      <select aria-label="Filter by activity type" value={typeFilter} onChange={(event) => setTypeFilter(event.target.value)}><option value="All">All activity types</option>{types.map((type) => <option key={type}>{type}</option>)}</select>
+      <div className="notification-filter-heading"><div><strong>Notifications</strong><span>Search or filter by category</span></div></div>
+      <div className="notification-search"><Search size={16} aria-hidden="true" /><input aria-label="Search notifications" placeholder="Search title, details, resident or staff..." value={search} onChange={(event) => setSearch(event.target.value)} /></div>
+      <select aria-label="Filter notifications by category" value={typeFilter} onChange={(event) => setTypeFilter(event.target.value)}><option value="All">All categories</option>{types.map((type) => <option key={type}>{type}</option>)}</select>
     </div>
     {error && <p className="page-error" role="alert">{error}</p>}
     <div className="notification-section">
       <div className="notification-section-header">
-        <div><span className="notification-section-kicker">YOUR COMMUNITY</span><h2>Recent activity</h2><p>Showing {filtered.length} of up to 30 latest updates</p></div>
+        <div><span className="notification-section-kicker">YOUR COMMUNITY</span><h2>Notifications</h2><p>Showing {filtered.length} of up to 30 notifications</p></div>
         <span className="notification-count">{filtered.length} <small>items</small></span>
       </div>
       <div className="notification-list">
         <table className="notification-table">
           <thead><tr><th>Icon</th><th>Notification title</th><th>Category</th><th>Date</th><th>Time</th><th>Read</th><th>Resident / Staff</th></tr></thead>
           <tbody>{loading
-            ? <tr><td colSpan="7" className="notification-table-empty">Loading activity…</td></tr>
+            ? <tr><td colSpan="7" className="notification-table-empty">Loading notifications…</td></tr>
             : filtered.length === 0
-              ? <tr><td colSpan="7" className="notification-table-empty">No matching activity found.</td></tr>
+              ? <tr><td colSpan="7" className="notification-table-empty">No notifications found.</td></tr>
               : filtered.map((item) => <tr className={item.isRead ? "notification-row-read" : "notification-row-unread"} key={item.id}>
                 <td><span className={`notification-icon type-${String(item.type || "activity").toLowerCase()}`}>{getIcon(item.type)}</span></td>
                 <td><div className="notification-table-title" title={item.title}>{item.title}</div><div className="notification-table-message" title={item.message}>{item.message}</div></td>
@@ -141,11 +128,6 @@ const Notifications = () => {
           </tbody>
         </table>
       </div>
-    </div>
-    <div className="notification-info-grid">
-      <div className="notification-info-card"><div className="info-icon"><Pin size={17} aria-hidden="true" /></div><div><h3>Activity sources</h3><p>Updates come from notices, payments, complaints, visitors, staff tasks, and amenity bookings.</p></div></div>
-      <div className="notification-info-card"><div className="info-icon"><Database size={17} aria-hidden="true" /></div><div><h3>Database-backed</h3><p>This feed reflects saved database activity. Read status is saved for your admin account.</p></div></div>
-      <div className="notification-info-card"><div className="info-icon"><RefreshCw size={17} aria-hidden="true" /></div><div><h3>Stay current</h3><p>Reopen or refresh this page to load the newest activity records.</p></div></div>
     </div>
   </div>;
 };

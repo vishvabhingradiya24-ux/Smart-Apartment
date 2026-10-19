@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Bell, Building2, Database, HardDrive, Shield, UserRound } from "lucide-react";
+import { Bell, Building2, Database, Eye, EyeOff, HardDrive, Shield, UserRound } from "lucide-react";
 import "../../css/settings.css";
 
 const defaultNotifications = {
@@ -29,6 +29,7 @@ const Settings = () => {
   const [notifications, setNotifications] = useState(defaultNotifications);
   const [security, setSecurity] = useState(defaultSecurity);
   const [password, setPassword] = useState(emptyPassword);
+  const [passwordVisibility, setPasswordVisibility] = useState({ currentPassword: false, newPassword: false, confirmPassword: false });
   const [databaseStatus, setDatabaseStatus] = useState("Checking");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState("");
@@ -70,15 +71,45 @@ const Settings = () => {
   }, [loadSettings]);
 
   const saveSettings = async (url, body, key, message) => {
-    setSaving(key);
     setError("");
+    if (key === "society" || key === "profile") {
+      const name = String(body.name || "").trim();
+      const email = String(body.email || "").trim();
+      const phone = String(body.phone || "").trim();
+      if (/[A-Z]/.test(email)) {
+        setError("Email must not contain uppercase letters.");
+        return;
+      }
+      if (!name || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        setError(key === "society" ? "Society name and a valid contact email are required." : "Name and a valid email address are required.");
+        return;
+      }
+      if (name.length > 150 || email.length > 150) {
+        setError("Name and email must be 150 characters or fewer.");
+        return;
+      }
+      if (phone && !/^[0-9]{10}$/.test(phone)) {
+        setError("Enter a phone number with exactly 10 digits.");
+        return;
+      }
+      if (key === "society" && (!String(body.totalBlocks ?? "").trim() || !String(body.totalFlats ?? "").trim() || !Number.isInteger(Number(body.totalBlocks)) || Number(body.totalBlocks) < 0 || !Number.isInteger(Number(body.totalFlats)) || Number(body.totalFlats) < 0)) {
+        setError("Block and flat counts must be non-negative whole numbers.");
+        return;
+      }
+      body = { ...body, name, email: email.toLowerCase(), phone };
+      if (key === "society") body.address = String(body.address || "").trim();
+    }
+    setSaving(key);
     setSuccess("");
     try {
       const response = await request(url, { method: "PUT", body: JSON.stringify(body) });
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || "Settings could not be saved");
       setSuccess(data.message || message);
-      if (key === "password") setPassword(emptyPassword);
+      if (key === "password") {
+        setPassword(emptyPassword);
+        setPasswordVisibility({ currentPassword: false, newPassword: false, confirmPassword: false });
+      }
       if (key === "profile" || key === "society") await loadSettings();
     } catch (err) {
       setError(err.message || "Settings could not be saved");
@@ -94,10 +125,10 @@ const Settings = () => {
         <span className="settings-status">{societyData.status || "—"}</span>
       </div>
       <div className="settings-form-grid">
-        <div className="settings-field"><label>Society Name</label><input type="text" name="name" value={societyData.name} onChange={(event) => setSocietyData({ ...societyData, name: event.target.value })} /></div>
-        <div className="settings-field"><label>Contact Email</label><input type="email" name="email" value={societyData.email} onChange={(event) => setSocietyData({ ...societyData, email: event.target.value })} /></div>
+        <div className="settings-field"><label>Society Name</label><input type="text" name="name" maxLength={150} value={societyData.name} onChange={(event) => setSocietyData({ ...societyData, name: event.target.value })} /></div>
+        <div className="settings-field"><label>Contact Email</label><input type="email" name="email" maxLength={150} pattern="[^A-Z]*" title="Email must not contain uppercase letters." value={societyData.email} onChange={(event) => setSocietyData({ ...societyData, email: event.target.value })} /></div>
         <div className="settings-field full-width"><label>Address</label><textarea name="address" value={societyData.address} onChange={(event) => setSocietyData({ ...societyData, address: event.target.value })} rows="3" /></div>
-        <div className="settings-field"><label>Contact Phone</label><input type="text" name="phone" value={societyData.phone} onChange={(event) => setSocietyData({ ...societyData, phone: event.target.value })} /></div>
+        <div className="settings-field"><label>Contact Phone</label><input type="tel" name="phone" inputMode="numeric" pattern="[0-9]{10}" minLength={10} maxLength={10} value={societyData.phone} onChange={(event) => setSocietyData({ ...societyData, phone: event.target.value })} /></div>
         <div className="settings-field"><label>Total Blocks</label><input type="number" min="0" step="1" name="totalBlocks" value={societyData.totalBlocks} onChange={(event) => setSocietyData({ ...societyData, totalBlocks: event.target.value })} /></div>
         <div className="settings-field"><label>Total Flats</label><input type="number" min="0" step="1" name="totalFlats" value={societyData.totalFlats} onChange={(event) => setSocietyData({ ...societyData, totalFlats: event.target.value })} /></div>
       </div>
@@ -110,9 +141,9 @@ const Settings = () => {
       <div className="settings-content-header"><div><h2>Administrator Profile</h2><p>Manage your administrator account information.</p></div></div>
       <div className="admin-profile-preview"><div className="large-admin-avatar">{adminData.name.charAt(0).toUpperCase() || "A"}</div><div><h3>{adminData.name || "—"}</h3><span>Administrator</span></div></div>
       <div className="settings-form-grid">
-        <div className="settings-field"><label>Full Name</label><input type="text" name="name" value={adminData.name} onChange={(event) => setAdminData({ ...adminData, name: event.target.value })} /></div>
-        <div className="settings-field"><label>Email Address</label><input type="email" name="email" value={adminData.email} onChange={(event) => setAdminData({ ...adminData, email: event.target.value })} /></div>
-        <div className="settings-field"><label>Phone Number</label><input type="text" name="phone" value={adminData.phone} onChange={(event) => setAdminData({ ...adminData, phone: event.target.value })} /></div>
+        <div className="settings-field"><label>Full Name</label><input type="text" name="name" maxLength={150} value={adminData.name} onChange={(event) => setAdminData({ ...adminData, name: event.target.value })} /></div>
+        <div className="settings-field"><label>Email Address</label><input type="email" name="email" maxLength={150} pattern="[^A-Z]*" title="Email must not contain uppercase letters." value={adminData.email} onChange={(event) => setAdminData({ ...adminData, email: event.target.value })} /></div>
+        <div className="settings-field"><label>Phone Number</label><input type="tel" name="phone" inputMode="numeric" pattern="[0-9]{10}" minLength={10} maxLength={10} value={adminData.phone} onChange={(event) => setAdminData({ ...adminData, phone: event.target.value })} /></div>
         <div className="settings-field"><label>Role</label><input type="text" value="Administrator" disabled /></div>
       </div>
       <div className="settings-actions"><button className="primary-settings-button" disabled={loading || Boolean(saving)} onClick={() => saveSettings("/api/admin/settings/profile", adminData, "profile", "Admin profile updated")}>{saving === "profile" ? "Saving…" : "✓ Update Profile"}</button></div>
@@ -154,8 +185,22 @@ const Settings = () => {
       <div className="settings-actions"><button className="primary-settings-button" disabled={loading || Boolean(saving)} onClick={() => saveSettings("/api/admin/settings/security", security, "security", "Security preferences saved")}>{saving === "security" ? "Saving…" : "✓ Save Security Settings"}</button></div>
       <form className="settings-password-card" onSubmit={(event) => {
         event.preventDefault();
+        const passwordDigits = (password.newPassword.match(/[0-9]/g) || []).length;
+        if (
+          password.newPassword.length < 5 ||
+          passwordDigits < 3 ||
+          !/[^A-Za-z0-9\s]/.test(password.newPassword) ||
+          new TextEncoder().encode(password.newPassword).length > 72
+        ) {
+          setError("New password must have at least 5 characters, 3 digits and 1 special character, and be no more than 72 bytes.");
+          return;
+        }
         if (password.newPassword !== password.confirmPassword) {
           setError("New password and confirmation do not match");
+          return;
+        }
+        if (password.newPassword === password.currentPassword) {
+          setError("New password must be different from the current password.");
           return;
         }
         saveSettings("/api/admin/settings/password", {
@@ -165,9 +210,35 @@ const Settings = () => {
       }}>
         <div><h3>Change Password</h3><p>Set a new password for your admin account.</p></div>
         <div className="settings-password-fields">
-          <input aria-label="Current password" autoComplete="current-password" minLength="6" required type="password" placeholder="Current password" value={password.currentPassword} onChange={(event) => setPassword({ ...password, currentPassword: event.target.value })} />
-          <input aria-label="New password" autoComplete="new-password" minLength="6" required type="password" placeholder="New password" value={password.newPassword} onChange={(event) => setPassword({ ...password, newPassword: event.target.value })} />
-          <input aria-label="Confirm new password" autoComplete="new-password" minLength="6" required type="password" placeholder="Confirm new password" value={password.confirmPassword} onChange={(event) => setPassword({ ...password, confirmPassword: event.target.value })} />
+          {[
+            ["currentPassword", "Current password", "current-password"],
+            ["newPassword", "New password", "new-password"],
+            ["confirmPassword", "Confirm new password", "new-password"],
+          ].map(([key, label, autoComplete]) => (
+            <div className="settings-password-input-control" key={key}>
+              <input
+                aria-label={label}
+                autoComplete={autoComplete}
+                minLength={key === "currentPassword" ? undefined : 5}
+                maxLength={key === "currentPassword" ? undefined : 72}
+                required
+                type={passwordVisibility[key] ? "text" : "password"}
+                placeholder={label}
+                value={password[key]}
+                onChange={(event) => setPassword({ ...password, [key]: event.target.value })}
+              />
+              <button
+                type="button"
+                className="settings-password-visibility"
+                aria-label={`${passwordVisibility[key] ? "Hide" : "Show"} ${label.toLowerCase()}`}
+                aria-pressed={passwordVisibility[key]}
+                title={`${passwordVisibility[key] ? "Hide" : "Show"} ${label.toLowerCase()}`}
+                onClick={() => setPasswordVisibility({ ...passwordVisibility, [key]: !passwordVisibility[key] })}
+              >
+                {passwordVisibility[key] ? <EyeOff size={16} aria-hidden="true" /> : <Eye size={16} aria-hidden="true" />}
+              </button>
+            </div>
+          ))}
           <button className="secondary-settings-button" disabled={Boolean(saving)} type="submit">{saving === "password" ? "Updating…" : "Update Password"}</button>
         </div>
       </form>

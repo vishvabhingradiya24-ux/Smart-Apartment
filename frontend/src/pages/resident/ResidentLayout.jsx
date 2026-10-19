@@ -126,7 +126,7 @@ const [user] = useState(() => {
             aria-controls="resident-navigation"
             onClick={() => setMobileMenuOpen((open) => !open)}
           >
-            {mobileMenuOpen ? <X size={20} aria-hidden="true" /> : <Menu size={20} aria-hidden="true" />}
+            {mobileMenuOpen ? <X size={21} strokeWidth={2} aria-hidden="true" /> : <Menu size={21} strokeWidth={2} aria-hidden="true" />}
           </button>
 
 
@@ -168,21 +168,6 @@ const [user] = useState(() => {
 
               <span>
                 My Profile
-              </span>
-            </NavLink>
-
-
-            <NavLink
-              to="/resident/flat-details"
-              className={({ isActive }) => `resident-nav-item nav-item ${isActive ? "active" : ""}`}
-              title="Flat Details"
-            >
-              <span className="resident-nav-icon nav-icon">
-                <Building2 size={17} strokeWidth={1.8} aria-hidden="true" />
-              </span>
-
-              <span>
-                Flat Details
               </span>
             </NavLink>
 
