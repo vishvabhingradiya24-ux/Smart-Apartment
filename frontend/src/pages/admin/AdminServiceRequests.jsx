@@ -1,5 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Search, Wrench } from "lucide-react";
+import {
+  SERVICE_REQUEST_DEPARTMENTS,
+  canTakeWork,
+  departmentsFor
+} from "../../constants/workDepartments";
 import "../../css/admin.css";
 
 const formatDate = (value) => {
@@ -222,6 +227,20 @@ const AdminServiceRequests = () => {
                 {filteredRequests.map((request) => {
                   const requestId = Number(request.service_request_id);
                   const residentName = `${request.first_name || ""} ${request.last_name || ""}`.trim() || "Resident";
+                  // Only staff of the matching type can take this request
+                  // (the person already assigned stays in the list).
+                  const eligibleStaff = staff.filter(
+                    (person) =>
+                      canTakeWork(
+                        SERVICE_REQUEST_DEPARTMENTS,
+                        request.service_type,
+                        person.department
+                      ) || person.id === request.assigned_to
+                  );
+                  const neededDepartments = departmentsFor(
+                    SERVICE_REQUEST_DEPARTMENTS,
+                    request.service_type
+                  );
                   return (
                     <tr key={requestId}>
                       <td>
@@ -243,13 +262,17 @@ const AdminServiceRequests = () => {
                         <select
                           aria-label={`Assign request ${requestId} to staff`}
                           value={request.assigned_to || ""}
-                          disabled={updatingId === requestId || staff.length === 0}
+                          disabled={updatingId === requestId || eligibleStaff.length === 0}
                           onChange={(event) => updateAssignment(requestId, event.target.value)}
                         >
                           <option value="" disabled>
-                            {staff.length ? "Select staff" : "No staff available"}
+                            {eligibleStaff.length
+                              ? "Select staff"
+                              : neededDepartments
+                                ? `No ${neededDepartments} staff yet`
+                                : "No staff available"}
                           </option>
-                          {staff.map((person) => (
+                          {eligibleStaff.map((person) => (
                             <option key={person.id} value={person.id}>
                               {person.first_name} {person.last_name} · {person.department || "No department"}
                             </option>

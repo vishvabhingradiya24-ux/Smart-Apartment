@@ -9,7 +9,7 @@ SET @add_staff_department_sql = IF(
       AND column_name = 'department'
   ),
   'SELECT 1',
-  'ALTER TABLE staff ADD COLUMN department ENUM(''Maintenance'', ''Electrical'', ''Plumbing'', ''Housekeeping'', ''Garden Maintenance'') NULL AFTER phone'
+  'ALTER TABLE staff ADD COLUMN department ENUM(''Maintenance'', ''Electrical'', ''Plumbing'', ''Housekeeping'', ''Garden Maintenance'', ''Security'', ''Facility Supervisor'') NULL AFTER phone'
 );
 PREPARE add_staff_department_statement FROM @add_staff_department_sql;
 EXECUTE add_staff_department_statement;

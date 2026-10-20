@@ -1,5 +1,10 @@
 import { useEffect, useState } from "react";
 import { Check, ClipboardList, Clock3, Search, Wrench } from "lucide-react";
+import {
+  COMPLAINT_CATEGORY_DEPARTMENTS,
+  canTakeWork,
+  departmentsFor
+} from "../../constants/workDepartments";
 import "../../css/complaints.css";
 
 const Complaints = () => {
@@ -196,6 +201,23 @@ assignedTo:
     );
   };
 
+
+  // Only staff of the matching type can take this complaint
+  // (the person already assigned stays in the list).
+  const eligibleStaff = selectedComplaint
+    ? staffList.filter(
+        (staff) =>
+          canTakeWork(
+            COMPLAINT_CATEGORY_DEPARTMENTS,
+            selectedComplaint.category,
+            staff.department
+          ) || staff.id === selectedComplaint.assignedStaffId
+      )
+    : staffList;
+
+  const neededDepartments = selectedComplaint
+    ? departmentsFor(COMPLAINT_CATEGORY_DEPARTMENTS, selectedComplaint.category)
+    : "";
 
   // ==========================================
   // ASSIGN COMPLAINT
@@ -904,14 +926,27 @@ const handleConfirmAssign = async () => {
             >
               <option value="">Select staff member</option>
 
-              {staffList.map((staff) => (
+              {eligibleStaff.map((staff) => (
                 <option key={staff.id} value={staff.id}>
-                  {staff.first_name} {staff.last_name}
+                  {staff.first_name} {staff.last_name} · {staff.department || "No staff type"}
                 </option>
               ))}
             </select>
 
-            {staffList.length === 0 && (
+            {neededDepartments && (
+              <p
+                style={{
+                  color: "#708692",
+                  fontSize: "11px",
+                  marginTop: "8px",
+                }}
+              >
+                {selectedComplaint.category} complaints go to {neededDepartments} staff
+                (or a Facility Supervisor).
+              </p>
+            )}
+
+            {eligibleStaff.length === 0 && (
               <p
                 style={{
                   color: "#c04b4b",
@@ -919,7 +954,9 @@ const handleConfirmAssign = async () => {
                   marginTop: "8px",
                 }}
               >
-                No staff members found.
+                {neededDepartments
+                  ? `No ${neededDepartments} staff registered yet. Add one in the Staff page first.`
+                  : "No staff members found."}
               </p>
             )}
 
@@ -954,19 +991,19 @@ const handleConfirmAssign = async () => {
 
               <button
                 type="button"
-                disabled={assigning || staffList.length === 0}
+                disabled={assigning || eligibleStaff.length === 0}
                 onClick={handleConfirmAssign}
                 style={{
                   padding: "10px 18px",
                   border: "none",
                   borderRadius: "9px",
                   background:
-                    assigning || staffList.length === 0
+                    assigning || eligibleStaff.length === 0
                       ? "#9dbfc5"
                       : "#167a8a",
                   color: "#ffffff",
                   cursor:
-                    assigning || staffList.length === 0
+                    assigning || eligibleStaff.length === 0
                       ? "not-allowed"
                       : "pointer",
                   fontSize: "11px",

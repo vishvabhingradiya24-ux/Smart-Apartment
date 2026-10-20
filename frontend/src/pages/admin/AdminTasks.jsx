@@ -640,6 +640,8 @@ const AdminTask = () => {
                       >
                         {staff.first_name}{" "}
                         {staff.last_name}
+                        {" · "}
+                        {staff.department || "No staff type"}
                       </option>
 
                     ))}

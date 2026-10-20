@@ -1,4 +1,9 @@
 const { pool } = require("../config/db");
+const {
+  COMPLAINT_CATEGORY_DEPARTMENTS,
+  canTakeWork,
+  mismatchMessage
+} = require("../constants/workDepartments");
 
 const isAdminUser = (user) =>
   String(user?.role || user?.user_type || "").trim().toLowerCase() === "admin";
@@ -316,7 +321,7 @@ const assignComplaintToStaff = async (req, res) => {
 
     // Check complaint exists
     const [complaints] = await pool.query(
-      `SELECT complaint_id
+      `SELECT complaint_id, category
        FROM complaints
        WHERE complaint_id = ?`,
       [complaint_id]
@@ -335,7 +340,8 @@ const assignComplaintToStaff = async (req, res) => {
       `SELECT
         id,
         first_name,
-        last_name
+        last_name,
+        department
        FROM staff
        WHERE id = ?`,
       [staff_id]
@@ -345,6 +351,25 @@ const assignComplaintToStaff = async (req, res) => {
     if (staff.length === 0) {
       return res.status(404).json({
         message: "Staff member not found"
+      });
+    }
+
+
+    // Only a staff member of the matching type can take this complaint
+    if (
+      !canTakeWork(
+        COMPLAINT_CATEGORY_DEPARTMENTS,
+        complaints[0].category,
+        staff[0].department
+      )
+    ) {
+      return res.status(400).json({
+        message: mismatchMessage(
+          "complaints",
+          complaints[0].category,
+          COMPLAINT_CATEGORY_DEPARTMENTS,
+          staff[0].department
+        )
       });
     }
 

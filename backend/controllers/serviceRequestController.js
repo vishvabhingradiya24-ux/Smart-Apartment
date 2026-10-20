@@ -1,4 +1,9 @@
 const { pool } = require("../config/db");
+const {
+  SERVICE_REQUEST_DEPARTMENTS,
+  canTakeWork,
+  mismatchMessage
+} = require("../constants/workDepartments");
 
 // ==========================================
 // GET MY SERVICE REQUESTS
@@ -258,7 +263,7 @@ const assignServiceRequestToStaff = async (req, res) => {
     }
 
     const [requests] = await pool.query(
-      "SELECT service_request_id FROM service_requests WHERE service_request_id = ?",
+      "SELECT service_request_id, service_type FROM service_requests WHERE service_request_id = ?",
       [requestId]
     );
     if (requests.length === 0) {
@@ -266,11 +271,29 @@ const assignServiceRequestToStaff = async (req, res) => {
     }
 
     const [staff] = await pool.query(
-      "SELECT id FROM staff WHERE id = ?",
+      "SELECT id, department FROM staff WHERE id = ?",
       [staffId]
     );
     if (staff.length === 0) {
       return res.status(404).json({ message: "Staff member not found" });
+    }
+
+    // Only a staff member of the matching type can take this request
+    if (
+      !canTakeWork(
+        SERVICE_REQUEST_DEPARTMENTS,
+        requests[0].service_type,
+        staff[0].department
+      )
+    ) {
+      return res.status(400).json({
+        message: mismatchMessage(
+          "service requests",
+          requests[0].service_type,
+          SERVICE_REQUEST_DEPARTMENTS,
+          staff[0].department
+        )
+      });
     }
 
     await pool.query(

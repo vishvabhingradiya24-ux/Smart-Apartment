@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import "../../css/staff/staff_dashboard.css";
 import "../../css/staff/staff_shared_theme.css";
 import { useNavigate } from "react-router-dom";
+import { workSummary } from "../../constants/workDepartments";
 
 const mergeStoredStaff = (serverStaff) => {
   let currentStaff = {};
@@ -476,7 +477,7 @@ function StaffDashboard() {
 
             <p>
               {staff.department
-                ? `Manage ${staff.department.toLowerCase()} assignments, requests, and tasks.`
+                ? `You receive ${workSummary(staff.department)}.`
                 : "Set your department in My Profile to complete your staff dashboard."}
             </p>
 

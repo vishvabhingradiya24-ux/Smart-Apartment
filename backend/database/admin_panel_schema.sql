@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS staff (
   last_name VARCHAR(100) NOT NULL,
   email VARCHAR(150) NOT NULL,
   phone VARCHAR(30) NOT NULL,
-  department ENUM('Maintenance', 'Electrical', 'Plumbing', 'Housekeeping', 'Garden Maintenance') NULL,
+  department ENUM('Maintenance', 'Electrical', 'Plumbing', 'Housekeeping', 'Garden Maintenance', 'Security', 'Facility Supervisor') NULL,
   password VARCHAR(255) NOT NULL,
   created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
