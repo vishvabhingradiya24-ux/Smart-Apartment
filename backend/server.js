@@ -41,6 +41,7 @@ const staffRoutes = require("./routes/staffRoutes");
 const adminTaskRoutes = require("./routes/adminTaskRoutes");
 const visitorRoutes = require("./routes/visitorRoutes");
 const noticeRoutes = require("./routes/noticeRoutes");
+const publicRoutes = require("./routes/publicRoutes");
 
 
 
@@ -90,6 +91,9 @@ app.use(
   "/api/notices",
   noticeRoutes
 );
+
+// Public overview for the Home page (aggregate data only, no login needed)
+app.use("/api/public", publicRoutes);
 // ==========================================
 // HOME ROUTE
 // ==========================================

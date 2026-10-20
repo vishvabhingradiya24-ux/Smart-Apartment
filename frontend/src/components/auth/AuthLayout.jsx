@@ -1,11 +1,11 @@
 import { useRef } from "react";
 import { BellRing, CreditCard, ShieldCheck } from "lucide-react";
 import BrandLogo from "../BrandLogo";
-import courtyardPhoto from "../../assets/community-courtyard.jpg";
+import sidePhoto from "../../assets/public/auth-balconies.jpg";
 import "../../css/brand.css";
 import "../../css/auth.css";
 
-// Shared split-screen layout: illustrated panel on the left,
+// Shared split-screen layout: apartment photo panel on the left,
 // the page's form card on the right.
 function AuthLayout({
   headline,
@@ -51,7 +51,7 @@ function AuthLayout({
         onMouseLeave={handleLeave}
       >
         <div className="au-aside-photo" aria-hidden="true">
-          <img src={courtyardPhoto} alt="" />
+          <img src={sidePhoto} alt="" />
         </div>
 
         <div className="au-aside-top">

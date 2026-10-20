@@ -728,7 +728,7 @@
   align-items: flex-end;
   gap: 10px;
   height: 100px;
-  margin: 16px 0;
+  margin: 16px 0 6px;
   padding: 0 4px;
   border-bottom: 1px dashed var(--sa-line);
 }
@@ -863,7 +863,8 @@
 
 .sa-facility-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(250px, 280px));
+  justify-content: center;
   gap: 20px;
 }
 
@@ -876,22 +877,19 @@
   padding: 26px;
   overflow: hidden;
   border-radius: 26px;
+  background: var(--sa-night-2);
   color: #fff;
   box-shadow: 0 16px 40px rgba(16, 38, 36, 0.16);
 }
 
-.sa-facility.bg-pool { background: linear-gradient(160deg, #2b93b8, #155a78); }
-.sa-facility.bg-gym { background: linear-gradient(160deg, #1a8c75, #0f4d41); }
-.sa-facility.bg-hall { background: linear-gradient(160deg, #d98a32, #9c5518); }
-.sa-facility.bg-garden { background: linear-gradient(160deg, #3fa86e, #1d6a45); }
-
+/* Darkens the bottom of the photo so the white text stays readable. */
 .sa-facility::before {
   content: "";
   position: absolute;
   inset: 0;
+  z-index: 1;
   background:
-    radial-gradient(220px 160px at 90% 0%, rgba(255, 255, 255, 0.28), transparent 70%),
-    linear-gradient(0deg, rgba(10, 24, 24, 0.38), transparent 55%);
+    linear-gradient(0deg, rgba(10, 24, 24, 0.88) 0%, rgba(10, 24, 24, 0.35) 48%, rgba(10, 24, 24, 0.05) 100%);
 }
 
 .sa-facility {
@@ -907,18 +905,21 @@
 
 .sa-facility > * {
   position: relative;
+  z-index: 2;
 }
 
-.sa-facility-ghost {
+.sa-facility > .sa-facility-photo {
   position: absolute;
-  top: -10px;
-  right: -26px;
-  color: rgba(255, 255, 255, 0.2);
-  transition: transform 0.5s ease;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.7s ease;
 }
 
-.sa-facility:hover .sa-facility-ghost {
-  transform: rotate(-12deg) scale(1.12);
+.sa-facility:hover .sa-facility-photo {
+  transform: scale(1.09);
 }
 
 .sa-facility-icon {
@@ -973,6 +974,140 @@
 
 
 /* =====================================================
+   LIVE DATA STATES (loading, empty, status, notes)
+===================================================== */
+
+.sa-live-note {
+  max-width: 520px;
+  margin-top: 22px;
+  padding: 12px 16px;
+  border: 1px solid #f5d9a8;
+  border-radius: 12px;
+  background: var(--sa-warning-soft);
+  color: #8a4b05;
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+.sa-mock-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  color: var(--sa-success);
+  font-size: 11.5px;
+  font-style: normal;
+  font-weight: 700;
+}
+
+.sa-mock-live::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--sa-success);
+  animation: sa-pulse-dot 2s infinite;
+}
+
+.sa-mock-chart span.is-empty {
+  background: var(--sa-line);
+}
+
+.sa-mock-days {
+  display: flex;
+  gap: 10px;
+  padding: 0 4px;
+}
+
+.sa-mock-days span {
+  flex: 1;
+  font-size: 10.5px;
+  font-weight: 600;
+  text-align: center;
+  color: var(--sa-muted);
+}
+
+.sa-mock-caption {
+  margin: 8px 0 14px;
+  font-size: 12px;
+  text-align: center;
+  color: var(--sa-muted);
+}
+
+.sa-service-count {
+  font-weight: 600;
+  color: var(--tone);
+}
+
+.sa-facility .sa-facility-status {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  backdrop-filter: blur(8px);
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.sa-facility-status.is-open {
+  background: rgba(22, 163, 74, 0.85);
+}
+
+.sa-facility-status.is-closed {
+  background: rgba(70, 82, 88, 0.85);
+}
+
+.sa-empty {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 44px 32px;
+  border: 1.5px dashed #c9d8d3;
+  border-radius: 22px;
+  background: #fff;
+  text-align: center;
+}
+
+.sa-empty-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  border-radius: 17px;
+  background: var(--sa-primary-soft);
+  color: var(--sa-primary);
+}
+
+.sa-empty h3 {
+  margin-top: 18px;
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--sa-ink);
+}
+
+.sa-empty p {
+  margin-top: 8px;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--sa-ink-soft);
+}
+
+.sa-skeleton {
+  min-height: 330px;
+  border-radius: 26px;
+  background: linear-gradient(100deg, #e6ece9 30%, #f3f6f5 50%, #e6ece9 70%);
+  background-size: 200% 100%;
+  animation: sa-shimmer 1.4s linear infinite;
+}
+
+@keyframes sa-shimmer {
+  from { background-position: 100% 0; }
+  to { background-position: -100% 0; }
+}
+
+
+/* =====================================================
    CTA
 ===================================================== */
 
@@ -987,7 +1122,7 @@
   border-radius: 34px;
   background:
     linear-gradient(90deg, rgba(15, 31, 32, 0.94) 0%, rgba(17, 44, 39, 0.78) 48%, rgba(17, 44, 39, 0.35) 100%),
-    url("../assets/resident-community.jpg") center / cover no-repeat;
+    url("../assets/public/cta-gardens.jpg") center 38% / cover no-repeat;
   box-shadow: var(--sa-shadow-lg);
 }
 
@@ -1108,10 +1243,6 @@
   }
 
   .sa-feature-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .sa-facility-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 

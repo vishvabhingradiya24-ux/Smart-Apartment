@@ -2,30 +2,42 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowRight,
-  BellRing,
   Building2,
   CalendarDays,
   Check,
+  ClipboardCheck,
   CreditCard,
+  Droplets,
   Dumbbell,
+  Flower2,
+  Home as HomeIcon,
   Mail,
+  MapPin,
   Menu,
   PartyPopper,
   Phone,
   ShieldCheck,
+  Sparkles,
   Trees,
   UserCheck,
   Users,
   Waves,
   Wrench,
-  X
+  X,
+  Zap
 } from "lucide-react";
 import BrandLogo from "../components/BrandLogo";
 import Reveal from "../components/Reveal";
 import { useCountUp, useInView } from "../hooks/useInView";
-import courtyardPhoto from "../assets/community-courtyard.jpg";
-import exteriorPhoto from "../assets/apartment.jpg";
-import livingRoomPhoto from "../assets/resident-community.jpg";
+import { timeAgo, usePublicOverview } from "../hooks/usePublicOverview";
+import { STAFF_DEPARTMENTS } from "../constants/staffDepartments";
+import heroPhoto from "../assets/public/hero-apartment.jpg";
+import livingRoomPhoto from "../assets/public/hero-living-room.jpg";
+import aboutPhoto from "../assets/public/about-community.jpg";
+import poolPhoto from "../assets/public/facility-pool.jpg";
+import gymPhoto from "../assets/public/facility-gym.jpg";
+import hallPhoto from "../assets/public/facility-hall.jpg";
+import gardenPhoto from "../assets/public/facility-garden.jpg";
 import "../css/brand.css";
 import "../css/home.css";
 
@@ -76,12 +88,30 @@ const FEATURES = [
   }
 ];
 
-const FACILITIES = [
-  { icon: Waves, name: "Swimming Pool", note: "Open 6 AM - 9 PM", bg: "pool" },
-  { icon: Dumbbell, name: "Gym", note: "Fully equipped", bg: "gym" },
-  { icon: PartyPopper, name: "Community Hall", note: "Events and parties", bg: "hall" },
-  { icon: Trees, name: "Garden", note: "Green walking trails", bg: "garden" }
+// Facilities come from the database. This only picks a matching photo and
+// icon from the facility's name; anything unrecognised gets a neutral photo.
+const FACILITY_LOOKS = [
+  { match: /pool|swim/i, icon: Waves, photo: poolPhoto },
+  { match: /gym|fitness|yoga|sport/i, icon: Dumbbell, photo: gymPhoto },
+  { match: /hall|club|party|event|banquet|community/i, icon: PartyPopper, photo: hallPhoto },
+  { match: /garden|park|lawn|play|jogging|trail/i, icon: Trees, photo: gardenPhoto }
 ];
+
+const facilityLook = (name) =>
+  FACILITY_LOOKS.find((look) => look.match.test(name)) || {
+    icon: Building2,
+    photo: aboutPhoto
+  };
+
+const DEPARTMENT_LOOKS = {
+  Maintenance: { icon: Wrench, tone: "amber" },
+  Electrical: { icon: Zap, tone: "blue" },
+  Plumbing: { icon: Droplets, tone: "teal" },
+  Housekeeping: { icon: Sparkles, tone: "purple" },
+  "Garden Maintenance": { icon: Flower2, tone: "green" },
+  Security: { icon: ShieldCheck, tone: "rose" },
+  "Facility Supervisor": { icon: ClipboardCheck, tone: "blue" }
+};
 
 const FOLLOW_CURSOR = (event) => {
   const rect = event.currentTarget.getBoundingClientRect();
@@ -90,9 +120,11 @@ const FOLLOW_CURSOR = (event) => {
   event.currentTarget.style.setProperty("--y", `${event.clientY - rect.top}px`);
 };
 
-function Stat({ icon: Icon, target, suffix = "", text, label }) {
+// `value` is null while the data is loading (or unavailable), so a dash is
+// shown instead of a made-up number.
+function Stat({ icon: Icon, value, label }) {
   const { ref, inView } = useInView({ threshold: 0.6 });
-  const value = useCountUp(target || 0, inView);
+  const counted = useCountUp(value ?? 0, inView && value !== null);
 
   return (
     <div className="sa-stat" ref={ref}>
@@ -101,83 +133,112 @@ function Stat({ icon: Icon, target, suffix = "", text, label }) {
       </span>
 
       <div>
-        <strong>{text || `${value}${suffix}`}</strong>
+        <strong>{value === null ? "—" : counted}</strong>
         <span>{label}</span>
       </div>
     </div>
   );
 }
 
-function DashboardMock() {
+const RECENT_ICONS = {
+  complaint: { icon: Wrench, tone: "amber" },
+  request: { icon: Wrench, tone: "blue" },
+  visitor: { icon: UserCheck, tone: "green" }
+};
+
+function DashboardMock({ data }) {
   const { ref, inView } = useInView({ threshold: 0.3 });
-  const bars = [38, 62, 48, 80, 58, 92, 70];
+
+  const stats = data?.stats;
+  const activity = data?.activity ?? [];
+  const recent = data?.recent ?? [];
+  const peak = Math.max(0, ...activity.map((day) => day.count));
+  const shown = (value) => (stats ? value : "—");
 
   return (
-    <div
-      className={`sa-mock ${inView ? "is-visible" : ""}`}
-      ref={ref}
-      aria-hidden="true"
-    >
+    <div className={`sa-mock ${inView ? "is-visible" : ""}`} ref={ref}>
       <div className="sa-mock-bar">
         <i />
         <i />
         <i />
-        <span>Society overview</span>
+        <span>{data?.society?.name || "Society overview"}</span>
+        {data && <em className="sa-mock-live">Live</em>}
       </div>
 
       <div className="sa-mock-stats">
         <div>
-          <small>Dues collected</small>
-          <strong>₹4.8L</strong>
+          <small>Open requests</small>
+          <strong>{shown(stats?.openRequests)}</strong>
         </div>
         <div>
-          <small>Open requests</small>
-          <strong>12</strong>
+          <small>Complaints resolved</small>
+          <strong>{shown(stats?.complaintsResolved)}</strong>
         </div>
         <div>
           <small>Visitors today</small>
-          <strong>38</strong>
+          <strong>{shown(stats?.visitorsToday)}</strong>
         </div>
       </div>
 
-      <div className="sa-mock-chart">
-        {bars.map((height, index) => (
-          <span
-            key={index}
-            style={{ "--h": `${height}%`, "--d": `${index * 90}ms` }}
-          />
+      <div className="sa-mock-chart" role="img" aria-label="Society activity in the last 7 days">
+        {(activity.length ? activity : Array.from({ length: 7 }, () => ({ count: 0 }))).map(
+          (day, index) => (
+            <span
+              key={index}
+              className={peak === 0 ? "is-empty" : ""}
+              style={{
+                "--h": `${peak === 0 ? 6 : Math.max(8, (day.count / peak) * 100)}%`,
+                "--d": `${index * 90}ms`
+              }}
+              title={day.label ? `${day.label}: ${day.count}` : undefined}
+            />
+          )
+        )}
+      </div>
+
+      <div className="sa-mock-days" aria-hidden="true">
+        {(activity.length ? activity : []).map((day) => (
+          <span key={day.date}>{day.label}</span>
         ))}
       </div>
 
-      <ul className="sa-mock-list">
-        <li>
-          <span className="sa-mock-dot green">
-            <Check size={14} />
-          </span>
-          Lift complaint resolved
-          <small>2m ago</small>
-        </li>
-        <li>
-          <span className="sa-mock-dot blue">
-            <UserCheck size={14} />
-          </span>
-          Visitor approved at Gate 1
-          <small>9m ago</small>
-        </li>
-        <li>
-          <span className="sa-mock-dot amber">
-            <CreditCard size={14} />
-          </span>
-          Maintenance paid - A 204
-          <small>21m ago</small>
-        </li>
-      </ul>
+      <p className="sa-mock-caption">
+        {peak === 0 && stats
+          ? "No activity recorded in the last 7 days yet."
+          : "Visitors, complaints and requests in the last 7 days"}
+      </p>
+
+      {recent.length > 0 && (
+        <ul className="sa-mock-list">
+          {recent.map((item, index) => {
+            const { icon: Icon, tone } = RECENT_ICONS[item.type] || RECENT_ICONS.request;
+
+            return (
+              <li key={index}>
+                <span className={`sa-mock-dot ${tone}`}>
+                  <Icon size={14} />
+                </span>
+                {item.text}
+                <small>{timeAgo(item.at)}</small>
+              </li>
+            );
+          })}
+        </ul>
+      )}
     </div>
   );
 }
 
 function Home() {
   const visualRef = useRef(null);
+  const { data, loading, error } = usePublicOverview();
+
+  const society = data?.society ?? null;
+  const stats = data?.stats ?? null;
+  const facilities = data?.facilities ?? [];
+  const departmentCounts = new Map(
+    (data?.departments ?? []).map((item) => [item.name, item.staff])
+  );
 
   const [scrolled, setScrolled] = useState(
     () => typeof window !== "undefined" && window.scrollY > 12
@@ -323,7 +384,9 @@ function Home() {
           <div className="sa-hero-copy">
             <span className="sa-pill">
               <i className="sa-pill-dot" />
-              Smart society management
+              {society?.name
+                ? `${society.name}${society.address ? ` - ${society.address}` : ""}`
+                : "Smart society management"}
             </span>
 
             <h1>
@@ -349,10 +412,21 @@ function Home() {
             </div>
 
             <div className="sa-stats">
-              <Stat icon={Users} target={500} suffix="+" label="Residents" />
-              <Stat icon={Building2} target={50} suffix="+" label="Facilities" />
-              <Stat icon={ShieldCheck} text="24/7" label="Security" />
+              <Stat icon={Users} value={stats ? stats.residents : null} label="Residents" />
+              <Stat icon={ShieldCheck} value={stats ? stats.staff : null} label="Staff members" />
+              {society?.totalFlats ? (
+                <Stat icon={Building2} value={society.totalFlats} label="Flats" />
+              ) : (
+                <Stat icon={Building2} value={stats ? stats.facilities : null} label="Facilities" />
+              )}
             </div>
+
+            {error && (
+              <p className="sa-live-note">
+                Live society data is unavailable right now. Please check that
+                the server is running and refresh the page.
+              </p>
+            )}
           </div>
 
           <div
@@ -363,8 +437,8 @@ function Home() {
           >
             <div className="sa-hero-photo">
               <img
-                src={courtyardPhoto}
-                alt="Modern apartment buildings with a green courtyard"
+                src={heroPhoto}
+                alt="Modern apartment building with balconies and palm trees"
               />
             </div>
 
@@ -375,35 +449,47 @@ function Home() {
               />
             </div>
 
-            <div className="sa-float sa-float-1">
-              <span className="sa-float-icon green">
-                <ShieldCheck size={18} />
-              </span>
-              <div>
-                <strong>Visitor approved</strong>
-                <small>Courier - Gate 2</small>
+            {society && (
+              <div className="sa-float sa-float-1">
+                <span className="sa-float-icon green">
+                  <MapPin size={18} />
+                </span>
+                <div>
+                  <strong>{society.name}</strong>
+                  {society.address && <small>{society.address}</small>}
+                </div>
               </div>
-            </div>
+            )}
 
-            <div className="sa-float sa-float-2">
-              <span className="sa-float-icon blue">
-                <CreditCard size={18} />
-              </span>
-              <div>
-                <strong>₹2,500 paid</strong>
-                <small>Maintenance - Flat A 204</small>
+            {stats && (
+              <div className="sa-float sa-float-2">
+                <span className="sa-float-icon blue">
+                  <Users size={18} />
+                </span>
+                <div>
+                  <strong>
+                    {stats.residents} {stats.residents === 1 ? "resident" : "residents"}
+                  </strong>
+                  <small>Registered members</small>
+                </div>
               </div>
-            </div>
+            )}
 
-            <div className="sa-float sa-float-3">
-              <span className="sa-float-icon amber">
-                <BellRing size={18} />
-              </span>
-              <div>
-                <strong>New notice</strong>
-                <small>Water tank cleaning</small>
+            {society?.totalFlats > 0 && (
+              <div className="sa-float sa-float-3">
+                <span className="sa-float-icon amber">
+                  <HomeIcon size={18} />
+                </span>
+                <div>
+                  <strong>{society.totalFlats} flats</strong>
+                  <small>
+                    {society.totalBlocks > 0
+                      ? `${society.totalBlocks} ${society.totalBlocks === 1 ? "block" : "blocks"}`
+                      : "Society size"}
+                  </small>
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
         </div>
@@ -450,6 +536,53 @@ function Home() {
       </section>
 
 
+      {/* SERVICE TEAMS (staff departments, counts from the database) */}
+      <section className="sa-section sa-services" id="services">
+        <div className="sa-container">
+
+          <Reveal className="sa-section-head">
+            <span className="sa-eyebrow">Service teams</span>
+            <h2>People who keep your society running</h2>
+            <p>
+              Dedicated teams for every kind of request, from a leaking tap to
+              a tripped fuse.
+            </p>
+          </Reveal>
+
+          <div className="sa-feature-grid">
+            {STAFF_DEPARTMENTS.map((name, index) => {
+              const { icon: Icon, tone } = DEPARTMENT_LOOKS[name];
+              const count = departmentCounts.has(name) ? departmentCounts.get(name) : null;
+
+              return (
+                <Reveal key={name} delay={(index % 3) * 90} className="sa-cell">
+                  <article
+                    className={`sa-feature sa-service tone-${tone}`}
+                    onMouseMove={FOLLOW_CURSOR}
+                  >
+                    <span className="sa-feature-icon">
+                      <Icon size={26} aria-hidden="true" />
+                    </span>
+
+                    <h3>{name}</h3>
+
+                    <p className="sa-service-count">
+                      {count === null
+                        ? "—"
+                        : count === 0
+                          ? "Team being set up"
+                          : `${count} ${count === 1 ? "staff member" : "staff members"}`}
+                    </p>
+                  </article>
+                </Reveal>
+              );
+            })}
+          </div>
+
+        </div>
+      </section>
+
+
       {/* ABOUT */}
       <section className="sa-section sa-about" id="about">
         <div className="sa-container sa-about-grid">
@@ -457,22 +590,28 @@ function Home() {
           <Reveal className="sa-about-visual">
             <div className="sa-about-photo">
               <img
-                src={exteriorPhoto}
-                alt="Apartment blocks with landscaped walkways"
+                src={aboutPhoto}
+                alt="Apartment buildings with a landscaped garden"
               />
             </div>
 
-            <DashboardMock />
+            <DashboardMock data={data} />
 
-            <div className="sa-about-badge">
-              <span className="sa-about-badge-icon">
-                <Users size={20} aria-hidden="true" />
-              </span>
-              <div>
-                <strong>A better community</strong>
-                <p>Together we build a safer and happier society.</p>
+            {society && (
+              <div className="sa-about-badge">
+                <span className="sa-about-badge-icon">
+                  <Users size={20} aria-hidden="true" />
+                </span>
+                <div>
+                  <strong>{society.name}</strong>
+                  <p>
+                    {society.totalFlats > 0
+                      ? `${society.totalFlats} flats${society.totalBlocks > 0 ? ` in ${society.totalBlocks} blocks` : ""}`
+                      : society.address}
+                  </p>
+                </div>
               </div>
-            </div>
+            )}
           </Reveal>
 
           <Reveal delay={120} className="sa-about-copy">
@@ -521,29 +660,73 @@ function Home() {
             <p>Book your favourite spaces in a few taps from your dashboard.</p>
           </Reveal>
 
-          <div className="sa-facility-grid">
-            {FACILITIES.map(({ icon: Icon, name, note, bg }, index) => (
-              <Reveal key={name} delay={index * 90} className="sa-cell">
-                <article className={`sa-facility bg-${bg}`}>
-                  <span className="sa-facility-ghost" aria-hidden="true">
-                    <Icon size={150} strokeWidth={1.2} />
-                  </span>
+          {loading && (
+            <div className="sa-facility-grid" aria-hidden="true">
+              {[0, 1, 2, 3].map((item) => (
+                <div key={item} className="sa-skeleton" />
+              ))}
+            </div>
+          )}
 
-                  <span className="sa-facility-icon">
-                    <Icon size={26} aria-hidden="true" />
-                  </span>
+          {!loading && facilities.length === 0 && (
+            <Reveal className="sa-empty">
+              <span className="sa-empty-icon">
+                <Building2 size={26} aria-hidden="true" />
+              </span>
+              <h3>
+                {error ? "Facilities are unavailable right now" : "No facilities added yet"}
+              </h3>
+              <p>
+                {error
+                  ? "We could not reach the server. Please try again in a moment."
+                  : "Swimming pool, gym, hall and more will appear here as soon as your society adds them."}
+              </p>
+            </Reveal>
+          )}
 
-                  <h3>{name}</h3>
-                  <p>{note}</p>
+          {facilities.length > 0 && (
+            <div className="sa-facility-grid">
+              {facilities.map((facility, index) => {
+                const { icon: Icon, photo } = facilityLook(facility.name);
 
-                  <Link to="/login" className="sa-facility-cta">
-                    Book now
-                    <ArrowRight size={15} aria-hidden="true" />
-                  </Link>
-                </article>
-              </Reveal>
-            ))}
-          </div>
+                return (
+                  <Reveal key={facility.id} delay={(index % 4) * 90} className="sa-cell">
+                    <article className="sa-facility">
+                      <img
+                        className="sa-facility-photo"
+                        src={photo}
+                        alt={`${facility.name} at the society`}
+                      />
+
+                      <span
+                        className={`sa-facility-status ${facility.available ? "is-open" : "is-closed"}`}
+                      >
+                        {facility.available ? "Available" : "Unavailable"}
+                      </span>
+
+                      <span className="sa-facility-icon">
+                        <Icon size={26} aria-hidden="true" />
+                      </span>
+
+                      <h3>{facility.name}</h3>
+                      <p>
+                        {facility.description ||
+                          facility.location ||
+                          "Open to all residents"}
+                      </p>
+
+                      {facility.available && (
+                        <Link to="/login" className="sa-facility-cta">
+                          Book now
+                          <ArrowRight size={15} aria-hidden="true" />
+                        </Link>
+                      )}
+                    </article>
+                  </Reveal>
+                );
+              })}
+            </div>
+          )}
 
         </div>
       </section>
@@ -603,18 +786,30 @@ function Home() {
 
           <div>
             <h4>Contact us</h4>
-            <p>
-              <Mail size={16} aria-hidden="true" /> support@smartapartment.com
-            </p>
-            <p>
-              <Phone size={16} aria-hidden="true" /> +91 98765 43210
-            </p>
+            {society?.contactEmail && (
+              <p>
+                <Mail size={16} aria-hidden="true" /> {society.contactEmail}
+              </p>
+            )}
+            {society?.contactPhone && (
+              <p>
+                <Phone size={16} aria-hidden="true" /> {society.contactPhone}
+              </p>
+            )}
+            {society?.address && (
+              <p>
+                <MapPin size={16} aria-hidden="true" /> {society.address}
+              </p>
+            )}
+            {!society?.contactEmail && !society?.contactPhone && !society?.address && (
+              <p>Log in to reach your society admin.</p>
+            )}
           </div>
 
         </div>
 
         <div className="sa-container sa-footer-bottom">
-          © 2026 Smart Apartment. All rights reserved.
+          © {new Date().getFullYear()} {society?.name || "Smart Apartment"}. All rights reserved.
         </div>
       </footer>
 
