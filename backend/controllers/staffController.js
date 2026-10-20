@@ -22,11 +22,17 @@ const registerStaff = async (req, res) => {
       !last_name ||
       !email ||
       !phone ||
-      !STAFF_DEPARTMENTS.includes(department) ||
+      !department ||
       !password
     ) {
       return res.status(400).json({
         message: "All fields are required"
+      });
+    }
+
+    if (!STAFF_DEPARTMENTS.includes(department)) {
+      return res.status(400).json({
+        message: "Please select a valid staff type"
       });
     }
 
