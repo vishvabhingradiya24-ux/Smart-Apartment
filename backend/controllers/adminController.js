@@ -2,6 +2,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { pool } = require("../config/db");
 const { STAFF_DEPARTMENTS } = require("../constants/staffDepartments");
+const { getEmailError } = require("../utils/validation");
 
 require("dotenv").config();
 
@@ -13,6 +14,11 @@ const loginAdmin = async (req, res) => {
       return res.status(400).json({
         message: "Email and password are required"
       });
+    }
+
+    const emailError = getEmailError(email);
+    if (emailError) {
+      return res.status(400).json({ message: emailError });
     }
 
     const [admins] = await pool.query(

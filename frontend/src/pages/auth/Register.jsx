@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "../../css/auth.css";
 import { STAFF_DEPARTMENTS } from "../../constants/staffDepartments";
+import { getEmailError, getPhoneError } from "../../utils/validation";
 
 const WING_OPTIONS = ["A", "B", "C", "D"];
 const FLAT_NUMBER_OPTIONS = Array.from({ length: 5 }, (_, floorIndex) =>
@@ -33,13 +34,57 @@ const Register = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const [touched, setTouched] = useState({});
+
+  const getFieldErrors = (values) => ({
+    first_name: values.first_name.trim() ? "" : "First name is required",
+    last_name: values.last_name.trim() ? "" : "Last name is required",
+    email: getEmailError(values.email),
+    phone: getPhoneError(values.phone),
+    password: !values.password
+      ? "Password is required"
+      : values.password.length < 6
+        ? "Password must be at least 6 characters"
+        : "",
+    confirm_password: !values.confirm_password
+      ? "Please confirm your password"
+      : values.confirm_password !== values.password
+        ? "Passwords do not match"
+        : ""
+  });
+
+  const fieldErrors = getFieldErrors(formData);
+
+  const fieldError = (name) =>
+    touched[name] && fieldErrors[name] ? fieldErrors[name] : "";
+
+  const fieldClass = (name) => {
+    if (!touched[name]) return "";
+
+    return fieldErrors[name] ? "input-invalid" : "input-valid";
+  };
+
+  const handleBlur = (e) => {
+    const { name } = e.target;
+
+    setTouched((prev) => ({ ...prev, [name]: true }));
+  };
+
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    const { name, type, checked } = e.target;
+    let { value } = e.target;
+
+    // Phone accepts digits only and stops after 10 digits.
+    if (name === "phone") {
+      value = value.replace(/\D/g, "").slice(0, 10);
+    }
 
     setFormData((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value
     }));
+
+    setTouched((prev) => ({ ...prev, [name]: true }));
   };
 
   const handleUserTypeChange = (e) => {
@@ -110,6 +155,29 @@ const Register = () => {
 
     const terms = form.elements.terms.checked;
 
+    setTouched({
+      first_name: true,
+      last_name: true,
+      email: true,
+      phone: true,
+      password: true,
+      confirm_password: true
+    });
+
+    const submitErrors = getFieldErrors({
+      first_name,
+      last_name,
+      email,
+      phone,
+      password,
+      confirm_password
+    });
+
+    if (Object.values(submitErrors).some(Boolean)) {
+      setError("Please fix the highlighted fields.");
+      return;
+    }
+
     if (
       !first_name ||
       !last_name ||
@@ -126,16 +194,6 @@ const Register = () => {
     if (user_type === "Resident") {
       if (!block_wing || !flat_number || !ownership_type) {
         setError("Please fill Block/Wing, Flat Number, and Owner/Rent status.");
-        return;
-      }
-
-      if (!/^[0-9]{10}$/.test(phone)) {
-        setError("Phone number must be exactly 10 digits.");
-        return;
-      }
-
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        setError("Please enter a valid email address (for example name@gmail.com).");
         return;
       }
     }
@@ -349,7 +407,7 @@ const Register = () => {
 
           </div>
 
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} noValidate>
 
             <div className="register-row">
 
@@ -360,11 +418,17 @@ const Register = () => {
                 <input
                   type="text"
                   name="first_name"
+                  className={fieldClass("first_name")}
                   placeholder="Enter first name"
                   value={formData.first_name}
                   onChange={handleChange}
+                  onBlur={handleBlur}
                   required
                 />
+
+                {fieldError("first_name") && (
+                  <p className="field-error">{fieldError("first_name")}</p>
+                )}
 
               </div>
 
@@ -375,11 +439,17 @@ const Register = () => {
                 <input
                   type="text"
                   name="last_name"
+                  className={fieldClass("last_name")}
                   placeholder="Enter last name"
                   value={formData.last_name}
                   onChange={handleChange}
+                  onBlur={handleBlur}
                   required
                 />
+
+                {fieldError("last_name") && (
+                  <p className="field-error">{fieldError("last_name")}</p>
+                )}
 
               </div>
 
@@ -392,11 +462,17 @@ const Register = () => {
               <input
                 type="email"
                 name="email"
-                placeholder="Enter your email"
+                className={fieldClass("email")}
+                placeholder="Enter your email (lowercase only)"
                 value={formData.email}
                 onChange={handleChange}
+                onBlur={handleBlur}
                 required
               />
+
+              {fieldError("email") && (
+                <p className="field-error">{fieldError("email")}</p>
+              )}
 
             </div>
 
@@ -407,11 +483,19 @@ const Register = () => {
               <input
                 type="tel"
                 name="phone"
-                placeholder="Enter phone number"
+                className={fieldClass("phone")}
+                inputMode="numeric"
+                maxLength={10}
+                placeholder="Enter 10 digit phone number"
                 value={formData.phone}
                 onChange={handleChange}
+                onBlur={handleBlur}
                 required
               />
+
+              {fieldError("phone") && (
+                <p className="field-error">{fieldError("phone")}</p>
+              )}
 
             </div>
 
@@ -556,9 +640,11 @@ const Register = () => {
                       : "password"
                   }
                   name="password"
+                  className={fieldClass("password")}
                   placeholder="Create password"
                   value={formData.password}
                   onChange={handleChange}
+                  onBlur={handleBlur}
                   required
                 />
 
@@ -572,6 +658,10 @@ const Register = () => {
                 </button>
 
               </div>
+
+              {fieldError("password") && (
+                <p className="field-error">{fieldError("password")}</p>
+              )}
 
             </div>
 
@@ -588,9 +678,11 @@ const Register = () => {
                       : "password"
                   }
                   name="confirm_password"
+                  className={fieldClass("confirm_password")}
                   placeholder="Confirm password"
                   value={formData.confirm_password}
                   onChange={handleChange}
+                  onBlur={handleBlur}
                   required
                 />
 
@@ -608,6 +700,10 @@ const Register = () => {
                 </button>
 
               </div>
+
+              {fieldError("confirm_password") && (
+                <p className="field-error">{fieldError("confirm_password")}</p>
+              )}
 
             </div>
 

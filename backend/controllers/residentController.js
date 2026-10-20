@@ -2,6 +2,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { pool } = require("../config/db");
 const transporter = require("../config/email");
+const { getEmailError, getPhoneError } = require("../utils/validation");
 require("dotenv").config();
 
 
@@ -48,6 +49,16 @@ const registerResident = async (req, res) => {
       });
     }
 
+    const emailError = getEmailError(email);
+    if (emailError) {
+      return res.status(400).json({ message: emailError });
+    }
+
+    const phoneError = getPhoneError(phone);
+    if (phoneError) {
+      return res.status(400).json({ message: phoneError });
+    }
+
     if (user_type === "Resident") {
       if (!block_wing || !flat_number || !ownership_type) {
         return res.status(400).json({
@@ -71,18 +82,6 @@ const registerResident = async (req, res) => {
       if (!/^[1-5]0[1-4]$/.test(flat_number)) {
         return res.status(400).json({
           message: "Flat number must be between 101 and 504 (for example 101)"
-        });
-      }
-
-      if (!/^[0-9]{10}$/.test(phone)) {
-        return res.status(400).json({
-          message: "Phone number must be exactly 10 digits"
-        });
-      }
-
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
-        return res.status(400).json({
-          message: "Please enter a valid email address"
         });
       }
 
@@ -190,6 +189,11 @@ const loginResident = async (req, res) => {
         message:
           "Email and password are required"
       });
+    }
+
+    const emailError = getEmailError(email);
+    if (emailError) {
+      return res.status(400).json({ message: emailError });
     }
 
     const [users] = await pool.query(

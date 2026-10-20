@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "../../css/auth.css";
+import { getEmailError } from "../../utils/validation";
 
 function Login() {
   const navigate = useNavigate();
@@ -17,11 +18,37 @@ function Login() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const [touched, setTouched] = useState({});
+
+  const fieldErrors = {
+    email: getEmailError(formData.email),
+    password: formData.password ? "" : "Password is required"
+  };
+
+  const fieldError = (name) =>
+    touched[name] && fieldErrors[name] ? fieldErrors[name] : "";
+
+  const fieldClass = (name) => {
+    if (!touched[name]) return "";
+
+    return fieldErrors[name] ? "input-invalid" : "input-valid";
+  };
+
+  const handleBlur = (e) => {
+    const { name } = e.target;
+
+    setTouched((prev) => ({ ...prev, [name]: true }));
+  };
+
   const handleChange = (e) => {
+    const { name, value } = e.target;
+
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [name]: value
     });
+
+    setTouched((prev) => ({ ...prev, [name]: true }));
   };
 
   const handleLogin = async (e) => {
@@ -29,6 +56,13 @@ function Login() {
 
     setMessage("");
     setError("");
+
+    setTouched({ email: true, password: true });
+
+    if (fieldErrors.email || fieldErrors.password) {
+      setError("Please fix the highlighted fields.");
+      return;
+    }
 
     if (!formData.user_type || !formData.email || !formData.password) {
       setError("Please fill all required fields.");
@@ -251,7 +285,7 @@ function Login() {
 
           </div>
 
-          <form onSubmit={handleLogin}>
+          <form onSubmit={handleLogin} noValidate>
 
             <div className="form-group">
 
@@ -309,13 +343,19 @@ function Login() {
                 <input
                   type="email"
                   name="email"
+                  className={fieldClass("email")}
                   value={formData.email}
                   onChange={handleChange}
+                  onBlur={handleBlur}
                   placeholder="Enter your email"
                   required
                 />
 
               </div>
+
+              {fieldError("email") && (
+                <p className="field-error">{fieldError("email")}</p>
+              )}
 
             </div>
 
@@ -342,8 +382,10 @@ function Login() {
                 <input
                   type={showPassword ? "text" : "password"}
                   name="password"
+                  className={fieldClass("password")}
                   value={formData.password}
                   onChange={handleChange}
+                  onBlur={handleBlur}
                   placeholder="Enter your password"
                   required
                 />
@@ -359,6 +401,10 @@ function Login() {
                 </button>
 
               </div>
+
+              {fieldError("password") && (
+                <p className="field-error">{fieldError("password")}</p>
+              )}
 
             </div>
 

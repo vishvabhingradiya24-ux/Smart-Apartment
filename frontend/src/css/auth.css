@@ -848,3 +848,51 @@ body {
   }
 
 }
+
+
+/* =====================================================
+   LIVE FIELD VALIDATION
+===================================================== */
+
+.field-error {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 6px 2px 0;
+  color: #d32f2f;
+  font-size: 12.5px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.field-error::before {
+  content: "!";
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #d32f2f;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.register-form-group input.input-invalid,
+.input-wrapper input.input-invalid {
+  border-color: #e53935;
+  background: #fff8f8;
+}
+
+.register-form-group input.input-invalid:focus,
+.input-wrapper input.input-invalid:focus {
+  border-color: #e53935;
+  box-shadow: 0 0 0 3px rgba(229, 57, 53, 0.12);
+}
+
+.register-form-group input.input-valid,
+.input-wrapper input.input-valid {
+  border-color: #10a37f;
+}
