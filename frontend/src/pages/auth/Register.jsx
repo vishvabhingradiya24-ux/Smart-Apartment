@@ -3,6 +3,11 @@ import { Link, useNavigate } from "react-router-dom";
 import "../../css/auth.css";
 import { STAFF_DEPARTMENTS } from "../../constants/staffDepartments";
 
+const WING_OPTIONS = ["A", "B", "C", "D"];
+const FLAT_NUMBER_OPTIONS = Array.from({ length: 5 }, (_, floorIndex) =>
+  [1, 2, 3, 4].map((unit) => String((floorIndex + 1) * 100 + unit))
+).flat();
+
 const Register = () => {
   const navigate = useNavigate();
 
@@ -121,6 +126,16 @@ const Register = () => {
     if (user_type === "Resident") {
       if (!block_wing || !flat_number || !ownership_type) {
         setError("Please fill Block/Wing, Flat Number, and Owner/Rent status.");
+        return;
+      }
+
+      if (!/^[0-9]{10}$/.test(phone)) {
+        setError("Phone number must be exactly 10 digits.");
+        return;
+      }
+
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        setError("Please enter a valid email address (for example name@gmail.com).");
         return;
       }
     }
@@ -468,21 +483,11 @@ const Register = () => {
                       Select block / wing
                     </option>
 
-                    <option value="A Wing">
-                      A Wing
-                    </option>
-
-                    <option value="B Wing">
-                      B Wing
-                    </option>
-
-                    <option value="C Wing">
-                      C Wing
-                    </option>
-
-                    <option value="D Wing">
-                      D Wing
-                    </option>
+                    {WING_OPTIONS.map((wing) => (
+                      <option key={wing} value={wing}>
+                        {wing} Wing
+                      </option>
+                    ))}
 
                   </select>
 
@@ -492,14 +497,23 @@ const Register = () => {
 
                   <label>Flat Number</label>
 
-                  <input
-                    type="text"
+                  <select
+                    className="register-select"
                     name="flat_number"
-                    placeholder="e.g. A-101"
                     value={formData.flat_number}
                     onChange={handleChange}
                     required
-                  />
+                  >
+                    <option value="" disabled>
+                      Select flat number
+                    </option>
+
+                    {FLAT_NUMBER_OPTIONS.map((flatNumber) => (
+                      <option key={flatNumber} value={flatNumber}>
+                        {flatNumber}
+                      </option>
+                    ))}
+                  </select>
 
                 </div>
 

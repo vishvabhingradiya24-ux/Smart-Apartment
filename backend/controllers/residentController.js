@@ -62,6 +62,30 @@ const registerResident = async (req, res) => {
         });
       }
 
+      if (!["A", "B", "C", "D"].includes(block_wing)) {
+        return res.status(400).json({
+          message: "Block/Wing must be A, B, C or D"
+        });
+      }
+
+      if (!/^[1-5]0[1-4]$/.test(flat_number)) {
+        return res.status(400).json({
+          message: "Flat number must be between 101 and 504 (for example 101)"
+        });
+      }
+
+      if (!/^[0-9]{10}$/.test(phone)) {
+        return res.status(400).json({
+          message: "Phone number must be exactly 10 digits"
+        });
+      }
+
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+        return res.status(400).json({
+          message: "Please enter a valid email address"
+        });
+      }
+
       const [existingFlatResidents] = await pool.query(
         "SELECT id FROM residents WHERE user_type = 'Resident' AND block_wing = ? AND flat_number = ? LIMIT 1",
         [block_wing, flat_number]
@@ -136,6 +160,12 @@ const registerResident = async (req, res) => {
     if (error.code === "ER_DUP_ENTRY" && error.message.includes("uq_residents_flat")) {
       return res.status(409).json({
         message: "A resident is already registered in this flat"
+      });
+    }
+
+    if (error.code === "ER_CHECK_CONSTRAINT_VIOLATED") {
+      return res.status(400).json({
+        message: "Please check your details (wing, flat number, phone and email) and try again"
       });
     }
 
