@@ -1,0 +1,208 @@
+/* =====================================================
+   SMART APARTMENT - PUBLIC SITE THEME
+   Shared by the Home page and every login / register page.
+
+   These colours are taken from the admin and resident
+   dashboards (dark green sidebar, deep green buttons,
+   mint highlights), so the whole product looks like one app.
+
+   To re-colour the public site, change only the colour
+   tokens in the first block below.
+===================================================== */
+
+.sa-brand {
+  /* Colour tokens ------------------------------------ */
+  --sa-primary: #157461;
+  --sa-primary-dark: #105e4f;
+  --sa-primary-light: #1a8c75;
+  --sa-primary-soft: #e8f3ef;
+  --sa-mint: #8be3c8;
+  --sa-success: #16a34a;
+  --sa-success-soft: #e7f6ec;
+  --sa-danger: #dc2626;
+  --sa-danger-soft: #fef2f2;
+  --sa-warning: #d97706;
+  --sa-warning-soft: #fff4e0;
+  --sa-blue: #2563eb;
+  --sa-blue-soft: #eaf1ff;
+
+  --sa-ink: #202d35;
+  --sa-ink-soft: #4a5a62;
+  --sa-muted: #69777d;
+  --sa-bg: #f3f6f5;
+  --sa-surface: #ffffff;
+  --sa-line: #dfe7e4;
+
+  --sa-night-1: #0f1f20;
+  --sa-night-2: #182a2b;
+  --sa-night-3: #1d3d39;
+
+  --sa-gradient: linear-gradient(135deg, #157461 0%, #1a8c75 100%);
+  --sa-night-gradient: linear-gradient(165deg, #0f1f20 0%, #182a2b 50%, #1d3d39 100%);
+
+  --sa-radius: 16px;
+  --sa-shadow-sm: 0 2px 10px rgba(24, 42, 43, 0.06);
+  --sa-shadow-md: 0 14px 40px rgba(24, 42, 43, 0.12);
+  --sa-shadow-lg: 0 30px 70px rgba(15, 31, 32, 0.28);
+
+  /* Same font stack as the admin and resident dashboards. */
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: var(--sa-ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+.sa-brand *,
+.sa-brand *::before,
+.sa-brand *::after {
+  box-sizing: border-box;
+}
+
+/* Global typography rules (global.css) set sizes on bare h1-h4,
+   so every heading inside the public site sets its own size. */
+.sa-brand h1,
+.sa-brand h2,
+.sa-brand h3,
+.sa-brand h4,
+.sa-brand p {
+  margin: 0;
+  font-family: inherit;
+}
+
+.sa-brand a {
+  text-decoration: none;
+}
+
+.sa-brand :focus-visible {
+  outline: 3px solid rgba(21, 116, 97, 0.4);
+  outline-offset: 2px;
+}
+
+
+/* =====================================================
+   LOGO
+===================================================== */
+
+.sa-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  color: var(--sa-ink);
+}
+
+.sa-logo-mark {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  background: var(--sa-gradient);
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(21, 116, 97, 0.32);
+  transition: transform 0.3s ease;
+}
+
+.sa-logo:hover .sa-logo-mark {
+  transform: rotate(-8deg) scale(1.06);
+}
+
+.sa-logo-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+
+.sa-logo-text strong {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.sa-logo-text span {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--sa-muted);
+  letter-spacing: 0.04em;
+}
+
+.sa-logo-light {
+  color: #fff;
+}
+
+.sa-logo-light .sa-logo-mark {
+  background: rgba(255, 255, 255, 0.14);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22);
+}
+
+.sa-logo-light .sa-logo-text span {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+
+/* =====================================================
+   SHARED KEYFRAMES
+===================================================== */
+
+@keyframes sa-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes sa-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes sa-pulse-dot {
+  0% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.55); }
+  70% { box-shadow: 0 0 0 9px rgba(22, 163, 74, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0); }
+}
+
+@keyframes sa-rise {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes sa-shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-5px); }
+  40%, 80% { transform: translateX(5px); }
+}
+
+
+/* =====================================================
+   SCROLL REVEAL
+===================================================== */
+
+.sa-reveal {
+  opacity: 0;
+  transform: translateY(26px);
+  transition:
+    opacity 0.7s ease,
+    transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition-delay: var(--delay, 0ms);
+}
+
+.sa-reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+
+/* =====================================================
+   REDUCED MOTION
+===================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .sa-brand *,
+  .sa-brand *::before,
+  .sa-brand *::after {
+    animation: none !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
+
+  .sa-reveal {
+    opacity: 1;
+    transform: none;
+  }
+}

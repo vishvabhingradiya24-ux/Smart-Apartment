@@ -1,6 +1,25 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import "../../css/auth.css";
+import { ArrowLeft, MailCheck, ShieldCheck } from "lucide-react";
+import AuthLayout from "../../components/auth/AuthLayout";
+import {
+  AuthAlert,
+  AuthButton,
+  OtpInput
+} from "../../components/auth/AuthKit";
+
+const PERKS = [
+  {
+    icon: MailCheck,
+    title: "OTP verification",
+    text: "We confirm it is your registered email"
+  },
+  {
+    icon: ShieldCheck,
+    title: "Secure recovery",
+    text: "The code can only be used once"
+  }
+];
 
 function VerifyOTP() {
   const location = useLocation();
@@ -74,129 +93,49 @@ function VerifyOTP() {
   };
 
   return (
-    <div className="login-page">
+    <AuthLayout
+      headline={
+        <>
+          Check your inbox, <span>enter the code</span>
+        </>
+      }
+      description="Verify your identity with the 6-digit code we emailed you, then choose a new password."
+      perks={PERKS}
+      badge="Step 2 of 3"
+      title="Verify OTP"
+      subtitle={
+        email
+          ? `Enter the 6-digit code sent to ${email}`
+          : "Enter the 6-digit code sent to your email"
+      }
+      footer={
+        <Link to="/forgot-password" className="au-back">
+          <ArrowLeft size={16} aria-hidden="true" />
+          Request a new OTP
+        </Link>
+      }
+    >
+      <form onSubmit={handleVerify} noValidate>
+        <div className="au-field">
+          <span className="au-label">One-time password</span>
 
-      <section className="login-left">
-        <div className="left-content">
-
-          <div className="building-icon">🏢</div>
-
-          <h1>
-            Smart <span>Apartment</span>
-          </h1>
-
-          <h3>Manage Better. Live Better.</h3>
-
-          <p className="left-description">
-            Verify your identity and securely recover your account.
-          </p>
-
-          <div className="features">
-
-            <div className="feature">
-              <div className="feature-icon">🔐</div>
-              <div>
-                <h4>OTP Verification</h4>
-                <p>Verify your registered email</p>
-              </div>
-            </div>
-
-            <div className="feature">
-              <div className="feature-icon">🛡️</div>
-              <div>
-                <h4>Secure Recovery</h4>
-                <p>Protect your account</p>
-              </div>
-            </div>
-
-          </div>
-
+          <OtpInput
+            value={otp}
+            onChange={(value) => {
+              setOtp(value);
+              setError("");
+            }}
+            invalid={Boolean(error)}
+          />
         </div>
-      </section>
 
-      <section className="login-right">
-        <div className="login-card">
+        <AuthAlert type="error">{error}</AuthAlert>
 
-          <div className="login-logo">
-            <div className="logo-building">🏢</div>
-
-            <h2>
-              Smart <span>Apartment</span>
-            </h2>
-          </div>
-
-          <div className="login-heading">
-            <h1>Verify OTP</h1>
-
-            <p>
-              Enter the 6-digit OTP sent to your email
-            </p>
-          </div>
-
-          <form onSubmit={handleVerify}>
-
-            <div className="form-group">
-
-              <label>OTP</label>
-
-              <div className="input-wrapper">
-
-                <span className="field-icon">🔢</span>
-
-                <input
-                  type="text"
-                  value={otp}
-                  onChange={(e) =>
-                    setOtp(
-                      e.target.value
-                        .replace(/\D/g, "")
-                        .slice(0, 6)
-                    )
-                  }
-                  placeholder="Enter 6-digit OTP"
-                  maxLength="6"
-                  inputMode="numeric"
-                />
-
-              </div>
-
-            </div>
-
-            {error && (
-              <p className="auth-error">
-                {error}
-              </p>
-            )}
-
-            <button
-              type="submit"
-              className="login-button"
-              disabled={loading}
-            >
-              <span>
-                {loading ? "Verifying..." : "Verify OTP"}
-              </span>
-
-              <span className="arrow">→</span>
-            </button>
-
-          </form>
-
-          <div className="register-text">
-            <Link to="/forgot-password">
-              ← Request New OTP
-            </Link>
-          </div>
-
-          <div className="security">
-            <span>🛡️</span>
-            <p>Your information is protected and secure</p>
-          </div>
-
-        </div>
-      </section>
-
-    </div>
+        <AuthButton loading={loading}>
+          {loading ? "Verifying..." : "Verify OTP"}
+        </AuthButton>
+      </form>
+    </AuthLayout>
   );
 }
 

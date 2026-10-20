@@ -1,23 +1,52 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import "../../css/auth.css";
+import { ArrowLeft, Info, KeyRound, Mail, ShieldCheck } from "lucide-react";
+import AuthLayout from "../../components/auth/AuthLayout";
+import {
+  AuthAlert,
+  AuthButton,
+  AuthField
+} from "../../components/auth/AuthKit";
+import { getEmailError } from "../../utils/validation";
+
+const PERKS = [
+  {
+    icon: KeyRound,
+    title: "Secure account recovery",
+    text: "A one-time code proves it is really you"
+  },
+  {
+    icon: ShieldCheck,
+    title: "Protected information",
+    text: "Your account details always stay private"
+  }
+];
 
 function ForgotPassword() {
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
+  const [touched, setTouched] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const emailError = getEmailError(email);
+  const shownError = touched ? emailError : "";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     setMessage("");
     setError("");
+    setTouched(true);
 
-    if (!email) {
-      setError("Please enter your email address.");
+    if (emailError) {
+      setError(
+        email
+          ? "Please fix the highlighted field."
+          : "Please enter your email address."
+      );
       return;
     }
 
@@ -65,134 +94,56 @@ function ForgotPassword() {
   };
 
   return (
-    <div className="login-page">
+    <AuthLayout
+      headline={
+        <>
+          Forgot your password? <span>No worries</span>
+        </>
+      }
+      description="Enter the email you registered with and we will send you a one-time code to get you back into your account."
+      perks={PERKS}
+      badge="Step 1 of 3"
+      title="Forgot password?"
+      subtitle="Enter your registered email address and we will send you an OTP."
+      footer={
+        <Link to="/login" className="au-back">
+          <ArrowLeft size={16} aria-hidden="true" />
+          Back to login
+        </Link>
+      }
+    >
+      <form onSubmit={handleSubmit} noValidate>
+        <AuthField
+          label="Email address"
+          icon={Mail}
+          type="email"
+          name="email"
+          autoComplete="email"
+          placeholder="Enter your registered email"
+          value={email}
+          onChange={(e) => {
+            setEmail(e.target.value);
+            setTouched(true);
+          }}
+          onBlur={() => setTouched(true)}
+          error={shownError}
+          valid={touched && !emailError}
+        />
 
-      <section className="login-left">
-        <div className="left-content">
+        <p className="au-note">
+          <Info size={17} aria-hidden="true" />
+          The code is valid for a short time. Check your spam folder if you
+          do not see the email.
+        </p>
 
-          <div className="building-icon">🏢</div>
+        <AuthAlert type="error">{error}</AuthAlert>
+        <AuthAlert type="success">{message}</AuthAlert>
 
-          <h1>
-            Smart <span>Apartment</span>
-          </h1>
-
-          <h3>Manage Better. Live Better.</h3>
-
-          <p className="left-description">
-            A smart and secure platform to manage your society,
-            residents, visitors, maintenance and amenities in one place.
-          </p>
-
-          <div className="features">
-
-            <div className="feature">
-              <div className="feature-icon">🔐</div>
-              <div>
-                <h4>Secure Account Recovery</h4>
-                <p>Recover your account securely</p>
-              </div>
-            </div>
-
-            <div className="feature">
-              <div className="feature-icon">🛡️</div>
-              <div>
-                <h4>Protected Information</h4>
-                <p>Your account information stays protected</p>
-              </div>
-            </div>
-
-            <div className="feature">
-              <div className="feature-icon">🏠</div>
-              <div>
-                <h4>Smart Society Management</h4>
-                <p>Manage your apartment in one place</p>
-              </div>
-            </div>
-
-          </div>
-
-        </div>
-      </section>
-
-      <section className="login-right">
-        <div className="login-card">
-
-          <div className="login-logo">
-            <div className="logo-building">🏢</div>
-            <h2>
-              Smart <span>Apartment</span>
-            </h2>
-          </div>
-
-          <div className="login-heading">
-            <h1>Forgot Password?</h1>
-            <p>
-              Enter your registered email address to receive an OTP
-            </p>
-          </div>
-
-          <form onSubmit={handleSubmit}>
-
-            <div className="form-group">
-
-              <label>Email Address</label>
-
-              <div className="input-wrapper">
-
-                <span className="field-icon">✉</span>
-
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your registered email"
-                />
-
-              </div>
-
-            </div>
-
-            {error && (
-              <p className="auth-error">
-                {error}
-              </p>
-            )}
-
-            {message && (
-              <p className="auth-success">
-                {message}
-              </p>
-            )}
-
-            <button
-              type="submit"
-              className="login-button"
-              disabled={loading}
-            >
-              <span>
-                {loading ? "Sending OTP..." : "Send OTP"}
-              </span>
-
-              <span className="arrow">→</span>
-            </button>
-
-          </form>
-
-          <div className="register-text">
-            <Link to="/login">
-              ← Back to Login
-            </Link>
-          </div>
-
-          <div className="security">
-            <span>🛡️</span>
-            <p>Your information is protected and secure</p>
-          </div>
-
-        </div>
-      </section>
-
-    </div>
+        <AuthButton loading={loading}>
+          {loading ? "Sending OTP..." : "Send OTP"}
+        </AuthButton>
+      </form>
+    </AuthLayout>
   );
 }
 

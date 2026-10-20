@@ -1,15 +1,52 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import "../../css/auth.css";
+import {
+  CreditCard,
+  HardHat,
+  Lock,
+  Mail,
+  ShieldCheck,
+  UserCog,
+  Users
+} from "lucide-react";
+import AuthLayout from "../../components/auth/AuthLayout";
+import {
+  AuthAlert,
+  AuthButton,
+  AuthField,
+  RoleTabs
+} from "../../components/auth/AuthKit";
 import { getEmailError } from "../../utils/validation";
+
+const ROLES = [
+  { value: "resident", label: "Resident", icon: Users },
+  { value: "staff", label: "Staff", icon: HardHat },
+  { value: "admin", label: "Admin", icon: UserCog }
+];
+
+const PERKS = [
+  {
+    icon: Users,
+    title: "Easy society management",
+    text: "Residents, staff and records in one place"
+  },
+  {
+    icon: ShieldCheck,
+    title: "Secure visitor management",
+    text: "Know who is at your gate, always"
+  },
+  {
+    icon: CreditCard,
+    title: "Maintenance and payments",
+    text: "Track dues and pay online in a few taps"
+  }
+];
 
 function Login() {
   const navigate = useNavigate();
 
-  const [showPassword, setShowPassword] = useState(false);
-
   const [formData, setFormData] = useState({
-    user_type: "",
+    user_type: "resident",
     email: "",
     password: ""
   });
@@ -28,11 +65,7 @@ function Login() {
   const fieldError = (name) =>
     touched[name] && fieldErrors[name] ? fieldErrors[name] : "";
 
-  const fieldClass = (name) => {
-    if (!touched[name]) return "";
-
-    return fieldErrors[name] ? "input-invalid" : "input-valid";
-  };
+  const isValid = (name) => touched[name] && !fieldErrors[name];
 
   const handleBlur = (e) => {
     const { name } = e.target;
@@ -192,295 +225,74 @@ function Login() {
   };
 
   return (
-    <div className="login-page">
+    <AuthLayout
+      headline={
+        <>
+          Welcome back to <span>your community</span>
+        </>
+      }
+      description="A smart and secure platform to manage your society, residents, visitors, maintenance and amenities in one place."
+      perks={PERKS}
+      title="Welcome back"
+      subtitle="Log in to continue to your Smart Apartment account."
+      footer={
+        <>
+          Don&apos;t have an account?
+          <Link to="/register">Create an account</Link>
+        </>
+      }
+    >
+      <form onSubmit={handleLogin} noValidate>
+        <RoleTabs
+          label="Login as"
+          value={formData.user_type}
+          options={ROLES}
+          onChange={(userType) =>
+            setFormData((prev) => ({ ...prev, user_type: userType }))
+          }
+        />
 
-      <section className="login-left">
+        <AuthField
+          label="Email address"
+          icon={Mail}
+          type="email"
+          name="email"
+          autoComplete="email"
+          placeholder="you@example.com"
+          value={formData.email}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          error={fieldError("email")}
+          valid={isValid("email")}
+        />
 
-        <div className="left-content">
+        <AuthField
+          label="Password"
+          icon={Lock}
+          type="password"
+          name="password"
+          autoComplete="current-password"
+          placeholder="Enter your password"
+          value={formData.password}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          error={fieldError("password")}
+        />
 
-          <div className="building-icon">
-            🏢
-          </div>
-
-          <h1>
-            Smart <span>Apartment</span>
-          </h1>
-
-          <h3>Manage Better. Live Better.</h3>
-
-          <p className="left-description">
-            A smart and secure platform to manage your society,
-            residents, visitors, maintenance and amenities in one place.
-          </p>
-
-          <div className="features">
-
-            <div className="feature">
-              <div className="feature-icon">👥</div>
-
-              <div>
-                <h4>Easy Society Management</h4>
-                <p>Manage your society efficiently</p>
-              </div>
-            </div>
-
-            <div className="feature">
-              <div className="feature-icon">🛡️</div>
-
-              <div>
-                <h4>Secure Visitor Management</h4>
-                <p>Keep your community safe</p>
-              </div>
-            </div>
-
-            <div className="feature">
-              <div className="feature-icon">💳</div>
-
-              <div>
-                <h4>Maintenance & Payment Tracking</h4>
-                <p>Track payments and maintenance</p>
-              </div>
-            </div>
-
-            <div className="feature">
-              <div className="feature-icon">📅</div>
-
-              <div>
-                <h4>Amenity Booking</h4>
-                <p>Book amenities easily</p>
-              </div>
-            </div>
-
-          </div>
-
+        <div className="au-row-end">
+          <Link to="/forgot-password" className="au-link">
+            Forgot password?
+          </Link>
         </div>
 
-      </section>
-
-      <section className="login-right">
-
-        <div className="login-card">
-
-          <div className="login-logo">
-
-            <div className="logo-building">
-              🏢
-            </div>
-
-            <h2>
-              Smart <span>Apartment</span>
-            </h2>
-
-          </div>
-
-          <div className="login-heading">
-
-            <h1>
-              Welcome Back! <span>👋</span>
-            </h1>
-
-            <p>
-              Login to access your account
-            </p>
-
-          </div>
-
-          <form onSubmit={handleLogin} noValidate>
-
-            <div className="form-group">
-
-              <label>
-                Login As
-              </label>
-
-              <div className="select-wrapper">
-
-                <span className="field-icon">
-                  👤
-                </span>
-
-                <select
-                  name="user_type"
-                  value={formData.user_type}
-                  onChange={handleChange}
-                  required
-                >
-
-                  <option value="" disabled>
-                    Select your role
-                  </option>
-
-                  <option value="resident">
-                    Resident
-                  </option>
-
-                  <option value="staff">
-                    Staff
-                  </option>
-
-                  <option value="admin">
-                    Admin
-                  </option>
-
-                </select>
-
-              </div>
-
-            </div>
-
-            <div className="form-group">
-
-              <label>
-                Email Address
-              </label>
-
-              <div className="input-wrapper">
-
-                <span className="field-icon">
-                  ✉
-                </span>
-
-                <input
-                  type="email"
-                  name="email"
-                  className={fieldClass("email")}
-                  value={formData.email}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  placeholder="Enter your email"
-                  required
-                />
-
-              </div>
-
-              {fieldError("email") && (
-                <p className="field-error">{fieldError("email")}</p>
-              )}
-
-            </div>
-
-            <div className="form-group">
-
-              <div className="password-top">
-
-                <label>
-                  Password
-                </label>
-
-                <Link to="/forgot-password">
-                  Forgot Password?
-                </Link>
-
-              </div>
-
-              <div className="input-wrapper">
-
-                <span className="field-icon">
-                  🔒
-                </span>
-
-                <input
-                  type={showPassword ? "text" : "password"}
-                  name="password"
-                  className={fieldClass("password")}
-                  value={formData.password}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  placeholder="Enter your password"
-                  required
-                />
-
-                <button
-                  type="button"
-                  className="show-password"
-                  onClick={() =>
-                    setShowPassword(!showPassword)
-                  }
-                >
-                  {showPassword ? "🙈" : "👁"}
-                </button>
-
-              </div>
-
-              {fieldError("password") && (
-                <p className="field-error">{fieldError("password")}</p>
-              )}
-
-            </div>
-
-            <div className="remember-row">
-
-              <label className="remember">
-
-                <input type="checkbox" />
-
-                <span>
-                  Remember me
-                </span>
-
-              </label>
-
-            </div>
-
-            {error && (
-              <p className="auth-error">
-                {error}
-              </p>
-            )}
-
-            {message && (
-              <p className="auth-success">
-                {message}
-              </p>
-            )}
-
-            <button
-              type="submit"
-              className="login-button"
-              disabled={loading}
-            >
-
-              <span>
-                {loading ? "Logging in..." : "Login"}
-              </span>
-
-              <span className="arrow">
-                →
-              </span>
-
-            </button>
-
-          </form>
-
-          <div className="register-text">
-
-            <span>
-              Don't have an account?
-            </span>
-
-            <Link to="/register">
-              Create an account
-            </Link>
-
-          </div>
-
-          <div className="security">
-
-            <span>
-              🛡️
-            </span>
-
-            <p>
-              Your information is protected and secure
-            </p>
-
-          </div>
-
-        </div>
-
-      </section>
-
-    </div>
+        <AuthAlert type="error">{error}</AuthAlert>
+        <AuthAlert type="success">{message}</AuthAlert>
+
+        <AuthButton loading={loading}>
+          {loading ? "Logging in..." : "Log in"}
+        </AuthButton>
+      </form>
+    </AuthLayout>
   );
 }
 

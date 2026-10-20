@@ -1,6 +1,26 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import "../../css/auth.css";
+import { ArrowLeft, Lock, ShieldCheck } from "lucide-react";
+import AuthLayout from "../../components/auth/AuthLayout";
+import {
+  AuthAlert,
+  AuthButton,
+  AuthField,
+  PasswordStrength
+} from "../../components/auth/AuthKit";
+
+const PERKS = [
+  {
+    icon: Lock,
+    title: "Secure password reset",
+    text: "Pick a strong password only you know"
+  },
+  {
+    icon: ShieldCheck,
+    title: "Protected account",
+    text: "Your account stays safe and private"
+  }
+];
 
 function ResetPassword() {
   const location = useLocation();
@@ -11,10 +31,29 @@ function ResetPassword() {
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [touched, setTouched] = useState({});
 
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const fieldErrors = {
+    password: !password
+      ? "Password is required"
+      : password.length < 6
+        ? "Password must be at least 6 characters"
+        : "",
+    confirm: !confirmPassword
+      ? "Please confirm your password"
+      : confirmPassword !== password
+        ? "Passwords do not match"
+        : ""
+  };
+
+  const fieldError = (name) =>
+    touched[name] && fieldErrors[name] ? fieldErrors[name] : "";
+
+  const touch = (name) => setTouched((prev) => ({ ...prev, [name]: true }));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -26,6 +65,8 @@ function ResetPassword() {
       setError("Reset session is missing. Please request a new OTP.");
       return;
     }
+
+    setTouched({ password: true, confirm: true });
 
     if (!password || !confirmPassword) {
       setError("Please fill both password fields.");
@@ -83,146 +124,71 @@ function ResetPassword() {
   };
 
   return (
-    <div className="login-page">
+    <AuthLayout
+      headline={
+        <>
+          Almost there, <span>choose a new password</span>
+        </>
+      }
+      description="Create a new password for your account. Use a mix of letters, numbers and symbols to keep it strong."
+      perks={PERKS}
+      badge="Step 3 of 3"
+      title="Reset password"
+      subtitle="Create a new password for your account."
+      footer={
+        <Link to="/login" className="au-back">
+          <ArrowLeft size={16} aria-hidden="true" />
+          Back to login
+        </Link>
+      }
+    >
+      <form onSubmit={handleSubmit} noValidate>
+        <div>
+          <AuthField
+            label="New password"
+            icon={Lock}
+            type="password"
+            name="password"
+            autoComplete="new-password"
+            placeholder="Enter new password"
+            value={password}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              touch("password");
+            }}
+            onBlur={() => touch("password")}
+            error={fieldError("password")}
+          />
 
-      <section className="login-left">
-        <div className="left-content">
-
-          <div className="building-icon">🏢</div>
-
-          <h1>
-            Smart <span>Apartment</span>
-          </h1>
-
-          <h3>Manage Better. Live Better.</h3>
-
-          <p className="left-description">
-            Create a new password and securely recover your account.
-          </p>
-
-          <div className="features">
-
-            <div className="feature">
-              <div className="feature-icon">🔐</div>
-              <div>
-                <h4>Secure Password Reset</h4>
-                <p>Create a new secure password</p>
-              </div>
-            </div>
-
-            <div className="feature">
-              <div className="feature-icon">🛡️</div>
-              <div>
-                <h4>Protected Account</h4>
-                <p>Your account remains protected</p>
-              </div>
-            </div>
-
-          </div>
-
+          <PasswordStrength password={password} />
         </div>
-      </section>
 
-      <section className="login-right">
-        <div className="login-card">
+        <AuthField
+          className="au-field-spaced"
+          label="Confirm password"
+          icon={Lock}
+          type="password"
+          name="confirm_password"
+          autoComplete="new-password"
+          placeholder="Confirm new password"
+          value={confirmPassword}
+          onChange={(e) => {
+            setConfirmPassword(e.target.value);
+            touch("confirm");
+          }}
+          onBlur={() => touch("confirm")}
+          error={fieldError("confirm")}
+          valid={touched.confirm && !fieldErrors.confirm}
+        />
 
-          <div className="login-logo">
-            <div className="logo-building">🏢</div>
+        <AuthAlert type="error">{error}</AuthAlert>
+        <AuthAlert type="success">{message}</AuthAlert>
 
-            <h2>
-              Smart <span>Apartment</span>
-            </h2>
-          </div>
-
-          <div className="login-heading">
-            <h1>Reset Password</h1>
-
-            <p>
-              Create a new password for your account
-            </p>
-          </div>
-
-          <form onSubmit={handleSubmit}>
-
-            <div className="form-group">
-
-              <label>New Password</label>
-
-              <div className="input-wrapper">
-
-                <span className="field-icon">🔒</span>
-
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter new password"
-                />
-
-              </div>
-
-            </div>
-
-            <div className="form-group">
-
-              <label>Confirm Password</label>
-
-              <div className="input-wrapper">
-
-                <span className="field-icon">🔒</span>
-
-                <input
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Confirm new password"
-                />
-
-              </div>
-
-            </div>
-
-            {error && (
-              <p className="auth-error">
-                {error}
-              </p>
-            )}
-
-            {message && (
-              <p className="auth-success">
-                {message}
-              </p>
-            )}
-
-            <button
-              type="submit"
-              className="login-button"
-              disabled={loading}
-            >
-              <span>
-                {loading ? "Resetting..." : "Reset Password"}
-              </span>
-
-              <span className="arrow">→</span>
-            </button>
-
-          </form>
-
-          <div className="register-text">
-            <Link to="/login">
-              ← Back to Login
-            </Link>
-          </div>
-
-          <div className="security">
-            <span>🛡️</span>
-            <p>Your information is protected and secure</p>
-          </div>
-
-        </div>
-      </section>
-
-    </div>
+        <AuthButton loading={loading}>
+          {loading ? "Resetting..." : "Reset password"}
+        </AuthButton>
+      </form>
+    </AuthLayout>
   );
 }
 

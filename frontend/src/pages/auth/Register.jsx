@@ -1,6 +1,29 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import "../../css/auth.css";
+import {
+  Briefcase,
+  CalendarDays,
+  Check,
+  CreditCard,
+  HardHat,
+  Home,
+  KeyRound,
+  Lock,
+  Mail,
+  Phone,
+  ShieldCheck,
+  User,
+  Users
+} from "lucide-react";
+import AuthLayout from "../../components/auth/AuthLayout";
+import {
+  AuthAlert,
+  AuthButton,
+  AuthField,
+  AuthSelect,
+  PasswordStrength,
+  RoleTabs
+} from "../../components/auth/AuthKit";
 import { STAFF_DEPARTMENTS } from "../../constants/staffDepartments";
 import { getEmailError, getPhoneError } from "../../utils/validation";
 
@@ -9,18 +32,38 @@ const FLAT_NUMBER_OPTIONS = Array.from({ length: 5 }, (_, floorIndex) =>
   [1, 2, 3, 4].map((unit) => String((floorIndex + 1) * 100 + unit))
 ).flat();
 
+const ROLES = [
+  { value: "Resident", label: "Resident", icon: Users },
+  { value: "Staff", label: "Staff", icon: HardHat }
+];
+
+const PERKS = [
+  {
+    icon: CreditCard,
+    title: "Easy maintenance and payments",
+    text: "Pay society dues online, anytime"
+  },
+  {
+    icon: ShieldCheck,
+    title: "Quick visitor management",
+    text: "Approve visitors right from your phone"
+  },
+  {
+    icon: CalendarDays,
+    title: "Amenity booking",
+    text: "Reserve the hall, gym or pool in seconds"
+  }
+];
+
 const Register = () => {
   const navigate = useNavigate();
-
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [formData, setFormData] = useState({
     first_name: "",
     last_name: "",
     email: "",
     phone: "",
-    user_type: "",
+    user_type: "Resident",
     department: "",
     block_wing: "",
     flat_number: "",
@@ -58,11 +101,7 @@ const Register = () => {
   const fieldError = (name) =>
     touched[name] && fieldErrors[name] ? fieldErrors[name] : "";
 
-  const fieldClass = (name) => {
-    if (!touched[name]) return "";
-
-    return fieldErrors[name] ? "input-invalid" : "input-valid";
-  };
+  const isValid = (name) => touched[name] && !fieldErrors[name];
 
   const handleBlur = (e) => {
     const { name } = e.target;
@@ -87,9 +126,7 @@ const Register = () => {
     setTouched((prev) => ({ ...prev, [name]: true }));
   };
 
-  const handleUserTypeChange = (e) => {
-    const userType = e.target.value;
-
+  const handleUserTypeChange = (userType) => {
     setFormData((prev) => ({
       ...prev,
       user_type: userType,
@@ -286,501 +323,236 @@ const Register = () => {
   };
 
   return (
-    <div className="register-page">
+    <AuthLayout
+      wide
+      headline={
+        <>
+          Join your society, <span>live smarter</span>
+        </>
+      }
+      description="Create your account to pay dues, approve visitors, raise requests and book amenities, all from one friendly dashboard."
+      perks={PERKS}
+      title="Create your account"
+      subtitle="It only takes a minute. Fill in your details to get started."
+      footer={
+        <>
+          Already have an account?
+          <Link to="/login">Log in</Link>
+        </>
+      }
+    >
+      <form onSubmit={handleSubmit} noValidate>
+        <input type="hidden" name="user_type" value={formData.user_type} />
 
-      <div className="register-left">
+        <RoleTabs
+          label="I am registering as"
+          value={formData.user_type}
+          options={ROLES}
+          onChange={handleUserTypeChange}
+        />
 
-        <div className="register-left-content">
+        <div className="au-section-title">Your details</div>
 
-          <div className="auth-brand">
+        <div className="au-row">
+          <AuthField
+            label="First name"
+            icon={User}
+            name="first_name"
+            autoComplete="given-name"
+            placeholder="First name"
+            value={formData.first_name}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            error={fieldError("first_name")}
+            valid={isValid("first_name")}
+          />
 
-            <div className="auth-logo">
-              🏠
-            </div>
-
-            <div>
-              <h2>Smart Apartment</h2>
-              <span>Smart Living. Better Community.</span>
-            </div>
-
-          </div>
-
-          <div className="register-features">
-
-            <div className="register-feature">
-
-              <div className="register-feature-icon">
-                ✓
-              </div>
-
-              <div className="register-feature-text">
-
-                <strong>
-                  Easy Maintenance & Payments
-                </strong>
-
-                <span>
-                  Manage your society payments easily.
-                </span>
-
-              </div>
-
-            </div>
-
-            <div className="register-feature">
-
-              <div className="register-feature-icon">
-                ✓
-              </div>
-
-              <div className="register-feature-text">
-
-                <strong>
-                  Quick Visitor Management
-                </strong>
-
-                <span>
-                  Manage visitors and approvals securely.
-                </span>
-
-              </div>
-
-            </div>
-
-            <div className="register-feature">
-
-              <div className="register-feature-icon">
-                ✓
-              </div>
-
-              <div className="register-feature-text">
-
-                <strong>
-                  Complaints & Service Requests
-                </strong>
-
-                <span>
-                  Raise and track your requests easily.
-                </span>
-
-              </div>
-
-            </div>
-
-            <div className="register-feature">
-
-              <div className="register-feature-icon">
-                ✓
-              </div>
-
-              <div className="register-feature-text">
-
-                <strong>
-                  Community Notices & Events
-                </strong>
-
-                <span>
-                  Stay updated with society activities.
-                </span>
-
-              </div>
-
-            </div>
-
-          </div>
-
+          <AuthField
+            label="Last name"
+            icon={User}
+            name="last_name"
+            autoComplete="family-name"
+            placeholder="Last name"
+            value={formData.last_name}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            error={fieldError("last_name")}
+            valid={isValid("last_name")}
+          />
         </div>
 
-      </div>
+        <AuthField
+          label="Email address"
+          icon={Mail}
+          type="email"
+          name="email"
+          autoComplete="email"
+          placeholder="name@example.com"
+          hint="Lowercase letters only, no capital letters"
+          value={formData.email}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          error={fieldError("email")}
+          valid={isValid("email")}
+        />
 
-      <div className="register-right">
+        <AuthField
+          label="Phone number"
+          icon={Phone}
+          type="tel"
+          name="phone"
+          inputMode="numeric"
+          maxLength={10}
+          autoComplete="tel"
+          placeholder="10 digit mobile number"
+          hint="Numbers only, exactly 10 digits"
+          value={formData.phone}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          error={fieldError("phone")}
+          valid={isValid("phone")}
+        />
 
-        <div className="register-card">
+        {formData.user_type === "Resident" && (
+          <div className="au-slide">
+            <div className="au-section-title">Flat details</div>
 
-          <div className="register-heading">
-
-            <h1>Create Account</h1>
-
-            <p>
-              Register to access your Smart Apartment account
-            </p>
-
-          </div>
-
-          <form onSubmit={handleSubmit} noValidate>
-
-            <div className="register-row">
-
-              <div className="register-form-group">
-
-                <label>First Name</label>
-
-                <input
-                  type="text"
-                  name="first_name"
-                  className={fieldClass("first_name")}
-                  placeholder="Enter first name"
-                  value={formData.first_name}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  required
-                />
-
-                {fieldError("first_name") && (
-                  <p className="field-error">{fieldError("first_name")}</p>
-                )}
-
-              </div>
-
-              <div className="register-form-group">
-
-                <label>Last Name</label>
-
-                <input
-                  type="text"
-                  name="last_name"
-                  className={fieldClass("last_name")}
-                  placeholder="Enter last name"
-                  value={formData.last_name}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  required
-                />
-
-                {fieldError("last_name") && (
-                  <p className="field-error">{fieldError("last_name")}</p>
-                )}
-
-              </div>
-
-            </div>
-
-            <div className="register-form-group">
-
-              <label>Email Address</label>
-
-              <input
-                type="email"
-                name="email"
-                className={fieldClass("email")}
-                placeholder="Enter your email (lowercase only)"
-                value={formData.email}
+            <div className="au-row">
+              <AuthSelect
+                label="Block / Wing"
+                icon={Home}
+                name="block_wing"
+                value={formData.block_wing}
                 onChange={handleChange}
-                onBlur={handleBlur}
-                required
-              />
-
-              {fieldError("email") && (
-                <p className="field-error">{fieldError("email")}</p>
-              )}
-
-            </div>
-
-            <div className="register-form-group">
-
-              <label>Phone Number</label>
-
-              <input
-                type="tel"
-                name="phone"
-                className={fieldClass("phone")}
-                inputMode="numeric"
-                maxLength={10}
-                placeholder="Enter 10 digit phone number"
-                value={formData.phone}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                required
-              />
-
-              {fieldError("phone") && (
-                <p className="field-error">{fieldError("phone")}</p>
-              )}
-
-            </div>
-
-            <div className="register-form-group">
-
-              <label>Register As</label>
-
-              <select
-                className="register-select"
-                name="user_type"
-                value={formData.user_type}
-                onChange={handleUserTypeChange}
-                required
               >
-
                 <option value="" disabled>
-                  Select role
+                  Select wing
                 </option>
 
-                <option value="Resident">
-                  Resident
-                </option>
-
-                <option value="Staff">
-                  Staff
-                </option>
-
-              </select>
-
-            </div>
-
-            {formData.user_type === "Staff" && (
-              <div className="register-form-group">
-                <label>Staff Type / Department</label>
-                <select
-                  className="register-select"
-                  name="department"
-                  value={formData.department}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="" disabled>Select staff department</option>
-                  {STAFF_DEPARTMENTS.map((department) => (
-                    <option key={department} value={department}>{department}</option>
-                  ))}
-                </select>
-              </div>
-            )}
-
-            {formData.user_type === "Resident" && (
-
-              <>
-
-                <div className="register-row">
-
-                <div className="register-form-group">
-
-                  <label>Block / Wing</label>
-
-                  <select
-                    className="register-select"
-                    name="block_wing"
-                    value={formData.block_wing}
-                    onChange={handleChange}
-                    required
-                  >
-
-                    <option value="" disabled>
-                      Select block / wing
-                    </option>
-
-                    {WING_OPTIONS.map((wing) => (
-                      <option key={wing} value={wing}>
-                        {wing} Wing
-                      </option>
-                    ))}
-
-                  </select>
-
-                  </div>
-
-                  <div className="register-form-group">
-
-                  <label>Flat Number</label>
-
-                  <select
-                    className="register-select"
-                    name="flat_number"
-                    value={formData.flat_number}
-                    onChange={handleChange}
-                    required
-                  >
-                    <option value="" disabled>
-                      Select flat number
-                    </option>
-
-                    {FLAT_NUMBER_OPTIONS.map((flatNumber) => (
-                      <option key={flatNumber} value={flatNumber}>
-                        {flatNumber}
-                      </option>
-                    ))}
-                  </select>
-
-                </div>
-
-              </div>
-
-              <div className="register-form-group">
-
-                <label>Flat Ownership</label>
-
-                <select
-                  className="register-select"
-                  name="ownership_type"
-                  value={formData.ownership_type}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="" disabled>
-                    Select owner or rent
+                {WING_OPTIONS.map((wing) => (
+                  <option key={wing} value={wing}>
+                    {wing} Wing
                   </option>
-                  <option value="Owner">Owner</option>
-                  <option value="Rent">Rent</option>
-                </select>
+                ))}
+              </AuthSelect>
 
-                </div>
-
-              </>
-
-            )}
-
-            <div className="register-form-group">
-
-              <label>Password</label>
-
-              <div className="register-password">
-
-                <input
-                  type={
-                    showPassword
-                      ? "text"
-                      : "password"
-                  }
-                  name="password"
-                  className={fieldClass("password")}
-                  placeholder="Create password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  required
-                />
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    setShowPassword(!showPassword)
-                  }
-                >
-                  {showPassword ? "Hide" : "Show"}
-                </button>
-
-              </div>
-
-              {fieldError("password") && (
-                <p className="field-error">{fieldError("password")}</p>
-              )}
-
-            </div>
-
-            <div className="register-form-group">
-
-              <label>Confirm Password</label>
-
-              <div className="register-password">
-
-                <input
-                  type={
-                    showConfirmPassword
-                      ? "text"
-                      : "password"
-                  }
-                  name="confirm_password"
-                  className={fieldClass("confirm_password")}
-                  placeholder="Confirm password"
-                  value={formData.confirm_password}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  required
-                />
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    setShowConfirmPassword(
-                      !showConfirmPassword
-                    )
-                  }
-                >
-                  {showConfirmPassword
-                    ? "Hide"
-                    : "Show"}
-                </button>
-
-              </div>
-
-              {fieldError("confirm_password") && (
-                <p className="field-error">{fieldError("confirm_password")}</p>
-              )}
-
-            </div>
-
-            <label className="register-terms">
-
-              <input
-                type="checkbox"
-                name="terms"
-                checked={formData.terms}
+              <AuthSelect
+                label="Flat number"
+                icon={KeyRound}
+                name="flat_number"
+                value={formData.flat_number}
                 onChange={handleChange}
-              />
-
-              <span>
-                I agree to the Terms & Conditions and Privacy Policy
-              </span>
-
-            </label>
-
-            {error && (
-
-              <div
-                style={{
-                  color: "red",
-                  marginTop: "10px"
-                }}
               >
-                {error}
-              </div>
+                <option value="" disabled>
+                  Select flat
+                </option>
 
-            )}
+                {FLAT_NUMBER_OPTIONS.map((flatNumber) => (
+                  <option key={flatNumber} value={flatNumber}>
+                    {flatNumber}
+                  </option>
+                ))}
+              </AuthSelect>
+            </div>
 
-            {message && (
-
-              <div
-                style={{
-                  color: "green",
-                  marginTop: "10px"
-                }}
-              >
-                {message}
-              </div>
-
-            )}
-
-            <button
-              type="submit"
-              className="register-button"
-              disabled={loading}
+            <AuthSelect
+              label="Flat ownership"
+              icon={Home}
+              name="ownership_type"
+              value={formData.ownership_type}
+              onChange={handleChange}
             >
-              {loading
-                ? "Creating Account..."
-                : "Create Account"}
-            </button>
+              <option value="" disabled>
+                Select owner or rent
+              </option>
+              <option value="Owner">Owner</option>
+              <option value="Rent">Rent</option>
+            </AuthSelect>
+          </div>
+        )}
 
-          </form>
+        {formData.user_type === "Staff" && (
+          <div className="au-slide">
+            <div className="au-section-title">Work details</div>
 
-          <div className="register-login">
+            <AuthSelect
+              label="Staff type / Department"
+              icon={Briefcase}
+              name="department"
+              value={formData.department}
+              onChange={handleChange}
+            >
+              <option value="" disabled>
+                Select staff type / department
+              </option>
 
-            <span>
-              Already have an account?
-            </span>
+              {STAFF_DEPARTMENTS.map((department) => (
+                <option key={department} value={department}>
+                  {department}
+                </option>
+              ))}
+            </AuthSelect>
+          </div>
+        )}
 
-            <Link to="/login">
-              Sign In
-            </Link>
+        <div className="au-section-title">Security</div>
 
+        <div className="au-row">
+          <div>
+            <AuthField
+              label="Password"
+              icon={Lock}
+              type="password"
+              name="password"
+              autoComplete="new-password"
+              placeholder="Create a password"
+              value={formData.password}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              error={fieldError("password")}
+            />
+
+            <PasswordStrength password={formData.password} />
           </div>
 
+          <AuthField
+            label="Confirm password"
+            icon={Lock}
+            type="password"
+            name="confirm_password"
+            autoComplete="new-password"
+            placeholder="Re-enter password"
+            value={formData.confirm_password}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            error={fieldError("confirm_password")}
+          />
         </div>
 
-      </div>
+        <label className="au-check">
+          <input
+            type="checkbox"
+            name="terms"
+            checked={formData.terms}
+            onChange={handleChange}
+          />
 
-    </div>
+          <span className="au-check-box">
+            <Check size={14} strokeWidth={3} aria-hidden="true" />
+          </span>
+
+          <span>I agree to the Terms &amp; Conditions and Privacy Policy</span>
+        </label>
+
+        <AuthAlert type="error">{error}</AuthAlert>
+        <AuthAlert type="success">{message}</AuthAlert>
+
+        <AuthButton loading={loading}>
+          {loading ? "Creating account..." : "Create account"}
+        </AuthButton>
+      </form>
+    </AuthLayout>
   );
 };
 
 export default Register;
-
-
-//cndjnchjbdch
