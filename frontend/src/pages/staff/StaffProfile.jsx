@@ -3,6 +3,7 @@ import "../../css/staff/staff_profile.css";
 import "../../css/staff/staff_shared_theme.css";
 import { useNavigate } from "react-router-dom";
 import { STAFF_DEPARTMENTS } from "../../constants/staffDepartments";
+import StaffNav from "../../components/StaffNav";
 
 function StaffProfile() {
   const navigate = useNavigate();
@@ -126,6 +127,11 @@ function StaffProfile() {
   };
 
   const handleSaveProfile = async () => {
+    if (staff?.department) {
+      alert("Only the admin can change your staff type.");
+      return;
+    }
+
     if (!STAFF_DEPARTMENTS.includes(profileData.department)) {
       alert("Please select a valid staff department.");
       return;
@@ -231,74 +237,7 @@ function StaffProfile() {
         <div className="sidebar-section-title">
           MAIN MENU
         </div>
-
-        <nav className="sidebar-nav">
-
-          <button
-            className="nav-btn"
-            onClick={() => handleNavigation("/staff/dashboard")}
-          >
-            <span className="nav-icon">📊</span>
-            <span>Dashboard</span>
-          </button>
-
-          <button
-            className="nav-btn"
-            onClick={() => handleNavigation("/staff/complaints")}
-          >
-            <span className="nav-icon">🛠️</span>
-            <span>Assigned Complaints</span>
-          </button>
-
-          <button
-            className="nav-btn"
-            onClick={() => handleNavigation("/staff/service-requests")}
-          >
-            <span className="nav-icon">📋</span>
-            <span>Service Requests</span>
-          </button>
-
-          <button
-            className="nav-btn"
-            onClick={() => handleNavigation("/staff/tasks")}
-          >
-            <span className="nav-icon">✅</span>
-            <span>Tasks</span>
-          </button>
-
-          <button
-            className="nav-btn"
-            onClick={() => handleNavigation("/staff/maintenance")}
-          >
-            <span className="nav-icon">⚙️</span>
-            <span>Maintenance</span>
-          </button>
-
-          <button
-            className="nav-btn"
-            onClick={() => handleNavigation("/staff/assets")}
-          >
-            <span className="nav-icon">📦</span>
-            <span>Assets & Inventory</span>
-          </button>
-
-          <button
-            className="nav-btn"
-            onClick={() => handleNavigation("/staff/work-history")}
-          >
-            <span className="nav-icon">📜</span>
-            <span>Work History</span>
-          </button>
-
-          <button
-            className="nav-btn active"
-            onClick={() => handleNavigation("/staff/profile")}
-          >
-            <span className="nav-icon">👤</span>
-            <span>My Profile</span>
-          </button>
-
-        </nav>
+                <StaffNav onNavigate={handleNavigation} />
 
         {/* SIDEBAR FOOTER */}
 
@@ -361,9 +300,9 @@ function StaffProfile() {
                   {savingProfile ? "Saving..." : "Save"}
                 </button>
               </div>
-            ) : (
-              <button type="button" className="edit-profile-btn" onClick={() => setIsEditing(true)}>Edit Profile</button>
-            )}
+            ) : !staff?.department ? (
+              <button type="button" className="edit-profile-btn" onClick={() => setIsEditing(true)}>Choose staff type</button>
+            ) : null}
 
             <div
               className="profile-pill"
@@ -585,7 +524,7 @@ function StaffProfile() {
                   name="department"
                   value={profileData.department}
                   onChange={handleInputChange}
-                  disabled={!isEditing}
+                  disabled={!isEditing || Boolean(staff?.department)}
                 >
 
                   <option value="">Select department</option>
@@ -594,6 +533,12 @@ function StaffProfile() {
                   ))}
 
                 </select>
+
+                <small className="profile-hint">
+                  {staff?.department
+                    ? "Only the admin can change your staff type."
+                    : "Choose your staff type once. After that only the admin can change it."}
+                </small>
 
               </div>
 

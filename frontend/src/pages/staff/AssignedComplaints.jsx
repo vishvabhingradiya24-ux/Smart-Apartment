@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import StaffNav from "../../components/StaffNav";
 import "../../css/staff/assigned_complaints.css";
 import "../../css/staff/staff_shared_theme.css";
 
@@ -424,98 +425,7 @@ function StaffComplaints() {
         <div className="complaints-menu-title">
           MAIN MENU
         </div>
-
-
-        <nav className="complaints-sidebar-nav">
-
-          <button
-            className="complaints-nav-btn"
-            onClick={() =>
-              handleNavigation("/staff/dashboard")
-            }
-          >
-            <span>📊</span>
-            Dashboard
-          </button>
-
-
-          <button
-            className="complaints-nav-btn active"
-            onClick={() =>
-              handleNavigation("/staff/complaints")
-            }
-          >
-            <span>🛠️</span>
-            Assigned Complaints
-          </button>
-
-
-          <button
-            className="complaints-nav-btn"
-            onClick={() =>
-              handleNavigation("/staff/service-requests")
-            }
-          >
-            <span>📋</span>
-            Service Requests
-          </button>
-
-
-          <button
-            className="complaints-nav-btn"
-            onClick={() =>
-              handleNavigation("/staff/tasks")
-            }
-          >
-            <span>✅</span>
-            Tasks
-          </button>
-
-
-          <button
-            className="complaints-nav-btn"
-            onClick={() =>
-              handleNavigation("/staff/maintenance")
-            }
-          >
-            <span>⚙️</span>
-            Maintenance
-          </button>
-
-
-          <button
-            className="complaints-nav-btn"
-            onClick={() =>
-              handleNavigation("/staff/assets")
-            }
-          >
-            <span>📦</span>
-            Assets & Inventory
-          </button>
-
-
-          <button
-            className="complaints-nav-btn"
-            onClick={() =>
-              handleNavigation("/staff/work-history")
-            }
-          >
-            <span>📜</span>
-            Work History
-          </button>
-
-
-          <button
-            className="complaints-nav-btn"
-            onClick={() =>
-              handleNavigation("/staff/profile")
-            }
-          >
-            <span>👤</span>
-            My Profile
-          </button>
-
-        </nav>
+                <StaffNav onNavigate={handleNavigation} variant="complaints" />
 
 
         <div className="complaints-sidebar-footer">

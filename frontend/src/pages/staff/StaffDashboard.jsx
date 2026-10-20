@@ -4,6 +4,8 @@ import "../../css/staff/staff_dashboard.css";
 import "../../css/staff/staff_shared_theme.css";
 import { useNavigate } from "react-router-dom";
 import { workSummary } from "../../constants/workDepartments";
+import StaffNav from "../../components/StaffNav";
+import { staffMenuFor } from "../../constants/staffMenu";
 
 const mergeStoredStaff = (serverStaff) => {
   let currentStaff = {};
@@ -156,7 +158,7 @@ function StaffDashboard() {
      SERVICE DATA
   ========================= */
 
-  const services = [
+  const allServices = [
     {
       id: 1,
       icon: "🛠️",
@@ -207,6 +209,15 @@ function StaffDashboard() {
     },
   ];
 
+  // Only show the cards for pages in this staff member's menu.
+  const allowedPaths = new Set(
+    staffMenuFor(staff.department).map((item) => item.path)
+  );
+
+  const services = allServices.filter((service) =>
+    allowedPaths.has(service.path)
+  );
+
   /* =========================
      SEARCH
   ========================= */
@@ -235,7 +246,7 @@ function StaffDashboard() {
     Number(counts.tasks_in_progress || 0) > 0 ||
     Number(counts.tasks_completed || 0) > 0
   );
-  const stats = [
+  const allStats = [
     {
       title: "Assigned Complaints",
       value: displayCount(counts?.complaints_total),
@@ -269,6 +280,8 @@ function StaffDashboard() {
       path: "/staff/work-history",
     },
   ];
+
+  const stats = allStats.filter((stat) => allowedPaths.has(stat.path));
 
   return (
     <div className="modern-staff-layout">
@@ -323,97 +336,7 @@ function StaffDashboard() {
 
 
         {/* Navigation */}
-
-        <nav className="sidebar-nav">
-
-          <button
-            className="nav-btn active"
-            onClick={() =>
-              handleNavigation("/staff/dashboard")
-            }
-          >
-            <span className="nav-icon">📊</span>
-            <span>Dashboard</span>
-          </button>
-
-
-          <button
-            className="nav-btn"
-            onClick={() =>
-              handleNavigation("/staff/complaints")
-            }
-          >
-            <span className="nav-icon">🛠️</span>
-            <span>Assigned Complaints</span>
-          </button>
-
-
-          <button
-            className="nav-btn"
-            onClick={() =>
-              handleNavigation("/staff/service-requests")
-            }
-          >
-            <span className="nav-icon">📋</span>
-            <span>Service Requests</span>
-          </button>
-
-
-          <button
-            className="nav-btn"
-            onClick={() =>
-              handleNavigation("/staff/tasks")
-            }
-          >
-            <span className="nav-icon">✅</span>
-            <span>Tasks</span>
-          </button>
-
-
-          <button
-            className="nav-btn"
-            onClick={() =>
-              handleNavigation("/staff/maintenance")
-            }
-          >
-            <span className="nav-icon">⚙️</span>
-            <span>Maintenance</span>
-          </button>
-
-
-          <button
-            className="nav-btn"
-            onClick={() =>
-              handleNavigation("/staff/assets")
-            }
-          >
-            <span className="nav-icon">📦</span>
-            <span>Assets & Inventory</span>
-          </button>
-
-
-          <button
-            className="nav-btn"
-            onClick={() =>
-              handleNavigation("/staff/work-history")
-            }
-          >
-            <span className="nav-icon">📜</span>
-            <span>Work History</span>
-          </button>
-
-
-          <button
-            className="nav-btn"
-            onClick={() =>
-              handleNavigation("/staff/profile")
-            }
-          >
-            <span className="nav-icon">👤</span>
-            <span>My Profile</span>
-          </button>
-
-        </nav>
+                <StaffNav onNavigate={handleNavigation} />
 
 
         {/* Sidebar Footer */}

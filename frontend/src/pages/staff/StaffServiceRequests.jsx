@@ -3,6 +3,7 @@ import "../../css/staff/staff_service_requests.css";
 import "../../css/staff/staff_shared_theme.css";
 import { useNavigate } from "react-router-dom";
 import { Check, Eye, Play, X } from "lucide-react";
+import StaffNav from "../../components/StaffNav";
 
 function StaffServiceRequests() {
   const navigate = useNavigate();
@@ -295,90 +296,7 @@ function StaffServiceRequests() {
         <div className="sidebar-section-title">
           MAIN MENU
         </div>
-
-        <nav className="sidebar-nav">
-
-          <button
-            className="nav-btn"
-            onClick={() =>
-              handleNavigation("/staff/dashboard")
-            }
-          >
-            <span className="nav-icon">📊</span>
-            <span>Dashboard</span>
-          </button>
-
-          <button
-            className="nav-btn"
-            onClick={() =>
-              handleNavigation("/staff/complaints")
-            }
-          >
-            <span className="nav-icon">🛠️</span>
-            <span>Assigned Complaints</span>
-          </button>
-
-          <button
-            className="nav-btn active"
-            onClick={() =>
-              handleNavigation("/staff/service-requests")
-            }
-          >
-            <span className="nav-icon">📋</span>
-            <span>Service Requests</span>
-          </button>
-
-          <button
-            className="nav-btn"
-            onClick={() =>
-              handleNavigation("/staff/tasks")
-            }
-          >
-            <span className="nav-icon">✅</span>
-            <span>Tasks</span>
-          </button>
-
-          <button
-            className="nav-btn"
-            onClick={() =>
-              handleNavigation("/staff/maintenance")
-            }
-          >
-            <span className="nav-icon">⚙️</span>
-            <span>Maintenance</span>
-          </button>
-
-          <button
-            className="nav-btn"
-            onClick={() =>
-              handleNavigation("/staff/assets")
-            }
-          >
-            <span className="nav-icon">📦</span>
-            <span>Assets & Inventory</span>
-          </button>
-
-          <button
-            className="nav-btn"
-            onClick={() =>
-              handleNavigation("/staff/work-history")
-            }
-          >
-            <span className="nav-icon">📜</span>
-            <span>Work History</span>
-          </button>
-
-          <button
-            className="nav-btn"
-            onClick={() =>
-              handleNavigation("/staff/profile")
-            }
-          >
-            <span className="nav-icon">👤</span>
-            <span>My Profile</span>
-          </button>
-
-        </nav>
+                <StaffNav onNavigate={handleNavigation} />
 
         {/* ================= SIDEBAR USER ================= */}
         <div className="sidebar-footer">

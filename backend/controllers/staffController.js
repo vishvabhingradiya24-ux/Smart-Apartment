@@ -291,9 +291,15 @@ const updateStaffDepartment = async (req, res) => {
       return res.status(400).json({ message: "Select a valid staff department" });
     }
 
-    const [staffRows] = await pool.query("SELECT id FROM staff WHERE id = ?", [req.user.id]);
+    const [staffRows] = await pool.query("SELECT id, department FROM staff WHERE id = ?", [req.user.id]);
     if (staffRows.length === 0) {
       return res.status(404).json({ message: "Staff account not found" });
+    }
+
+    // A staff member can pick a type only if none was set yet (older
+    // accounts). After that, only the admin can change it.
+    if (staffRows[0].department) {
+      return res.status(403).json({ message: "Only the admin can change your staff type" });
     }
 
     await pool.query(
