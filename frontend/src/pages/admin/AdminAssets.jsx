@@ -118,7 +118,7 @@ const AdminAssets = () => {
   const maintenanceCount = assets.filter((asset) => asset.status === "Maintenance").length;
 
   return (
-    <div className="admin-records-page">
+    <div className="admin-records-page admin-assets-page">
       <header className="admin-records-header">
         <div>
           <span className="admin-records-eyebrow">INVENTORY MANAGEMENT</span>

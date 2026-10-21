@@ -1532,6 +1532,9 @@
   --records-soft: #eff6ff;
 }
 
+.admin-service-requests-page,
+.admin-assets-page { --records-accent: #157461; --records-soft: #e8f8f3; }
+
 .admin-residents-page { --records-accent: #2563eb; --records-soft: #eff6ff; }
 .admin-security-page { --records-accent: #d97706; --records-soft: #fff7e8; }
 .admin-staff-page { --records-accent: #0f8b72; --records-soft: #eaf8f4; }

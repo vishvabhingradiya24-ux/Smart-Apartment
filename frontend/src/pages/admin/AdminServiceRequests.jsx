@@ -147,7 +147,7 @@ const AdminServiceRequests = () => {
   const assignedCount = requests.filter((request) => request.assigned_to).length;
 
   return (
-    <div className="admin-records-page">
+    <div className="admin-records-page admin-service-requests-page">
       <header className="admin-records-header">
         <div>
           <span className="admin-records-eyebrow">RESIDENT SERVICES</span>

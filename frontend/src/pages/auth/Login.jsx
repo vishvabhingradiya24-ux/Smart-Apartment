@@ -17,6 +17,7 @@ import {
   RoleTabs
 } from "../../components/auth/AuthKit";
 import { getEmailError } from "../../utils/validation";
+import { saveSessionToken } from "../../utils/authFetch";
 
 const ROLES = [
   { value: "resident", label: "Resident", icon: Users },
@@ -151,7 +152,7 @@ function Login() {
         return;
       }
 
-      localStorage.setItem("token", data.token);
+      saveSessionToken(formData.user_type, data.token);
 
       if (formData.user_type === "resident") {
         const residentUser = {

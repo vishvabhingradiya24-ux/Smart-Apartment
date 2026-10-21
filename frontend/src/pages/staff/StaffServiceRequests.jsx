@@ -198,6 +198,9 @@ function StaffServiceRequests() {
   // ================= LOGOUT =================
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("adminToken");
+    localStorage.removeItem("staffToken");
+    localStorage.removeItem("residentToken");
     localStorage.removeItem("user");
     localStorage.removeItem("staff");
 
