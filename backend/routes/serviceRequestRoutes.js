@@ -5,7 +5,8 @@ const {
   createServiceRequest,
   getServiceRequestById,
   getStaffServiceRequests,
-  updateServiceRequestStatus
+  updateServiceRequestStatus,
+  acceptServiceRequest
 } = require("../controllers/serviceRequestController");
 
 const authMiddleware = require("../middleware/authMiddleware");
@@ -30,6 +31,13 @@ router.get(
   "/staff",
   authMiddleware,
   getStaffServiceRequests
+);
+
+// Accept service request - Staff
+router.put(
+  "/staff/:id/accept",
+  authMiddleware,
+  acceptServiceRequest
 );
 
 // Update service request status - Staff

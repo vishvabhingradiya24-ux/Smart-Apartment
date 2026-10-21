@@ -4,6 +4,7 @@ const {
   canTakeWork,
   mismatchMessage
 } = require("../constants/workDepartments");
+const { notifyStaff } = require("../utils/staffNotifications");
 
 // ==========================================
 // GET MY SERVICE REQUESTS
@@ -194,7 +195,11 @@ const getStaffServiceRequests = async (req, res) => {
         sr.status,
         sr.assigned_to,
         sr.request_date,
-        sr.completed_date
+        sr.completed_date,
+        sr.assigned_at,
+        sr.accepted_at,
+        sr.work_notes,
+        r.block_wing
       FROM service_requests sr
       INNER JOIN residents r
         ON sr.resident_id = r.id
@@ -297,9 +302,16 @@ const assignServiceRequestToStaff = async (req, res) => {
     }
 
     await pool.query(
-      "UPDATE service_requests SET assigned_to = ? WHERE service_request_id = ?",
+      "UPDATE service_requests SET assigned_to = ?, assigned_at = CURRENT_TIMESTAMP, accepted_at = NULL WHERE service_request_id = ?",
       [staffId, requestId]
     );
+
+    await notifyStaff(staffId, {
+      type: "assignment",
+      title: "New service request assigned",
+      message: `${requests[0].service_type || "Service"} request #${requestId} was assigned to you.`,
+      link: "/staff/service-requests"
+    });
 
     res.status(200).json({
       message: "Service request assigned successfully",
@@ -324,6 +336,10 @@ const updateServiceRequestStatus = async (req, res) => {
 
     const requestId = req.params.id;
     const { status } = req.body;
+    const workNotes =
+      typeof req.body.work_notes === "string"
+        ? req.body.work_notes.trim().slice(0, 1000) || null
+        : null;
 
     // Allowed statuses
     const allowedStatuses = [
@@ -350,21 +366,14 @@ const updateServiceRequestStatus = async (req, res) => {
       });
     }
 
-    if (status === "Completed") {
-      await pool.query(
-        `UPDATE service_requests
-         SET status = ?, completed_date = NOW()
-         WHERE service_request_id = ? AND assigned_to = ?`,
-        [status, requestId, req.user.id]
-      );
-    } else {
-      await pool.query(
-        `UPDATE service_requests
-         SET status = ?
-         WHERE service_request_id = ? AND assigned_to = ?`,
-        [status, requestId, req.user.id]
-      );
-    }
+    await pool.query(
+      `UPDATE service_requests
+       SET status = ?,
+           completed_date = CASE WHEN ? = 'Completed' THEN COALESCE(completed_date, NOW()) ELSE NULL END,
+           work_notes = COALESCE(?, work_notes)
+       WHERE service_request_id = ? AND assigned_to = ?`,
+      [status, status, workNotes, requestId, req.user.id]
+    );
 
     // Check updated request
     const [requests] = await pool.query(
@@ -407,7 +416,38 @@ const updateServiceRequestStatus = async (req, res) => {
 
 
 
+// ==========================================
+// ACCEPT SERVICE REQUEST - STAFF
+// ==========================================
+
+const acceptServiceRequest = async (req, res) => {
+  try {
+    if (req.user?.role !== "Staff") {
+      return res.status(403).json({ message: "Staff access required" });
+    }
+
+    const [result] = await pool.query(
+      `UPDATE service_requests
+       SET accepted_at = COALESCE(accepted_at, CURRENT_TIMESTAMP)
+       WHERE service_request_id = ? AND assigned_to = ?`,
+      [req.params.id, req.user.id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({
+        message: "Service request not found or not assigned to you"
+      });
+    }
+
+    res.status(200).json({ message: "Service request accepted" });
+  } catch (error) {
+    console.error("Accept Service Request Error:", error);
+    res.status(500).json({ message: "Unable to accept service request" });
+  }
+};
+
 module.exports = {
+  acceptServiceRequest,
   getMyServiceRequests,
   createServiceRequest,
   getServiceRequestById,

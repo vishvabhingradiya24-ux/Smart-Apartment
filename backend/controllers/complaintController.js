@@ -4,6 +4,7 @@ const {
   canTakeWork,
   mismatchMessage
 } = require("../constants/workDepartments");
+const { notifyStaff } = require("../utils/staffNotifications");
 
 const isAdminUser = (user) =>
   String(user?.role || user?.user_type || "").trim().toLowerCase() === "admin";
@@ -261,7 +262,9 @@ const getAdminComplaints = async (req, res) => {
         c.resolution_details,
 
         c.complaint_date,
-        c.updated_at
+        c.updated_at,
+        c.priority,
+        c.assigned_at
 
       FROM complaints c
 
@@ -308,8 +311,20 @@ const assignComplaintToStaff = async (req, res) => {
     const complaint_id = req.params.id;
 
     const {
-      staff_id
+      staff_id,
+      priority
     } = req.body;
+
+    if (
+      priority !== undefined &&
+      priority !== null &&
+      priority !== "" &&
+      !["Low", "Medium", "High", "Urgent"].includes(priority)
+    ) {
+      return res.status(400).json({
+        message: "Priority must be Low, Medium, High or Urgent"
+      });
+    }
 
 
     if (!staff_id) {
@@ -380,13 +395,24 @@ const assignComplaintToStaff = async (req, res) => {
        SET
          assigned_staff_id = ?,
          status = 'Assigned',
+         priority = COALESCE(?, priority),
+         assigned_at = CURRENT_TIMESTAMP,
+         accepted_at = NULL,
          updated_at = CURRENT_TIMESTAMP
        WHERE complaint_id = ?`,
       [
         staff_id,
+        priority || null,
         complaint_id
       ]
     );
+
+    await notifyStaff(staff_id, {
+      type: "assignment",
+      title: "New complaint assigned",
+      message: `${complaints[0].category || "Society"} complaint #${complaint_id} was assigned to you.`,
+      link: "/staff/complaints"
+    });
 
 
     res.status(200).json({
@@ -456,7 +482,11 @@ const getStaffComplaints = async (req, res) => {
         c.resolution_details,
 
         c.complaint_date,
-        c.updated_at
+        c.updated_at,
+        c.priority,
+        c.assigned_at,
+        c.accepted_at,
+        r.block_wing
 
       FROM complaints c
 
@@ -564,7 +594,7 @@ const updateComplaintStatus = async (req, res) => {
       `UPDATE complaints
        SET
          status = ?,
-         resolution_details = ?,
+         resolution_details = COALESCE(?, resolution_details),
          updated_at = CURRENT_TIMESTAMP
        WHERE complaint_id = ?
        AND assigned_staff_id = ?`,
@@ -608,7 +638,41 @@ const updateComplaintStatus = async (req, res) => {
 // EXPORTS
 // ======================================================
 
+// ======================================================
+// ACCEPT COMPLAINT - STAFF
+// ======================================================
+
+const acceptStaffComplaint = async (req, res) => {
+  try {
+    if (req.user?.role !== "Staff") {
+      return res.status(403).json({ message: "Staff access required" });
+    }
+
+    const [result] = await pool.query(
+      `UPDATE complaints
+       SET accepted_at = COALESCE(accepted_at, CURRENT_TIMESTAMP),
+           updated_at = CURRENT_TIMESTAMP
+       WHERE complaint_id = ? AND assigned_staff_id = ?`,
+      [req.params.id, req.user.id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({
+        message: "Complaint not found or not assigned to you"
+      });
+    }
+
+    res.status(200).json({ message: "Complaint accepted" });
+  } catch (error) {
+    console.error("Accept Complaint Error:", error);
+    res.status(500).json({ message: "Unable to accept complaint" });
+  }
+};
+
+
 module.exports = {
+
+  acceptStaffComplaint,
 
   createComplaint,
 

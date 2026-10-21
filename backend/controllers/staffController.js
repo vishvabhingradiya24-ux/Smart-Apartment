@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken");
 const { pool } = require("../config/db");
 const { STAFF_DEPARTMENTS } = require("../constants/staffDepartments");
 const { getEmailError, getPhoneError } = require("../utils/validation");
+const { notifySupervisors } = require("../utils/staffNotifications");
 
 require("dotenv").config();
 
@@ -200,8 +201,13 @@ const getStaffDashboard = async (req, res) => {
          (SELECT COUNT(*) FROM tasks
           WHERE assigned_to = ? AND status = 'In Progress') AS tasks_in_progress,
          (SELECT COUNT(*) FROM tasks
-          WHERE assigned_to = ? AND status = 'Completed') AS tasks_completed`,
-      [staffId, staffId, staffId, staffId, staffId, staffId, staffId]
+          WHERE assigned_to = ? AND status = 'Completed') AS tasks_completed,
+         (SELECT COUNT(*) FROM tasks
+          WHERE assigned_to = ?) AS tasks_total,
+         (SELECT COUNT(*) FROM tasks
+          WHERE assigned_to = ? AND status <> 'Completed'
+            AND due_date IS NOT NULL AND due_date < CURDATE()) AS tasks_overdue`,
+      [staffId, staffId, staffId, staffId, staffId, staffId, staffId, staffId, staffId]
     );
 
     const [recentActivity] = await pool.query(
@@ -239,10 +245,53 @@ const getStaffDashboard = async (req, res) => {
       [staffId, staffId, staffId]
     );
 
+    // Extra numbers for the Security and Facility Supervisor dashboards.
+    const department = staffRows[0].department;
+    let security = null;
+    let supervisor = null;
+
+    if (department === "Security") {
+      const [[visitors]] = await pool.query(
+        `SELECT
+           COALESCE(SUM(DATE(visit_date) = CURDATE()), 0) AS visitors_today,
+           COALESCE(SUM(DATE(visit_date) = CURDATE()
+             AND entry_time IS NULL
+             AND status IN ('Pending', 'Approved')), 0) AS expected_today,
+           COALESCE(SUM(entry_time IS NOT NULL AND exit_time IS NULL), 0) AS inside_now
+         FROM visitors`
+      );
+
+      security = {
+        visitors_today: Number(visitors.visitors_today) || 0,
+        expected_today: Number(visitors.expected_today) || 0,
+        inside_now: Number(visitors.inside_now) || 0,
+      };
+    }
+
+    if (department === "Facility Supervisor") {
+      const [[work]] = await pool.query(
+        `SELECT
+           (SELECT COUNT(*) FROM staff) AS total_staff,
+           COUNT(*) AS tasks_total,
+           COALESCE(SUM(status = 'Pending'), 0) AS tasks_pending,
+           COALESCE(SUM(status = 'In Progress'), 0) AS tasks_in_progress,
+           COALESCE(SUM(status = 'Completed'), 0) AS tasks_completed,
+           COALESCE(SUM(status <> 'Completed' AND due_date IS NOT NULL AND due_date < CURDATE()), 0) AS tasks_overdue,
+           COALESCE(SUM(status = 'Completed' AND verified_at IS NULL), 0) AS awaiting_verification
+         FROM tasks`
+      );
+
+      supervisor = Object.fromEntries(
+        Object.entries(work).map(([key, value]) => [key, Number(value) || 0])
+      );
+    }
+
     res.status(200).json({
       staff: staffRows[0],
       counts,
       recentActivity,
+      security,
+      supervisor,
     });
   } catch (error) {
     console.error("Get Staff Dashboard Error:", error);
@@ -342,6 +391,12 @@ const getStaffTasks = async (req, res) => {
     status,
     due_date,
     started_at,
+    completed_date,
+    location,
+    work_notes,
+    accepted_at,
+    verified_at,
+    verification_note,
     created_at
   FROM tasks
   WHERE assigned_to = ?
@@ -349,8 +404,14 @@ const getStaffTasks = async (req, res) => {
   [staffId]
 );
 
+    // Verification only makes sense when there is a supervisor to do it.
+    const [[supervisors]] = await pool.query(
+      "SELECT COUNT(*) AS total FROM staff WHERE department = 'Facility Supervisor'"
+    );
+
     res.status(200).json({
-      tasks
+      tasks,
+      verification_enabled: Number(supervisors.total) > 0
     });
 
   } catch (error) {
@@ -379,12 +440,16 @@ const updateStaffTaskStatus = async (req, res) => {
     const staffId = req.user.id;
     const { taskId } = req.params;
     const { status, priority } = req.body;
+    const hasNotes = typeof req.body.work_notes === "string";
+    const workNotes = hasNotes
+      ? req.body.work_notes.trim().slice(0, 1000) || null
+      : undefined;
 
     const allowedStatuses = ["Pending", "In Progress", "Completed"];
     const allowedPriorities = ["Low", "Medium", "Normal", "High", "Urgent"];
 
-    if (status === undefined && priority === undefined) {
-      return res.status(400).json({ message: "Status or priority is required" });
+    if (status === undefined && priority === undefined && !hasNotes) {
+      return res.status(400).json({ message: "Status, priority or work notes are required" });
     }
 
     if (status !== undefined && !allowedStatuses.includes(status)) {
@@ -398,7 +463,7 @@ const updateStaffTaskStatus = async (req, res) => {
     }
 
     const [existingTask] = await pool.query(
-      `SELECT task_id
+      `SELECT task_id, task_name
        FROM tasks
        WHERE task_id = ?
        AND assigned_to = ?`,
@@ -413,17 +478,28 @@ const updateStaffTaskStatus = async (req, res) => {
 
     const updates = [];
     const values = [];
+
     if (status !== undefined) {
       updates.push("status = ?");
       values.push(status);
+      updates.push("accepted_at = COALESCE(accepted_at, CURRENT_TIMESTAMP)");
       updates.push("started_at = CASE WHEN ? = 'In Progress' THEN COALESCE(started_at, CURRENT_TIMESTAMP) ELSE started_at END");
       values.push(status);
       updates.push("completed_date = CASE WHEN ? = 'Completed' THEN COALESCE(completed_date, CURRENT_TIMESTAMP) ELSE NULL END");
       values.push(status);
+      // Any change away from Completed removes an earlier verification.
+      updates.push("verified_at = CASE WHEN ? = 'Completed' THEN verified_at ELSE NULL END");
+      values.push(status);
     }
+
     if (priority !== undefined) {
       updates.push("priority = ?");
       values.push(priority);
+    }
+
+    if (hasNotes) {
+      updates.push("work_notes = ?");
+      values.push(workNotes);
     }
 
     values.push(taskId, staffId);
@@ -431,18 +507,33 @@ const updateStaffTaskStatus = async (req, res) => {
       `UPDATE tasks SET ${updates.join(", ")} WHERE task_id = ? AND assigned_to = ?`,
       values
     );
+
+    if (status === "Completed") {
+      const [[person]] = await pool.query(
+        "SELECT first_name, last_name FROM staff WHERE id = ?",
+        [staffId]
+      );
+
+      await notifySupervisors(
+        {
+          type: "verification",
+          title: "Work ready for verification",
+          message: `${person?.first_name || "A staff member"} completed "${existingTask[0].task_name}".`,
+          link: "/staff/supervisor/verification"
+        },
+        staffId
+      );
+    }
+
     res.status(200).json({
       message: "Task updated successfully"
     });
 
   } catch (error) {
-    console.error(
-      "Update Staff Task Status Error:",
-      error
-    );
+    console.error("Update Staff Task Status Error:", error);
 
     res.status(500).json({
-      message: "Unable to update task status"
+      message: "Unable to update task"
     });
   }
 };
@@ -526,7 +617,158 @@ const getStaffWorkHistory = async (req, res) => {
 
 
 
+// ==========================================
+// ACCEPT A TASK
+// ==========================================
+
+const acceptStaffTask = async (req, res) => {
+  try {
+    if (req.user?.role !== "Staff") {
+      return res.status(403).json({ message: "Staff access required" });
+    }
+
+    const [result] = await pool.query(
+      `UPDATE tasks
+       SET accepted_at = COALESCE(accepted_at, CURRENT_TIMESTAMP)
+       WHERE task_id = ? AND assigned_to = ?`,
+      [req.params.taskId, req.user.id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "Task not found or not assigned to you" });
+    }
+
+    res.status(200).json({ message: "Task accepted" });
+  } catch (error) {
+    console.error("Accept Task Error:", error);
+    res.status(500).json({ message: "Unable to accept task" });
+  }
+};
+
+// ==========================================
+// NOTIFICATIONS (own only)
+// ==========================================
+
+const getStaffNotifications = async (req, res) => {
+  try {
+    if (req.user?.role !== "Staff") {
+      return res.status(403).json({ message: "Staff access required" });
+    }
+
+    const [notifications] = await pool.query(
+      `SELECT id, type, title, message, link, is_read, created_at
+       FROM staff_notifications
+       WHERE staff_id = ?
+       ORDER BY created_at DESC, id DESC
+       LIMIT 50`,
+      [req.user.id]
+    );
+
+    const [[unread]] = await pool.query(
+      "SELECT COUNT(*) AS total FROM staff_notifications WHERE staff_id = ? AND is_read = 0",
+      [req.user.id]
+    );
+
+    res.status(200).json({ notifications, unread: Number(unread.total) || 0 });
+  } catch (error) {
+    console.error("Get Staff Notifications Error:", error);
+    res.status(500).json({ message: "Unable to load notifications" });
+  }
+};
+
+const markStaffNotificationRead = async (req, res) => {
+  try {
+    if (req.user?.role !== "Staff") {
+      return res.status(403).json({ message: "Staff access required" });
+    }
+
+    await pool.query(
+      "UPDATE staff_notifications SET is_read = 1 WHERE id = ? AND staff_id = ?",
+      [req.params.id, req.user.id]
+    );
+
+    res.status(200).json({ message: "Notification marked as read" });
+  } catch (error) {
+    console.error("Mark Notification Read Error:", error);
+    res.status(500).json({ message: "Unable to update notification" });
+  }
+};
+
+const markAllStaffNotificationsRead = async (req, res) => {
+  try {
+    if (req.user?.role !== "Staff") {
+      return res.status(403).json({ message: "Staff access required" });
+    }
+
+    await pool.query(
+      "UPDATE staff_notifications SET is_read = 1 WHERE staff_id = ? AND is_read = 0",
+      [req.user.id]
+    );
+
+    res.status(200).json({ message: "All notifications marked as read" });
+  } catch (error) {
+    console.error("Mark All Notifications Read Error:", error);
+    res.status(500).json({ message: "Unable to update notifications" });
+  }
+};
+
+// ==========================================
+// CHANGE PASSWORD
+// ==========================================
+
+const changeStaffPassword = async (req, res) => {
+  try {
+    if (req.user?.role !== "Staff") {
+      return res.status(403).json({ message: "Staff access required" });
+    }
+
+    const { current_password, new_password } = req.body;
+
+    if (!current_password || !new_password) {
+      return res.status(400).json({ message: "Current and new password are required" });
+    }
+
+    if (new_password.length < 6) {
+      return res.status(400).json({ message: "New password must be at least 6 characters" });
+    }
+
+    if (Buffer.byteLength(new_password, "utf8") > 72) {
+      return res.status(400).json({ message: "New password is too long" });
+    }
+
+    if (new_password === current_password) {
+      return res.status(400).json({ message: "New password must be different from the current one" });
+    }
+
+    const [rows] = await pool.query("SELECT password FROM staff WHERE id = ?", [req.user.id]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: "Staff account not found" });
+    }
+
+    const matches = await bcrypt.compare(current_password, rows[0].password);
+
+    if (!matches) {
+      return res.status(400).json({ message: "Current password is incorrect" });
+    }
+
+    const hashed = await bcrypt.hash(new_password, 10);
+
+    await pool.query("UPDATE staff SET password = ? WHERE id = ?", [hashed, req.user.id]);
+
+    res.status(200).json({ message: "Password changed successfully" });
+  } catch (error) {
+    console.error("Change Staff Password Error:", error);
+    res.status(500).json({ message: "Unable to change password" });
+  }
+};
+
 module.exports = {
+  acceptStaffTask,
+  getStaffNotifications,
+  markStaffNotificationRead,
+  markAllStaffNotificationsRead,
+  changeStaffPassword,
   registerStaff,
   loginStaff,
   getStaffDashboard,

@@ -9,6 +9,7 @@ const {
 
   getStaffComplaints,
   updateComplaintStatus,
+  acceptStaffComplaint,
 
   getAdminComplaints,
   assignComplaintToStaff
@@ -55,6 +56,14 @@ router.get(
   "/staff/assigned",
   authMiddleware,
   getStaffComplaints
+);
+
+
+// Staff accept complaint
+router.put(
+  "/staff/:id/accept",
+  authMiddleware,
+  acceptStaffComplaint
 );
 
 

@@ -12,7 +12,12 @@ const {
   updateStaffTaskStatus,
   getStaffAssets,
   updateStaffAssetStatus,
-  getStaffWorkHistory
+  getStaffWorkHistory,
+  acceptStaffTask,
+  getStaffNotifications,
+  markStaffNotificationRead,
+  markAllStaffNotificationsRead,
+  changeStaffPassword
 } = require("../controllers/staffController");
 const authMiddleware = require("../middleware/authMiddleware");
 
@@ -33,6 +38,15 @@ router.put(
   authMiddleware,
   updateStaffTaskStatus
 );
+
+router.put("/tasks/:taskId/accept", authMiddleware, acceptStaffTask);
+
+// NOTIFICATIONS
+router.get("/notifications", authMiddleware, getStaffNotifications);
+router.put("/notifications/read-all", authMiddleware, markAllStaffNotificationsRead);
+router.put("/notifications/:id/read", authMiddleware, markStaffNotificationRead);
+
+router.put("/change-password", authMiddleware, changeStaffPassword);
 
 router.get("/assets", authMiddleware, getStaffAssets);
 router.put("/assets/:assetId/status", authMiddleware, updateStaffAssetStatus);

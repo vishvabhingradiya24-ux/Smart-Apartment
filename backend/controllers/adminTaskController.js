@@ -1,4 +1,5 @@
 const { pool } = require("../config/db");
+const { notifyStaff } = require("../utils/staffNotifications");
 
 // ==========================================
 // CREATE TASK
@@ -11,6 +12,7 @@ const createTask = async (req, res) => {
       assigned_to,
       priority,
       due_date,
+      location,
     } = req.body;
 
     if (!task_name || !assigned_to) {
@@ -41,17 +43,26 @@ const createTask = async (req, res) => {
         assigned_to,
         priority,
         status,
-        due_date
+        due_date,
+        location
       )
-      VALUES (?, ?, ?, ?, 'Pending', ?)`,
+      VALUES (?, ?, ?, ?, 'Pending', ?, ?)`,
       [
         task_name,
         description || null,
         assigned_to,
         priority || "Normal",
         due_date || null,
+        typeof location === "string" ? location.trim().slice(0, 150) || null : null,
       ]
     );
+
+    await notifyStaff(assigned_to, {
+      type: "assignment",
+      title: "New task assigned",
+      message: `"${task_name}" was assigned to you.`,
+      link: "/staff/tasks"
+    });
 
     res.status(201).json({
       message: "Task created and assigned successfully",

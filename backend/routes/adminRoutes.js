@@ -36,6 +36,7 @@ const {
 } = require("../controllers/adminController");
 const authMiddleware = require("../middleware/authMiddleware");
 const requireAdmin = require("../middleware/requireAdmin");
+const { getIncidentReports, updateIncidentReport } = require("../controllers/adminIncidentController");
 const {
   getAdminServiceRequests,
   assignServiceRequestToStaff,
@@ -65,6 +66,8 @@ router.post("/payments", createAdminPayment);
 router.put("/payments/:id", updateAdminPayment);
 router.patch("/payments/:id/cancel", cancelAdminPayment);
 router.get("/visitors", getAdminVisitors);
+router.get("/incident-reports", getIncidentReports);
+router.put("/incident-reports/:id", updateIncidentReport);
 router.get("/amenities", getAdminAmenities);
 router.post("/amenities", createAdminAmenity);
 router.put("/amenities/:id", updateAdminAmenity);
