@@ -9,9 +9,24 @@ import "../../css/staff/staff_tasks.css";
 import "../../css/staff/staff_shared_theme.css";
 import { useNavigate } from "react-router-dom";
 import StaffNav from "../../components/StaffNav";
+import WorkNotesModal from "../../components/WorkNotesModal";
+import { useStaffDepartment } from "../../hooks/useStaffDepartment";
 
 function StaffTasks() {
   const navigate = useNavigate();
+  const department = useStaffDepartment();
+
+  // Label of the "start" button follows the staff type (PDF guide).
+  const startLabel =
+    department === "Housekeeping"
+      ? "Start Cleaning"
+      : department === "Garden Maintenance"
+        ? "Start Task"
+        : "Start Work";
+
+  const [notesTask, setNotesTask] = useState(null);
+  const [verificationEnabled, setVerificationEnabled] = useState(false);
+  const [acceptingId, setAcceptingId] = useState(null);
 
   // ================= STAFF DATA =================
 
@@ -103,14 +118,18 @@ function StaffTasks() {
               ).toLocaleDateString()
             : "-",
 
-        // IMPORTANT:
-        // Database column is complate_date
         completedDate:
-          item.complate_date
+          item.completed_date
             ? new Date(
-                item.complate_date
+                item.completed_date
               ).toLocaleDateString()
             : null,
+
+        location: item.location || "",
+        workNotes: item.work_notes || "",
+        acceptedAt: item.accepted_at || null,
+        verifiedAt: item.verified_at || null,
+        verificationNote: item.verification_note || "",
 
         createdDate:
           item.created_at
@@ -128,6 +147,7 @@ function StaffTasks() {
       }));
 
       setTasks(formattedTasks);
+      setVerificationEnabled(Boolean(data?.verification_enabled));
     } catch (err) {
       // AbortController error ignore karo
       if (err.name === "AbortError") {
@@ -251,7 +271,8 @@ function StaffTasks() {
 
   const updateTaskStatus = async (
     taskId,
-    newStatus
+    newStatus,
+    workNotes
   ) => {
     setUpdatingTaskId(String(taskId));
     try {
@@ -276,6 +297,7 @@ function StaffTasks() {
 
           body: JSON.stringify({
             status: newStatus,
+            ...(workNotes ? { work_notes: workNotes } : {}),
           }),
         }
       );
@@ -316,6 +338,7 @@ function StaffTasks() {
               : task
           )
       );
+      fetchTasks();
       return true;
     } catch (error) {
       console.error(
@@ -337,6 +360,36 @@ function StaffTasks() {
     }
   };
 
+  // ================= ACCEPT TASK =================
+
+  const acceptTask = async (taskId) => {
+    setAcceptingId(String(taskId));
+
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/staff/tasks/${taskId}/accept`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data?.message || "Unable to accept task");
+      }
+
+      await fetchTasks();
+    } catch (err) {
+      alert(err?.message || "Unable to accept task");
+    } finally {
+      setAcceptingId(null);
+    }
+  };
+
   // ================= VIEW TASK =================
 
   const handleViewTask = (task) => {
@@ -348,9 +401,15 @@ function StaffTasks() {
         `Priority: ${task.priority}\n` +
         `Status: ${task.status}\n` +
         `Due Date: ${task.dueDate}\n` +
-        `Assigned To: ${
-          task.assignedTo || "Not Assigned"
-        }\n` +
+        `Location: ${task.location || "-"}\n` +
+        `Accepted: ${task.acceptedAt ? new Date(task.acceptedAt).toLocaleString() : "Not yet"}\n` +
+        `Work Notes: ${task.workNotes || "-"}\n` +
+        (task.status === "Completed"
+          ? `Verification: ${task.verifiedAt ? "Approved by supervisor" : "Waiting for supervisor"}\n`
+          : "") +
+        (task.verificationNote
+          ? `Supervisor Note: ${task.verificationNote}\n`
+          : "") +
         `Created Date: ${task.createdDate}`
     );
   };
@@ -806,6 +865,22 @@ function StaffTasks() {
                               {task.description}
                             </p>
 
+                            {task.location && (
+                              <small>📍 {task.location}</small>
+                            )}
+
+                            {task.workNotes && (
+                              <div className="sx-notes-box">
+                                <strong>Your notes:</strong> {task.workNotes}
+                              </div>
+                            )}
+
+                            {task.verificationNote && task.status !== "Completed" && (
+                              <div className="sx-notes-box is-warning">
+                                <strong>Reopened by supervisor:</strong> {task.verificationNote}
+                              </div>
+                            )}
+
                           </div>
 
                         </td>
@@ -881,34 +956,43 @@ function StaffTasks() {
                             >
                               View
                             </button>
-                            {task.status !== "Completed" && (
+                            {task.status === "Pending" && !task.acceptedAt && (
                               <button
-                                className={`task-status-action-btn ${
-                                  task.status === "Pending"
-                                    ? "task-status-action-btn--start"
-                                    : "task-status-action-btn--complete"
-                                }`}
+                                className="action-btn"
+                                type="button"
+                                disabled={acceptingId === task.id}
+                                onClick={() => acceptTask(task.id)}
+                              >
+                                {acceptingId === task.id ? "Accepting..." : "Accept Task"}
+                              </button>
+                            )}
+                            {task.status === "Pending" && (
+                              <button
+                                className="task-status-action-btn task-status-action-btn--start"
                                 type="button"
                                 disabled={updatingTaskId === task.id}
-                                onClick={() =>
-                                  updateTaskStatus(
-                                    task.id,
-                                    task.status === "Pending"
-                                      ? "In Progress"
-                                      : "Completed"
-                                  )
-                                }
+                                onClick={() => updateTaskStatus(task.id, "In Progress")}
                               >
-                                {updatingTaskId === task.id
-                                  ? "Updating..."
-                                  : task.status === "Pending"
-                                    ? "Work Start"
-                                    : "Work Completed"}
+                                {updatingTaskId === task.id ? "Updating..." : startLabel}
+                              </button>
+                            )}
+                            {task.status === "In Progress" && (
+                              <button
+                                className="task-status-action-btn task-status-action-btn--complete"
+                                type="button"
+                                disabled={updatingTaskId === task.id}
+                                onClick={() => setNotesTask(task)}
+                              >
+                                {updatingTaskId === task.id ? "Updating..." : "Mark Completed"}
                               </button>
                             )}
                             {task.status === "Completed" && (
                               <span className="task-completed-label">
-                                ✓ Completed
+                                {task.verifiedAt
+                                  ? "✓ Completed and verified"
+                                  : verificationEnabled
+                                    ? "✓ Completed - waiting for verification"
+                                    : "✓ Completed"}
                               </span>
                             )}
                           </div>
@@ -960,6 +1044,22 @@ function StaffTasks() {
         </section>
 
       </main>
+
+      {notesTask && (
+        <WorkNotesModal
+          title="Mark task as completed"
+          description={notesTask.title}
+          confirmLabel="Mark Completed"
+          initialNotes={notesTask.workNotes}
+          busy={updatingTaskId === notesTask.id}
+          onCancel={() => setNotesTask(null)}
+          onConfirm={async (notes) => {
+            const done = await updateTaskStatus(notesTask.id, "Completed", notes);
+
+            if (done) setNotesTask(null);
+          }}
+        />
+      )}
 
     </div>
   );

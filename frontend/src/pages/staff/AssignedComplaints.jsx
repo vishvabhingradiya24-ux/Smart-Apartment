@@ -149,9 +149,7 @@ function StaffComplaints() {
 
           time: formattedTime,
 
-          // Priority is not currently stored in complaints table.
-          // So we don't show fake priority from static data.
-          priority: "Normal",
+          priority: item.priority || "Medium",
 
           // Phone is not returned by current backend API.
           phone: "Not available",
@@ -159,6 +157,18 @@ function StaffComplaints() {
           userId: item.user_id,
 
           resolutionDetails: item.resolution_details || "",
+
+          location: [item.block_wing, item.flat_number].filter(Boolean).join(" - ") || "N/A",
+
+          assignedDate: item.assigned_at
+            ? new Date(item.assigned_at).toLocaleDateString("en-IN", {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+              })
+            : "N/A",
+
+          acceptedAt: item.accepted_at || null,
         };
       });
 
@@ -240,6 +250,45 @@ function StaffComplaints() {
     } catch (error) {
       console.error("Update Complaint Status Error:", error);
       alert(error.message || "Unable to update complaint status.");
+    } finally {
+      setUpdatingStatus(false);
+    }
+  };
+
+
+  // ======================================================
+  // ACCEPT COMPLAINT
+  // ======================================================
+
+  const acceptComplaint = async () => {
+    if (!selectedComplaint) return;
+
+    try {
+      setUpdatingStatus(true);
+
+      const response = await fetch(
+        `http://localhost:5000/api/resident/complaints/staff/${selectedComplaint.complaintId}/accept`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Unable to accept complaint");
+      }
+
+      setSelectedComplaint((current) =>
+        current ? { ...current, acceptedAt: new Date().toISOString() } : current
+      );
+
+      await fetchAssignedComplaints();
+    } catch (error) {
+      alert(error.message || "Unable to accept complaint.");
     } finally {
       setUpdatingStatus(false);
     }
@@ -1236,6 +1285,32 @@ function StaffComplaints() {
 
                 </div>
 
+
+                <div>
+
+                  <span>
+                    Location
+                  </span>
+
+                  <strong>
+                    {selectedComplaint.location}
+                  </strong>
+
+                </div>
+
+
+                <div>
+
+                  <span>
+                    Assigned on
+                  </span>
+
+                  <strong>
+                    {selectedComplaint.assignedDate}
+                  </strong>
+
+                </div>
+
               </div>
 
 
@@ -1291,6 +1366,18 @@ function StaffComplaints() {
               >
                 Close
               </button>
+
+
+              {getNormalizedStatus(selectedComplaint.status) === "assigned" &&
+                !selectedComplaint.acceptedAt && (
+                <button
+                  className="modal-secondary-btn"
+                  onClick={acceptComplaint}
+                  disabled={updatingStatus}
+                >
+                  {updatingStatus ? "Accepting..." : "Accept Task"}
+                </button>
+              )}
 
 
               {getNormalizedStatus(selectedComplaint.status) === "assigned" && (

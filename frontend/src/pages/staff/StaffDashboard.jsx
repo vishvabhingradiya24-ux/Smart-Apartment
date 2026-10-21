@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { workSummary } from "../../constants/workDepartments";
 import StaffNav from "../../components/StaffNav";
 import { staffMenuFor } from "../../constants/staffMenu";
+import { buildDashboardCards } from "../../constants/staffDashboardCards";
 
 const mergeStoredStaff = (serverStaff) => {
   let currentStaff = {};
@@ -207,6 +208,72 @@ function StaffDashboard() {
         "Review completed tasks and previous monthly activities.",
       path: "/staff/work-history",
     },
+    {
+      id: 7,
+      icon: "🚪",
+      title: "Visitors",
+      description:
+        "Register visitors, record entry and exit, and see who is inside.",
+      path: "/staff/visitors",
+    },
+    {
+      id: 8,
+      icon: "📝",
+      title: staff.department === "Security" ? "Incident Report" : "Report an Issue",
+      description:
+        staff.department === "Security"
+          ? "Report suspicious activity or incidents to the Supervisor and Admin."
+          : "Report unsafe or complex issues to the supervisor.",
+      path: "/staff/report-issue",
+    },
+    {
+      id: 9,
+      icon: "👥",
+      title: "Staff Overview",
+      description:
+        "See every staff member, their work status and task counts.",
+      path: "/staff/supervisor/staff",
+    },
+    {
+      id: 10,
+      icon: "🗂️",
+      title: "Task Management",
+      description:
+        "Create, assign and reassign tasks and track their progress.",
+      path: "/staff/supervisor/tasks",
+    },
+    {
+      id: 11,
+      icon: "📡",
+      title: "Complaint Monitoring",
+      description:
+        "Follow every complaint, who it is assigned to and its status.",
+      path: "/staff/supervisor/complaints",
+    },
+    {
+      id: 12,
+      icon: "🔍",
+      title: "Work Verification",
+      description:
+        "Check completed work and approve it or reopen it.",
+      path: "/staff/supervisor/verification",
+    },
+    {
+      id: 13,
+      icon: "📈",
+      title: "Reports",
+      description:
+        "Daily work, staff-wise tasks, pending, completed and overdue work.",
+      path: "/staff/supervisor/reports",
+    },
+    {
+      id: 14,
+      icon: "🚨",
+      title: "Incident Reports",
+      description:
+        "Incidents and issues reported by Security and other staff.",
+      path: "/staff/supervisor/incidents",
+    },
   ];
 
   // Only show the cards for pages in this staff member's menu.
@@ -246,40 +313,13 @@ function StaffDashboard() {
     Number(counts.tasks_in_progress || 0) > 0 ||
     Number(counts.tasks_completed || 0) > 0
   );
-  const allStats = [
-    {
-      title: "Assigned Complaints",
-      value: displayCount(counts?.complaints_total),
-      description: `${displayCount(counts?.complaints_open)} open cases`,
-      icon: "🛠️",
-      className: "blue",
-      path: "/staff/complaints",
-    },
-    {
-      title: "Service Requests",
-      value: displayCount(counts?.service_requests_total),
-      description: `${displayCount(counts?.service_requests_open)} open requests`,
-      icon: "📋",
-      className: "orange",
-      path: "/staff/service-requests",
-    },
-    {
-      title: "Pending Tasks",
-      value: displayCount(counts?.tasks_pending),
-      description: `${displayCount(counts?.tasks_in_progress)} in progress`,
-      icon: "✅",
-      className: "green",
-      path: "/staff/tasks",
-    },
-    {
-      title: "Completed Tasks",
-      value: displayCount(counts?.tasks_completed),
-      description: "Assigned tasks completed",
-      icon: "📦",
-      className: "purple",
-      path: "/staff/work-history",
-    },
-  ];
+  const allStats = buildDashboardCards({
+    department: staff.department,
+    counts,
+    security: dashboard?.security,
+    supervisor: dashboard?.supervisor,
+    display: displayCount,
+  });
 
   const stats = allStats.filter((stat) => allowedPaths.has(stat.path));
 

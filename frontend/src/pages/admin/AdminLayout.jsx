@@ -12,6 +12,7 @@ import {
   Megaphone,
   PackageOpen,
   Settings2,
+  ShieldAlert,
   UsersRound,
   Waves,
   Wrench,
@@ -37,6 +38,11 @@ const AdminLayout = ({ children }) => {
       label: "Staff",
       icon: BriefcaseBusiness,
       path: "/admin/staff",
+    },
+    {
+      label: "Incident Reports",
+      icon: ShieldAlert,
+      path: "/admin/incident-reports",
     },
     {
       label: "Complaints",

@@ -20,6 +20,7 @@ const Complaints = () => {
 const [showAssignModal, setShowAssignModal] = useState(false);
 const [selectedComplaint, setSelectedComplaint] = useState(null);
 const [selectedStaff, setSelectedStaff] = useState("");
+const [assignPriority, setAssignPriority] = useState("Medium");
 const [assigning, setAssigning] = useState(false);
 
   // ==========================================
@@ -75,7 +76,7 @@ const [assigning, setAssigning] = useState(false);
         category: complaint.category || "Other",
 
         // Priority is not currently stored in complaints table
-        priority: "Medium",
+        priority: complaint.priority || "Medium",
 
         status: complaint.status || "Pending",
 
@@ -229,6 +230,7 @@ assignedTo:
       ? String(complaint.assignedStaffId)
       : ""
   );
+  setAssignPriority(complaint.priority || "Medium");
    // Get latest registered staff from database
   await fetchStaff();
   setShowAssignModal(true);
@@ -263,6 +265,7 @@ const handleConfirmAssign = async () => {
 
         body: JSON.stringify({
           staff_id: Number(selectedStaff),
+          priority: assignPriority,
         }),
       }
     );
@@ -931,6 +934,39 @@ const handleConfirmAssign = async () => {
                   {staff.first_name} {staff.last_name} · {staff.department || "No staff type"}
                 </option>
               ))}
+            </select>
+
+            <label
+              style={{
+                display: "block",
+                margin: "14px 0 7px",
+                color: "#102d42",
+                fontSize: "12px",
+                fontWeight: 700,
+              }}
+            >
+              Priority
+            </label>
+
+            <select
+              value={assignPriority}
+              onChange={(e) => setAssignPriority(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "12px",
+                border: "1px solid #dcebef",
+                borderRadius: "10px",
+                background: "#ffffff",
+                color: "#102d42",
+                fontSize: "12px",
+                outline: "none",
+                cursor: "pointer",
+              }}
+            >
+              <option value="Low">Low</option>
+              <option value="Medium">Medium</option>
+              <option value="High">High</option>
+              <option value="Urgent">Urgent</option>
             </select>
 
             {neededDepartments && (

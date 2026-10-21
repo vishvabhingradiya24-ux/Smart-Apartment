@@ -23,6 +23,7 @@ const AdminTask = () => {
     assigned_to: "",
     priority: "Medium",
     due_date: "",
+    location: "",
   });
 
   // ================= FETCH TASKS =================
@@ -159,6 +160,7 @@ const AdminTask = () => {
         assigned_to: "",
         priority: "Medium",
         due_date: "",
+        location: "",
       });
 
       fetchTasks();
@@ -716,6 +718,27 @@ const AdminTask = () => {
                     })
                   }
                   required
+                />
+
+              </div>
+
+              <div className="form-group">
+
+                <label>
+                  Location (optional)
+                </label>
+
+                <input
+                  type="text"
+                  value={formData.location}
+                  maxLength={150}
+                  placeholder="For example: Block A lobby"
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      location: e.target.value,
+                    })
+                  }
                 />
 
               </div>

@@ -4,9 +4,19 @@ import "../../css/staff/staff_shared_theme.css";
 import { useNavigate } from "react-router-dom";
 import { Check, Eye, Play, X } from "lucide-react";
 import StaffNav from "../../components/StaffNav";
+import WorkNotesModal from "../../components/WorkNotesModal";
+import { useStaffDepartment } from "../../hooks/useStaffDepartment";
 
 function StaffServiceRequests() {
   const navigate = useNavigate();
+  const department = useStaffDepartment();
+
+  // Label of the "start" button follows the staff type (PDF guide).
+  const startLabel =
+    department === "Housekeeping" ? "Start Cleaning" : "Start Work";
+
+  const [completeRequest, setCompleteRequest] = useState(null);
+  const [acceptingRequestId, setAcceptingRequestId] = useState(null);
 
   // ================= STAFF DATA =================
   const [staff] = useState(() => {
@@ -122,6 +132,13 @@ function StaffServiceRequests() {
           assignedTo: item.assigned_to || null,
 
           completedDate: item.completed_date || null,
+
+          location: [item.block_wing, item.flat_number].filter(Boolean).join(" - ") || "-",
+          assignedDate: item.assigned_at
+            ? new Date(item.assigned_at).toLocaleDateString()
+            : "-",
+          acceptedAt: item.accepted_at || null,
+          workNotes: item.work_notes || "",
         }));
 
         setServiceRequests(formattedRequests);
@@ -193,7 +210,7 @@ function StaffServiceRequests() {
   };
 
   // ================= UPDATE STATUS =================
-  const handleStatusUpdate = async (requestId, newStatus) => {
+  const handleStatusUpdate = async (requestId, newStatus, workNotes) => {
     try {
       const token = localStorage.getItem("token");
 
@@ -215,6 +232,7 @@ function StaffServiceRequests() {
           },
           body: JSON.stringify({
             status: newStatus,
+            ...(workNotes ? { work_notes: workNotes } : {}),
           }),
         }
       );
@@ -237,6 +255,8 @@ function StaffServiceRequests() {
             ? {
                 ...item,
                 status: newStatus,
+                acceptedAt: item.acceptedAt || new Date().toISOString(),
+                workNotes: workNotes || item.workNotes,
 
                 // Store completed date locally when completed.
                 completedDate:
@@ -269,6 +289,43 @@ function StaffServiceRequests() {
   };
 
   // ================= VIEW REQUEST =================
+  // ================= ACCEPT =================
+  const handleAccept = async (requestId) => {
+    try {
+      setAcceptingRequestId(String(requestId));
+
+      const response = await fetch(
+        `http://localhost:5000/api/resident/requests/staff/${requestId}/accept`,
+        {
+          method: "PUT",
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data?.message || "Unable to accept service request");
+      }
+
+      const acceptedAt = new Date().toISOString();
+
+      setServiceRequests((previous) =>
+        previous.map((item) =>
+          item.id === String(requestId) ? { ...item, acceptedAt } : item
+        )
+      );
+
+      setSelectedRequest((current) =>
+        current && current.id === String(requestId) ? { ...current, acceptedAt } : current
+      );
+    } catch (error) {
+      alert(error?.message || "Unable to accept service request.");
+    } finally {
+      setAcceptingRequestId(null);
+    }
+  };
+
   const handleViewRequest = (request) => setSelectedRequest(request);
 
   // ================= RESET FILTER =================
@@ -770,6 +827,18 @@ function StaffServiceRequests() {
                             View
                           </button>
 
+                          {/* ACCEPT */}
+                          {request.status === "Pending" && !request.acceptedAt && (
+                            <button
+                              className="service-action-btn service-action-btn--view"
+                              type="button"
+                              onClick={() => handleAccept(request.id)}
+                              disabled={acceptingRequestId === request.id}
+                            >
+                              {acceptingRequestId === request.id ? "Accepting..." : "Accept Task"}
+                            </button>
+                          )}
+
                           {/* PENDING → IN PROGRESS */}
                           {request.status ===
                             "Pending" && (
@@ -791,7 +860,7 @@ function StaffServiceRequests() {
                               {updatingRequestId ===
                               request.id
                                 ? "Updating..."
-                                : "Start Work"}
+                                : startLabel}
                               {updatingRequestId !== request.id && (
                                 <Play size={14} aria-hidden="true" />
                               )}
@@ -806,12 +875,7 @@ function StaffServiceRequests() {
                             <button
                               className="service-action-btn service-action-btn--complete"
                               type="button"
-                              onClick={() =>
-                                handleStatusUpdate(
-                                  request.id,
-                                  "Completed"
-                                )
-                              }
+                              onClick={() => setCompleteRequest(request)}
                               disabled={
                                 updatingRequestId ===
                                 request.id
@@ -926,11 +990,19 @@ function StaffServiceRequests() {
                   </strong>
                 </div>
                 <div><span>Submitted</span><strong>{selectedRequest.date}</strong></div>
+                <div><span>Location</span><strong>{selectedRequest.location}</strong></div>
+                <div><span>Assigned on</span><strong>{selectedRequest.assignedDate}</strong></div>
               </div>
               <div className="service-request-modal-description">
                 <span>Request description</span>
                 <p>{selectedRequest.description}</p>
               </div>
+              {selectedRequest.workNotes && (
+                <div className="service-request-modal-description">
+                  <span>Your work notes</span>
+                  <p>{selectedRequest.workNotes}</p>
+                </div>
+              )}
             </div>
             <footer className="service-request-modal-footer">
               <button
@@ -940,6 +1012,16 @@ function StaffServiceRequests() {
               >
                 Close
               </button>
+              {selectedRequest.status === "Pending" && !selectedRequest.acceptedAt && (
+                <button
+                  className="service-action-btn service-action-btn--view"
+                  type="button"
+                  disabled={acceptingRequestId === selectedRequest.id}
+                  onClick={() => handleAccept(selectedRequest.id)}
+                >
+                  {acceptingRequestId === selectedRequest.id ? "Accepting..." : "Accept Task"}
+                </button>
+              )}
               {selectedRequest.status === "Pending" && (
                 <button
                   className="service-action-btn service-action-btn--start"
@@ -955,7 +1037,7 @@ function StaffServiceRequests() {
                   }}
                 >
                   <Play size={14} aria-hidden="true" />
-                  Start Work
+                  {startLabel}
                 </button>
               )}
               {selectedRequest.status === "In Progress" && (
@@ -963,14 +1045,7 @@ function StaffServiceRequests() {
                   className="service-action-btn service-action-btn--complete"
                   type="button"
                   disabled={updatingRequestId === selectedRequest.id}
-                  onClick={async () => {
-                    const updated = await handleStatusUpdate(selectedRequest.id, "Completed");
-                    if (updated) {
-                      setSelectedRequest((current) => current
-                        ? { ...current, status: "Completed" }
-                        : current);
-                    }
-                  }}
+                  onClick={() => setCompleteRequest(selectedRequest)}
                 >
                   <Check size={15} aria-hidden="true" />
                   Complete
@@ -979,6 +1054,29 @@ function StaffServiceRequests() {
             </footer>
           </section>
         </div>
+      )}
+
+      {completeRequest && (
+        <WorkNotesModal
+          title="Mark request as completed"
+          description={`${completeRequest.service} - flat ${completeRequest.flat}`}
+          confirmLabel="Mark Completed"
+          initialNotes={completeRequest.workNotes}
+          busy={updatingRequestId === completeRequest.id}
+          onCancel={() => setCompleteRequest(null)}
+          onConfirm={async (notes) => {
+            const updated = await handleStatusUpdate(completeRequest.id, "Completed", notes);
+
+            if (updated) {
+              setSelectedRequest((current) =>
+                current && current.id === completeRequest.id
+                  ? { ...current, status: "Completed", workNotes: notes || current.workNotes }
+                  : current
+              );
+              setCompleteRequest(null);
+            }
+          }}
+        />
       )}
 
     </div>

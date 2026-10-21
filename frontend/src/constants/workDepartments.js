@@ -58,7 +58,11 @@ const joinList = (items) =>
 // One sentence telling a staff member what kind of work they receive.
 export const workSummary = (department) => {
   if (department === SUPERVISOR) {
-    return "all complaints, service requests and tasks";
+    return "all complaints, service requests and tasks, and you check that staff work is done properly";
+  }
+
+  if (department === "Security") {
+    return "visitor entry and exit, incident reports, Security complaints, plus tasks and other work given by the admin";
   }
 
   const complaints = matching(COMPLAINT_CATEGORY_DEPARTMENTS, department);

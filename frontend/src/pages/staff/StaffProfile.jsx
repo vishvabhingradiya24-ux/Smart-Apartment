@@ -183,7 +183,7 @@ function StaffProfile() {
     setIsEditing(false);
   };
 
-  const handleChangePassword = (e) => {
+  const handleChangePassword = async (e) => {
     e.preventDefault();
 
     if (
@@ -205,13 +205,35 @@ function StaffProfile() {
       return;
     }
 
-    alert("Password changed successfully!");
+    try {
+      const response = await fetch("http://localhost:5000/api/staff/change-password", {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          current_password: passwordData.currentPassword,
+          new_password: passwordData.newPassword,
+        }),
+      });
 
-    setPasswordData({
-      currentPassword: "",
-      newPassword: "",
-      confirmPassword: "",
-    });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Unable to change password.");
+      }
+
+      alert("Password changed successfully!");
+
+      setPasswordData({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+    } catch (error) {
+      alert(error.message || "Unable to change password.");
+    }
   };
 
   return (
