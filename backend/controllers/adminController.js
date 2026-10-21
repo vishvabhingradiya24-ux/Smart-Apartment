@@ -2,7 +2,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { pool } = require("../config/db");
 const { STAFF_DEPARTMENTS } = require("../constants/staffDepartments");
-const { getEmailError } = require("../utils/validation");
+const { getEmailError, getPhoneError } = require("../utils/validation");
 
 require("dotenv").config();
 
@@ -548,6 +548,59 @@ const updateAdminStaffDepartment = async (req, res) => {
   } catch (error) {
     console.error("Update Admin Staff Department Error:", error);
     res.status(500).json({ message: "Unable to update staff department" });
+  }
+};
+
+const updateAdminStaff = async (req, res) => {
+  try {
+    if (!requireAdmin(req, res)) return;
+
+    const firstName = typeof req.body.first_name === "string" ? req.body.first_name.trim() : "";
+    const lastName = typeof req.body.last_name === "string" ? req.body.last_name.trim() : "";
+    const email = typeof req.body.email === "string" ? req.body.email.trim() : "";
+    const phone = typeof req.body.phone === "string" ? req.body.phone.trim() : "";
+    const { department } = req.body;
+    const namePattern = /^[\p{L}\p{M}][\p{L}\p{M} .'-]*$/u;
+
+    if (!namePattern.test(firstName) || !namePattern.test(lastName) || firstName.length > 100 || lastName.length > 100) {
+      return res.status(400).json({ message: "Enter valid first and last names up to 100 characters" });
+    }
+    const emailError = getEmailError(email);
+    if (emailError || email.length > 150) {
+      return res.status(400).json({ message: emailError || "Email must be no more than 150 characters" });
+    }
+    const phoneError = getPhoneError(phone);
+    if (phoneError) {
+      return res.status(400).json({ message: phoneError });
+    }
+    if (!STAFF_DEPARTMENTS.includes(department)) {
+      return res.status(400).json({ message: "Select a valid staff department" });
+    }
+
+    const [existingStaff] = await pool.query(
+      "SELECT id FROM staff WHERE email = ? AND id <> ?",
+      [email, req.params.id]
+    );
+    if (existingStaff.length) {
+      return res.status(409).json({ message: "Staff email already registered" });
+    }
+
+    const [staffRows] = await pool.query("SELECT id FROM staff WHERE id = ?", [req.params.id]);
+    if (!staffRows.length) {
+      return res.status(404).json({ message: "Staff member not found" });
+    }
+
+    await pool.query(
+      `UPDATE staff
+       SET first_name = ?, last_name = ?, email = ?, phone = ?, department = ?
+       WHERE id = ?`,
+      [firstName, lastName, email, phone, department, req.params.id]
+    );
+
+    res.status(200).json({ message: "Staff member updated successfully" });
+  } catch (error) {
+    console.error("Update Admin Staff Error:", error);
+    res.status(500).json({ message: "Unable to update staff member" });
   }
 };
 
@@ -1165,6 +1218,7 @@ module.exports = {
   restoreAdminResident,
   getAdminStaff,
   createAdminStaff,
+  updateAdminStaff,
   updateAdminStaffDepartment,
   getAdminSecurity,
   getAdminPayments,

@@ -11,6 +11,7 @@ const {
   restoreAdminResident,
   getAdminStaff,
   createAdminStaff,
+  updateAdminStaff,
   updateAdminStaffDepartment,
   getAdminSecurity,
   getAdminPayments,
@@ -54,6 +55,7 @@ router.patch("/residents/:id/archive", archiveAdminResident);
 router.patch("/residents/:id/restore", restoreAdminResident);
 router.get("/staff", getAdminStaff);
 router.post("/staff", createAdminStaff);
+router.put("/staff/:id", updateAdminStaff);
 router.patch("/staff/:id/department", updateAdminStaffDepartment);
 router.get("/service-requests", getAdminServiceRequests);
 router.put("/service-requests/:id/assign", assignServiceRequestToStaff);

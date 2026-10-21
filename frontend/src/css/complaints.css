@@ -457,6 +457,135 @@
   background: #fff7ed;
 }
 
+.complaint-action-view {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #157461;
+}
+
+.complaint-action-view:hover {
+  background: #e8f3ef;
+}
+
+.complaint-details-backdrop {
+  position: fixed;
+  z-index: 9999;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(10, 35, 32, 0.48);
+}
+
+.complaint-details-modal {
+  width: min(620px, 100%);
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  border: 1px solid #dfe7e4;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 20px 55px rgba(18, 48, 41, 0.2);
+}
+
+.complaint-details-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 22px;
+  border-bottom: 1px solid #e8eeeb;
+}
+
+.complaint-details-header span {
+  color: #157461;
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: 0.8px;
+}
+
+.complaint-details-header h2 {
+  margin: 5px 0 0;
+  color: #202d35;
+  font-size: 18px;
+}
+
+.complaint-details-header button {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #dfe7e4;
+  border-radius: 7px;
+  background: #fff;
+  color: #596a65;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.complaint-details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 20px;
+  margin: 0;
+  padding: 22px;
+}
+
+.complaint-details-grid dt {
+  margin-bottom: 4px;
+  color: #75847f;
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.complaint-details-grid dd {
+  margin: 0;
+  color: #263832;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.complaint-details-description {
+  grid-column: 1 / -1;
+  padding-top: 14px;
+  border-top: 1px solid #e8eeeb;
+}
+
+.complaint-details-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 9px;
+  padding: 14px 22px 20px;
+  border-top: 1px solid #e8eeeb;
+}
+
+.complaint-details-actions button {
+  min-height: 36px;
+  padding: 8px 13px;
+  border: 1px solid #dfe7e4;
+  border-radius: 6px;
+  background: #fff;
+  color: #4d625b;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.complaint-details-actions button:last-child {
+  border-color: #157461;
+  background: #157461;
+  color: #fff;
+}
+
+@media (max-width: 520px) {
+  .complaint-details-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .complaint-details-description {
+    grid-column: auto;
+  }
+}
+
 /* =========================================
    EMPTY
    ========================================= */

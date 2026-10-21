@@ -78,26 +78,6 @@ const Residents = () => {
     }
   };
 
-  const updateOwnership = async (residentId, ownershipType) => {
-    setSavingResidentId(residentId);
-    setError("");
-    try {
-      const response = await request(`/api/admin/residents/${residentId}/ownership`, {
-        method: "PUT",
-        body: JSON.stringify({ ownership_type: ownershipType }),
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || "Unable to update ownership type.");
-      setResidents((current) => current.map((resident) => (
-        resident.id === residentId ? { ...resident, ownership_type: ownershipType } : resident
-      )));
-    } catch (err) {
-      setError(err.message || "Unable to update ownership type.");
-    } finally {
-      setSavingResidentId(null);
-    }
-  };
-
   const openAddForm = () => {
     setEditingId(null);
     setShowPassword(false);
@@ -552,19 +532,7 @@ const Residents = () => {
                           </div>
                         </div>
                       </td>
-                      <td>
-                        <select
-                          className="admin-ownership-select"
-                          aria-label={`Ownership type for ${name}`}
-                          value={resident.ownership_type || ""}
-                          disabled={savingResidentId === resident.id || Number(resident.is_active) === 0}
-                          onChange={(event) => updateOwnership(resident.id, event.target.value)}
-                        >
-                          <option value="" disabled>Not specified</option>
-                          <option value="Owner">Owner</option>
-                          <option value="Rent">Rent</option>
-                        </select>
-                      </td>
+                      <td>{resident.ownership_type || "—"}</td>
                       <td>{resident.phone || "—"}</td>
                       <td>{formatDate(resident.created_at)}</td>
                       <td>

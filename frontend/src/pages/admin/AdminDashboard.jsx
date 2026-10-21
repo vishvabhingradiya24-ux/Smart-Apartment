@@ -7,7 +7,6 @@ import {
   CreditCard,
   DoorOpen,
   House,
-  Megaphone,
   UsersRound,
   Wrench,
   Waves,
@@ -93,57 +92,6 @@ const AdminDashboard = () => {
       icon: DoorOpen,
       change: `${statsData.checkedInToday ?? 0} checked in today`,
       path: "/admin/visitors",
-    },
-  ];
-
-  const quickAccess = [
-    {
-      title: "Residents",
-      description: "Manage society residents",
-      icon: UsersRound,
-      path: "/admin/residents",
-    },
-    {
-      title: "Staff",
-      description: "Manage staff and tasks",
-      icon: Wrench,
-      path: "/admin/staff",
-    },
-    {
-      title: "Complaints",
-      description: "Review resident complaints",
-      icon: ClipboardList,
-      path: "/admin/complaints",
-    },
-    {
-    title: "Tasks",
-    description: "Create and assign tasks to staff",
-    icon: ClipboardList,
-    path: "/admin/task",
-  },
-    {
-      title: "Payments",
-      description: "Track maintenance payments",
-      icon: CreditCard,
-      path: "/admin/payments",
-    },
-    {
-      title: "Visitors",
-      description: "Monitor visitor activity",
-      icon: DoorOpen,
-      path: "/admin/visitors",
-    },
-    {
-      title: "Amenities",
-      description: "Manage society amenities",
-      icon: Waves,
-      path: "/admin/amenities",
-    },
-    {
-      title: "Notices",
-      description: "Manage notices and events",
-      icon: Megaphone,
-      path: "/admin/notices",
     },
   ];
 
@@ -274,54 +222,6 @@ const AdminDashboard = () => {
                 </span>
 
               </div>
-
-            </button>
-          ))}
-
-        </div>
-
-      </section>
-
-      {/* ================= QUICK ACCESS ================= */}
-      <section className="admin-section">
-
-        <div className="admin-section-header">
-
-          <div>
-            <span>SHORTCUTS</span>
-            <h2>Quick Access</h2>
-          </div>
-
-        </div>
-
-        <div className="admin-card-grid">
-
-          {quickAccess.map((item, index) => (
-            <button
-              className="admin-management-card"
-              key={index}
-              onClick={() => navigate(item.path)}
-            >
-
-              <div className="management-icon">
-                <item.icon size={18} strokeWidth={1.8} aria-hidden="true" />
-              </div>
-
-              <div className="management-content">
-
-                <h3>
-                  {item.title}
-                </h3>
-
-                <p>
-                  {item.description}
-                </p>
-
-              </div>
-
-              <span className="management-arrow">
-                →
-              </span>
 
             </button>
           ))}

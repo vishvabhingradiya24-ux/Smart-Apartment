@@ -22,7 +22,10 @@ const Staff = () => {
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
-  const [departmentUpdate, setDepartmentUpdate] = useState({ id: null, error: "" });
+  const [editingStaff, setEditingStaff] = useState(null);
+  const [editForm, setEditForm] = useState({ first_name: "", last_name: "", email: "", phone: "", department: "" });
+  const [savingEdit, setSavingEdit] = useState(false);
+  const [editError, setEditError] = useState("");
   const [newStaff, setNewStaff] = useState({
     first_name: "",
     last_name: "",
@@ -62,32 +65,6 @@ const Staff = () => {
     setLoading(true);
     setError("");
     fetchStaff();
-  };
-
-  const updateStaffDepartment = async (staffId, department) => {
-    setDepartmentUpdate({ id: staffId, error: "" });
-    try {
-      const response = await fetch(`http://localhost:5000/api/admin/staff/${staffId}/department`, {
-        method: "PATCH",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ department }),
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.message || "Unable to update staff department.");
-      }
-
-      setStaffList((current) => current.map((person) =>
-        person.id === staffId ? { ...person, department: data.department } : person
-      ));
-    } catch (err) {
-      setDepartmentUpdate({ id: null, error: err.message || "Unable to update staff department." });
-    } finally {
-      setDepartmentUpdate((current) => current.id === staffId ? { ...current, id: null } : current);
-    }
   };
 
   const handleAddStaff = async (event) => {
@@ -186,8 +163,52 @@ const Staff = () => {
     return !Number.isNaN(date.getTime()) && date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
   }).length;
 
-  const viewStaff = (person) => {
-    alert(`Staff Details\n\nName: ${person.first_name || ""} ${person.last_name || ""}\nStaff ID: ${person.id}\nDepartment: ${person.department || "Not assigned"}\nEmail: ${person.email || "—"}\nPhone: ${person.phone || "—"}\nJoined: ${formatDate(person.created_at)}`);
+  const openEditForm = (person) => {
+    setEditingStaff(person);
+    setEditForm({
+      first_name: person.first_name || "",
+      last_name: person.last_name || "",
+      email: person.email || "",
+      phone: person.phone || "",
+      department: person.department || "",
+    });
+    setEditError("");
+  };
+
+  const saveStaffEdit = async (event) => {
+    event.preventDefault();
+    if (!editingStaff) return;
+    setSavingEdit(true);
+    setEditError("");
+    try {
+      const updatedFields = {
+        ...editForm,
+        first_name: editForm.first_name.trim(),
+        last_name: editForm.last_name.trim(),
+        email: editForm.email.trim(),
+        phone: editForm.phone.trim(),
+      };
+      const response = await fetch(`http://localhost:5000/api/admin/staff/${editingStaff.id}`, {
+        method: "PUT",
+        headers: {
+          Authorization: `******"token")}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedFields),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Unable to update staff member.");
+
+      setStaffList((current) => current.map((person) =>
+        person.id === editingStaff.id ? { ...person, ...updatedFields } : person
+      ));
+      setEditingStaff(null);
+      setSuccessMessage(data.message || "Staff member updated successfully.");
+    } catch (err) {
+      setEditError(err.message || "Unable to update staff member.");
+    } finally {
+      setSavingEdit(false);
+    }
   };
 
   return (
@@ -211,8 +232,6 @@ const Staff = () => {
       </header>
 
       {successMessage && <p className="admin-staff-success" role="status">{successMessage}</p>}
-      {departmentUpdate.error && <p className="admin-staff-form-error" role="alert">{departmentUpdate.error}</p>}
-
       {showAddForm && (
         <AdminFormModal title="Add Staff Member" onClose={() => setShowAddForm(false)} saving={saving}>
           <form className="admin-staff-create-form" onSubmit={handleAddStaff}>
@@ -311,6 +330,41 @@ const Staff = () => {
         </AdminFormModal>
       )}
 
+      {editingStaff && (
+        <AdminFormModal title="Edit Staff Member" onClose={() => setEditingStaff(null)} saving={savingEdit}>
+          <form className="admin-staff-create-form" onSubmit={saveStaffEdit}>
+            <label>
+              First name
+              <input required maxLength={100} autoComplete="given-name" value={editForm.first_name} onChange={(event) => setEditForm({ ...editForm, first_name: event.target.value })} />
+            </label>
+            <label>
+              Department
+              <select required value={editForm.department} onChange={(event) => setEditForm({ ...editForm, department: event.target.value })}>
+                <option value="" disabled>Select department</option>
+                {STAFF_DEPARTMENTS.map((department) => <option key={department} value={department}>{department}</option>)}
+              </select>
+            </label>
+            <label>
+              Last name
+              <input required maxLength={100} autoComplete="family-name" value={editForm.last_name} onChange={(event) => setEditForm({ ...editForm, last_name: event.target.value })} />
+            </label>
+            <label>
+              Email
+              <input type="email" required maxLength={150} pattern="[^A-Z]*" title="Email must not contain uppercase letters." autoComplete="email" value={editForm.email} onChange={(event) => setEditForm({ ...editForm, email: event.target.value })} />
+            </label>
+            <label>
+              Phone
+              <input type="tel" required inputMode="numeric" pattern="[0-9]{10}" minLength={10} maxLength={10} autoComplete="tel" value={editForm.phone} onChange={(event) => setEditForm({ ...editForm, phone: event.target.value })} />
+            </label>
+            {editError && <p className="admin-staff-form-error" role="alert">{editError}</p>}
+            <div className="admin-staff-form-actions">
+              <button type="button" className="admin-records-secondary" onClick={() => setEditingStaff(null)} disabled={savingEdit}>Cancel</button>
+              <button type="submit" className="admin-records-secondary" disabled={savingEdit}>{savingEdit ? "Saving..." : "Save Changes"}</button>
+            </div>
+          </form>
+        </AdminFormModal>
+      )}
+
       <section className="admin-records-stats">
         <article><span><UsersRound size={18} strokeWidth={1.8} aria-hidden="true" /></span><div><small>Total staff</small><strong>{loading ? "—" : staffList.length}</strong></div></article>
         <article><span><CalendarDays size={18} strokeWidth={1.8} aria-hidden="true" /></span><div><small>Joined this month</small><strong>{loading ? "—" : joinedThisMonth}</strong></div></article>
@@ -335,21 +389,9 @@ const Staff = () => {
                 const name = `${person.first_name || ""} ${person.last_name || ""}`.trim() || "Staff member";
                 return <tr key={person.id}>
                   <td><div className="admin-records-person"><span>{name.charAt(0).toUpperCase()}</span><div><strong>{name}</strong><small>Staff ID #{person.id}</small></div></div></td>
-                  <td>
-                    <select
-                      aria-label={`Department for ${name}`}
-                      value={person.department || ""}
-                      disabled={departmentUpdate.id === person.id}
-                      onChange={(event) => updateStaffDepartment(person.id, event.target.value)}
-                    >
-                      <option value="" disabled>Not assigned</option>
-                      {STAFF_DEPARTMENTS.map((department) => (
-                        <option key={department} value={department}>{department}</option>
-                      ))}
-                    </select>
-                  </td>
+                  <td>{person.department || "Not assigned"}</td>
                   <td>{person.phone || "—"}</td><td>{person.email || "—"}</td><td>{formatDate(person.created_at)}</td>
-                  <td className="admin-action-column"><div className="admin-records-actions"><button type="button" onClick={() => viewStaff(person)}>View</button><button type="button" onClick={() => navigate("/admin/task")}>Tasks</button></div></td>
+                  <td className="admin-action-column"><div className="admin-records-actions"><button type="button" onClick={() => openEditForm(person)}>Edit</button><button type="button" onClick={() => navigate(`/admin/task?staffId=${encodeURIComponent(person.id)}`)}>Tasks</button></div></td>
                 </tr>;
               })}</tbody>
             </table>

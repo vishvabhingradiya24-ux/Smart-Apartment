@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Boxes, PackagePlus, Search } from "lucide-react";
+import AdminFormModal from "./AdminFormModal";
 import "../../css/admin.css";
 import "../../css/admin_assets.css";
 
@@ -12,6 +13,9 @@ const emptyForm = {
   status: "Available",
 };
 
+const assetCategories = ["Electrical", "Plumbing", "Cleaning", "Maintenance", "Security", "Gardening", "Other"];
+const assetLocations = ["Store Room", "Maintenance Room", "Security Office", "Clubhouse", "Gym", "Garden", "Parking", "Other"];
+
 const AdminAssets = () => {
   const [assets, setAssets] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -20,6 +24,7 @@ const AdminAssets = () => {
   const [error, setError] = useState("");
   const [formError, setFormError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState(emptyForm);
 
   const fetchAssets = useCallback(async (signal) => {
@@ -87,6 +92,7 @@ const AdminAssets = () => {
       );
       setFormData(emptyForm);
       setSuccessMessage(data.message || "Asset added successfully.");
+      setShowForm(false);
     } catch (submitError) {
       setFormError(submitError.message || "Unable to add asset.");
     } finally {
@@ -119,15 +125,12 @@ const AdminAssets = () => {
           <h1>Assets &amp; Inventory</h1>
           <p>Add and manage the inventory available to staff.</p>
         </div>
-        <button
-          type="button"
-          className="admin-records-refresh"
-          onClick={() => fetchAssets()}
-          disabled={loading}
-        >
-          ↻ Refresh
+        <button type="button" className="admin-records-secondary" onClick={() => { setFormError(""); setSuccessMessage(""); setShowForm(true); }}>
+          <PackagePlus size={16} aria-hidden="true" /> Add Asset
         </button>
       </header>
+
+      {successMessage && <p className="admin-assets-success" role="status">{successMessage}</p>}
 
       <section className="admin-records-stats">
         <article>
@@ -148,15 +151,9 @@ const AdminAssets = () => {
         </article>
       </section>
 
-      <section className="admin-records-card admin-assets-form-card">
-        <div className="admin-records-card-header">
-          <div>
-            <h2><PackagePlus size={18} aria-hidden="true" /> Add an asset</h2>
-            <p>New assets are saved to the inventory database and shown to staff.</p>
-          </div>
-        </div>
-
-        <form className="admin-assets-form" onSubmit={handleSubmit}>
+      {showForm && (
+        <AdminFormModal title="Add an asset" onClose={() => setShowForm(false)} saving={saving}>
+          <form className="admin-assets-form" onSubmit={handleSubmit}>
           <label>
             Asset name
             <input
@@ -169,13 +166,14 @@ const AdminAssets = () => {
           </label>
           <label>
             Category
-            <input
+            <select
+              required
               value={formData.category}
               onChange={(event) => setFormData({ ...formData, category: event.target.value })}
-              maxLength={80}
-              placeholder="e.g. Maintenance Tools"
-              required
-            />
+            >
+              <option value="" disabled>Select category</option>
+              {assetCategories.map((category) => <option key={category} value={category}>{category}</option>)}
+            </select>
           </label>
           <label>
             Quantity
@@ -201,12 +199,13 @@ const AdminAssets = () => {
           </label>
           <label>
             Location
-            <input
+            <select
               value={formData.location}
               onChange={(event) => setFormData({ ...formData, location: event.target.value })}
-              maxLength={150}
-              placeholder="e.g. Store Room"
-            />
+            >
+              <option value="">Select location</option>
+              {assetLocations.map((location) => <option key={location} value={location}>{location}</option>)}
+            </select>
           </label>
           <label>
             Status
@@ -221,13 +220,14 @@ const AdminAssets = () => {
           </label>
           <div className="admin-assets-form-actions">
             {formError && <p role="alert">{formError}</p>}
-            {successMessage && <p className="success" role="status">{successMessage}</p>}
+            <button type="button" className="admin-assets-cancel" onClick={() => setShowForm(false)} disabled={saving}>Cancel</button>
             <button type="submit" disabled={saving}>
               {saving ? "Saving…" : "Add asset"}
             </button>
           </div>
-        </form>
-      </section>
+          </form>
+        </AdminFormModal>
+      )}
 
       <section className="admin-records-card">
         <div className="admin-records-card-header">
@@ -256,7 +256,7 @@ const AdminAssets = () => {
         ) : filteredAssets.length === 0 ? (
           <div className="admin-records-state">
             {assets.length === 0
-              ? "No assets have been added yet. Use the form above to add inventory."
+              ? "No assets have been added yet. Use Add Asset to add inventory."
               : "No assets match this search."}
           </div>
         ) : (

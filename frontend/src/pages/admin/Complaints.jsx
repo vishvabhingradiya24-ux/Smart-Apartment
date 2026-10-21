@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Check, ClipboardList, Clock3, Search, Wrench } from "lucide-react";
+import { Check, ClipboardList, Clock3, Eye, Search, Wrench } from "lucide-react";
 import {
   COMPLAINT_CATEGORY_DEPARTMENTS,
   canTakeWork,
@@ -18,6 +18,7 @@ const Complaints = () => {
   const [staffLoadError, setStaffLoadError] = useState("");
   const [staffList, setStaffList] = useState([]);
 const [showAssignModal, setShowAssignModal] = useState(false);
+const [showDetailsModal, setShowDetailsModal] = useState(false);
 const [selectedComplaint, setSelectedComplaint] = useState(null);
 const [selectedStaff, setSelectedStaff] = useState("");
 const [assignPriority, setAssignPriority] = useState("Medium");
@@ -192,16 +193,10 @@ assignedTo:
   ).length;
 
 
-  // ==========================================
-  // EDIT COMPLAINT
-  // ==========================================
-  const handleEdit = (complaint) => {
-    alert(
-      `Update Complaint: ${complaint.id}\n\n` +
-      `Backend update functionality will be connected later.`
-    );
+  const handleView = (complaint) => {
+    setSelectedComplaint(complaint);
+    setShowDetailsModal(true);
   };
-
 
   // Only staff of the matching type can take this complaint
   // (the person already assigned stays in the list).
@@ -225,6 +220,7 @@ assignedTo:
   // ==========================================
   const handleAssign = async  (complaint) => {
   setSelectedComplaint(complaint);
+    setShowDetailsModal(false);
   setSelectedStaff(
     complaint.assignedStaffId
       ? String(complaint.assignedStaffId)
@@ -519,7 +515,6 @@ const handleConfirmAssign = async () => {
                 <th>Complaint</th>
                 <th>Category</th>
                 <th>Priority</th>
-                <th>Assigned To</th>
                 <th>Status</th>
                 <th>Date</th>
                 <th className="admin-action-column">Actions</th>
@@ -536,7 +531,7 @@ const handleConfirmAssign = async () => {
 
                 <tr>
 
-                  <td colSpan="9">
+                  <td colSpan="8">
 
                     <div className="complaints-empty">
 
@@ -559,7 +554,7 @@ const handleConfirmAssign = async () => {
 
               ) : fetchError ? (
                 <tr>
-                  <td colSpan="9" role="alert">
+                  <td colSpan="8" role="alert">
                     Complaints could not be loaded. Use “Try again” above.
                   </td>
                 </tr>
@@ -586,30 +581,7 @@ const handleConfirmAssign = async () => {
 
                       <div className="resident-complaint-details">
 
-                        <div className="resident-complaint-avatar">
-
-                          {complaint.residentName
-                            ? complaint.residentName.charAt(0)
-                            : "R"}
-
-                        </div>
-
-
-                        <div>
-
-                          <strong>
-                            {complaint.residentName}
-                          </strong>
-
-                          <small>
-                            {complaint.flat}
-                          </small>
-
-                          <small>
-                            ID: {complaint.residentId}
-                          </small>
-
-                        </div>
+                        <strong>{complaint.residentName}</strong>
 
                       </div>
 
@@ -626,9 +598,6 @@ const handleConfirmAssign = async () => {
                           {complaint.title}
                         </strong>
 
-                        <small>
-                          {complaint.description}
-                        </small>
 
                       </div>
 
@@ -654,17 +623,6 @@ const handleConfirmAssign = async () => {
                         className={`priority-badge ${complaint.priority.toLowerCase()}`}
                       >
                         {complaint.priority}
-                      </span>
-
-                    </td>
-
-
-                    {/* ASSIGNED STAFF */}
-
-                    <td>
-
-                      <span className="assigned-staff">
-                        {complaint.assignedTo}
                       </span>
 
                     </td>
@@ -702,24 +660,13 @@ const handleConfirmAssign = async () => {
 
                       <div className="complaint-actions">
                         <button
-                          className="complaint-action-assign"
-                          onClick={() =>
-                            handleAssign(complaint)
-                          }
-                          title="Assign Staff"
+                          type="button"
+                          className="complaint-action-view"
+                          onClick={() => handleView(complaint)}
+                          title="View complaint details"
+                          aria-label={`View complaint ${complaint.id}`}
                         >
-                          👨‍🔧
-                        </button>
-
-
-                        <button
-                          className="complaint-action-edit"
-                          onClick={() =>
-                            handleEdit(complaint)
-                          }
-                          title="Update"
-                        >
-                          ✏️
+                          <Eye size={16} strokeWidth={1.8} aria-hidden="true" />
                         </button>
 
                       </div>
@@ -734,7 +681,7 @@ const handleConfirmAssign = async () => {
 
                 <tr>
 
-                  <td colSpan="9">
+                  <td colSpan="8">
 
                     <div className="complaints-empty">
 
@@ -790,6 +737,41 @@ const handleConfirmAssign = async () => {
         </div>
 
       </div>
+      {showDetailsModal && selectedComplaint && (
+        <div
+          className="complaint-details-backdrop"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) {
+              setShowDetailsModal(false);
+              setSelectedComplaint(null);
+            }
+          }}
+        >
+          <section className="complaint-details-modal" role="dialog" aria-modal="true" aria-labelledby="complaint-details-title">
+            <header className="complaint-details-header">
+              <div><span>COMPLAINT DETAILS</span><h2 id="complaint-details-title">{selectedComplaint.title}</h2></div>
+              <button type="button" aria-label="Close complaint details" onClick={() => { setShowDetailsModal(false); setSelectedComplaint(null); }}>×</button>
+            </header>
+            <dl className="complaint-details-grid">
+              <div><dt>Complaint ID</dt><dd>{selectedComplaint.id}</dd></div>
+              <div><dt>Resident</dt><dd>{selectedComplaint.residentName || "—"}</dd></div>
+              <div><dt>Flat</dt><dd>{selectedComplaint.flat || "—"}</dd></div>
+              <div><dt>Resident ID</dt><dd>{selectedComplaint.residentId || "—"}</dd></div>
+              <div><dt>Category</dt><dd>{selectedComplaint.category || "—"}</dd></div>
+              <div><dt>Priority</dt><dd>{selectedComplaint.priority || "—"}</dd></div>
+              <div><dt>Assigned to</dt><dd>{selectedComplaint.assignedTo || "Not Assigned"}</dd></div>
+              <div><dt>Status</dt><dd>{selectedComplaint.status || "—"}</dd></div>
+              <div><dt>Date</dt><dd>{selectedComplaint.date || "—"}</dd></div>
+              <div className="complaint-details-description"><dt>Description</dt><dd>{selectedComplaint.description || "No description provided."}</dd></div>
+            </dl>
+            <footer className="complaint-details-actions">
+              <button type="button" onClick={() => { setShowDetailsModal(false); setSelectedComplaint(null); }}>Close</button>
+              <button type="button" onClick={() => handleAssign(selectedComplaint)}>Assign Staff</button>
+            </footer>
+          </section>
+        </div>
+      )}
+
       {showAssignModal && selectedComplaint && (
         <div
           style={{

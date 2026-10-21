@@ -85,6 +85,18 @@
   background: #105e4f;
 }
 
+.admin-assets-form-actions .admin-assets-cancel {
+  border-color: #dce5e2;
+  background: #fff;
+  color: #36536f;
+}
+
+.admin-assets-form-actions .admin-assets-cancel:hover:not(:disabled) {
+  border-color: #c7d5d0;
+  background: #f4f8f6;
+  color: #203b38;
+}
+
 .admin-assets-form-actions button:disabled {
   opacity: .65;
   cursor: wait;

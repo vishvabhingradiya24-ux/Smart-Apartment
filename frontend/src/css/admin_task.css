@@ -202,6 +202,19 @@
   color: #2563eb;
 }
 
+.task-status-filter {
+  min-width: 150px;
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px solid #d9dee8;
+  border-radius: 8px;
+  background: #fff;
+  color: #344054;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
 /* ================= TABLE ================= */
 
 .task-table-wrapper {

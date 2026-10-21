@@ -1,8 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Check, ClipboardList, Clock3, RotateCw, Search } from "lucide-react";
 import "../../css/admin_task.css";
 
 const AdminTask = () => {
+  const [searchParams] = useSearchParams();
+  const staffIdFilter = searchParams.get("staffId") || "";
   const [tasks, setTasks] = useState([]);
   const [staffList, setStaffList] = useState([]);
   const [staffLoading, setStaffLoading] = useState(true);
@@ -20,7 +23,7 @@ const AdminTask = () => {
   const [formData, setFormData] = useState({
     task_name: "",
     description: "",
-    assigned_to: "",
+    assigned_to: staffIdFilter,
     priority: "Medium",
     due_date: "",
     location: "",
@@ -102,6 +105,12 @@ const AdminTask = () => {
 
   // ================= CREATE TASK =================
 
+  const openCreateModal = () => {
+    setTaskFormError("");
+    setFormData((current) => ({ ...current, assigned_to: staffIdFilter }));
+    setShowModal(true);
+  };
+
   const handleCreateTask = async (e) => {
     e.preventDefault();
     setTaskFormError("");
@@ -173,8 +182,16 @@ const AdminTask = () => {
 
   // ================= FILTER =================
 
+  const scopedTasks = useMemo(() => (
+    staffIdFilter
+      ? tasks.filter((task) => String(task.assigned_to) === staffIdFilter)
+      : tasks
+  ), [tasks, staffIdFilter]);
+
+  const selectedStaff = staffList.find((staff) => String(staff.id) === staffIdFilter);
+
   const filteredTasks = useMemo(() => {
-    return tasks.filter((task) => {
+    return scopedTasks.filter((task) => {
       const search = searchTerm.toLowerCase();
 
       const matchesSearch =
@@ -194,21 +211,21 @@ const AdminTask = () => {
 
       return matchesSearch && matchesStatus;
     });
-  }, [tasks, searchTerm, statusFilter]);
+  }, [scopedTasks, searchTerm, statusFilter]);
 
   // ================= STATS =================
 
-  const totalTasks = tasks.length;
+  const totalTasks = scopedTasks.length;
 
-  const pendingTasks = tasks.filter(
+  const pendingTasks = scopedTasks.filter(
     (task) => task.status === "Pending"
   ).length;
 
-  const progressTasks = tasks.filter(
+  const progressTasks = scopedTasks.filter(
     (task) => task.status === "In Progress"
   ).length;
 
-  const completedTasks = tasks.filter(
+  const completedTasks = scopedTasks.filter(
     (task) => task.status === "Completed"
   ).length;
 
@@ -244,17 +261,9 @@ const AdminTask = () => {
         </div>
 
         <div className="task-header-actions">
-
-          <button
-            className="task-refresh-btn"
-            onClick={fetchTasks}
-          >
-            ↻ Refresh
-          </button>
-
           <button
             className="create-task-btn"
-            onClick={() => { setTaskFormError(""); setShowModal(true); }}
+            onClick={openCreateModal}
           >
             + Create Task
           </button>
@@ -331,7 +340,9 @@ const AdminTask = () => {
             <h2>Assigned Tasks</h2>
 
             <p>
-              Manage tasks assigned to apartment staff.
+              {staffIdFilter
+                ? `Tasks assigned to ${selectedStaff ? `${selectedStaff.first_name} ${selectedStaff.last_name}`.trim() : "this staff member"}.`
+                : "Manage tasks assigned to apartment staff."}
             </p>
           </div>
 
@@ -354,30 +365,17 @@ const AdminTask = () => {
             />
           </div>
 
-          <div className="task-filters">
-
-            {[
-              "All",
-              "Pending",
-              "In Progress",
-              "Completed",
-            ].map((status) => (
-              <button
-                key={status}
-                className={
-                  statusFilter === status
-                    ? "active"
-                    : ""
-                }
-                onClick={() =>
-                  setStatusFilter(status)
-                }
-              >
-                {status}
-              </button>
-            ))}
-
-          </div>
+          <select
+            className="task-status-filter"
+            aria-label="Filter tasks by status"
+            value={statusFilter}
+            onChange={(event) => setStatusFilter(event.target.value)}
+          >
+            <option value="All">All statuses</option>
+            <option value="Pending">Pending</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Completed">Completed</option>
+          </select>
 
         </div>
 
@@ -413,11 +411,13 @@ const AdminTask = () => {
             <h3>No Tasks Found</h3>
 
             <p>
-              Create a task and assign it to staff.
+              {staffIdFilter
+                ? "No tasks are assigned to this staff member yet."
+                : "Create a task and assign it to staff."}
             </p>
 
             <button
-              onClick={() => setShowModal(true)}
+              onClick={openCreateModal}
             >
               + Create First Task
             </button>
@@ -476,8 +476,7 @@ const AdminTask = () => {
                         </div>
 
                         <span>
-                          {task.assigned_to ||
-                            "Not Assigned"}
+                          {task.staff_name || "Not Assigned"}
                         </span>
 
                       </div>

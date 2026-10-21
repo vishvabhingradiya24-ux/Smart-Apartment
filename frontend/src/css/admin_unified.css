@@ -241,6 +241,35 @@
   box-shadow: var(--admin-unified-shadow);
 }
 
+.admin-main :is(
+  .admin-records-card,
+  .task-table-card,
+  .complaints-table-card,
+  .visitors-section,
+  .notices-card,
+  .notification-section
+) {
+  position: relative;
+  overflow: hidden;
+}
+
+.admin-main :is(
+  .admin-records-card,
+  .task-table-card,
+  .complaints-table-card,
+  .visitors-section,
+  .notices-card,
+  .notification-section
+)::before {
+  position: absolute;
+  z-index: 1;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: var(--admin-unified-accent);
+  content: "";
+  pointer-events: none;
+}
+
 .admin-main :is(.task-stat-card, .payment-stat-card, .visitor-stat-card, .notice-stat-card) {
   position: relative;
   overflow: hidden;
@@ -445,6 +474,13 @@
 .admin-main :is(.admin-records-actions button, .admin-row-action, .view-all-button, .notification-read-button, .secondary-settings-button) {
   border-radius: 6px;
   font-size: 11px;
+}
+
+.admin-main .admin-assets-success {
+  margin: -8px 0 18px;
+  color: var(--admin-unified-accent-dark);
+  font-size: 13px;
+  font-weight: 650;
 }
 
 .admin-main .admin-welcome-card {
