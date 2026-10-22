@@ -5,6 +5,7 @@ import "../../css/resident/resident_shared.css";
 
 const API = "http://localhost:5000/api";
 const DAY = 24 * 60 * 60 * 1000;
+const REFRESH_MS = 30000;
 
 const FILTERS = [
   { key: "all", label: "All" },
@@ -31,6 +32,11 @@ const formatDay = (value) => {
     ? "soon"
     : date.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
 };
+
+// Visitor requests added by Security (and older records without that field) need
+// the resident's decision; visitors the resident registered themselves do not.
+const isSecurityRequest = (visitor) =>
+  visitor.registered_by_staff_id === undefined || visitor.registered_by_staff_id != null;
 
 // Turns the three data sources into one list of updates.
 const buildItems = ({ notices, polls, visitors }) => [
@@ -59,19 +65,24 @@ const buildItems = ({ notices, polls, visitors }) => [
       action: "Vote now",
       attention: true,
     })),
-  ...visitors
-    .filter((visitor) => visitor.status === "Pending")
-    .map((visitor) => ({
+  ...visitors.filter(isSecurityRequest).map((visitor) => {
+    const pending = visitor.status === "Pending";
+    const name = visitor.visitor_name || "A visitor";
+    const time = visitor.expected_time ? String(visitor.expected_time).slice(0, 5) : "";
+    const details = [visitor.purpose, time && `Visit time ${time}`].filter(Boolean).join(" · ");
+
+    return {
       id: `visitor-${visitor.visitor_id}`,
       type: "visitor",
-      label: "Visitor",
-      title: `${visitor.visitor_name || "A visitor"} is waiting for your approval`,
-      message: visitor.purpose ? `Purpose of visit: ${visitor.purpose}` : "Approve or reject this visitor request.",
-      time: toTime(visitor.created_at),
+      label: pending ? "Visitor approval" : `Visitor ${String(visitor.status || "").toLowerCase()}`,
+      title: pending ? `${name} is waiting for your approval` : `Visitor request for ${name}`,
+      message: details || (pending ? "Approve or reject this visitor request." : ""),
+      time: toTime(visitor.created_at || visitor.visit_date),
       link: "/resident/visitors",
-      action: "Review",
-      attention: true,
-    })),
+      action: pending ? "Review" : "View visitors",
+      attention: pending,
+    };
+  }),
 ];
 
 function ResidentNotifications() {
@@ -124,13 +135,26 @@ function ResidentNotifications() {
     }
   }, []);
 
+  // Load once, then refresh every 30 seconds so new visitor requests show up.
   useEffect(() => {
-    const controller = new AbortController();
+    let controller = new AbortController();
+
     const load = async () => {
       await loadNotifications(controller.signal);
     };
+
     load();
-    return () => controller.abort();
+
+    const refreshTimer = window.setInterval(() => {
+      controller.abort();
+      controller = new AbortController();
+      loadNotifications(controller.signal);
+    }, REFRESH_MS);
+
+    return () => {
+      window.clearInterval(refreshTimer);
+      controller.abort();
+    };
   }, [loadNotifications]);
 
   const counts = useMemo(
@@ -169,7 +193,7 @@ function ResidentNotifications() {
         <div className="rp-banner-text">
           <span className="rp-banner-eyebrow">RESIDENT UPDATES</span>
           <h1>Notifications</h1>
-          <p>Announcements, polls and visitor requests that need your attention, in one place.</p>
+          <p>Announcements, polls and visitor approval requests that need your attention, in one place.</p>
         </div>
         <span className="rp-banner-icon" aria-hidden="true"><BellRing size={28} strokeWidth={1.6} /></span>
       </header>

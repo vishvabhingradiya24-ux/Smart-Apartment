@@ -89,6 +89,7 @@
 
 .resident-notification-card:hover { border-color: #b6dfd5; transform: translateY(-1px); }
 .resident-notification-icon { background: #edf7f5; }
+.visitor-request-notification { border-color: #cde9e1; background: #f8fffc; }
 .resident-notification-content { min-width: 0; flex: 1; }
 
 .resident-notification-meta {
@@ -111,6 +112,7 @@
 .resident-notification-content h2 { margin: 0 0 5px; color: #17324f; font-size: 15px; }
 .resident-notification-content p { margin: 0; color: #647b91; font-size: 13px; line-height: 1.6; white-space: pre-line; }
 .resident-notification-content small { display: block; margin-top: 8px; color: #8a9bad; font-size: 11px; }
+.visitor-request-link { display: inline-block; margin-top: 10px; color: #087f69; font-size: 12px; font-weight: 700; }
 
 .resident-notifications-state {
   padding: 38px 18px;

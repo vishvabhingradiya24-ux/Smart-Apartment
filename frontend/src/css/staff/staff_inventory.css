@@ -732,6 +732,33 @@ body {
   vertical-align: middle;
 }
 
+.custom-table th:last-child,
+.custom-table td:last-child {
+  position: sticky;
+  right: 0;
+  z-index: 2;
+  min-width: 88px;
+  background: #ffffff;
+}
+
+.custom-table th:last-child {
+  z-index: 3;
+  background: #f8fafc;
+}
+
+.custom-table tbody tr:hover td:last-child {
+  background: #faf5ff;
+}
+
+.table-container .custom-table td:last-child .action-btn {
+  display: inline-flex;
+  min-width: 64px;
+  min-height: 36px;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
 .custom-table tr:last-child td {
   border-bottom: none;
 }

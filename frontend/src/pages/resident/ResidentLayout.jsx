@@ -253,7 +253,7 @@ function ResidentLayout() {
 
             <div className="resident-brand-text brand-text">
               <strong>
-                Smart Apartment Mulsha
+                Smart Apartment
               </strong>
 
               <span>

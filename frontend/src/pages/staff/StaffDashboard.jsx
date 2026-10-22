@@ -258,12 +258,6 @@ function StaffDashboard() {
   const counts = dashboard?.counts;
   const displayCount = (value) =>
     dashboardLoading ? "…" : counts ? Number(value || 0) : "—";
-  const hasAssignedWork = counts && (
-    Number(counts.complaints_total || 0) > 0 ||
-    Number(counts.tasks_pending || 0) > 0 ||
-    Number(counts.tasks_in_progress || 0) > 0 ||
-    Number(counts.tasks_completed || 0) > 0
-  );
   const allStats = buildDashboardCards({
     department: staff.department,
     counts,
@@ -421,14 +415,6 @@ function StaffDashboard() {
           </div>
         )}
 
-        {!dashboardLoading && !dashboardError && counts && !hasAssignedWork && (
-          <div className="dashboard-data-empty" role="status">
-            No complaints or tasks are assigned to your account in the database yet.
-            Ask your administrator to assign work; it will appear here automatically.
-          </div>
-        )}
-
-
         {/* =====================================
             WELCOME HERO
         ===================================== */}
@@ -517,19 +503,6 @@ function StaffDashboard() {
 
             <div className="welcome-circle large"></div>
             <div className="welcome-circle medium"></div>
-
-            <div className="welcome-user-card">
-
-              <div className="welcome-user-avatar">
-                {initials}
-              </div>
-
-              <div>
-                <span>{staff.department?.toUpperCase() || "DEPARTMENT NOT SET"}</span>
-                <strong>{fullName}</strong>
-              </div>
-
-            </div>
 
           </div>
 

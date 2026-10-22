@@ -78,10 +78,10 @@ const AdminDashboard = () => {
       path: "/admin/payments",
     },
     {
-      title: "Visitors Today",
+      title: "Visitor Entries Today",
       value: statsData.visitorsToday ?? "—",
       icon: DoorOpen,
-      change: `${statsData.checkedInToday ?? 0} checked in today`,
+      change: `${statsData.checkedInToday ?? 0} currently inside`,
       path: "/admin/visitors",
     },
     {

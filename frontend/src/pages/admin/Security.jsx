@@ -63,8 +63,8 @@ const Security = () => {
 
       <section className="admin-records-stats">
         <article><span><Shield size={18} strokeWidth={1.8} aria-hidden="true" /></span><div><small>Total staff</small><strong>{loading ? "—" : guards.length}</strong></div></article>
-        <article><span><DoorOpen size={18} strokeWidth={1.8} aria-hidden="true" /></span><div><small>Visitor requests today</small><strong>{loading ? "—" : visitorStats.visitorsToday}</strong></div></article>
-        <article><span><Check size={18} strokeWidth={1.8} aria-hidden="true" /></span><div><small>Checked in today</small><strong>{loading ? "—" : visitorStats.checkedInToday}</strong></div></article>
+        <article><span><DoorOpen size={18} strokeWidth={1.8} aria-hidden="true" /></span><div><small>Visitor entries today</small><strong>{loading ? "—" : visitorStats.visitorsToday}</strong></div></article>
+        <article><span><Check size={18} strokeWidth={1.8} aria-hidden="true" /></span><div><small>Currently inside</small><strong>{loading ? "—" : visitorStats.checkedInToday}</strong></div></article>
         <article><span><UserRoundPlus size={18} strokeWidth={1.8} aria-hidden="true" /></span><div><small>Guards joined this month</small><strong>{loading ? "—" : joinedThisMonth}</strong></div></article>
       </section>
 

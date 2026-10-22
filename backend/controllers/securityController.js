@@ -28,7 +28,7 @@ const VISITOR_COLUMNS = `
 const SCOPES = {
   today: "DATE(v.visit_date) = CURDATE()",
   expected:
-    "DATE(v.visit_date) = CURDATE() AND v.entry_time IS NULL AND v.status IN ('Pending', 'Approved')",
+    "DATE(v.visit_date) >= CURDATE() AND v.entry_time IS NULL AND v.status IN ('Pending', 'Approved')",
   inside: "v.entry_time IS NOT NULL AND v.exit_time IS NULL",
   history: "1 = 1"
 };
@@ -61,7 +61,7 @@ const getVisitors = async (req, res) => {
     const [[counts]] = await pool.query(
       `SELECT
          COALESCE(SUM(DATE(visit_date) = CURDATE()), 0) AS today,
-         COALESCE(SUM(DATE(visit_date) = CURDATE()
+         COALESCE(SUM(DATE(visit_date) >= CURDATE()
            AND entry_time IS NULL AND status IN ('Pending', 'Approved')), 0) AS expected,
          COALESCE(SUM(entry_time IS NOT NULL AND exit_time IS NULL), 0) AS inside
        FROM visitors`

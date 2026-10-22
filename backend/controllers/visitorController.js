@@ -1,4 +1,12 @@
 const { pool } = require("../config/db");
+const { getPhoneError } = require("../utils/validation");
+const { notifySecurity } = require("../utils/staffNotifications");
+
+const formatPersonName = (value) =>
+  value.trim().toLocaleLowerCase("en-IN").replace(
+    /(^|[\s'-])(\p{L})/gu,
+    (_, separator, initial) => `${separator}${initial.toLocaleUpperCase("en-IN")}`
+  );
 
 // GET ALL VISITORS OF LOGGED-IN RESIDENT
 const getMyVisitors = async (req, res) => {
@@ -11,10 +19,12 @@ const getMyVisitors = async (req, res) => {
         resident_id,
         visitor_name,
         contact_number,
+        visitor_type,
         purpose,
         visit_date,
         expected_time,
         status,
+        registered_by_staff_id,
         entry_time,
         exit_time,
         created_at
@@ -40,26 +50,66 @@ const getMyVisitors = async (req, res) => {
 // CREATE VISITOR
 const createVisitor = async (req, res) => {
   try {
+    if (req.user.user_type !== "Resident") {
+      return res.status(403).json({ message: "Only residents can register their visitors" });
+    }
+
     const residentId = req.user.id;
 
     const {
       visitor_name,
       contact_number,
+      visitor_type,
       purpose,
       visit_date,
       expected_time,
     } = req.body;
 
-    if (
-      !visitor_name ||
-      !contact_number ||
-      !purpose ||
-      !visit_date ||
-      !expected_time
-    ) {
+    const name = String(visitor_name || "").trim();
+    const contact = String(contact_number || "").trim();
+    const visitorType = String(visitor_type || "Guest").trim();
+    const visitPurpose = String(purpose || "").trim();
+    const visitDate = String(visit_date || "");
+    const expectedTime = String(expected_time || "");
+
+    if (!name || name.length > 100 || !visitPurpose || visitPurpose.length > 255) {
       return res.status(400).json({
-        message: "All visitor details are required",
+        message: "Enter a visitor name (up to 100 characters) and purpose (up to 255 characters)",
       });
+    }
+
+    const phoneError = getPhoneError(contact);
+    if (phoneError) {
+      return res.status(400).json({ message: phoneError });
+    }
+
+    if (!["Guest", "Delivery", "Service", "Cab", "Other"].includes(visitorType)) {
+      return res.status(400).json({ message: "Select a valid visitor type" });
+    }
+
+    const dateMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(visitDate);
+    const timeMatch = /^([01]\d|2[0-3]):[0-5]\d$/.exec(expectedTime);
+    if (!dateMatch || !timeMatch) {
+      return res.status(400).json({ message: "Enter a valid visit date and time" });
+    }
+    const parsedDate = new Date(Date.UTC(
+      Number(dateMatch[1]),
+      Number(dateMatch[2]) - 1,
+      Number(dateMatch[3])
+    ));
+    if (
+      parsedDate.getUTCFullYear() !== Number(dateMatch[1]) ||
+      parsedDate.getUTCMonth() !== Number(dateMatch[2]) - 1 ||
+      parsedDate.getUTCDate() !== Number(dateMatch[3])
+    ) {
+      return res.status(400).json({ message: "Enter a valid visit date" });
+    }
+    const [[dateCheck]] = await pool.query(
+      "SELECT ? < CURDATE() AS is_past",
+      [visitDate]
+    );
+    if (dateCheck.is_past) {
+      return res.status(400).json({ message: "Visit date cannot be in the past" });
     }
 
     const [result] = await pool.query(
@@ -68,21 +118,48 @@ const createVisitor = async (req, res) => {
         resident_id,
         visitor_name,
         contact_number,
+        visitor_type,
         purpose,
         visit_date,
         expected_time,
         status
       )
-      VALUES (?, ?, ?, ?, ?, ?, 'Pending')`,
+      VALUES (?, ?, ?, ?, ?, ?, ?, 'Approved')`,
       [
         residentId,
-        visitor_name,
-        contact_number,
-        purpose,
-        visit_date,
-        expected_time,
+        name,
+        contact,
+        visitorType,
+        visitPurpose,
+        visitDate,
+        expectedTime,
       ]
     );
+
+    const [[resident]] = await pool.query(
+      `SELECT first_name, last_name, block_wing, flat_number
+       FROM residents
+       WHERE id = ?`,
+      [residentId]
+    );
+    const residentName = [resident?.first_name, resident?.last_name].filter(Boolean).join(" ");
+    const flat = [resident?.block_wing, resident?.flat_number].filter(Boolean).join("-");
+    const displayVisitorName = formatPersonName(name);
+    const displayResidentName = residentName ? formatPersonName(residentName) : "";
+    const visitorDetails = [
+      `${displayVisitorName} (${visitorType})`,
+      `Purpose: ${visitPurpose.slice(0, 120)}`,
+      `Contact: ${contact}`,
+      displayResidentName && `Resident: ${displayResidentName}`,
+      flat && `Flat: ${flat}`,
+      `Visit: ${visitDate} at ${expectedTime}`,
+    ].filter(Boolean).join(" | ");
+    await notifySecurity({
+      type: "visitor",
+      title: "Resident pre-registered a visitor",
+      message: visitorDetails,
+      link: `/staff/visitors?scope=expected&visitorId=${result.insertId}`,
+    });
 
     const [visitor] = await pool.query(
       `SELECT
@@ -90,10 +167,12 @@ const createVisitor = async (req, res) => {
         resident_id,
         visitor_name,
         contact_number,
+        visitor_type,
         purpose,
         visit_date,
         expected_time,
         status,
+        registered_by_staff_id,
         entry_time,
         exit_time,
         created_at
@@ -104,7 +183,7 @@ const createVisitor = async (req, res) => {
     );
 
     res.status(201).json({
-      message: "Visitor request submitted successfully",
+      message: "Visitor pre-registered successfully",
       visitor: visitor[0],
     });
   } catch (error) {
