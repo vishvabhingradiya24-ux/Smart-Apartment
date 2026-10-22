@@ -55,6 +55,63 @@
   line-height: 1.6;
 }
 
+.sr-add-request-btn {
+  min-height: 43px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  flex-shrink: 0;
+  padding: 0 17px;
+  border: 0;
+  border-radius: 9px;
+  background: #087c79;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.sr-add-request-btn:hover {
+  background: #066b68;
+  transform: translateY(-1px);
+}
+
+.sr-add-request-btn span {
+  font-size: 19px;
+  line-height: 1;
+}
+
+.sr-form-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.sr-close-form-btn {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  border: 1px solid #dce5ec;
+  border-radius: 9px;
+  background: #ffffff;
+  color: #526272;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.sr-close-form-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.sr-request-area--closed {
+  grid-template-columns: 1fr;
+}
+
 
 /* =========================================
    BACK TO DASHBOARD
@@ -268,6 +325,35 @@
   margin-bottom: 20px;
 }
 
+.sr-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1500;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(16, 27, 39, 0.62);
+}
+
+.sr-form-modal {
+  width: min(650px, 100%);
+  max-height: min(90vh, 760px);
+  overflow-y: auto;
+  border-radius: 15px;
+  box-shadow: 0 24px 70px rgba(13, 27, 40, 0.28);
+}
+
+.sr-form-modal .sr-form-card {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.sr-modal-error {
+  margin: 0 0 16px;
+  color: #b33b3b;
+  font-size: 12px;
+}
+
 
 /* =========================================
    FORM CARD
@@ -427,13 +513,13 @@
   overflow: hidden;
   background: linear-gradient(
     145deg,
-    #064b70 0%,
-    #075c77 65%,
-    #078b73 100%
+    #182230 0%,
+    #123746 65%,
+    #087c79 100%
   );
   border-radius: 15px;
   padding: 27px;
-  box-shadow: 0 7px 20px rgba(6, 75, 112, 0.08);
+  box-shadow: 0 7px 20px rgba(24, 34, 48, 0.12);
 }
 
 .sr-process-card::after {
@@ -455,7 +541,7 @@
 
 .sr-process-header > span {
   display: block;
-  color: #a7ded3;
+  color: #b6c0ca;
   font-size: 9px;
   font-weight: 800;
   letter-spacing: 1.6px;
@@ -837,6 +923,10 @@
     align-self: flex-end;
   }
 
+  .sr-add-request-btn {
+    width: 100%;
+  }
+
   .sr-stat-list {
     flex-direction: column;
     align-items: stretch;
@@ -876,5 +966,9 @@
   .sr-dashboard-btn {
     align-self: stretch;
     justify-content: center;
+  }
+
+  .sr-add-request-btn {
+    align-self: stretch;
   }
 }

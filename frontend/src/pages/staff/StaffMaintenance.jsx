@@ -3,9 +3,11 @@ import "../../css/staff/staff_maintenance.css";
 import "../../css/staff/staff_shared_theme.css";
 import { useNavigate } from "react-router-dom";
 import StaffNav from "../../components/StaffNav";
+import { useStaffDepartment } from "../../hooks/useStaffDepartment";
 
 function StaffMaintenance() {
   const navigate = useNavigate();
+  const department = useStaffDepartment();
 
   const [staff] = useState(() => {
     try {
@@ -163,7 +165,7 @@ function StaffMaintenance() {
 
             <div className="user-details">
               <strong>{fullName}</strong>
-              <small>Staff Member</small>
+              <small>{department || "Staff Member"}</small>
             </div>
           </div>
 

@@ -3,6 +3,7 @@ import "../../css/staff/staff_work_history.css";
 import "../../css/staff/staff_shared_theme.css";
 import { useNavigate } from "react-router-dom";
 import StaffNav from "../../components/StaffNav";
+import { useStaffDepartment } from "../../hooks/useStaffDepartment";
 
 const formatDuration = (durationHours) => {
   if (durationHours == null || !Number.isFinite(Number(durationHours))) {
@@ -17,6 +18,7 @@ const formatDuration = (durationHours) => {
 
 function StaffWorkHistory() {
   const navigate = useNavigate();
+  const department = useStaffDepartment();
 
   const [staff] = useState(() => {
     try {
@@ -41,6 +43,8 @@ function StaffWorkHistory() {
   const [error, setError] = useState("");
 
   const fetchWorkHistory = useCallback(async (signal) => {
+    setLoading(true);
+    setError("");
     try {
       const response = await fetch("http://localhost:5000/api/staff/work-history", {
         headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` }, signal,
@@ -48,10 +52,10 @@ function StaffWorkHistory() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || "Unable to load work history.");
       setWorkHistory((data.works || []).map((work) => ({
-        id: String(work.task_id),
-        title: work.task_name || "Completed task",
-        category: "Task",
-        location: "—",
+        id: String(work.work_id),
+        title: work.title || `Completed ${work.work_type?.toLowerCase() || "work"}`,
+        category: work.work_type || "Task",
+        workCategory: work.work_category || "",
         priority: work.priority || "Normal",
         status: work.status,
         date: work.completed_at ? new Date(work.completed_at).toLocaleDateString() : "—",
@@ -85,6 +89,8 @@ function StaffWorkHistory() {
       const matchesSearch =
         work.id.toLowerCase().includes(search) ||
         work.title.toLowerCase().includes(search) ||
+        work.category.toLowerCase().includes(search) ||
+        work.workCategory.toLowerCase().includes(search) ||
         work.priority.toLowerCase().includes(search) ||
         work.description.toLowerCase().includes(search);
 
@@ -97,6 +103,12 @@ function StaffWorkHistory() {
 
   const totalCompleted = workHistory.filter(
     (work) => work.status === "Completed"
+  ).length;
+  const completedTasks = workHistory.filter(
+    (work) => work.category === "Task"
+  ).length;
+  const completedComplaints = workHistory.filter(
+    (work) => work.category === "Complaint"
   ).length;
 
   const trackedHours = workHistory.reduce(
@@ -140,6 +152,7 @@ function StaffWorkHistory() {
     alert(
       `Work Details\n\n` +
         `Work ID: ${work.id}\n` +
+        `Type: ${work.category}${work.workCategory ? ` (${work.workCategory})` : ""}\n` +
         `Title: ${work.title}\n` +
         `Priority: ${work.priority}\n` +
         `Status: ${work.status}\n` +
@@ -153,6 +166,8 @@ function StaffWorkHistory() {
     if (workHistory.length === 0) return;
     const rows = workHistory.map((work) => ({
       "Work ID": work.id,
+      Type: work.category,
+      Category: work.workCategory || "",
       "Work Title": work.title,
       Priority: work.priority,
       Status: work.status,
@@ -211,7 +226,7 @@ function StaffWorkHistory() {
 
             <div className="user-details">
               <strong>{fullName}</strong>
-              <small>Staff Member</small>
+              <small>{department || "Staff Member"}</small>
             </div>
           </div>
 
@@ -233,8 +248,7 @@ function StaffWorkHistory() {
             <h1>My Work History</h1>
 
             <p>
-              Review completed tasks, repairs and maintenance work performed
-              by you.
+              Review tasks and complaints you have completed.
             </p>
           </div>
 
@@ -251,8 +265,8 @@ function StaffWorkHistory() {
         </header>
 
         <section className="staff-page-intro staff-page-intro--history">
-          <div><span className="staff-page-intro-kicker">COMPLETED OPERATIONS</span><h2>A record of the work you’ve completed.</h2><p>Look back through finished repairs and tasks to find outcomes and service details.</p></div>
-          <div className="staff-page-intro-aside"><span>COMPLETED RECORDS</span><strong>{totalCompleted}</strong><small>logged in your work history</small><i aria-hidden="true">↗</i></div>
+          <div><span className="staff-page-intro-kicker">COMPLETED OPERATIONS</span><h2>A record of the work you’ve completed.</h2><p>Review completed tasks and resolved complaints, with their recorded outcomes.</p></div>
+          <div className="staff-page-intro-aside"><span>COMPLETED RECORDS</span><strong>{totalCompleted}</strong><small>{completedTasks} tasks · {completedComplaints} complaints</small><i aria-hidden="true">↗</i></div>
           <span className="staff-page-intro-art" aria-hidden="true">◷</span>
         </section>
 
@@ -321,7 +335,7 @@ function StaffWorkHistory() {
             <input
               type="text"
               className="search-input"
-              placeholder="Search work, category or location..."
+              placeholder="Search tasks, complaints or category..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -337,7 +351,7 @@ function StaffWorkHistory() {
           </div>
 
           <div className="filter-tabs">
-            {["All"].map((filter) => (
+            {["All", "Task", "Complaint"].map((filter) => (
               <button
                 key={filter}
                 className={`filter-tab-btn ${
@@ -345,7 +359,7 @@ function StaffWorkHistory() {
                 }`}
                 onClick={() => setActiveFilter(filter)}
               >
-                {filter}
+                {filter === "All" ? "All" : `${filter}s`}
               </button>
             ))}
           </div>
@@ -374,7 +388,7 @@ function StaffWorkHistory() {
           </div>
 
           {loading ? (
-            <div className="empty-state"><div className="empty-icon">⏳</div><h3>Loading work history...</h3><p>Fetching completed tasks from the database.</p></div>
+            <div className="empty-state"><div className="empty-icon">⏳</div><h3>Loading work history...</h3><p>Fetching completed tasks and resolved complaints.</p></div>
           ) : error ? (
             <div className="empty-state"><div className="empty-icon">⚠️</div><h3>Unable to Load Work History</h3><p>{error}</p><button className="empty-reset-btn" onClick={() => fetchWorkHistory()}>Try Again</button></div>
           ) : filteredHistory.length > 0 ? (
@@ -384,6 +398,7 @@ function StaffWorkHistory() {
                   <tr>
                     <th>WORK ID</th>
                     <th>WORK DETAILS</th>
+                    <th>TYPE</th>
                     <th>PRIORITY</th>
                     <th>DATE</th>
                     <th>DURATION</th>
@@ -408,10 +423,12 @@ function StaffWorkHistory() {
                           <div>
                             <strong>{work.title}</strong>
 
-                            <small>{work.description}</small>
+                            <small>{work.workCategory ? `${work.workCategory} · ` : ""}{work.description}</small>
                           </div>
                         </div>
                       </td>
+
+                      <td>{work.category}</td>
 
                       <td>
                         <span

@@ -37,12 +37,6 @@ function ResidentNotifications() {
     return () => controller.abort();
   }, [loadNotifications]);
 
-  const refreshNotifications = () => {
-    setLoading(true);
-    setError("");
-    loadNotifications();
-  };
-
   const formatDate = (value) => {
     if (!value) return "";
     const date = new Date(value);
@@ -59,9 +53,6 @@ function ResidentNotifications() {
           <h1>Notifications</h1>
           <p>Stay up to date with announcements from your apartment management.</p>
         </div>
-        <button type="button" onClick={refreshNotifications} disabled={loading}>
-          ↻ Refresh
-        </button>
       </header>
 
       <div className="resident-notifications-summary">

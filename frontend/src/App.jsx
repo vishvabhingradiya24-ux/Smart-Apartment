@@ -60,6 +60,7 @@ import StaffSupervisorComplaints from "./pages/staff/StaffSupervisorComplaints";
 import StaffSupervisorVerification from "./pages/staff/StaffSupervisorVerification";
 import StaffSupervisorReports from "./pages/staff/StaffSupervisorReports";
 import StaffSupervisorIncidents from "./pages/staff/StaffSupervisorIncidents";
+import StaffWorkspaceLayout from "./components/StaffWorkspaceLayout";
 
 
 // ==========================================
@@ -86,6 +87,7 @@ import AdminIncidents from "./pages/admin/AdminIncidents";
 import "./css/admin_residents.css";
 import "./css/admin_unified.css";
 import "./css/staff_admin_theme.css";
+import "./css/staff_workspace.css";
 // import "./css/custom-overrides.css";
 
 function App() {
@@ -120,25 +122,27 @@ function App() {
         </Route>
 
         {/* STAFF (FIXED PATHS HERE) */}
-        <Route path="/staff" element={<StaffDashboard />} />
-        <Route path="/staff/dashboard" element={<StaffDashboard />} />
-        <Route path="/staff/complaints" element={<AssignedComplaints />} />
-        <Route path="/staff/service-requests" element={<StaffServiceRequests />} />
-        <Route path="/staff/tasks" element={<StaffTasks />} />
-        <Route path="/staff/maintenance" element={<StaffMaintenance />} />
-        <Route path="/staff/assets" element={<StaffInventory />} />
-        <Route path="/staff/inventory" element={<StaffInventory />} />
-        <Route path="/staff/work-history" element={<StaffWorkHistory />} />
-        <Route path="/staff/profile" element={<StaffProfile />} />
-        <Route path="/staff/notifications" element={<StaffNotifications />} />
-        <Route path="/staff/visitors" element={<StaffVisitors />} />
-        <Route path="/staff/report-issue" element={<StaffReportIssue />} />
-        <Route path="/staff/supervisor/staff" element={<StaffSupervisorStaff />} />
-        <Route path="/staff/supervisor/tasks" element={<StaffSupervisorTasks />} />
-        <Route path="/staff/supervisor/complaints" element={<StaffSupervisorComplaints />} />
-        <Route path="/staff/supervisor/verification" element={<StaffSupervisorVerification />} />
-        <Route path="/staff/supervisor/reports" element={<StaffSupervisorReports />} />
-        <Route path="/staff/supervisor/incidents" element={<StaffSupervisorIncidents />} />
+        <Route path="/staff" element={<StaffWorkspaceLayout />}>
+          <Route index element={<StaffDashboard />} />
+          <Route path="dashboard" element={<StaffDashboard />} />
+          <Route path="complaints" element={<AssignedComplaints />} />
+          <Route path="tasks" element={<StaffTasks />} />
+          <Route path="service-requests" element={<StaffServiceRequests />} />
+          <Route path="maintenance" element={<StaffMaintenance />} />
+          <Route path="assets" element={<StaffInventory />} />
+          <Route path="inventory" element={<StaffInventory />} />
+          <Route path="work-history" element={<StaffWorkHistory />} />
+          <Route path="profile" element={<StaffProfile />} />
+          <Route path="notifications" element={<StaffNotifications />} />
+          <Route path="visitors" element={<StaffVisitors />} />
+          <Route path="report-issue" element={<StaffReportIssue />} />
+          <Route path="supervisor/staff" element={<StaffSupervisorStaff />} />
+          <Route path="supervisor/tasks" element={<StaffSupervisorTasks />} />
+          <Route path="supervisor/complaints" element={<StaffSupervisorComplaints />} />
+          <Route path="supervisor/verification" element={<StaffSupervisorVerification />} />
+          <Route path="supervisor/reports" element={<StaffSupervisorReports />} />
+          <Route path="supervisor/incidents" element={<StaffSupervisorIncidents />} />
+        </Route>
 
 
         {/* ADMIN DASHBOARD */}

@@ -19,23 +19,29 @@ import {
 } from "lucide-react";
 import "../../css/resident/resident_dashboard.css";
 
+const readResidentUser = () => {
+  try {
+    const storedUser = sessionStorage.getItem("user");
+    if (storedUser) {
+      const parsedUser = JSON.parse(storedUser);
+      return parsedUser?.user || parsedUser?.data?.user || parsedUser || {};
+    }
+  } catch (error) {
+    console.error("User data error:", error);
+  }
+  return {};
+};
+
 function ResidentLayout() {
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-const [user] = useState(() => {
-    try {
-      const storedUser = sessionStorage.getItem("user");
+  const [user, setUser] = useState(readResidentUser);
 
-      if (storedUser) {
-        const parsedUser = JSON.parse(storedUser);
-        return parsedUser?.user || parsedUser?.data?.user || parsedUser || {};
-      }
-    } catch (error) {
-      console.error("User data error:", error);
-    }
-    return {};
-  });
-
+  useEffect(() => {
+    const updateResidentUser = () => setUser(readResidentUser());
+    window.addEventListener("resident-profile-updated", updateResidentUser);
+    return () => window.removeEventListener("resident-profile-updated", updateResidentUser);
+  }, []);
   const firstName = user?.first_name || "";
   const lastName = user?.last_name || "";
 
@@ -156,21 +162,6 @@ const [user] = useState(() => {
 
               <span>
                 Dashboard
-              </span>
-            </NavLink>
-
-
-            <NavLink
-              to="/resident/profile"
-              className={({ isActive }) => `resident-nav-item nav-item ${isActive ? "active" : ""}`}
-              title="My Profile"
-            >
-              <span className="resident-nav-icon nav-icon">
-                <UserRound size={17} strokeWidth={1.8} aria-hidden="true" />
-              </span>
-
-              <span>
-                My Profile
               </span>
             </NavLink>
 
@@ -304,6 +295,20 @@ const [user] = useState(() => {
 
               <span>
                 Emergency Contacts
+              </span>
+            </NavLink>
+
+            <NavLink
+              to="/resident/profile"
+              className={({ isActive }) => `resident-nav-item nav-item ${isActive ? "active" : ""}`}
+              title="My Profile"
+            >
+              <span className="resident-nav-icon nav-icon">
+                <UserRound size={17} strokeWidth={1.8} aria-hidden="true" />
+              </span>
+
+              <span>
+                My Profile
               </span>
             </NavLink>
 

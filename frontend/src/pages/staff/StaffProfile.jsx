@@ -276,7 +276,7 @@ function StaffProfile() {
 
             <div className="user-details">
               <strong>{fullName}</strong>
-              <small>Staff Member</small>
+              <small>{profileData.department || "Staff Member"}</small>
             </div>
 
           </div>

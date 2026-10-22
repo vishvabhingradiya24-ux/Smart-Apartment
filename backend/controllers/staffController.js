@@ -597,16 +597,42 @@ const getStaffWorkHistory = async (req, res) => {
     }
 
     const [works] = await pool.query(
-      `SELECT task_id, task_name, description, priority, status,
-              COALESCE(completed_date, created_at) AS completed_at,
-              CASE
-                WHEN started_at IS NOT NULL AND completed_date IS NOT NULL
-                  THEN GREATEST(TIMESTAMPDIFF(SECOND, started_at, completed_date), 0) / 3600
-                ELSE NULL
-              END AS duration_hours
-       FROM tasks WHERE assigned_to = ? AND status = 'Completed'
-       ORDER BY created_at DESC`,
-      [req.user.id]
+      `SELECT *
+       FROM (
+         SELECT
+           CONCAT('T', task_id) AS work_id,
+           task_name AS title,
+           description,
+           'Task' AS work_type,
+           NULL AS work_category,
+           priority,
+           status,
+           COALESCE(completed_date, created_at) AS completed_at,
+           CASE
+             WHEN started_at IS NOT NULL AND completed_date IS NOT NULL
+               THEN GREATEST(TIMESTAMPDIFF(SECOND, started_at, completed_date), 0) / 3600
+             ELSE NULL
+           END AS duration_hours
+         FROM tasks
+         WHERE assigned_to = ? AND status = 'Completed'
+
+         UNION ALL
+
+         SELECT
+           CONCAT('C', complaint_id) AS work_id,
+           complaint_title AS title,
+           COALESCE(NULLIF(resolution_details, ''), complaint_description) AS description,
+           'Complaint' AS work_type,
+           category AS work_category,
+           priority,
+           'Completed' AS status,
+           COALESCE(updated_at, complaint_date) AS completed_at,
+           NULL AS duration_hours
+         FROM complaints
+         WHERE assigned_staff_id = ? AND status IN ('Resolved', 'Completed')
+       ) AS completed_work
+       ORDER BY completed_at DESC`,
+      [req.user.id, req.user.id]
     );
     res.status(200).json({ works });
   } catch (error) {

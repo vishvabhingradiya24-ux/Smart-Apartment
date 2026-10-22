@@ -75,22 +75,6 @@ function ResidentVisitors() {
     };
   }, []);
 
-  const refreshVisitors = async () => {
-    setLoading(true);
-    setError("");
-
-    try {
-      setVisitors(await fetchVisitors());
-    } catch (err) {
-      console.error("Fetch Visitors Error:", err);
-
-      setVisitors([]);
-      setError(err.message || "Unable to fetch visitor records.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const updateVisitorStatus = async (visitorId, status) => {
     setError("");
     setSuccess("");
@@ -317,15 +301,6 @@ function ResidentVisitors() {
               Review the visitor information and decide on pending requests.
             </p>
           </div>
-
-          <button
-            type="button"
-            className="resident-visitors-refresh"
-            onClick={refreshVisitors}
-            disabled={loading}
-          >
-            ↻ Refresh
-          </button>
 
         </div>
 

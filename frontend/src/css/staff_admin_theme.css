@@ -423,3 +423,51 @@
     padding: 20px 16px 30px;
   }
 }
+
+/* Keep the shared role-based menu usable despite legacy page CSS selectors. */
+.modern-staff-layout .modern-sidebar,
+.staff-complaints-layout .complaints-sidebar {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+}
+
+.modern-staff-layout .sidebar-nav,
+.staff-complaints-layout .complaints-sidebar-nav {
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.modern-staff-layout .nav-btn,
+.staff-complaints-layout .complaints-nav-btn {
+  display: flex;
+  min-height: 44px;
+  flex: 0 0 auto;
+}
+
+.modern-staff-layout .nav-btn > span:not(.nav-icon) {
+  display: inline;
+}
+
+.modern-staff-layout .sidebar-footer,
+.staff-complaints-layout .complaints-sidebar-footer {
+  flex: 0 0 auto;
+}
+
+.staff-complaints-layout {
+  width: 100%;
+  overflow-x: hidden;
+}
+
+.staff-complaints-layout .complaints-main {
+  min-width: 0;
+}
+
+.staff-complaints-layout .complaints-table-scroll {
+  overflow-x: hidden;
+}

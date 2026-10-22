@@ -369,7 +369,7 @@ function StaffServiceRequests() {
 
             <div className="user-details">
               <strong>{fullName}</strong>
-              <small>Staff Member</small>
+              <small>{department || "Staff Member"}</small>
             </div>
 
           </div>
