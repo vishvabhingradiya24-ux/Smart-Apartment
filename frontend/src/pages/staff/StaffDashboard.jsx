@@ -39,8 +39,7 @@ function StaffDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [showQuickActions, setShowQuickActions] = useState(false);
-  const [currentTime, setCurrentTime] = useState(new Date());
-  const [dashboard, setDashboard] = useState(null);
+    const [dashboard, setDashboard] = useState(null);
   const [dashboardLoading, setDashboardLoading] = useState(true);
   const [dashboardError, setDashboardError] = useState("");
 
@@ -52,30 +51,6 @@ function StaffDashboard() {
   const initials =
     `${firstName.charAt(0)}${lastName.charAt(0)}`
       .toUpperCase() || "S";
-
-  /* =========================
-     CURRENT DATE & TIME
-  ========================= */
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, []);
-
-  const formattedDate = currentTime.toLocaleDateString("en-IN", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
-
-  const formattedTime = currentTime.toLocaleTimeString("en-IN", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
 
   const requestDashboard = useCallback(async (signal) => {
     const token = sessionStorage.getItem("token");
@@ -449,42 +424,6 @@ function StaffDashboard() {
 
           </div>
 
-
-          <div className="header-actions">
-
-            {/* Date / Time */}
-
-            <div className="header-datetime">
-              <strong>{formattedTime}</strong>
-              <span>{formattedDate}</span>
-            </div>
-
-
-            {/* Profile */}
-
-            <button
-              className="profile-pill"
-              onClick={() =>
-                handleNavigation("/staff/profile")
-              }
-            >
-
-              <div className="avatar-sm">
-                {initials}
-              </div>
-
-              <div className="profile-pill-info">
-                <strong>{fullName}</strong>
-                <span>{staff.department || "Department not set"}</span>
-              </div>
-
-              <span className="profile-arrow">
-                ›
-              </span>
-
-            </button>
-
-          </div>
 
         </header>
 
@@ -1050,7 +989,7 @@ function StaffDashboard() {
         <footer className="staff-footer">
 
           <span>
-            © {currentTime.getFullYear()} Smart Apartment
+            © {new Date().getFullYear()} Smart Apartment
             Management System
           </span>
 

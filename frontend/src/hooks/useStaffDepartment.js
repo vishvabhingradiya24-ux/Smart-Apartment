@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 const readStoredDepartment = () => {
   try {
-    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    const user = JSON.parse(sessionStorage.getItem("user") || "{}");
     return user?.department ?? user?.staff_type ?? user?.staffType ?? "";
   } catch {
     return "";
@@ -16,7 +16,7 @@ export function useStaffDepartment() {
   const [department, setDepartment] = useState(readStoredDepartment);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token");
 
     if (!token) return undefined;
 
@@ -38,9 +38,9 @@ export function useStaffDepartment() {
         setDepartment(fresh || "");
 
         try {
-          const user = JSON.parse(localStorage.getItem("user") || "{}");
+          const user = JSON.parse(sessionStorage.getItem("user") || "{}");
 
-          localStorage.setItem("user", JSON.stringify({ ...user, department: fresh }));
+          sessionStorage.setItem("user", JSON.stringify({ ...user, department: fresh }));
         } catch {
           // The menu still works if the saved login cannot be updated.
         }

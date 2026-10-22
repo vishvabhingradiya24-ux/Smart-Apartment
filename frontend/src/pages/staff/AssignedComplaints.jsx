@@ -553,63 +553,8 @@ function StaffComplaints() {
           </div>
 
 
-          <div
-            className="complaints-profile"
-            onClick={() =>
-              handleNavigation("/staff/profile")
-            }
-          >
-
-            <div className="complaints-profile-avatar">
-              {initials}
-            </div>
-
-
-            <div className="complaints-profile-info">
-
-              <strong>
-                {fullName}
-              </strong>
-
-              <span>
-                Staff Member
-              </span>
-
-            </div>
-
-
-            <span>⌄</span>
-
-          </div>
 
         </header>
-
-
-        <section className="complaints-hero" aria-label="Complaint workbench overview">
-          <div className="complaints-hero-copy">
-            <span className="complaints-hero-kicker">FIELD OPERATIONS · STAFF MEMBER</span>
-            <h2>Resolve issues.<br />Keep the community moving.</h2>
-            <p>Your assigned cases, progress and resident follow-up in one focused workspace.</p>
-            <div className="complaints-workflow" aria-label="Complaint workflow">
-              <button type="button" onClick={() => setActiveFilter("All")}><span>01</span> Review queue</button>
-              <i aria-hidden="true"></i>
-              <button type="button" onClick={() => setActiveFilter("In Progress")}><span>02</span> Work in progress</button>
-              <i aria-hidden="true"></i>
-              <button type="button" onClick={() => setActiveFilter("Resolved")}><span>03</span> Resolved</button>
-            </div>
-          </div>
-          <div className="complaints-hero-summary">
-            <div className="complaints-completion-ring" style={{ "--completion": `${complaints.length ? Math.round((resolvedCount / complaints.length) * 100) : 0}%` }}>
-              <div><strong>{complaints.length ? Math.round((resolvedCount / complaints.length) * 100) : 0}%</strong><span>resolved</span></div>
-            </div>
-            <div className="complaints-hero-summary-text">
-              <span>YOUR WORK QUEUE</span>
-              <strong>{complaints.length} {complaints.length === 1 ? "case" : "cases"}</strong>
-              <small>{pendingCount} pending · {progressCount} in progress</small>
-            </div>
-            <div className="complaints-hero-decoration" aria-hidden="true">⚒</div>
-          </div>
-        </section>
 
 
         {/* =====================================================

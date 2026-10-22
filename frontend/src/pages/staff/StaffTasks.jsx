@@ -472,9 +472,7 @@ function StaffTasks() {
                 {fullName}
               </strong>
 
-              <small>
-                Staff Member
-              </small>
+              <small>{department || "Staff Member"}</small>
 
             </div>
 
@@ -518,34 +516,10 @@ function StaffTasks() {
 
           <div className="header-actions">
 
-            <div
-              className="profile-pill"
-              onClick={() =>
-                handleNavigation(
-                  "/staff/profile"
-                )
-              }
-            >
-
-              <div className="avatar-sm">
-                {initials}
-              </div>
-
-              <span>
-                {fullName}
-              </span>
-
-            </div>
 
           </div>
 
         </header>
-
-        <section className="staff-page-intro staff-page-intro--tasks">
-          <div><span className="staff-page-intro-kicker">DAILY EXECUTION BOARD</span><h2>Plan the work. Make steady progress.</h2><p>Your task queue brings today’s priorities and completion status together.</p></div>
-          <div className="staff-page-intro-aside"><span>TASKS TO REVIEW</span><strong>{pendingTasks}</strong><small>of {totalTasks} assigned tasks</small><i aria-hidden="true">✓</i></div>
-          <span className="staff-page-intro-art" aria-hidden="true">☑</span>
-        </section>
 
         {/* ================= STATS ================= */}
 

@@ -329,20 +329,6 @@ function StaffProfile() {
               <button type="button" className="edit-profile-btn" onClick={() => setIsEditing(true)}>Choose staff type</button>
             ) : null}
 
-            <div
-              className="profile-pill"
-              onClick={() => handleNavigation("/staff/profile")}
-            >
-
-              <div className="avatar-sm">
-                {initials}
-              </div>
-
-              <span>
-                {fullName}
-              </span>
-
-            </div>
 
           </div>
 
@@ -360,7 +346,7 @@ function StaffProfile() {
 
             <div className="profile-name-section">
 
-              <span className="profile-role-badge">Staff Member</span>
+              <span className="profile-role-badge">{profileData.department || "Staff Member"}</span>
 
               <h2>
                 {profileData.first_name} {profileData.last_name}

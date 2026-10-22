@@ -104,12 +104,6 @@ function StaffWorkHistory() {
   const totalCompleted = workHistory.filter(
     (work) => work.status === "Completed"
   ).length;
-  const completedTasks = workHistory.filter(
-    (work) => work.category === "Task"
-  ).length;
-  const completedComplaints = workHistory.filter(
-    (work) => work.category === "Complaint"
-  ).length;
 
   const trackedHours = workHistory.reduce(
     (total, work) => total + (work.durationHours ?? 0),
@@ -253,22 +247,8 @@ function StaffWorkHistory() {
           </div>
 
           <div className="header-actions">
-            <div
-              className="profile-pill"
-              onClick={() => handleNavigation("/staff/profile")}
-            >
-              <div className="avatar-sm">{initials}</div>
-
-              <span>{fullName}</span>
-            </div>
           </div>
         </header>
-
-        <section className="staff-page-intro staff-page-intro--history">
-          <div><span className="staff-page-intro-kicker">COMPLETED OPERATIONS</span><h2>A record of the work you’ve completed.</h2><p>Review completed tasks and resolved complaints, with their recorded outcomes.</p></div>
-          <div className="staff-page-intro-aside"><span>COMPLETED RECORDS</span><strong>{totalCompleted}</strong><small>{completedTasks} tasks · {completedComplaints} complaints</small><i aria-hidden="true">↗</i></div>
-          <span className="staff-page-intro-art" aria-hidden="true">◷</span>
-        </section>
 
         {/* ================= STATS ================= */}
 

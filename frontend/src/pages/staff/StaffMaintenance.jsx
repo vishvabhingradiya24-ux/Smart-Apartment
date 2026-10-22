@@ -190,22 +190,8 @@ function StaffMaintenance() {
           </div>
 
           <div className="header-actions">
-            <div
-              className="profile-pill"
-              onClick={() => handleNavigation("/staff/profile")}
-            >
-              <div className="avatar-sm">{initials}</div>
-
-              <span>{fullName}</span>
-            </div>
           </div>
         </header>
-
-        <section className="staff-page-intro staff-page-intro--maintenance">
-          <div><span className="staff-page-intro-kicker">PROPERTY CARE</span><h2>Keep every shared space running well.</h2><p>Review planned maintenance and follow each repair through to completion.</p></div>
-          <div className="staff-page-intro-aside"><span>MAINTENANCE ITEMS</span><strong>{totalMaintenance}</strong><small>{completedCount} completed so far</small><i aria-hidden="true">⚙</i></div>
-          <span className="staff-page-intro-art" aria-hidden="true">⌘</span>
-        </section>
 
         {/* ================= STATS ================= */}
 

@@ -83,14 +83,6 @@ function StaffLayout({ badge, title, subtitle, actions = null, children }) {
           <div className="header-actions">
             {actions}
 
-            <div
-              className="profile-pill"
-              onClick={() => navigate("/staff/profile")}
-            >
-              <div className="avatar-sm">{initials}</div>
-
-              <span>{fullName}</span>
-            </div>
           </div>
         </header>
 
