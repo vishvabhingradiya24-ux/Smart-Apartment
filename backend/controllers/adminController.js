@@ -795,10 +795,34 @@ const ensureAdminSettingsSchema = async () => {
   adminSettingsSchemaReady = true;
 };
 
+// An admin created before a society existed has no society_id, which left the
+// Settings page empty. Link such an admin to the society automatically: the only
+// society if there is one, or a default one if the table is empty. With several
+// societies the choice is not obvious, so nothing is assigned.
+const ensureAdminSociety = async (adminId) => {
+  const [admins] = await pool.query("SELECT society_id FROM admins WHERE id = ?", [adminId]);
+  if (!admins.length || admins[0].society_id) return;
+
+  const [societies] = await pool.query("SELECT society_id FROM societies ORDER BY society_id LIMIT 2");
+  let societyId = null;
+
+  if (societies.length === 0) {
+    const [created] = await pool.query("INSERT INTO societies (society_name) VALUES ('Smart Apartment')");
+    societyId = created.insertId;
+  } else if (societies.length === 1) {
+    societyId = societies[0].society_id;
+  }
+
+  if (societyId) {
+    await pool.query("UPDATE admins SET society_id = ? WHERE id = ? AND society_id IS NULL", [societyId, adminId]);
+  }
+};
+
 const getAdminSettings = async (req, res) => {
   try {
     await ensureAdminSettingsSchema();
     if (!requireAdmin(req, res)) return;
+    await ensureAdminSociety(req.user.id);
     const [admins] = await pool.query(
           `SELECT a.id, a.name, a.email, a.phone, a.society_id,
               a.notification_preferences, a.security_preferences,
@@ -867,6 +891,7 @@ const updateAdminSocietySettings = async (req, res) => {
       return res.status(400).json({ message: "Enter a valid society email address" });
     }
 
+    await ensureAdminSociety(req.user.id);
     const [societies] = await pool.query(
       `SELECT s.society_id FROM societies s
        INNER JOIN admins a ON a.society_id = s.society_id
