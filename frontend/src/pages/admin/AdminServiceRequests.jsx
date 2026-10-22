@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Search, Wrench } from "lucide-react";
+import { CheckCircle2, Clock3, Search, Wrench } from "lucide-react";
 import {
   SERVICE_REQUEST_DEPARTMENTS,
   canTakeWork,
@@ -154,14 +154,6 @@ const AdminServiceRequests = () => {
           <h1>Service Requests</h1>
           <p>Review resident requests and assign them to the right staff member.</p>
         </div>
-        <button
-          type="button"
-          className="admin-records-refresh"
-          onClick={() => fetchData()}
-          disabled={loading}
-        >
-          ↻ Refresh
-        </button>
       </header>
 
       <section className="admin-records-stats">
@@ -170,11 +162,11 @@ const AdminServiceRequests = () => {
           <div><small>Total requests</small><strong>{loading ? "—" : requests.length}</strong></div>
         </article>
         <article>
-          <span>⌛</span>
+          <span><Clock3 size={18} aria-hidden="true" /></span>
           <div><small>Pending</small><strong>{loading ? "—" : pendingCount}</strong></div>
         </article>
         <article>
-          <span>✓</span>
+          <span><CheckCircle2 size={18} aria-hidden="true" /></span>
           <div><small>Assigned to staff</small><strong>{loading ? "—" : assignedCount}</strong></div>
         </article>
       </section>
