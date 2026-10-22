@@ -1,10 +1,21 @@
-import { useEffect, useState } from "react";
-import "../../css/resident/residentVisitors.css";
+import { useEffect, useMemo, useState } from "react";
+import { CheckCircle2, Clock3, DoorOpen, Info, UsersRound } from "lucide-react";
+import "../../css/resident/resident_shared.css";
 
 const API_URL = "http://localhost:5000/api/resident/visitors";
 
+const FILTERS = ["All", "Pending", "Approved", "Rejected", "Completed"];
+
+const statusTone = (status) => {
+  if (status === "Approved") return "";
+  if (status === "Rejected") return "is-danger";
+  if (status === "Completed") return "is-muted";
+  return "is-warn";
+};
+
 function ResidentVisitors() {
   const [visitors, setVisitors] = useState([]);
+  const [filter, setFilter] = useState("All");
 
   const [loading, setLoading] = useState(true);
   const [updatingVisitorId, setUpdatingVisitorId] = useState(null);
@@ -159,333 +170,190 @@ function ResidentVisitors() {
     });
   };
 
-  const getStatusClass = (status) => {
-    switch (status) {
-      case "Approved":
-        return "resident-visitors-status-approved";
-
-      case "Rejected":
-        return "resident-visitors-status-rejected";
-
-      case "Completed":
-        return "resident-visitors-status-completed";
-
-      case "Pending":
-      default:
-        return "resident-visitors-status-pending";
-    }
-  };
+  const countBy = (status) => visitors.filter((visitor) => visitor.status === status).length;
 
   const totalVisitors = visitors.length;
+  const pendingVisitors = countBy("Pending");
+  const approvedVisitors = countBy("Approved");
+  const completedVisitors = countBy("Completed");
 
-  const pendingVisitors = visitors.filter(
-    (visitor) => visitor.status === "Pending"
-  ).length;
+  // Requests that need a decision come first.
+  const visibleVisitors = useMemo(() => {
+    const list = visitors.filter((visitor) => filter === "All" || (visitor.status || "Pending") === filter);
 
-  const approvedVisitors = visitors.filter(
-    (visitor) => visitor.status === "Approved"
-  ).length;
-
-  const completedVisitors = visitors.filter(
-    (visitor) => visitor.status === "Completed"
-  ).length;
+    return [...list].sort(
+      (a, b) => Number(b.status === "Pending") - Number(a.status === "Pending")
+    );
+  }, [visitors, filter]);
 
   return (
-    <div className="resident-visitors-page">
-
-      <section className="resident-visitors-top">
-
-        <div>
-          <span className="resident-visitors-eyebrow">
-            RESIDENT SERVICES
-          </span>
-
+    <div className="rp-page">
+      <header className="rp-banner">
+        <div className="rp-banner-text">
+          <span className="rp-banner-eyebrow">RESIDENT SERVICES</span>
           <h1>Visitors</h1>
-
           <p>Review visitor details and approve or reject pending requests.</p>
         </div>
-
-      </section>
-
+        <span className="rp-banner-icon" aria-hidden="true"><DoorOpen size={28} strokeWidth={1.6} /></span>
+      </header>
 
       {success && (
-        <div className="resident-visitors-alert success">
-
-          <div className="resident-visitors-alert-icon">
-            ✓
-          </div>
-
+        <div className="rp-alert" role="status">
+          <CheckCircle2 size={18} aria-hidden="true" />
           <div>
-            <strong>Success</strong>
+            <strong>Done</strong>
             <p>{success}</p>
           </div>
-
-          <button
-            type="button"
-            onClick={() => setSuccess("")}
-          >
-            ×
-          </button>
-
+          <button type="button" aria-label="Dismiss" onClick={() => setSuccess("")}>×</button>
         </div>
       )}
 
-
       {error && (
-        <div className="resident-visitors-alert error">
-
-          <div className="resident-visitors-alert-icon">
-            !
-          </div>
-
+        <div className="rp-alert is-error" role="alert">
+          <Info size={18} aria-hidden="true" />
           <div>
             <strong>Something went wrong</strong>
             <p>{error}</p>
           </div>
-
-          <button
-            type="button"
-            onClick={() => setError("")}
-          >
-            ×
-          </button>
-
+          <button type="button" aria-label="Dismiss" onClick={() => setError("")}>×</button>
         </div>
       )}
 
-
-      <section className="resident-visitors-overview">
-
-        <div className="resident-visitors-overview-heading">
-          <span>VISITOR OVERVIEW</span>
-          <h2>Your visitor activity</h2>
+      <section className="rp-stats" aria-label="Visitor summary">
+        <div className="rp-stat">
+          <span className="rp-stat-icon"><UsersRound size={19} strokeWidth={1.8} aria-hidden="true" /></span>
+          <div className="rp-stat-body"><small>Total visitors</small><strong>{totalVisitors}</strong></div>
         </div>
-
-        <div className="resident-visitors-stat-grid">
-
-          <div className="resident-visitors-stat">
-            <span>Total Visitors</span>
-            <strong>{totalVisitors}</strong>
-          </div>
-
-          <div className="resident-visitors-stat pending">
-            <span>Pending</span>
-            <strong>{pendingVisitors}</strong>
-          </div>
-
-          <div className="resident-visitors-stat approved">
-            <span>Approved</span>
-            <strong>{approvedVisitors}</strong>
-          </div>
-
-          <div className="resident-visitors-stat completed">
-            <span>Completed</span>
-            <strong>{completedVisitors}</strong>
-          </div>
-
+        <div className={`rp-stat${pendingVisitors > 0 ? " is-warn" : ""}`}>
+          <span className="rp-stat-icon"><Clock3 size={19} strokeWidth={1.8} aria-hidden="true" /></span>
+          <div className="rp-stat-body"><small>Waiting for you</small><strong>{pendingVisitors}</strong></div>
         </div>
-
+        <div className="rp-stat">
+          <span className="rp-stat-icon"><CheckCircle2 size={19} strokeWidth={1.8} aria-hidden="true" /></span>
+          <div className="rp-stat-body"><small>Approved</small><strong>{approvedVisitors}</strong></div>
+        </div>
+        <div className="rp-stat">
+          <span className="rp-stat-icon"><DoorOpen size={19} strokeWidth={1.8} aria-hidden="true" /></span>
+          <div className="rp-stat-body"><small>Completed visits</small><strong>{completedVisitors}</strong></div>
+        </div>
       </section>
 
-
-      <section className="resident-visitors-history">
-
-        <div className="resident-visitors-history-header">
-
+      <section className="rp-section">
+        <div className="rp-section-head">
           <div>
-            <span>YOUR VISITORS</span>
-
-            <h2>Visitor History</h2>
-
-            <p>
-              Review the visitor information and decide on pending requests.
-            </p>
+            <span className="rp-eyebrow">YOUR VISITORS</span>
+            <h2>Visitor history</h2>
+            <p>Review the visitor information and decide on pending requests.</p>
           </div>
-
+          <span className="rp-chip">{visibleVisitors.length} of {totalVisitors}</span>
         </div>
 
-
-        {loading ? (
-
-          <div className="resident-visitors-loading">
-
-            <div className="resident-visitors-loader"></div>
-
-            <p>Loading visitor records...</p>
-
-          </div>
-
-        ) : visitors.length === 0 ? (
-
-          <div className="resident-visitors-empty">
-
-            <div className="resident-visitors-empty-icon">
-              ◉
-            </div>
-
-            <h3>No visitor requests</h3>
-
-            <p>
-              Visitor requests for your residence will appear here.
-            </p>
-
-          </div>
-
-        ) : (
-
-          <div className="resident-visitors-list">
-
-            {visitors.map((visitor) => (
-
-              <article
-                className="resident-visitor-card"
-                key={visitor.visitor_id}
+        {totalVisitors > 0 && (
+          <div className="rp-filters" role="group" aria-label="Filter visitors by status">
+            {FILTERS.map((item) => (
+              <button
+                key={item}
+                type="button"
+                className={`rp-filter${filter === item ? " is-active" : ""}`}
+                aria-pressed={filter === item}
+                onClick={() => setFilter(item)}
               >
-
-                <div className="resident-visitor-card-top">
-
-                  <div className="resident-visitor-person">
-
-                    <div className="resident-visitor-avatar">
-                      {visitor.visitor_name
-                        ?.charAt(0)
-                        ?.toUpperCase() || "V"}
-                    </div>
-
-                    <div>
-
-                      <span>
-                        VISITOR #{visitor.visitor_id}
-                      </span>
-
-                      <h3>
-                        {visitor.visitor_name}
-                      </h3>
-
-                      <p>
-                        {visitor.purpose}
-                      </p>
-
-                    </div>
-
-                  </div>
-
-
-                  <span
-                    className={`resident-visitors-status ${getStatusClass(
-                      visitor.status
-                    )}`}
-                  >
-                    {visitor.status || "Pending"}
-                  </span>
-
-                </div>
-
-
-                <div className="resident-visitor-details">
-
-                  <div>
-                    <span>CONTACT</span>
-                    <strong>
-                      {visitor.contact_number || "—"}
-                    </strong>
-                  </div>
-
-                  <div>
-                    <span>VISIT DATE</span>
-                    <strong>
-                      {formatDate(visitor.visit_date)}
-                    </strong>
-                  </div>
-
-                  <div>
-                    <span>EXPECTED TIME</span>
-                    <strong>
-                      {formatTime(visitor.expected_time)}
-                    </strong>
-                  </div>
-
-                  <div>
-                    <span>REQUESTED</span>
-                    <strong>
-                      {formatDateTime(visitor.created_at)}
-                    </strong>
-                  </div>
-
-                </div>
-
-
-                {(visitor.entry_time ||
-                  visitor.exit_time) && (
-
-                  <div className="resident-visitor-entry">
-
-                    {visitor.entry_time && (
-                      <div>
-                        <span>ENTRY</span>
-                        <strong>
-                          {formatDateTime(
-                            visitor.entry_time
-                          )}
-                        </strong>
-                      </div>
-                    )}
-
-                    {visitor.exit_time && (
-                      <div>
-                        <span>EXIT</span>
-                        <strong>
-                          {formatDateTime(
-                            visitor.exit_time
-                          )}
-                        </strong>
-                      </div>
-                    )}
-
-                  </div>
-
-                )}
-
-                {visitor.status === "Pending" && (
-                  <div className="resident-visitor-decision-actions">
-                    <button type="button" className="resident-visitor-reject" onClick={() => updateVisitorStatus(visitor.visitor_id, "Rejected")} disabled={updatingVisitorId === visitor.visitor_id}>
-                      {updatingVisitorId === visitor.visitor_id ? "Updating..." : "Reject"}
-                    </button>
-                    <button type="button" className="resident-visitor-approve" onClick={() => updateVisitorStatus(visitor.visitor_id, "Approved")} disabled={updatingVisitorId === visitor.visitor_id}>
-                      {updatingVisitorId === visitor.visitor_id ? "Updating..." : "Approve"}
-                    </button>
-                  </div>
-                )}
-
-              </article>
-
+                {item}
+                <small>{item === "All" ? totalVisitors : countBy(item)}</small>
+              </button>
             ))}
-
           </div>
-
         )}
 
+        {loading ? (
+          <div className="rp-loading">
+            <span className="rp-spinner" aria-hidden="true" />
+            Loading visitor records...
+          </div>
+        ) : visibleVisitors.length === 0 ? (
+          <div className="rp-empty">
+            <span className="rp-empty-icon" aria-hidden="true"><DoorOpen size={24} strokeWidth={1.7} /></span>
+            <h3>{totalVisitors === 0 ? "No visitor requests" : `No ${filter.toLowerCase()} visitors`}</h3>
+            <p>
+              {totalVisitors === 0
+                ? "When the security desk registers a visitor for your flat, the request will appear here for you to approve or reject."
+                : "Try another filter to see the rest of your visitors."}
+            </p>
+          </div>
+        ) : (
+          <div className="rp-grid is-wide">
+            {visibleVisitors.map((visitor) => {
+              const status = visitor.status || "Pending";
+              const isPending = status === "Pending";
+              const busy = updatingVisitorId === visitor.visitor_id;
+
+              return (
+                <article
+                  className={`rp-card${isPending ? " is-warn" : ""}${status === "Completed" ? " is-muted" : ""}`}
+                  key={visitor.visitor_id}
+                >
+                  <div className="rp-card-top">
+                    <div className="rp-person">
+                      <span className="rp-avatar">
+                        {visitor.visitor_name?.charAt(0)?.toUpperCase() || "V"}
+                      </span>
+                      <div>
+                        <small>VISITOR #{visitor.visitor_id}</small>
+                        <h3>{visitor.visitor_name}</h3>
+                        {visitor.purpose && <p>{visitor.purpose}</p>}
+                      </div>
+                    </div>
+
+                    <span className={`rp-pill ${statusTone(status)}`}>{status}</span>
+                  </div>
+
+                  <div className="rp-meta">
+                    <div><small>Contact</small><strong>{visitor.contact_number || "—"}</strong></div>
+                    <div><small>Visit date</small><strong>{formatDate(visitor.visit_date)}</strong></div>
+                    <div><small>Expected time</small><strong>{formatTime(visitor.expected_time)}</strong></div>
+                    <div><small>Requested</small><strong>{formatDateTime(visitor.created_at)}</strong></div>
+                    {visitor.entry_time && (
+                      <div><small>Entry</small><strong>{formatDateTime(visitor.entry_time)}</strong></div>
+                    )}
+                    {visitor.exit_time && (
+                      <div><small>Exit</small><strong>{formatDateTime(visitor.exit_time)}</strong></div>
+                    )}
+                  </div>
+
+                  {isPending && (
+                    <div className="rp-actions">
+                      <button
+                        type="button"
+                        className="rp-btn is-danger"
+                        onClick={() => updateVisitorStatus(visitor.visitor_id, "Rejected")}
+                        disabled={busy}
+                      >
+                        {busy ? "Updating..." : "Reject"}
+                      </button>
+                      <button
+                        type="button"
+                        className="rp-btn"
+                        onClick={() => updateVisitorStatus(visitor.visitor_id, "Approved")}
+                        disabled={busy}
+                      >
+                        {busy ? "Updating..." : "Approve"}
+                      </button>
+                    </div>
+                  )}
+                </article>
+              );
+            })}
+          </div>
+        )}
       </section>
 
-
-      <section className="resident-visitors-info">
-
-        <div className="resident-visitors-info-icon">
-          i
-        </div>
-
-        <div>
-          <strong>
-            Visitor approval
-          </strong>
-
-          <p>
-            Review each request and approve or reject it. Decisions are available only while a request is pending.
-          </p>
-        </div>
-
-      </section>
-
+      <div className="rp-note">
+        <Info size={17} aria-hidden="true" />
+        <p>
+          <strong>Visitor approval.</strong> Review each request and approve or reject it.
+          Decisions are available only while a request is pending.
+        </p>
+      </div>
     </div>
   );
 }

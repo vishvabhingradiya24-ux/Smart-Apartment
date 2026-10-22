@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
-import { ArrowRight, Check } from "lucide-react";
-import "../../css/resident/residentPolls.css";
+import { ArrowRight, Check, CheckCircle2, Clock3, Info, Lock, Vote } from "lucide-react";
+import "../../css/resident/resident_shared.css";
 
 const API = "http://localhost:5000/api/resident/polls";
 
@@ -82,6 +82,8 @@ const ResidentPolls = () => {
 
   const activePolls = polls.filter((poll) => poll.status === "Active");
   const closedPolls = polls.filter((poll) => poll.status === "Closed");
+  const waitingCount = activePolls.filter((poll) => poll.my_vote_option_id === null).length;
+  const votedCount = polls.filter((poll) => poll.my_vote_option_id !== null).length;
 
   const renderPoll = (poll) => {
     const isOpen = poll.status === "Active";
@@ -89,45 +91,39 @@ const ResidentPolls = () => {
     const submitting = submittingId === poll.poll_id;
 
     return (
-      <div className="resident-poll-card" key={poll.poll_id}>
-        <div className="resident-poll-card-top">
-          <div className="resident-poll-icon">?</div>
+      <article className={`rp-card${isOpen && !hasVoted ? " is-warn" : ""}${isOpen ? "" : " is-muted"}`} key={poll.poll_id}>
+        <div className="rp-card-top">
+          <span className={`rp-pill${isOpen ? "" : " is-muted"}`}>
+            {isOpen ? <Vote size={12} aria-hidden="true" /> : <Lock size={12} aria-hidden="true" />}
+            {isOpen ? "Active" : "Closed"}
+          </span>
 
-          <span className={`resident-poll-status${isOpen ? "" : " closed"}`}>
-            {isOpen ? "ACTIVE" : "CLOSED"}
+          <span className={`rp-pill${hasVoted ? "" : " is-warn"}`}>
+            {hasVoted ? <><Check size={12} aria-hidden="true" /> Voted</> : isOpen ? "Your vote needed" : "Did not vote"}
           </span>
         </div>
 
         <h3>{poll.question}</h3>
 
-        {poll.description && <p className="resident-poll-description">{poll.description}</p>}
+        {poll.description && <p className="rp-card-text">{poll.description}</p>}
 
-        <div className="resident-poll-meta">
-          <div>
-            <span>{isOpen ? "VOTING ENDS" : "VOTING ENDED"}</span>
-            <strong>{formatDate(poll.end_date)}</strong>
-          </div>
-
-          <div>
-            <span>YOUR STATUS</span>
-            <strong>{hasVoted ? "Voted" : isOpen ? "Not voted yet" : "Did not vote"}</strong>
-          </div>
+        <div className="rp-meta">
+          <div><small>{isOpen ? "Voting ends" : "Voting ended"}</small><strong>{formatDate(poll.end_date)}</strong></div>
+          <div><small>Your status</small><strong>{hasVoted ? "Voted" : isOpen ? "Not voted yet" : "Did not vote"}</strong></div>
         </div>
 
         {poll.show_results ? (
-          <div className="resident-poll-results">
-            <span className="resident-poll-options-title">Results</span>
-
+          <div className="rp-results">
             {poll.options.map((option) => {
               const mine = option.option_id === poll.my_vote_option_id;
 
               return (
-                <div className={`resident-poll-result${mine ? " mine" : ""}`} key={option.option_id}>
-                  <div className="resident-poll-result-top">
+                <div className={`rp-result${mine ? " is-mine" : ""}`} key={option.option_id}>
+                  <div className="rp-result-top">
                     <span>
                       {option.option_text}
                       {mine && (
-                        <em className="resident-poll-mine-tag">
+                        <em className="rp-mine">
                           <Check size={12} strokeWidth={3} aria-hidden="true" /> Your vote
                         </em>
                       )}
@@ -138,23 +134,21 @@ const ResidentPolls = () => {
                     </strong>
                   </div>
 
-                  <div className="resident-poll-bar">
+                  <div className="rp-bar">
                     <i style={{ width: `${option.percent}%` }} />
                   </div>
                 </div>
               );
             })}
 
-            <p className="resident-poll-total">
+            <p className="rp-card-foot">
               {poll.total_votes} {poll.total_votes === 1 ? "vote" : "votes"} in total
             </p>
           </div>
         ) : (
-          <div className="resident-poll-options">
-            <span className="resident-poll-options-title">Select your answer</span>
-
+          <div className="rp-options">
             {poll.options.map((option) => (
-              <label className="resident-poll-option" key={option.option_id}>
+              <label className="rp-option" key={option.option_id}>
                 <input
                   type="radio"
                   name={`poll-${poll.poll_id}`}
@@ -166,97 +160,121 @@ const ResidentPolls = () => {
                   }}
                 />
 
-                <span className="resident-poll-radio"></span>
+                <span className="rp-radio" aria-hidden="true"></span>
 
                 <span>{option.option_text}</span>
               </label>
             ))}
 
             {cardErrors[poll.poll_id] && (
-              <p className="resident-poll-error" role="alert">{cardErrors[poll.poll_id]}</p>
+              <p className="rp-error-text" role="alert">{cardErrors[poll.poll_id]}</p>
             )}
 
             <button
-              className="resident-poll-vote-button"
+              className="rp-btn is-block"
               type="button"
               disabled={submitting}
               onClick={() => submitVote(poll)}
             >
-              {submitting ? "Submitting…" : "Submit Vote"}
+              {submitting ? "Submitting…" : "Submit vote"}
               {!submitting && <ArrowRight size={16} aria-hidden="true" />}
             </button>
 
-            <p className="resident-poll-note">You can vote only once, and your vote cannot be changed.</p>
+            <p className="rp-hint">You can vote only once, and your vote cannot be changed.</p>
           </div>
         )}
-      </div>
+      </article>
     );
   };
 
   return (
-    <div className="resident-polls-page">
-      <header className="resident-polls-header">
-        <div>
-          <span className="resident-polls-overline">COMMUNITY</span>
+    <div className="rp-page">
+      <header className="rp-banner">
+        <div className="rp-banner-text">
+          <span className="rp-banner-eyebrow">COMMUNITY</span>
           <h1>Polls &amp; Voting</h1>
           <p>Share your opinion on active community decisions.</p>
         </div>
+        <span className="rp-banner-icon" aria-hidden="true"><Vote size={28} strokeWidth={1.6} /></span>
       </header>
 
+      <section className="rp-stats" aria-label="Poll summary">
+        <div className="rp-stat">
+          <span className="rp-stat-icon"><Vote size={19} strokeWidth={1.8} aria-hidden="true" /></span>
+          <div className="rp-stat-body"><small>Open for voting</small><strong>{loading ? "—" : activePolls.length}</strong></div>
+        </div>
+        <div className={`rp-stat${waitingCount > 0 ? " is-warn" : ""}`}>
+          <span className="rp-stat-icon"><Clock3 size={19} strokeWidth={1.8} aria-hidden="true" /></span>
+          <div className="rp-stat-body"><small>Waiting for your vote</small><strong>{loading ? "—" : waitingCount}</strong></div>
+        </div>
+        <div className="rp-stat">
+          <span className="rp-stat-icon"><CheckCircle2 size={19} strokeWidth={1.8} aria-hidden="true" /></span>
+          <div className="rp-stat-body"><small>Polls you voted in</small><strong>{loading ? "—" : votedCount}</strong></div>
+        </div>
+        <div className="rp-stat">
+          <span className="rp-stat-icon"><Lock size={19} strokeWidth={1.8} aria-hidden="true" /></span>
+          <div className="rp-stat-body"><small>Closed polls</small><strong>{loading ? "—" : closedPolls.length}</strong></div>
+        </div>
+      </section>
+
       {loading ? (
-        <section className="resident-polls-empty">
-          <h2>Loading polls…</h2>
-        </section>
+        <div className="rp-loading">
+          <span className="rp-spinner" aria-hidden="true" />
+          Loading polls…
+        </div>
       ) : loadError ? (
-        <section className="resident-polls-empty">
-          <div className="resident-polls-empty-icon" aria-hidden="true">!</div>
-          <h2>Unable to load polls</h2>
+        <div className="rp-empty is-error">
+          <span className="rp-empty-icon" aria-hidden="true"><Info size={24} strokeWidth={1.7} /></span>
+          <h3>Unable to load polls</h3>
           <p>{loadError}</p>
-          <button type="button" className="resident-poll-vote-button resident-polls-retry" onClick={fetchPolls}>
+          <button type="button" className="rp-btn" onClick={fetchPolls}>
             Try again
           </button>
-        </section>
+        </div>
       ) : polls.length === 0 ? (
-        <section className="resident-polls-empty">
-          <div className="resident-polls-empty-icon" aria-hidden="true">✓</div>
-          <span>COMMUNITY POLLS</span>
-          <h2>No active polls</h2>
+        <div className="rp-empty">
+          <span className="rp-empty-icon" aria-hidden="true"><Vote size={24} strokeWidth={1.7} /></span>
+          <h3>No active polls</h3>
           <p>
             There are no community polls available right now. Published polls will
             appear here when they are opened for voting.
           </p>
-        </section>
+        </div>
       ) : (
         <>
-          <section className="resident-polls-section">
-            <div className="resident-polls-section-heading">
+          <section className="rp-section">
+            <div className="rp-section-head">
               <div>
-                <span>ACTIVE POLLS</span>
+                <span className="rp-eyebrow">ACTIVE POLLS</span>
                 <h2>Open for voting</h2>
               </div>
 
-              <div className="resident-polls-count">{activePolls.length} Active</div>
+              <span className="rp-chip">{activePolls.length} Active</span>
             </div>
 
             {activePolls.length === 0 ? (
-              <p className="resident-polls-none">No polls are open for voting right now.</p>
+              <div className="rp-empty">
+                <span className="rp-empty-icon" aria-hidden="true"><CheckCircle2 size={24} strokeWidth={1.7} /></span>
+                <h3>No polls are open right now</h3>
+                <p>You will see new polls here as soon as the administration publishes them.</p>
+              </div>
             ) : (
-              <div className="resident-polls-grid">{activePolls.map(renderPoll)}</div>
+              <div className="rp-grid">{activePolls.map(renderPoll)}</div>
             )}
           </section>
 
           {closedPolls.length > 0 && (
-            <section className="resident-polls-section resident-polls-history">
-              <div className="resident-polls-section-heading">
+            <section className="rp-section">
+              <div className="rp-section-head">
                 <div>
-                  <span>PAST POLLS</span>
+                  <span className="rp-eyebrow">PAST POLLS</span>
                   <h2>Closed polls</h2>
                 </div>
 
-                <div className="resident-polls-count">{closedPolls.length} Closed</div>
+                <span className="rp-chip">{closedPolls.length} Closed</span>
               </div>
 
-              <div className="resident-polls-grid">{closedPolls.map(renderPoll)}</div>
+              <div className="rp-grid">{closedPolls.map(renderPoll)}</div>
             </section>
           )}
         </>
