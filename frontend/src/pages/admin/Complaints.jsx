@@ -319,9 +319,6 @@ const handleConfirmAssign = async () => {
             Review, assign and monitor resident complaints.
           </p>
         </div>
-        <button type="button" onClick={fetchComplaints} disabled={loading}>
-          {loading ? "Loading..." : "Refresh"}
-        </button>
       </div>
 
       {fetchError && (

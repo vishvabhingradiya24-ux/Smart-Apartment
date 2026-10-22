@@ -95,12 +95,6 @@ const AdminIncidents = () => {
           <h1>Incident Reports</h1>
           <p>Incidents reported by Security and issues reported by technical staff.</p>
         </div>
-
-        <div className="admin-records-header-actions">
-          <button type="button" className="admin-records-refresh" onClick={() => { setLoading(true); fetchReports(); }} disabled={loading}>
-            ↻ Refresh
-          </button>
-        </div>
       </header>
 
       <section className="admin-records-stats">

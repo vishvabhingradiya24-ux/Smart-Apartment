@@ -42,12 +42,6 @@ const Security = () => {
     return () => controller.abort();
   }, [fetchSecurity]);
 
-  const refreshSecurity = () => {
-    setLoading(true);
-    setError("");
-    fetchSecurity();
-  };
-
   const filteredGuards = useMemo(() => {
     const query = searchTerm.trim().toLowerCase();
     if (!query) return guards;
@@ -65,9 +59,6 @@ const Security = () => {
     <div className="admin-records-page admin-security-page">
       <header className="admin-records-header">
         <div><span className="admin-records-eyebrow">STAFF & SECURITY</span><h1>Staff Contacts</h1><p>Staff contact records and today’s visitor activity.</p></div>
-        <div className="admin-records-header-actions">
-          <button type="button" className="admin-records-refresh" onClick={refreshSecurity} disabled={loading}>↻ Refresh</button>
-        </div>
       </header>
 
       <section className="admin-records-stats">
