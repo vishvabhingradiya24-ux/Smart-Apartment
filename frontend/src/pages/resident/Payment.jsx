@@ -9,7 +9,7 @@ function Payment() {
   const [paying, setPaying] = useState(false);
   const [error, setError] = useState("");
 
-  const token = localStorage.getItem("token");
+  const token = sessionStorage.getItem("token");
 
   const loadPayments = useCallback(async () => {
     try {

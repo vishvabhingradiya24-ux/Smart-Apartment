@@ -44,7 +44,7 @@ const Facilities = () => {
   const [formMessage, setFormMessage] = useState("");
   const [formError, setFormError] = useState("");
 
-  const token = localStorage.getItem("token");
+  const token = sessionStorage.getItem("token");
   const today = new Date().toISOString().split("T")[0];
 
   const selectedFacilityBookingCharge =

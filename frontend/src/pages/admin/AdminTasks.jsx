@@ -33,7 +33,7 @@ const AdminTask = () => {
 
   const fetchTasks = async () => {
     try {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
 
       const response = await fetch(
         "http://localhost:5000/api/admin/tasks",
@@ -66,7 +66,7 @@ const AdminTask = () => {
     setStaffLoading(true);
     setStaffError("");
     try {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
       if (!token) {
         throw new Error("Admin session expired. Please log in again.");
       }
@@ -134,7 +134,7 @@ const AdminTask = () => {
     }
 
     try {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
 
       const response = await fetch(
         "http://localhost:5000/api/admin/tasks",

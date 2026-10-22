@@ -38,7 +38,7 @@ const Staff = () => {
   const fetchStaff = useCallback(async (signal) => {
     try {
       const response = await fetch("http://localhost:5000/api/admin/staff", {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }, signal,
+        headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` }, signal,
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || "Unable to load staff records.");
@@ -120,7 +120,7 @@ const Staff = () => {
       const response = await fetch("http://localhost:5000/api/admin/staff", {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${sessionStorage.getItem("token")}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify(normalizedStaff),

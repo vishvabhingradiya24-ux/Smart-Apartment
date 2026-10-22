@@ -11,14 +11,14 @@ import { buildDashboardCards } from "../../constants/staffDashboardCards";
 const mergeStoredStaff = (serverStaff) => {
   let currentStaff = {};
   try {
-    currentStaff = JSON.parse(localStorage.getItem("user") || "{}");
+    currentStaff = JSON.parse(sessionStorage.getItem("user") || "{}");
   } catch (error) {
     console.error("Unable to read stored staff profile:", error);
   }
 
   const updatedStaff = { ...currentStaff, ...serverStaff };
   try {
-    localStorage.setItem("user", JSON.stringify(updatedStaff));
+    sessionStorage.setItem("user", JSON.stringify(updatedStaff));
   } catch (error) {
     console.error("Unable to store refreshed staff profile:", error);
   }
@@ -30,7 +30,7 @@ function StaffDashboard() {
 
   const [staff, setStaff] = useState(() => {
     try {
-      return JSON.parse(localStorage.getItem("user") || "{}");
+      return JSON.parse(sessionStorage.getItem("user") || "{}");
     } catch {
       return {};
     }
@@ -78,7 +78,7 @@ function StaffDashboard() {
   });
 
   const requestDashboard = useCallback(async (signal) => {
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token");
     if (!token) {
       throw new Error("Login session expired. Please sign in again.");
     }
@@ -136,12 +136,12 @@ function StaffDashboard() {
   ========================= */
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("adminToken");
-    localStorage.removeItem("staffToken");
-    localStorage.removeItem("residentToken");
-    localStorage.removeItem("user");
-    localStorage.removeItem("staff");
+    sessionStorage.removeItem("token");
+    sessionStorage.removeItem("adminToken");
+    sessionStorage.removeItem("staffToken");
+    sessionStorage.removeItem("residentToken");
+    sessionStorage.removeItem("user");
+    sessionStorage.removeItem("staff");
 
     navigate("/login");
   };

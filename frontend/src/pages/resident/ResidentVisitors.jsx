@@ -12,7 +12,7 @@ function ResidentVisitors() {
   const [success, setSuccess] = useState("");
 
   const fetchVisitors = async () => {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
 
       if (!token) {
         throw new Error("Session expired. Please login again.");
@@ -96,7 +96,7 @@ function ResidentVisitors() {
     setSuccess("");
     setUpdatingVisitorId(visitorId);
     try {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
       if (!token) {
         throw new Error("Session expired. Please login again.");
       }

@@ -34,7 +34,7 @@ const AdminServiceRequests = () => {
     setLoading(true);
     setError("");
     try {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
       if (!token) throw new Error("Admin session expired. Please log in again.");
 
       const headers = { Authorization: `Bearer ${token}` };
@@ -99,7 +99,7 @@ const AdminServiceRequests = () => {
         {
           method: "PUT",
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            Authorization: `Bearer ${sessionStorage.getItem("token")}`,
             "Content-Type": "application/json",
           },
           body: JSON.stringify({ staff_id: Number(staffId) }),

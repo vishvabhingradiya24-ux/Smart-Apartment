@@ -8,7 +8,7 @@ export async function staffApi(path, { method = "GET", body } = {}) {
   const response = await fetch(`${BASE}${path}`, {
     method,
     headers: {
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
+      Authorization: `Bearer ${sessionStorage.getItem("token")}`,
       "Content-Type": "application/json"
     },
     body: body === undefined ? undefined : JSON.stringify(body)

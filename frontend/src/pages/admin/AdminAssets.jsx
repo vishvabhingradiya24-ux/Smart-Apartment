@@ -31,7 +31,7 @@ const AdminAssets = () => {
     setLoading(true);
     setError("");
     try {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
       if (!token) throw new Error("Admin session expired. Please log in again.");
 
       const response = await fetch("http://localhost:5000/api/admin/assets", {
@@ -66,7 +66,7 @@ const AdminAssets = () => {
     setFormError("");
     setSuccessMessage("");
     try {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
       if (!token) throw new Error("Admin session expired. Please log in again.");
 
       const response = await fetch("http://localhost:5000/api/admin/assets", {

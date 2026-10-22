@@ -17,14 +17,14 @@ const ROLE_TOKEN_KEYS = {
 const safeStorage = {
   get(key) {
     try {
-      return localStorage.getItem(key);
+      return sessionStorage.getItem(key);
     } catch {
       return null;
     }
   },
   remove(key) {
     try {
-      localStorage.removeItem(key);
+      sessionStorage.removeItem(key);
     } catch {
       /* storage unavailable */
     }
@@ -48,9 +48,9 @@ const roleFromApiUrl = (url) => {
 
 export const saveSessionToken = (role, token) => {
   try {
-    localStorage.setItem(ROLE_TOKEN_KEYS[role], token);
+    sessionStorage.setItem(ROLE_TOKEN_KEYS[role], token);
     // Kept for older code that still reads the shared key.
-    localStorage.setItem("token", token);
+    sessionStorage.setItem("token", token);
   } catch {
     /* storage unavailable */
   }

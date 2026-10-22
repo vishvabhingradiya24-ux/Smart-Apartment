@@ -9,7 +9,7 @@ function StaffMaintenance() {
 
   const [staff] = useState(() => {
     try {
-      return JSON.parse(localStorage.getItem("user") || "{}");
+      return JSON.parse(sessionStorage.getItem("user") || "{}");
     } catch {
       return {};
     }
@@ -31,7 +31,7 @@ function StaffMaintenance() {
 
   const fetchMaintenance = useCallback(async (signal) => {
     try {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
       if (!token) throw new Error("Please log in again to view assigned maintenance work.");
       const response = await fetch("http://localhost:5000/api/staff/tasks", {
         headers: { Authorization: `Bearer ${token}` }, signal,
@@ -95,12 +95,12 @@ function StaffMaintenance() {
   ).length;
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("adminToken");
-    localStorage.removeItem("staffToken");
-    localStorage.removeItem("residentToken");
-    localStorage.removeItem("user");
-    localStorage.removeItem("staff");
+    sessionStorage.removeItem("token");
+    sessionStorage.removeItem("adminToken");
+    sessionStorage.removeItem("staffToken");
+    sessionStorage.removeItem("residentToken");
+    sessionStorage.removeItem("user");
+    sessionStorage.removeItem("staff");
     navigate("/login");
   };
 
@@ -113,7 +113,7 @@ function StaffMaintenance() {
       const response = await fetch(`http://localhost:5000/api/staff/tasks/${id}/status`, {
         method: "PUT",
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${sessionStorage.getItem("token")}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify(changes),

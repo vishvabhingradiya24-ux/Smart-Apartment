@@ -11,7 +11,7 @@ function Notices() {
 
     const loadNotices = async () => {
       try {
-        const token = localStorage.getItem("token");
+        const token = sessionStorage.getItem("token");
 
         if (!token) {
           throw new Error("Login session not found. Please log in again.");

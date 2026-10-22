@@ -16,7 +16,7 @@ import "../../css/resident/resident_dashboard.css";
 function ResidentDashboard() {
   const [user] = useState(() => {
     try {
-      const storedUser = localStorage.getItem("user");
+      const storedUser = sessionStorage.getItem("user");
       if (!storedUser) return {};
       const parsedUser = JSON.parse(storedUser);
       return parsedUser?.user || parsedUser?.data?.user || parsedUser || {};

@@ -160,7 +160,7 @@ function Login() {
           user_type: "Resident"
         };
 
-        localStorage.setItem(
+        sessionStorage.setItem(
           "user",
           JSON.stringify(residentUser)
         );
@@ -180,7 +180,7 @@ function Login() {
           user_type: "Staff"
         };
 
-        localStorage.setItem(
+        sessionStorage.setItem(
           "user",
           JSON.stringify(staffUser)
         );
@@ -200,7 +200,7 @@ function Login() {
           user_type: "Admin"
         };
 
-        localStorage.setItem(
+        sessionStorage.setItem(
           "user",
           JSON.stringify(adminUser)
         );

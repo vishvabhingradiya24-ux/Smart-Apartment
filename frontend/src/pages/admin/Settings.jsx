@@ -35,7 +35,7 @@ const Settings = () => {
   const [saving, setSaving] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const token = localStorage.getItem("token");
+  const token = sessionStorage.getItem("token");
 
   const request = useCallback((url, options = {}) => fetch(`http://localhost:5000${url}`, {
     ...options,

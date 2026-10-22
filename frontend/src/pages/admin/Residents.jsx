@@ -50,7 +50,7 @@ const Residents = () => {
   const request = useCallback((url, options = {}) => fetch(`http://localhost:5000${url}`, {
     ...options,
     headers: {
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
+      Authorization: `Bearer ${sessionStorage.getItem("token")}`,
       ...(options.body ? { "Content-Type": "application/json" } : {}),
       ...options.headers,
     },

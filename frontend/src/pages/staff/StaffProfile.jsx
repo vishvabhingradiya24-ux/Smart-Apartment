@@ -10,7 +10,7 @@ function StaffProfile() {
 
   const [staff, setStaff] = useState(() => {
     try {
-      return JSON.parse(localStorage.getItem("user") || "{}");
+      return JSON.parse(sessionStorage.getItem("user") || "{}");
     } catch {
       return {};
     }
@@ -55,7 +55,7 @@ function StaffProfile() {
     setSummaryLoading(true);
     setSummaryError("");
     try {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
       if (!token) {
         throw new Error("Please sign in again to load your work summary.");
       }
@@ -101,12 +101,12 @@ function StaffProfile() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("adminToken");
-    localStorage.removeItem("staffToken");
-    localStorage.removeItem("residentToken");
-    localStorage.removeItem("user");
-    localStorage.removeItem("staff");
+    sessionStorage.removeItem("token");
+    sessionStorage.removeItem("adminToken");
+    sessionStorage.removeItem("staffToken");
+    sessionStorage.removeItem("residentToken");
+    sessionStorage.removeItem("user");
+    sessionStorage.removeItem("staff");
 
     navigate("/login");
   };
@@ -145,7 +145,7 @@ function StaffProfile() {
       const response = await fetch("http://localhost:5000/api/staff/profile/department", {
         method: "PUT",
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${sessionStorage.getItem("token")}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ department: profileData.department }),
@@ -160,7 +160,7 @@ function StaffProfile() {
         ...profileData,
         department: data.department,
       };
-      localStorage.setItem("user", JSON.stringify(updatedStaff));
+      sessionStorage.setItem("user", JSON.stringify(updatedStaff));
       setStaff(updatedStaff);
       setIsEditing(false);
       alert("Staff department updated successfully.");
@@ -212,7 +212,7 @@ function StaffProfile() {
       const response = await fetch("http://localhost:5000/api/staff/change-password", {
         method: "PUT",
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${sessionStorage.getItem("token")}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({

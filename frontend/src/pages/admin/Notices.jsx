@@ -16,7 +16,7 @@ const Notices = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const token = localStorage.getItem("token");
+  const token = sessionStorage.getItem("token");
   const request = useCallback((url, options = {}) => fetch(`http://localhost:5000${url}`, { ...options, headers: { Authorization: `Bearer ${token}`, ...(options.body ? { "Content-Type": "application/json" } : {}), ...options.headers } }), [token]);
 
   const loadNotices = useCallback(async () => {

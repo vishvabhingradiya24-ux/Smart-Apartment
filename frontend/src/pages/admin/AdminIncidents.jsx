@@ -24,7 +24,7 @@ const AdminIncidents = () => {
   const [busyId, setBusyId] = useState(null);
 
   const headers = () => ({
-    Authorization: `Bearer ${localStorage.getItem("token")}`,
+    Authorization: `Bearer ${sessionStorage.getItem("token")}`,
     "Content-Type": "application/json"
   });
 

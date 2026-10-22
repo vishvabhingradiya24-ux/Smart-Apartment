@@ -12,7 +12,7 @@ const ServiceRequests = () => {
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
-  const token = localStorage.getItem("token");
+  const token = sessionStorage.getItem("token");
 
   const fetchRequests = useCallback(async () => {
     try {

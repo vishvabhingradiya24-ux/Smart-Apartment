@@ -31,7 +31,7 @@ const [assigning, setAssigning] = useState(false);
     setLoading(true);
     setFetchError("");
     try {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
       if (!token) {
         throw new Error("Admin session expired. Please log in again.");
       }
@@ -113,7 +113,7 @@ assignedTo:
 
   const fetchStaff = async () => {
   try {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
       if (!token) {
         throw new Error("Admin session expired. Please log in again.");
       }
@@ -245,7 +245,7 @@ const handleConfirmAssign = async () => {
   try {
     setAssigning(true);
 
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token");
 
     const response = await fetch(
      `http://localhost:5000/api/resident/complaints/admin/${selectedComplaint.id

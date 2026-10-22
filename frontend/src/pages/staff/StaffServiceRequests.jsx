@@ -21,7 +21,7 @@ function StaffServiceRequests() {
   // ================= STAFF DATA =================
   const [staff] = useState(() => {
     try {
-      return JSON.parse(localStorage.getItem("user") || "{}");
+      return JSON.parse(sessionStorage.getItem("user") || "{}");
     } catch {
       return {};
     }
@@ -53,7 +53,7 @@ function StaffServiceRequests() {
         setLoading(true);
         setError("");
 
-        const token = localStorage.getItem("token");
+        const token = sessionStorage.getItem("token");
 
         if (!token) {
           throw new Error(
@@ -197,12 +197,12 @@ function StaffServiceRequests() {
 
   // ================= LOGOUT =================
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("adminToken");
-    localStorage.removeItem("staffToken");
-    localStorage.removeItem("residentToken");
-    localStorage.removeItem("user");
-    localStorage.removeItem("staff");
+    sessionStorage.removeItem("token");
+    sessionStorage.removeItem("adminToken");
+    sessionStorage.removeItem("staffToken");
+    sessionStorage.removeItem("residentToken");
+    sessionStorage.removeItem("user");
+    sessionStorage.removeItem("staff");
 
     navigate("/login");
   };
@@ -215,7 +215,7 @@ function StaffServiceRequests() {
   // ================= UPDATE STATUS =================
   const handleStatusUpdate = async (requestId, newStatus, workNotes) => {
     try {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
 
       if (!token) {
         alert("Please login again.");
@@ -301,7 +301,7 @@ function StaffServiceRequests() {
         `http://localhost:5000/api/resident/requests/staff/${requestId}/accept`,
         {
           method: "PUT",
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` },
         }
       );
 

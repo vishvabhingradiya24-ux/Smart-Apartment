@@ -19,7 +19,7 @@ const AdminDashboard = () => {
 
   const [admin] = useState(() => {
     try {
-      return JSON.parse(localStorage.getItem("user") || "{}") || {};
+      return JSON.parse(sessionStorage.getItem("user") || "{}") || {};
     } catch {
       return {};
     }
@@ -32,7 +32,7 @@ const AdminDashboard = () => {
     const controller = new AbortController();
     const loadDashboard = async () => {
       try {
-        const token = localStorage.getItem("token");
+        const token = sessionStorage.getItem("token");
         if (!token) throw new Error("Admin session expired. Please log in again.");
         const response = await fetch("http://localhost:5000/api/admin/dashboard", {
           headers: { Authorization: `Bearer ${token}` },

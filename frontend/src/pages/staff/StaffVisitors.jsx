@@ -21,7 +21,7 @@ const STATUS_PILL = {
 };
 
 const authHeaders = () => ({
-  Authorization: `Bearer ${localStorage.getItem("token")}`,
+  Authorization: `Bearer ${sessionStorage.getItem("token")}`,
   "Content-Type": "application/json"
 });
 

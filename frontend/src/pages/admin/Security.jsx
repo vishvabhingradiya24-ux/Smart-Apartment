@@ -18,7 +18,7 @@ const Security = () => {
   const fetchSecurity = useCallback(async (signal) => {
     try {
       const response = await fetch("http://localhost:5000/api/admin/security", {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }, signal,
+        headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` }, signal,
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || "Unable to load security records.");

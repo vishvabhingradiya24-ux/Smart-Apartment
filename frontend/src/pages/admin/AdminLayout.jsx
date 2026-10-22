@@ -97,12 +97,12 @@ const AdminLayout = ({ children }) => {
   ];
 
   const handleLogout = () => {
-    localStorage.removeItem("adminToken");
-    localStorage.removeItem("token");
-    localStorage.removeItem("adminToken");
-    localStorage.removeItem("staffToken");
-    localStorage.removeItem("residentToken");
-    localStorage.removeItem("user");
+    sessionStorage.removeItem("adminToken");
+    sessionStorage.removeItem("token");
+    sessionStorage.removeItem("adminToken");
+    sessionStorage.removeItem("staffToken");
+    sessionStorage.removeItem("residentToken");
+    sessionStorage.removeItem("user");
     navigate("/login");
   };
 

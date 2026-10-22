@@ -12,7 +12,7 @@ const Visitors = () => {
   const [visitors, setVisitors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const token = localStorage.getItem("token");
+  const token = sessionStorage.getItem("token");
 
   const request = useCallback((url) => fetch(`http://localhost:5000${url}`, {
     headers: { Authorization: `Bearer ${token}` },

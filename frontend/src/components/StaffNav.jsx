@@ -15,7 +15,7 @@ function useUnreadNotifications() {
   const [unread, setUnread] = useState(0);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token");
 
     if (!token) return undefined;
 

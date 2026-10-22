@@ -7,7 +7,7 @@ import "../css/staff/staff_extra.css";
 
 const readStoredUser = () => {
   try {
-    return JSON.parse(localStorage.getItem("user") || "{}") || {};
+    return JSON.parse(sessionStorage.getItem("user") || "{}") || {};
   } catch {
     return {};
   }
@@ -28,12 +28,12 @@ function StaffLayout({ badge, title, subtitle, actions = null, children }) {
     `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase() || "S";
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("adminToken");
-    localStorage.removeItem("staffToken");
-    localStorage.removeItem("residentToken");
-    localStorage.removeItem("user");
-    localStorage.removeItem("staff");
+    sessionStorage.removeItem("token");
+    sessionStorage.removeItem("adminToken");
+    sessionStorage.removeItem("staffToken");
+    sessionStorage.removeItem("residentToken");
+    sessionStorage.removeItem("user");
+    sessionStorage.removeItem("staff");
 
     navigate("/login");
   };

@@ -24,7 +24,7 @@ function StaffNotifications() {
   const [reloadKey, setReloadKey] = useState(0);
 
   const headers = () => ({
-    Authorization: `Bearer ${localStorage.getItem("token")}`,
+    Authorization: `Bearer ${sessionStorage.getItem("token")}`,
     "Content-Type": "application/json"
   });
 

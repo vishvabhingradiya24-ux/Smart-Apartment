@@ -9,7 +9,7 @@ function ResidentNotifications() {
 
   const loadNotifications = useCallback(async (signal) => {
     try {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
       if (!token) throw new Error("Your session has expired. Please log in again.");
 
       const response = await fetch("http://localhost:5000/api/notices/active", {
