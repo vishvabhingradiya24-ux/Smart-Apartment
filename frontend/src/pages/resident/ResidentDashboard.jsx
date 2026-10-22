@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowRight,
-  Bell,
   CheckCircle2,
   ClipboardList,
   CreditCard,
@@ -10,22 +9,11 @@ import {
   Megaphone,
   UserRound,
   Vote,
-  Waves,
 } from "lucide-react";
 import "../../css/resident/resident_dashboard.css";
 import "../../css/resident/resident_shared.css";
 
 const API = "http://localhost:5000/api";
-
-const QUICK_ACCESS = [
-  { title: "Payments", description: "Pay maintenance dues and see your history.", icon: CreditCard, path: "/resident/payment" },
-  { title: "Complaints", description: "Raise a complaint and track its progress.", icon: ClipboardList, path: "/resident/complaints" },
-  { title: "Visitors", description: "Approve or reject visitors at the gate.", icon: DoorOpen, path: "/resident/visitors" },
-  { title: "Amenity Booking", description: "Book the clubhouse, gym, pool and more.", icon: Waves, path: "/resident/facilities" },
-  { title: "Notices & Events", description: "Read society announcements and events.", icon: Megaphone, path: "/resident/notices" },
-  { title: "Polls & Voting", description: "Have your say in community decisions.", icon: Vote, path: "/resident/polls" },
-  { title: "Notifications", description: "Everything that needs your attention.", icon: Bell, path: "/resident/notifications" },
-];
 
 const formatDate = (value) => {
   const date = new Date(String(value).length <= 10 ? `${value}T00:00:00` : value);
@@ -293,28 +281,6 @@ function ResidentDashboard() {
                 </Link>
               ))
             )}
-          </div>
-        </section>
-
-        <section className="rp-section">
-          <div className="rp-section-head">
-            <div>
-              <span className="rp-eyebrow">RESIDENT SERVICES</span>
-              <h2>Quick access</h2>
-            </div>
-          </div>
-
-          <div className="rp-tiles">
-            {QUICK_ACCESS.map(({ title, description, icon: Icon, path }) => (
-              <Link to={path} className="rp-tile" key={path}>
-                <span className="rp-tile-icon"><Icon size={21} strokeWidth={1.7} aria-hidden="true" /></span>
-                <span className="rp-tile-body">
-                  <strong>{title}</strong>
-                  <span>{description}</span>
-                </span>
-                <ArrowRight size={17} className="rp-tile-arrow" aria-hidden="true" />
-              </Link>
-            ))}
           </div>
         </section>
     </div>

@@ -1337,8 +1337,8 @@
 .resident-dashboard-content .residence-content .section-eyebrow { color: #c9e1d7; letter-spacing: 1.2px; }
 .resident-dashboard-content .residence-content h2 { font-size: 32px; line-height: 1.16; letter-spacing: 0; }
 .resident-dashboard-content .residence-description { color: #e0ebe6; font-size: 13px; line-height: 1.65; }
-.resident-dashboard-content .residence-button { min-height: 42px; border-radius: 7px; background: #f4d27e; color: #273d37; }
-.resident-dashboard-content .residence-button:hover { background: #ffe19a; }
+.resident-dashboard-content .residence-button { min-height: 42px; border-radius: 7px; background: #bfe6d6; color: #273d37; }
+.resident-dashboard-content .residence-button:hover { background: #d9f2e7; }
 
 .resident-dashboard-content .residence-info {
   margin: 18px;
@@ -1349,7 +1349,7 @@
   backdrop-filter: blur(8px);
 }
 
-.resident-dashboard-content .large-avatar { background: #f4d27e; color: #20332f; }
+.resident-dashboard-content .large-avatar { background: #bfe6d6; color: #20332f; }
 .resident-dashboard-content .residence-details { gap: 12px; }
 .resident-dashboard-content .residence-detail span { color: #c6d8d0; }
 .resident-dashboard-content .residence-detail strong { color: #fff; font-size: 12px; }
@@ -1377,7 +1377,7 @@
 .resident-dashboard-content .service-primary { border-color: #173b37; background: #173b37; color: #fff; }
 .resident-dashboard-content .service-primary:hover { border-color: #24554c; background: #24554c; }
 .resident-dashboard-content .service-icon { background: #e1f1e9; color: #087c68; }
-.resident-dashboard-content .service-primary .service-icon { background: rgba(255, 255, 255, .14); color: #f4d27e; }
+.resident-dashboard-content .service-primary .service-icon { background: rgba(255, 255, 255, .14); color: #bfe6d6; }
 .resident-dashboard-content .service-arrow { color: #718078; }
 .resident-dashboard-content .service-primary .service-arrow { color: #d8e9e2; }
 .resident-dashboard-content .service-content { margin-top: 15px; }
@@ -1524,7 +1524,7 @@
 
 .resident-dashboard-content .residence-secondary-button:hover,
 .resident-dashboard-content .residence-profile-link:hover {
-  color: #f4d27e;
+  color: #bfe6d6;
 }
 
 .resident-dashboard-content .residence-user h3 {
@@ -1540,7 +1540,7 @@
   justify-content: flex-start;
   width: fit-content;
   margin-top: 17px;
-  color: #f4d27e;
+  color: #bfe6d6;
 }
 
 .resident-dashboard-content .services-grid {
@@ -1562,7 +1562,7 @@
 .resident-dashboard-content .residence-button:focus-visible,
 .resident-dashboard-content .residence-secondary-button:focus-visible,
 .resident-dashboard-content .residence-profile-link:focus-visible {
-  outline: 3px solid #f4d27e;
+  outline: 3px solid #bfe6d6;
   outline-offset: 3px;
 }
 

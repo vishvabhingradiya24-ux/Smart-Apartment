@@ -186,9 +186,9 @@
 /* Orange */
 
 .summary-icon.orange {
-  background: #fff5e8;
+  background: #e3f3ec;
 
-  color: #c98220;
+  color: #0f6b58;
 }
 
 .summary-card span {
@@ -444,11 +444,11 @@
 }
 
 .status.pending {
-  color: #b87516;
+  color: #0f6b58;
 
-  background: #fff4df;
+  background: #e3f3ec;
 
-  border: 1px solid #f4dfb9;
+  border: 1px solid #bfe1d3;
 }
 
 /* =========================================================

@@ -389,8 +389,8 @@
 
 
 .complaints-stat-icon.orange {
-  background: #fff2d9;
-  color: #b37612;
+  background: #e3f3ec;
+  color: #0f6b58;
 }
 
 
@@ -999,14 +999,14 @@
 
 
 .complaint-status.pending {
-  background: #fff5df;
+  background: #e3f3ec;
 
-  color: #9b680e;
+  color: #0f6b58;
 }
 
 
 .complaint-status.pending i {
-  background: #d99518;
+  background: #157461;
 }
 
 
@@ -1142,9 +1142,9 @@
 
 
 .complaint-category.electrical {
-  background: #fff4df;
+  background: #e3f3ec;
 
-  color: #a76c0b !important;
+  color: #0f6b58 !important;
 }
 
 
