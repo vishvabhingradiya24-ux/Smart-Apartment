@@ -9,15 +9,22 @@ const seedAdmin = async () => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    const [societies] = await pool.query(
+      "SELECT society_id FROM societies ORDER BY society_id"
+    );
+    const defaultSocietyId = societies.length === 1 ? societies[0].society_id : null;
+
     const [existingAdmin] = await pool.query(
-      "SELECT id FROM admins WHERE email = ?",
+      "SELECT id, society_id FROM admins WHERE email = ?",
       [email]
     );
 
     if (existingAdmin.length > 0) {
       await pool.query(
-        "UPDATE admins SET name = ?, password = ? WHERE email = ?",
-        [name, hashedPassword, email]
+        `UPDATE admins
+         SET name = ?, password = ?, society_id = COALESCE(society_id, ?)
+         WHERE email = ?`,
+        [name, hashedPassword, defaultSocietyId, email]
       );
 
       console.log("Admin password reset successfully");
@@ -25,8 +32,8 @@ const seedAdmin = async () => {
       console.log("Password:", password);
     } else {
       await pool.query(
-        "INSERT INTO admins (name, email, password) VALUES (?, ?, ?)",
-        [name, email, hashedPassword]
+        "INSERT INTO admins (name, email, password, society_id) VALUES (?, ?, ?, ?)",
+        [name, email, hashedPassword, defaultSocietyId]
       );
 
       console.log("Admin created successfully");
