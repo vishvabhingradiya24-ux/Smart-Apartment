@@ -72,7 +72,7 @@ const FEATURES = [
     icon: Wrench,
     tone: "amber",
     title: "Maintenance",
-    text: "Raise complaints and service requests and follow them to the end."
+    text: "Raise complaints and follow them to the end."
   },
   {
     icon: CalendarDays,
@@ -142,7 +142,6 @@ function Stat({ icon: Icon, value, label }) {
 
 const RECENT_ICONS = {
   complaint: { icon: Wrench, tone: "amber" },
-  request: { icon: Wrench, tone: "blue" },
   visitor: { icon: UserCheck, tone: "green" }
 };
 
@@ -167,7 +166,7 @@ function DashboardMock({ data }) {
 
       <div className="sa-mock-stats">
         <div>
-          <small>Open requests</small>
+          <small>Open complaints</small>
           <strong>{shown(stats?.openRequests)}</strong>
         </div>
         <div>
@@ -205,13 +204,13 @@ function DashboardMock({ data }) {
       <p className="sa-mock-caption">
         {peak === 0 && stats
           ? "No activity recorded in the last 7 days yet."
-          : "Visitors, complaints and requests in the last 7 days"}
+          : "Visitors and complaints in the last 7 days"}
       </p>
 
       {recent.length > 0 && (
         <ul className="sa-mock-list">
           {recent.map((item, index) => {
-            const { icon: Icon, tone } = RECENT_ICONS[item.type] || RECENT_ICONS.request;
+            const { icon: Icon, tone } = RECENT_ICONS[item.type] || RECENT_ICONS.complaint;
 
             return (
               <li key={index}>
@@ -544,7 +543,7 @@ function Home() {
             <span className="sa-eyebrow">Service teams</span>
             <h2>People who keep your society running</h2>
             <p>
-              Dedicated teams for every kind of request, from a leaking tap to
+              Dedicated teams for every kind of issue, from a leaking tap to
               a tripped fuse.
             </p>
           </Reveal>

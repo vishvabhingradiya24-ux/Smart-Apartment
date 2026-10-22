@@ -783,11 +783,13 @@ function ResidentComplaints() {
                   <div className="complaint-detail">
 
                     <span>
-                      COMPLAINT ID
+                      ASSIGNED STAFF
                     </span>
 
                     <strong>
-                      #{complaint.complaint_id}
+                      {complaint.staff_first_name
+                        ? `${complaint.staff_first_name} ${complaint.staff_last_name || ""}`.trim()
+                        : "Not assigned yet"}
                     </strong>
 
                   </div>

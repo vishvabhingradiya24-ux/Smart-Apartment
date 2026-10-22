@@ -120,7 +120,7 @@ function StaffSupervisorStaff() {
                   <th>In progress</th>
                   <th>Completed</th>
                   <th>Overdue</th>
-                  <th>Open complaints / requests</th>
+                  <th>Open complaints</th>
                 </tr>
               </thead>
 
@@ -159,7 +159,7 @@ function StaffSupervisorStaff() {
                     </td>
 
                     <td>
-                      {person.complaints_open} / {person.requests_open}
+                      {person.complaints_open}
                     </td>
                   </tr>
                 ))}

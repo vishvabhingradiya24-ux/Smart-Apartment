@@ -1,6 +1,6 @@
 // Which staff type can take which kind of work.
 //
-// A complaint or service request can only be assigned to a staff member of
+// A complaint can only be assigned to a staff member of
 // the matching staff type, so a Maintenance staff member never receives
 // Security work and the other way round. Staff only see the work assigned to
 // them, so each staff member sees only their own department's work.
@@ -20,15 +20,6 @@ export const COMPLAINT_CATEGORY_DEPARTMENTS = {
   Electrical: ["Electrical"],
   Cleaning: ["Housekeeping"],
   Security: ["Security"]
-};
-
-// Resident service request type -> staff types that can handle it
-export const SERVICE_REQUEST_DEPARTMENTS = {
-  Electrician: ["Electrical"],
-  Maintenance: ["Maintenance"],
-  Plumber: ["Plumbing"],
-  Cleaning: ["Housekeeping"],
-  Carpenter: ["Maintenance"]
 };
 
 export const canTakeWork = (rules, category, staffDepartment) => {
@@ -58,7 +49,7 @@ const joinList = (items) =>
 // One sentence telling a staff member what kind of work they receive.
 export const workSummary = (department) => {
   if (department === SUPERVISOR) {
-    return "all complaints, service requests and tasks, and you check that staff work is done properly";
+    return "all complaints and tasks, and you check that staff work is done properly";
   }
 
   if (department === "Security") {
@@ -66,11 +57,9 @@ export const workSummary = (department) => {
   }
 
   const complaints = matching(COMPLAINT_CATEGORY_DEPARTMENTS, department);
-  const requests = matching(SERVICE_REQUEST_DEPARTMENTS, department);
   const parts = [];
 
   if (complaints.length) parts.push(`${joinList(complaints)} complaints`);
-  if (requests.length) parts.push(`${joinList(requests)} service requests`);
 
   const own = parts.length ? `${parts.join(", ")}, plus ` : "";
 

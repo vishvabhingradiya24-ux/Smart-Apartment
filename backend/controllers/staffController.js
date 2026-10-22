@@ -191,11 +191,6 @@ const getStaffDashboard = async (req, res) => {
          (SELECT COUNT(*) FROM complaints
           WHERE assigned_staff_id = ?
             AND status NOT IN ('Resolved', 'Completed')) AS complaints_open,
-         (SELECT COUNT(*) FROM service_requests
-          WHERE assigned_to = ?) AS service_requests_total,
-         (SELECT COUNT(*) FROM service_requests
-          WHERE assigned_to = ?
-            AND status NOT IN ('Completed', 'Resolved', 'Cancelled')) AS service_requests_open,
          (SELECT COUNT(*) FROM tasks
           WHERE assigned_to = ? AND status = 'Pending') AS tasks_pending,
          (SELECT COUNT(*) FROM tasks
@@ -207,7 +202,7 @@ const getStaffDashboard = async (req, res) => {
          (SELECT COUNT(*) FROM tasks
           WHERE assigned_to = ? AND status <> 'Completed'
             AND due_date IS NOT NULL AND due_date < CURDATE()) AS tasks_overdue`,
-      [staffId, staffId, staffId, staffId, staffId, staffId, staffId, staffId, staffId]
+      [staffId, staffId, staffId, staffId, staffId, staffId, staffId]
     );
 
     const [recentActivity] = await pool.query(
@@ -223,15 +218,6 @@ const getStaffDashboard = async (req, res) => {
          WHERE assigned_staff_id = ?
          UNION ALL
          SELECT
-           'Service Request' AS activity_type,
-           service_type AS title,
-           request_description AS details,
-           COALESCE(completed_date, request_date) AS activity_date,
-           status
-         FROM service_requests
-         WHERE assigned_to = ?
-         UNION ALL
-         SELECT
            'Task' AS activity_type,
            task_name AS title,
            description AS details,
@@ -242,7 +228,7 @@ const getStaffDashboard = async (req, res) => {
        ) AS staff_activity
        ORDER BY activity_date DESC
        LIMIT 5`,
-      [staffId, staffId, staffId]
+      [staffId, staffId]
     );
 
     // Extra numbers for the Security and Facility Supervisor dashboards.
@@ -326,6 +312,85 @@ const getAllStaff = async (req, res) => {
     res.status(500).json({
       message: "Unable to fetch staff"
     });
+  }
+};
+
+const staffProfileFields = (row) => ({
+  id: row.id,
+  first_name: row.first_name,
+  last_name: row.last_name,
+  email: row.email,
+  phone: row.phone,
+  department: row.department || "",
+  employee_id: `STF-${String(row.id).padStart(3, "0")}`,
+  joining_date: row.created_at,
+});
+
+const getStaffProfile = async (req, res) => {
+  try {
+    if (req.user?.role !== "Staff") {
+      return res.status(403).json({ message: "Staff access required" });
+    }
+    const [rows] = await pool.query(
+      "SELECT id, first_name, last_name, email, phone, department, created_at FROM staff WHERE id = ? LIMIT 1",
+      [req.user.id]
+    );
+    if (!rows.length) return res.status(404).json({ message: "Staff account not found" });
+    res.status(200).json({ profile: staffProfileFields(rows[0]) });
+  } catch (error) {
+    console.error("Get Staff Profile Error:", error);
+    res.status(500).json({ message: "Unable to load profile" });
+  }
+};
+
+const updateStaffProfile = async (req, res) => {
+  try {
+    if (req.user?.role !== "Staff") {
+      return res.status(403).json({ message: "Staff access required" });
+    }
+    const firstName = String(req.body.first_name || "").trim();
+    const lastName = String(req.body.last_name || "").trim();
+    const email = String(req.body.email || "").trim().toLowerCase();
+    const phone = String(req.body.phone || "").trim();
+
+    if (!firstName || !lastName) {
+      return res.status(400).json({ message: "First name and last name are required" });
+    }
+    if (firstName.length > 100 || lastName.length > 100) {
+      return res.status(400).json({ message: "Names must be 100 characters or fewer" });
+    }
+    const emailError = getEmailError(email);
+    if (emailError) return res.status(400).json({ message: emailError });
+    const phoneError = getPhoneError(phone);
+    if (phoneError) return res.status(400).json({ message: phoneError });
+
+    const [current] = await pool.query("SELECT department FROM staff WHERE id = ? LIMIT 1", [req.user.id]);
+    if (!current.length) return res.status(404).json({ message: "Staff account not found" });
+
+    const [duplicate] = await pool.query("SELECT id FROM staff WHERE email = ? AND id <> ? LIMIT 1", [email, req.user.id]);
+    if (duplicate.length) return res.status(409).json({ message: "This email is already used by another staff member" });
+
+    // The staff type can only be chosen once; afterwards only the admin changes it.
+    let department = current[0].department;
+    if (!department && req.body.department) {
+      if (!STAFF_DEPARTMENTS.includes(req.body.department)) {
+        return res.status(400).json({ message: "Select a valid staff department" });
+      }
+      department = req.body.department;
+    }
+
+    await pool.query(
+      "UPDATE staff SET first_name = ?, last_name = ?, email = ?, phone = ?, department = ? WHERE id = ?",
+      [firstName, lastName, email, phone, department, req.user.id]
+    );
+    const [rows] = await pool.query(
+      "SELECT id, first_name, last_name, email, phone, department, created_at FROM staff WHERE id = ?",
+      [req.user.id]
+    );
+    res.status(200).json({ message: "Profile updated successfully", profile: staffProfileFields(rows[0]) });
+  } catch (error) {
+    console.error("Update Staff Profile Error:", error);
+    res.status(500).json({ message: "Unable to update profile" });
   }
 };
 
@@ -799,6 +864,8 @@ module.exports = {
   loginStaff,
   getStaffDashboard,
   updateStaffDepartment,
+  getStaffProfile,
+  updateStaffProfile,
   getAllStaff,
   getStaffTasks,
   updateStaffTaskStatus,

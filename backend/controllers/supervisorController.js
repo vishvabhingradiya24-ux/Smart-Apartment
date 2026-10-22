@@ -28,9 +28,7 @@ const getStaffOverview = async (req, res) => {
          (SELECT COUNT(*) FROM tasks t WHERE t.assigned_to = s.id AND t.status <> 'Completed'
             AND t.due_date IS NOT NULL AND t.due_date < CURDATE()) AS tasks_overdue,
          (SELECT COUNT(*) FROM complaints c WHERE c.assigned_staff_id = s.id
-            AND c.status NOT IN ('Resolved', 'Completed')) AS complaints_open,
-         (SELECT COUNT(*) FROM service_requests r WHERE r.assigned_to = s.id
-            AND r.status NOT IN ('Completed', 'Resolved', 'Cancelled')) AS requests_open
+            AND c.status NOT IN ('Resolved', 'Completed')) AS complaints_open
        FROM staff s
        ORDER BY s.department ASC, s.first_name ASC, s.last_name ASC`
     );
@@ -44,7 +42,7 @@ const getStaffOverview = async (req, res) => {
         );
 
         const openWork =
-          row.tasks_pending + row.tasks_in_progress + row.complaints_open + row.requests_open;
+          row.tasks_pending + row.tasks_in_progress + row.complaints_open;
 
         return {
           ...row,

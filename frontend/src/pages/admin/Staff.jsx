@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { CalendarDays, Eye, EyeOff, Search, UsersRound } from "lucide-react";
+import { CalendarDays, Search, UsersRound } from "lucide-react";
 import AdminFormModal from "./AdminFormModal";
 import { STAFF_DEPARTMENTS } from "../../constants/staffDepartments";
 import "../../css/admin.css";
@@ -17,23 +17,11 @@ const Staff = () => {
   const [staffList, setStaffList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [formError, setFormError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [editingStaff, setEditingStaff] = useState(null);
   const [editForm, setEditForm] = useState({ first_name: "", last_name: "", email: "", phone: "", department: "" });
   const [savingEdit, setSavingEdit] = useState(false);
   const [editError, setEditError] = useState("");
-  const [newStaff, setNewStaff] = useState({
-    first_name: "",
-    last_name: "",
-    email: "",
-    phone: "",
-    department: "",
-    password: "",
-  });
 
   const fetchStaff = useCallback(async (signal) => {
     try {
@@ -65,88 +53,6 @@ const Staff = () => {
     setLoading(true);
     setError("");
     fetchStaff();
-  };
-
-  const handleAddStaff = async (event) => {
-    event.preventDefault();
-    setFormError("");
-    setSuccessMessage("");
-
-    const enteredEmail = newStaff.email.trim();
-    const normalizedStaff = {
-      first_name: newStaff.first_name.trim(),
-      last_name: newStaff.last_name.trim(),
-      email: newStaff.email.trim().toLowerCase(),
-      phone: newStaff.phone.trim(),
-      password: newStaff.password,
-    };
-    const namePattern = /^[\p{L}\p{M}][\p{L}\p{M} .'-]*$/u;
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    if (!normalizedStaff.first_name || !normalizedStaff.last_name || !normalizedStaff.email || !normalizedStaff.phone || !normalizedStaff.password) {
-      setFormError("Please fill in all required fields.");
-      return;
-    }
-    if (!namePattern.test(normalizedStaff.first_name) || !namePattern.test(normalizedStaff.last_name)) {
-      setFormError("Names can contain letters, spaces, apostrophes, periods and hyphens.");
-      return;
-    }
-    if (/[A-Z]/.test(enteredEmail)) {
-      setFormError("Email must not contain uppercase letters.");
-      return;
-    }
-    if (!emailPattern.test(normalizedStaff.email) || normalizedStaff.email.length > 150) {
-      setFormError("Enter a valid email address with no more than 150 characters.");
-      return;
-    }
-    if (!/^[0-9]{10}$/.test(normalizedStaff.phone)) {
-      setFormError("Enter a phone number with exactly 10 digits.");
-      return;
-    }
-    const passwordDigits = (normalizedStaff.password.match(/[0-9]/g) || []).length;
-    if (
-      normalizedStaff.password.length < 5 ||
-      passwordDigits < 3 ||
-      !/[^A-Za-z0-9\s]/.test(normalizedStaff.password) ||
-      new TextEncoder().encode(normalizedStaff.password).length > 72
-    ) {
-      setFormError("Password must have at least 5 characters, 3 digits and 1 special character, and be no more than 72 bytes.");
-      return;
-    }
-
-    setSaving(true);
-
-    try {
-      const response = await fetch("http://localhost:5000/api/admin/staff", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${sessionStorage.getItem("token")}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(normalizedStaff),
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.message || "Unable to add staff member.");
-      }
-
-      setNewStaff({
-        first_name: "",
-        last_name: "",
-        email: "",
-        phone: "",
-        department: "",
-        password: "",
-      });
-      setShowPassword(false);
-      setShowAddForm(false);
-      setSuccessMessage(data.message || "Staff member added successfully.");
-      await fetchStaff();
-    } catch (err) {
-      setFormError(err.message || "Unable to add staff member.");
-    } finally {
-      setSaving(false);
-    }
   };
 
   const filteredStaff = useMemo(() => {
@@ -215,121 +121,9 @@ const Staff = () => {
     <div className="admin-records-page admin-staff-page">
       <header className="admin-records-header">
         <div><span className="admin-records-eyebrow">STAFF MANAGEMENT</span><h1>Staff Members</h1><p>Staff directory from your database, including contact details.</p></div>
-        <div className="admin-records-header-actions">
-          <button
-            type="button"
-            className="admin-records-secondary"
-            onClick={() => {
-              setShowAddForm(true);
-              setShowPassword(false);
-              setFormError("");
-              setSuccessMessage("");
-            }}
-          >
-            + Add Staff
-          </button>
-        </div>
       </header>
 
       {successMessage && <p className="admin-staff-success" role="status">{successMessage}</p>}
-      {showAddForm && (
-        <AdminFormModal title="Add Staff Member" onClose={() => setShowAddForm(false)} saving={saving}>
-          <form className="admin-staff-create-form" onSubmit={handleAddStaff}>
-            <label>
-              First name
-              <input
-                required
-                maxLength={100}
-                value={newStaff.first_name}
-                onChange={(event) => setNewStaff({ ...newStaff, first_name: event.target.value })}
-                autoComplete="given-name"
-              />
-            </label>
-            <label>
-              Department
-              <select
-                required
-                value={newStaff.department}
-                onChange={(event) => setNewStaff({ ...newStaff, department: event.target.value })}
-              >
-                <option value="" disabled>Select department</option>
-                {STAFF_DEPARTMENTS.map((department) => (
-                  <option key={department} value={department}>{department}</option>
-                ))}
-              </select>
-            </label>
-            <label>
-              Last name
-              <input
-                required
-                maxLength={100}
-                value={newStaff.last_name}
-                onChange={(event) => setNewStaff({ ...newStaff, last_name: event.target.value })}
-                autoComplete="family-name"
-              />
-            </label>
-            <label>
-              Email
-              <input
-                type="email"
-                required
-                maxLength={150}
-                pattern="[^A-Z]*"
-                title="Email must not contain uppercase letters."
-                value={newStaff.email}
-                onChange={(event) => setNewStaff({ ...newStaff, email: event.target.value })}
-                autoComplete="email"
-              />
-            </label>
-            <label>
-              Phone
-              <input
-                type="tel"
-                required
-                inputMode="numeric"
-                pattern="[0-9]{10}"
-                minLength={10}
-                maxLength={10}
-                value={newStaff.phone}
-                onChange={(event) => setNewStaff({ ...newStaff, phone: event.target.value })}
-                autoComplete="tel"
-              />
-            </label>
-            <label>
-              Initial password
-              <div className="admin-resident-password-control">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  required
-                  minLength={5}
-                  maxLength={72}
-                  value={newStaff.password}
-                  onChange={(event) => setNewStaff({ ...newStaff, password: event.target.value })}
-                  autoComplete="new-password"
-                />
-                <button
-                  type="button"
-                  className="admin-resident-password-toggle"
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                  aria-pressed={showPassword}
-                  title={showPassword ? "Hide password" : "Show password"}
-                  onClick={() => setShowPassword((visible) => !visible)}
-                >
-                  {showPassword ? <EyeOff size={16} aria-hidden="true" /> : <Eye size={16} aria-hidden="true" />}
-                </button>
-              </div>
-            </label>
-            {formError && <p className="admin-staff-form-error" role="alert">{formError}</p>}
-            <div className="admin-staff-form-actions">
-              <button type="button" className="admin-records-secondary" onClick={() => setShowAddForm(false)} disabled={saving}>Cancel</button>
-              <button type="submit" className="admin-records-refresh" disabled={saving}>
-                {saving ? "Adding..." : "Add Staff"}
-              </button>
-            </div>
-          </form>
-        </AdminFormModal>
-      )}
-
       {editingStaff && (
         <AdminFormModal title="Edit Staff Member" onClose={() => setEditingStaff(null)} saving={savingEdit}>
           <form className="admin-staff-create-form" onSubmit={saveStaffEdit}>

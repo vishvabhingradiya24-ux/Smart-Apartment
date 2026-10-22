@@ -1,6 +1,6 @@
 // Which staff type can take which kind of work.
 //
-// A complaint or service request can only be assigned to a staff member of the
+// A complaint can only be assigned to a staff member of the
 // matching staff type, so a Maintenance staff member never receives Security
 // work and the other way round. Because staff only see the work assigned to
 // them, each staff member ends up seeing only their own department's work.
@@ -20,15 +20,6 @@ const COMPLAINT_CATEGORY_DEPARTMENTS = Object.freeze({
   Electrical: ["Electrical"],
   Cleaning: ["Housekeeping"],
   Security: ["Security"]
-});
-
-// Resident service request type -> staff types that can handle it
-const SERVICE_REQUEST_DEPARTMENTS = Object.freeze({
-  Electrician: ["Electrical"],
-  Maintenance: ["Maintenance"],
-  Plumber: ["Plumbing"],
-  Cleaning: ["Housekeeping"],
-  Carpenter: ["Maintenance"]
 });
 
 const canTakeWork = (rules, category, staffDepartment) => {
@@ -54,7 +45,6 @@ const mismatchMessage = (workName, category, rules, staffDepartment) => {
 module.exports = {
   SUPERVISOR,
   COMPLAINT_CATEGORY_DEPARTMENTS,
-  SERVICE_REQUEST_DEPARTMENTS,
   canTakeWork,
   mismatchMessage
 };

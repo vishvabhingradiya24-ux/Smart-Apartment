@@ -1796,43 +1796,18 @@
 .resident-layout .resident-visitors-top { align-items: flex-end; margin-bottom: 22px; }
 .resident-layout .resident-visitors-eyebrow,
 .resident-layout .notice-overline,
-.resident-layout .resident-emergency-eyebrow { color: #157461; font-size: 11px; letter-spacing: 1.2px; }
 .resident-layout .resident-visitors-top h1 { margin: 5px 0; }
 .resident-layout .facilities-header { border-bottom: 1px solid #dfe7e4; }
 
-.resident-emergency-page { width: 100%; }
-.resident-emergency-header { margin-bottom: 20px; padding-bottom: 17px; border-bottom: 1px solid #dfe7e4; }
-.resident-emergency-eyebrow { display: block; margin-bottom: 6px; font-weight: 800; }
-.resident-emergency-header h1 { margin: 0; color: #202d35; font-size: 30px; line-height: 1.2; }
-.resident-emergency-header p { margin: 7px 0 0; color: #69777d; font-size: 14px; }
-.resident-emergency-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-.resident-emergency-card { display: flex; align-items: center; gap: 14px; min-width: 0; padding: 17px; border: 1px solid #dfe7e4; border-radius: 9px; background: #fff; }
-.resident-emergency-icon { width: 44px; height: 44px; flex: 0 0 44px; display: grid; place-items: center; border-radius: 8px; background: #e8f3ef; color: #105e4f; }
-.resident-emergency-icon.urgent { background: #fce9e7; color: #a63d3d; }
-.resident-emergency-icon.medical { background: #e6f3fa; color: #176889; }
-.resident-emergency-icon.fire { background: #fff0df; color: #a85d17; }
-.resident-emergency-icon.support { background: #f7e9ed; color: #9b4560; }
-.resident-emergency-copy { min-width: 0; flex: 1; }
-.resident-emergency-copy h2 { margin: 0; color: #202d35; font-size: 16px; }
-.resident-emergency-copy p { margin: 4px 0 0; color: #69777d; font-size: 13px; line-height: 1.4; }
-.resident-emergency-call { display: inline-flex; align-items: center; gap: 7px; min-height: 40px; padding: 0 12px; border-radius: 7px; background: #157461; color: #fff; font-size: 15px; font-weight: 750; text-decoration: none; }
-.resident-emergency-call:hover { background: #105e4f; }
-.resident-emergency-note { margin: 15px 0 0; color: #69777d; font-size: 13px; }
 
 @media (max-width: 700px) {
   .resident-layout .notice-header { align-items: flex-start; }
   .resident-layout .resident-polls-hero { align-items: flex-start; padding: 18px; }
-  .resident-emergency-grid { grid-template-columns: 1fr; }
-  .resident-emergency-header h1,
   .resident-layout .notice-header h1,
   .resident-layout .resident-polls-header h1 { font-size: 27px; }
 }
 
 @media (max-width: 420px) {
-  .resident-emergency-card { gap: 10px; padding: 12px; }
-  .resident-emergency-copy h2 { font-size: 14px; }
-  .resident-emergency-copy p { font-size: 12px; }
-  .resident-emergency-call { gap: 5px; min-height: 38px; padding: 0 9px; font-size: 14px; }
 }
 
 /* Keep resident page titles and cards consistent with the admin accent treatment. */
@@ -1847,7 +1822,6 @@
   .notice-page .notice-header,
   .resident-notifications-header,
   .resident-polls-header,
-  .resident-emergency-header
 ) {
   box-sizing: border-box;
   display: flex;
@@ -1872,7 +1846,6 @@
   .notice-page .notice-header,
   .resident-notifications-header,
   .resident-polls-header,
-  .resident-emergency-header
 ) :is(h1, h2, p) {
   color: #fff;
 }
@@ -1888,7 +1861,6 @@
   .notice-page .notice-header,
   .resident-notifications-header,
   .resident-polls-header,
-  .resident-emergency-header
 ) h1 {
   margin: 0;
   line-height: 1.2;
@@ -1905,7 +1877,6 @@
   .notice-page .notice-header,
   .resident-notifications-header,
   .resident-polls-header,
-  .resident-emergency-header
 ) p {
   margin: 7px 0 0;
   line-height: 1.5;
@@ -1922,7 +1893,6 @@
   .notice-page .notice-header,
   .resident-notifications-header,
   .resident-polls-header,
-  .resident-emergency-header
 ) :is(
   .profile-overline,
   .flat-overline,
@@ -1934,7 +1904,6 @@
   .notice-overline,
   .resident-notifications-eyebrow,
   .resident-polls-overline,
-  .resident-emergency-eyebrow
 ) {
   color: #c9e1d7;
 }
@@ -1977,7 +1946,6 @@
   .resident-notifications-state,
   .resident-notification-card,
   .resident-polls-empty,
-  .resident-emergency-card
 ) {
   position: relative;
   overflow: hidden;
@@ -2021,7 +1989,6 @@
   .resident-notifications-state,
   .resident-notification-card,
   .resident-polls-empty,
-  .resident-emergency-card
 )::before {
   position: absolute;
   z-index: 1;
@@ -2044,7 +2011,6 @@
     .notice-page .notice-header,
     .resident-notifications-header,
     .resident-polls-header,
-    .resident-emergency-header
   ) {
       align-items: flex-start;
       padding: 18px 20px;

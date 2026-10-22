@@ -24,15 +24,6 @@ export function buildDashboardCards({ department, counts, security, supervisor, 
     "/staff/complaints"
   );
 
-  const requestCard = card(
-    "Service Requests",
-    display(c.service_requests_total),
-    `${display(c.service_requests_open)} open requests`,
-    "📋",
-    "orange",
-    "/staff/service-requests"
-  );
-
   const taskCards = (assignedTitle) => [
     card(assignedTitle, display(c.tasks_total), `${display(c.tasks_overdue)} overdue`, "📌", "blue", "/staff/tasks"),
     card("Pending Tasks", display(c.tasks_pending), "Waiting to start", "⏳", "orange", "/staff/tasks"),
@@ -44,10 +35,10 @@ export function buildDashboardCards({ department, counts, security, supervisor, 
     case "Maintenance":
     case "Electrical":
     case "Plumbing":
-      return [complaintCard, requestCard, ...taskCards("Assigned Tasks")];
+      return [complaintCard, ...taskCards("Assigned Tasks")];
 
     case "Housekeeping":
-      return [...taskCards("Assigned Cleaning Tasks"), complaintCard, requestCard];
+      return [...taskCards("Assigned Cleaning Tasks"), complaintCard];
 
     case "Garden Maintenance":
       return taskCards("Assigned Tasks");
@@ -81,7 +72,6 @@ export function buildDashboardCards({ department, counts, security, supervisor, 
     default:
       return [
         complaintCard,
-        requestCard,
         card("Pending Tasks", display(c.tasks_pending), `${display(c.tasks_in_progress)} in progress`, "✅", "green", "/staff/tasks"),
         card("Completed Tasks", display(c.tasks_completed), "Assigned tasks completed", "📦", "purple", "/staff/work-history")
       ];

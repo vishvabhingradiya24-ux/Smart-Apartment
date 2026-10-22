@@ -10,11 +10,9 @@ import {
   LogOut,
   Megaphone,
   Menu,
-  PhoneCall,
   UserRound,
   Vote,
   Waves,
-  Wrench,
   X,
 } from "lucide-react";
 import "../../css/resident/resident_dashboard.css";
@@ -197,21 +195,6 @@ function ResidentLayout() {
 
 
             <NavLink
-              to="/resident/requests"
-              className={({ isActive }) => `resident-nav-item nav-item ${isActive ? "active" : ""}`}
-              title="Service Requests"
-            >
-              <span className="resident-nav-icon nav-icon">
-                <Wrench size={17} strokeWidth={1.8} aria-hidden="true" />
-              </span>
-
-              <span>
-                Service Requests
-              </span>
-            </NavLink>
-
-
-            <NavLink
               to="/resident/visitors"
               className={({ isActive }) => `resident-nav-item nav-item ${isActive ? "active" : ""}`}
               title="Visitors"
@@ -281,20 +264,6 @@ function ResidentLayout() {
 
               <span>
                 Notifications
-              </span>
-            </NavLink>
-
-            <NavLink
-              to="/resident/emergency"
-              className={({ isActive }) => `resident-nav-item nav-item emergency-nav ${isActive ? "active" : ""}`}
-              title="Emergency Contacts"
-            >
-              <span className="resident-nav-icon nav-icon">
-                <PhoneCall size={17} strokeWidth={1.8} aria-hidden="true" />
-              </span>
-
-              <span>
-                Emergency Contacts
               </span>
             </NavLink>
 

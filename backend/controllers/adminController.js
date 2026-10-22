@@ -781,8 +781,23 @@ const updateAdminNotificationReadState = async (req, res) => {
   }
 };
 
+let adminSettingsSchemaReady = false;
+const ensureAdminSettingsSchema = async () => {
+  if (adminSettingsSchemaReady) return;
+  for (const column of ["notification_preferences", "security_preferences"]) {
+    const [rows] = await pool.query(
+      `SELECT 1 FROM information_schema.columns
+       WHERE table_schema = DATABASE() AND table_name = 'admins' AND column_name = ? LIMIT 1`,
+      [column]
+    );
+    if (!rows.length) await pool.query(`ALTER TABLE admins ADD COLUMN ${column} JSON NULL`);
+  }
+  adminSettingsSchemaReady = true;
+};
+
 const getAdminSettings = async (req, res) => {
   try {
+    await ensureAdminSettingsSchema();
     if (!requireAdmin(req, res)) return;
     const [admins] = await pool.query(
           `SELECT a.id, a.name, a.email, a.phone, a.society_id,
@@ -941,6 +956,7 @@ const saveAdminPreference = async (req, res, column, value) => {
 
 const updateAdminNotifications = async (req, res) => {
   try {
+    await ensureAdminSettingsSchema();
     const { complaints, payments, bookings, notices, security, events } = req.body;
     const preferences = { complaints, payments, bookings, notices, security, events };
     if (Object.values(preferences).some((value) => typeof value !== "boolean")) {
@@ -955,6 +971,7 @@ const updateAdminNotifications = async (req, res) => {
 
 const updateAdminSecurityPreferences = async (req, res) => {
   try {
+    await ensureAdminSettingsSchema();
     const { twoFactor, sessionTimeout, loginAlerts } = req.body;
     if (typeof twoFactor !== "boolean" || typeof loginAlerts !== "boolean" ||
         !["15", "30", "60", "120"].includes(String(sessionTimeout))) {

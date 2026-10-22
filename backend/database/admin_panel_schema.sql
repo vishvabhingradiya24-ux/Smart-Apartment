@@ -456,25 +456,6 @@ CREATE TABLE IF NOT EXISTS booking_addons (
     FOREIGN KEY (addon_id) REFERENCES facility_addons(addon_id)
 );
 
-CREATE TABLE IF NOT EXISTS service_requests (
-  service_request_id INT NOT NULL AUTO_INCREMENT,
-  resident_id INT NOT NULL,
-  service_type VARCHAR(100) NOT NULL,
-  request_description TEXT NOT NULL,
-  status VARCHAR(30) NOT NULL DEFAULT 'Pending',
-  assigned_to INT NULL,
-  request_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  completed_date DATETIME NULL,
-  PRIMARY KEY (service_request_id),
-  KEY idx_service_requests_resident_date (resident_id, request_date),
-  KEY idx_service_requests_staff_status (assigned_to, status),
-  CONSTRAINT fk_service_requests_resident
-    FOREIGN KEY (resident_id) REFERENCES residents(id),
-  CONSTRAINT fk_service_requests_staff
-    FOREIGN KEY (assigned_to) REFERENCES staff(id)
-    ON DELETE SET NULL
-);
-
 CREATE TABLE IF NOT EXISTS tasks (
   task_id INT NOT NULL AUTO_INCREMENT,
   task_name VARCHAR(200) NOT NULL,

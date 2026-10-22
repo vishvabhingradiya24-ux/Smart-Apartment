@@ -67,24 +67,6 @@ PREPARE stmt FROM @sql;
 EXECUTE stmt;
 DEALLOCATE PREPARE stmt;
 
--- service_requests.assigned_at
-SET @sql = IF(EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'service_requests' AND column_name = 'assigned_at'), 'SELECT 1', 'ALTER TABLE service_requests ADD COLUMN assigned_at DATETIME NULL');
-PREPARE stmt FROM @sql;
-EXECUTE stmt;
-DEALLOCATE PREPARE stmt;
-
--- service_requests.accepted_at
-SET @sql = IF(EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'service_requests' AND column_name = 'accepted_at'), 'SELECT 1', 'ALTER TABLE service_requests ADD COLUMN accepted_at DATETIME NULL');
-PREPARE stmt FROM @sql;
-EXECUTE stmt;
-DEALLOCATE PREPARE stmt;
-
--- service_requests.work_notes
-SET @sql = IF(EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'service_requests' AND column_name = 'work_notes'), 'SELECT 1', 'ALTER TABLE service_requests ADD COLUMN work_notes TEXT NULL');
-PREPARE stmt FROM @sql;
-EXECUTE stmt;
-DEALLOCATE PREPARE stmt;
-
 -- visitors.visitor_type
 SET @sql = IF(EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'visitors' AND column_name = 'visitor_type'), 'SELECT 1', 'ALTER TABLE visitors ADD COLUMN visitor_type VARCHAR(30) NULL');
 PREPARE stmt FROM @sql;

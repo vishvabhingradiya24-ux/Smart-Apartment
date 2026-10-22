@@ -36,7 +36,6 @@ const complaintRoutes = require("./routes/complaintRoutes");
 const facilityRoutes = require("./routes/facilityRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
 const residentRoutes = require("./routes/residentRoutes");
-const serviceRequestRoutes = require("./routes/serviceRequestRoutes");
 const staffRoutes = require("./routes/staffRoutes");
 const adminTaskRoutes = require("./routes/adminTaskRoutes");
 const visitorRoutes = require("./routes/visitorRoutes");
@@ -75,12 +74,6 @@ app.use("/api/staff/supervisor", supervisorRoutes);
 app.use(
   "/api/resident/payments",
   paymentRoutes
-);
-
-// Service Requests
-app.use(
-  "/api/resident/requests",
-  serviceRequestRoutes
 );
 
 // Visitors

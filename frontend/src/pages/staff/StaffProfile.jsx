@@ -24,7 +24,9 @@ function StaffProfile() {
   const initials =
     `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase() || "S";
 
-  const [isEditing, setIsEditing] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editForm, setEditForm] = useState({ first_name: "", last_name: "", email: "", phone: "", department: "" });
+  const [editError, setEditError] = useState("");
   const [savingProfile, setSavingProfile] = useState(false);
   const [workSummary, setWorkSummary] = useState(null);
   const [summaryLoading, setSummaryLoading] = useState(true);
@@ -40,9 +42,8 @@ function StaffProfile() {
     email: staff?.email || "",
     phone: staff?.phone || staff?.mobile || "",
     department: staff?.department || "",
-    employee_id: staff?.employee_id || staff?.staff_id || "STF-001",
-    address: staff?.address || "",
-    joining_date: staff?.joining_date || "",
+    employee_id: staff?.id ? `STF-${String(staff.id).padStart(3, "0")}` : "",
+    joining_date: "",
   });
 
   const [passwordData, setPasswordData] = useState({
@@ -96,6 +97,26 @@ function StaffProfile() {
     return () => controller.abort();
   }, [fetchWorkSummary]);
 
+  useEffect(() => {
+    const controller = new AbortController();
+    const loadProfile = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/api/staff/profile", {
+          headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` },
+          signal: controller.signal,
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || "Unable to load profile.");
+        setProfileData((current) => ({ ...current, ...data.profile }));
+        setStaff((current) => ({ ...current, ...data.profile }));
+      } catch (error) {
+        if (error.name !== "AbortError") console.error("Load Staff Profile Error:", error);
+      }
+    };
+    loadProfile();
+    return () => controller.abort();
+  }, []);
+
   const handleNavigation = (path) => {
     navigate(path);
   };
@@ -111,15 +132,6 @@ function StaffProfile() {
     navigate("/login");
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-
-    setProfileData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
   const handlePasswordChange = (e) => {
     const { name, value } = e.target;
 
@@ -129,61 +141,65 @@ function StaffProfile() {
     }));
   };
 
-  const handleSaveProfile = async () => {
-    if (staff?.department) {
-      alert("Only the admin can change your staff type.");
+  const openEditModal = () => {
+    setEditForm({
+      first_name: profileData.first_name || "",
+      last_name: profileData.last_name || "",
+      email: profileData.email || "",
+      phone: profileData.phone || "",
+      department: profileData.department || "",
+    });
+    setEditError("");
+    setShowEditModal(true);
+  };
+
+  const handleSaveProfile = async (e) => {
+    e.preventDefault();
+    setEditError("");
+
+    const form = {
+      ...editForm,
+      first_name: editForm.first_name.trim(),
+      last_name: editForm.last_name.trim(),
+      email: editForm.email.trim().toLowerCase(),
+      phone: editForm.phone.trim(),
+    };
+    if (!form.first_name || !form.last_name) {
+      setEditError("First name and last name are required.");
       return;
     }
-
-    if (!STAFF_DEPARTMENTS.includes(profileData.department)) {
-      alert("Please select a valid staff department.");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+      setEditError("Enter a valid email address.");
+      return;
+    }
+    if (!/^[0-9]{10}$/.test(form.phone)) {
+      setEditError("Enter a phone number with exactly 10 digits.");
       return;
     }
 
     setSavingProfile(true);
     try {
-      const response = await fetch("http://localhost:5000/api/staff/profile/department", {
+      const response = await fetch("http://localhost:5000/api/staff/profile", {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${sessionStorage.getItem("token")}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ department: profileData.department }),
+        body: JSON.stringify(form),
       });
       const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.message || "Unable to update staff department.");
-      }
+      if (!response.ok) throw new Error(data.message || "Unable to update profile.");
 
-      const updatedStaff = {
-        ...staff,
-        ...profileData,
-        department: data.department,
-      };
+      const updatedStaff = { ...staff, ...data.profile };
       sessionStorage.setItem("user", JSON.stringify(updatedStaff));
       setStaff(updatedStaff);
-      setIsEditing(false);
-      alert("Staff department updated successfully.");
+      setProfileData((current) => ({ ...current, ...data.profile }));
+      setShowEditModal(false);
     } catch (error) {
-      alert(error.message || "Unable to update staff department.");
+      setEditError(error.message || "Unable to update profile.");
     } finally {
       setSavingProfile(false);
     }
-  };
-
-  const handleCancelEdit = () => {
-    setProfileData({
-      first_name: staff?.first_name || firstName,
-      last_name: staff?.last_name || lastName,
-      email: staff?.email || "",
-      phone: staff?.phone || staff?.mobile || "",
-      department: staff?.department || "",
-      employee_id: staff?.employee_id || staff?.staff_id || "STF-001",
-      address: staff?.address || "",
-      joining_date: staff?.joining_date || "",
-    });
-
-    setIsEditing(false);
   };
 
   const handleChangePassword = async (e) => {
@@ -318,53 +334,49 @@ function StaffProfile() {
 
           <div className="header-actions">
 
-            {isEditing ? (
-              <div className="edit-actions">
-                <button type="button" className="cancel-btn" onClick={handleCancelEdit}>Cancel</button>
-                <button type="button" className="save-btn" onClick={handleSaveProfile} disabled={savingProfile}>
-                  {savingProfile ? "Saving..." : "Save"}
-                </button>
-              </div>
-            ) : !staff?.department ? (
-              <button type="button" className="edit-profile-btn" onClick={() => setIsEditing(true)}>Choose staff type</button>
-            ) : null}
-
-
           </div>
 
         </header>
 
-        {/* ================= PROFILE HERO ================= */}
 
-        <section className="profile-hero">
-
-          <div className="profile-main-info">
-
-            <div className="large-avatar">
-              {initials}
-            </div>
-
-            <div className="profile-name-section">
-
-              <span className="profile-role-badge">{profileData.department || "Staff Member"}</span>
-
-              <h2>
-                {profileData.first_name} {profileData.last_name}
-              </h2>
-
-              <p>
-                {profileData.department || "Department not set"}
-              </p>
-
-              <div className="employee-id">
-                Employee ID: <strong>{profileData.employee_id}</strong>
+        {showEditModal && (
+          <div className="staff-edit-backdrop" role="presentation" onMouseDown={(e) => { if (e.target === e.currentTarget && !savingProfile) setShowEditModal(false); }}>
+            <form className="staff-edit-modal" onSubmit={handleSaveProfile} role="dialog" aria-modal="true" aria-label="Edit profile">
+              <div className="staff-edit-header">
+                <h2>Edit Profile</h2>
+                <button type="button" onClick={() => setShowEditModal(false)} disabled={savingProfile} aria-label="Close">×</button>
               </div>
-
-            </div>
-
+              <div className="staff-edit-grid">
+                <label>First name
+                  <input required maxLength="100" value={editForm.first_name} onChange={(e) => setEditForm({ ...editForm, first_name: e.target.value })} />
+                </label>
+                <label>Last name
+                  <input required maxLength="100" value={editForm.last_name} onChange={(e) => setEditForm({ ...editForm, last_name: e.target.value })} />
+                </label>
+                <label className="full">Email address
+                  <input required type="email" value={editForm.email} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} />
+                </label>
+                <label className="full">Phone number
+                  <input required inputMode="numeric" maxLength="10" value={editForm.phone} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value.replace(/\D/g, "") })} />
+                </label>
+                {!profileData.department && (
+                  <label className="full">Staff type
+                    <select required value={editForm.department} onChange={(e) => setEditForm({ ...editForm, department: e.target.value })}>
+                      <option value="">Select staff type</option>
+                      {STAFF_DEPARTMENTS.map((department) => <option key={department} value={department}>{department}</option>)}
+                    </select>
+                    <small>Choose once. After that only the admin can change it.</small>
+                  </label>
+                )}
+              </div>
+              {editError && <p className="staff-edit-error" role="alert">{editError}</p>}
+              <div className="staff-edit-actions">
+                <button type="button" className="cancel-btn" onClick={() => setShowEditModal(false)} disabled={savingProfile}>Cancel</button>
+                <button type="submit" className="save-btn" disabled={savingProfile}>{savingProfile ? "Saving..." : "Save changes"}</button>
+              </div>
+            </form>
           </div>
-
-        </section>
+        )}
 
         <div className="profile-content-grid">
 
@@ -382,9 +394,7 @@ function StaffProfile() {
                 </p>
               </div>
 
-              <span className="card-header-icon">
-                👤
-              </span>
+              <button type="button" className="edit-profile-btn" onClick={openEditModal}>Edit Profile</button>
 
             </div>
 
@@ -400,8 +410,7 @@ function StaffProfile() {
                   type="text"
                   name="first_name"
                   value={profileData.first_name}
-                  onChange={handleInputChange}
-                  disabled={!isEditing}
+                  readOnly
                 />
 
               </div>
@@ -416,8 +425,7 @@ function StaffProfile() {
                   type="text"
                   name="last_name"
                   value={profileData.last_name}
-                  onChange={handleInputChange}
-                  disabled={!isEditing}
+                  readOnly
                 />
 
               </div>
@@ -436,9 +444,7 @@ function StaffProfile() {
                     type="email"
                     name="email"
                     value={profileData.email}
-                    onChange={handleInputChange}
-                    disabled={!isEditing}
-                    placeholder="Enter email address"
+                    readOnly
                   />
 
                 </div>
@@ -459,9 +465,7 @@ function StaffProfile() {
                     type="text"
                     name="phone"
                     value={profileData.phone}
-                    onChange={handleInputChange}
-                    disabled={!isEditing}
-                    placeholder="Enter phone number"
+                    readOnly
                   />
 
                 </div>
@@ -478,23 +482,6 @@ function StaffProfile() {
                   type="text"
                   value={profileData.employee_id}
                   disabled
-                />
-
-              </div>
-
-              <div className="form-group full-width">
-
-                <label>
-                  Address
-                </label>
-
-                <textarea
-                  name="address"
-                  value={profileData.address}
-                  onChange={handleInputChange}
-                  disabled={!isEditing}
-                  placeholder="Enter your address"
-                  rows="3"
                 />
 
               </div>
@@ -531,24 +518,12 @@ function StaffProfile() {
                   Department
                 </label>
 
-                <select
-                  name="department"
-                  value={profileData.department}
-                  onChange={handleInputChange}
-                  disabled={!isEditing || Boolean(staff?.department)}
-                >
-
-                  <option value="">Select department</option>
-                  {STAFF_DEPARTMENTS.map((department) => (
-                    <option key={department} value={department}>{department}</option>
-                  ))}
-
-                </select>
+                <input type="text" value={profileData.department || "Not set"} readOnly />
 
                 <small className="profile-hint">
-                  {staff?.department
+                  {profileData.department
                     ? "Only the admin can change your staff type."
-                    : "Choose your staff type once. After that only the admin can change it."}
+                    : "Choose your staff type once from Edit Profile."}
                 </small>
 
               </div>
@@ -560,11 +535,13 @@ function StaffProfile() {
                 </label>
 
                 <input
-                  type="date"
-                  name="joining_date"
-                  value={profileData.joining_date}
-                  onChange={handleInputChange}
-                  disabled={!isEditing}
+                  type="text"
+                  value={
+                    profileData.joining_date
+                      ? new Date(profileData.joining_date).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })
+                      : "—"
+                  }
+                  readOnly
                 />
 
               </div>
@@ -621,17 +598,6 @@ function StaffProfile() {
 
               <div className="summary-box">
                 <span className="summary-icon">
-                  📋
-                </span>
-
-                <div>
-                  <strong>{summaryLoading ? "—" : workSummary?.service_requests_total ?? 0}</strong>
-                  <small>Service Requests</small>
-                </div>
-              </div>
-
-              <div className="summary-box">
-                <span className="summary-icon">
                   ✅
                 </span>
 
@@ -651,7 +617,6 @@ function StaffProfile() {
                     {summaryLoading
                       ? "—"
                       : Number(workSummary?.complaints_open || 0) +
-                        Number(workSummary?.service_requests_open || 0) +
                         Number(workSummary?.tasks_pending || 0) +
                         Number(workSummary?.tasks_in_progress || 0)}
                   </strong>

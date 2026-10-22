@@ -7,6 +7,8 @@ const {
   loginStaff,
   getStaffDashboard,
   updateStaffDepartment,
+  getStaffProfile,
+  updateStaffProfile,
   getAllStaff,
   getStaffTasks,
   updateStaffTaskStatus,
@@ -26,6 +28,8 @@ router.post("/register", registerStaff);
 router.post("/login", loginStaff);
 
 router.get("/dashboard", authMiddleware, getStaffDashboard);
+router.get("/profile", authMiddleware, getStaffProfile);
+router.put("/profile", authMiddleware, updateStaffProfile);
 router.put("/profile/department", authMiddleware, updateStaffDepartment);
 
 router.get("/all", authMiddleware, getAllStaff);

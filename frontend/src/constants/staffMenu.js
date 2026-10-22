@@ -2,8 +2,8 @@
 // It follows the "Staff Roles, Responsibilities and Role-Based Dashboard
 // Guide": every type sees the pages it needs and nothing else.
 //
-//   Maintenance, Electrical, Plumbing   complaints, requests, tasks
-//   Housekeeping                        cleaning complaints / requests and tasks
+//   Maintenance, Electrical, Plumbing   complaints, tasks
+//   Housekeeping                        cleaning complaints and tasks
 //   Garden Maintenance                  tasks only
 //   Security                            visitors, security complaints, tasks
 //   Facility Supervisor                 staff overview, task management, complaint
@@ -13,7 +13,6 @@ const ITEMS = {
   dashboard: { path: "/staff/dashboard", icon: "📊", label: "Dashboard" },
   visitors: { path: "/staff/visitors", icon: "🚪", label: "Visitors" },
   complaints: { path: "/staff/complaints", icon: "🛠️", label: "Assigned Complaints" },
-  requests: { path: "/staff/service-requests", icon: "📋", label: "Service Requests" },
   tasks: { path: "/staff/tasks", icon: "✅", label: "Tasks" },
   assets: { path: "/staff/assets", icon: "📦", label: "Assets & Inventory" },
   history: { path: "/staff/work-history", icon: "📜", label: "Work History" },
@@ -30,7 +29,6 @@ const ITEMS = {
 const TECHNICAL_STAFF = [
   "dashboard",
   "complaints",
-  "requests",
   "tasks",
   "assets",
   "history",
@@ -45,7 +43,6 @@ const MENU_BY_DEPARTMENT = {
   Housekeeping: [
     "dashboard",
     "complaints",
-    "requests",
     "tasks",
     "assets",
     "history",
@@ -70,7 +67,6 @@ const MENU_BY_DEPARTMENT = {
     "svVerification",
     "svReports",
     "complaints",
-    "requests",
     "tasks",
     "assets",
     "history",
@@ -82,7 +78,6 @@ const MENU_BY_DEPARTMENT = {
 const GENERAL_MENU = [
   "dashboard",
   "complaints",
-  "requests",
   "tasks",
   "assets",
   "history",

@@ -24,12 +24,10 @@ import ResidentDashboard from "./pages/resident/ResidentDashboard";
 import MyProfile from "./pages/resident/MyProfile";
 import ResidentComplaints from "./pages/resident/ResidentComplaints";
 import Payment from "./pages/resident/Payment";
-import ServiceRequests from "./pages/resident/ServiceRequests";
 import ResidentVisitors from "./pages/resident/ResidentVisitors";
 import Facilities from "./pages/resident/Facilities";
 import ResidentNotices from "./pages/resident/Notices";
 import ResidentNotifications from "./pages/resident/ResidentNotifications";
-import EmergencyContacts from "./pages/resident/EmergencyContacts";
 import ResidentPolls from "./pages/resident/residentPolls";
 import ResidentLayout from "./pages/resident/ResidentLayout";
 
@@ -45,7 +43,6 @@ import "./css/global.css";
 
 import StaffDashboard from "./pages/staff/StaffDashboard";
 import AssignedComplaints from "./pages/staff/AssignedComplaints";
-import StaffServiceRequests from "./pages/staff/StaffServiceRequests";
 import StaffTasks from "./pages/staff/StaffTasks";
 import StaffMaintenance from "./pages/staff/StaffMaintenance";
 import StaffInventory from "./pages/staff/StaffInventory";
@@ -110,12 +107,10 @@ function App() {
           <Route path="profile" element={<MyProfile />} />
           <Route path="complaints" element={<ResidentComplaints />} />
           <Route path="payment" element={<Payment />} />
-          <Route path="requests" element={<ServiceRequests />} />
           <Route path="visitors" element={<ResidentVisitors />} />
           <Route path="facilities" element={<Facilities />} />
           <Route path="notices" element={<ResidentNotices />} />
           <Route path="notifications" element={<ResidentNotifications />} />
-          <Route path="emergency" element={<EmergencyContacts />} />
           <Route path="polls" element={<ResidentPolls />} />
         </Route>
 
@@ -125,7 +120,6 @@ function App() {
           <Route path="dashboard" element={<StaffDashboard />} />
           <Route path="complaints" element={<AssignedComplaints />} />
           <Route path="tasks" element={<StaffTasks />} />
-          <Route path="service-requests" element={<StaffServiceRequests />} />
           <Route path="maintenance" element={<StaffMaintenance />} />
           <Route path="assets" element={<StaffInventory />} />
           <Route path="inventory" element={<StaffInventory />} />

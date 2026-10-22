@@ -147,14 +147,6 @@ function StaffDashboard() {
       path: "/staff/complaints",
     },
     {
-      id: 2,
-      icon: "📋",
-      title: "Service Requests",
-      description:
-        "Manage resident service requests and update their progress.",
-      path: "/staff/service-requests",
-    },
-    {
       id: 3,
       icon: "✅",
       title: "My Tasks",
@@ -268,7 +260,6 @@ function StaffDashboard() {
     dashboardLoading ? "…" : counts ? Number(value || 0) : "—";
   const hasAssignedWork = counts && (
     Number(counts.complaints_total || 0) > 0 ||
-    Number(counts.service_requests_total || 0) > 0 ||
     Number(counts.tasks_pending || 0) > 0 ||
     Number(counts.tasks_in_progress || 0) > 0 ||
     Number(counts.tasks_completed || 0) > 0
@@ -432,7 +423,7 @@ function StaffDashboard() {
 
         {!dashboardLoading && !dashboardError && counts && !hasAssignedWork && (
           <div className="dashboard-data-empty" role="status">
-            No complaints, service requests, or tasks are assigned to your account in the database yet.
+            No complaints or tasks are assigned to your account in the database yet.
             Ask your administrator to assign work; it will appear here automatically.
           </div>
         )}
@@ -457,7 +448,7 @@ function StaffDashboard() {
             </h2>
 
             <p>
-              Stay on top of complaints, requests,
+              Stay on top of complaints,
               maintenance and daily tasks from one
               simple workspace.
             </p>
@@ -504,16 +495,6 @@ function StaffDashboard() {
                   }
                 >
                   🛠️ View Complaints
-                </button>
-
-                <button
-                  onClick={() =>
-                    handleNavigation(
-                      "/staff/service-requests"
-                    )
-                  }
-                >
-                  📋 Service Requests
                 </button>
 
                 <button
@@ -868,7 +849,7 @@ function StaffDashboard() {
                   {dashboardLoading
                     ? "Loading assigned work…"
                     : counts
-                      ? `${Number(counts.complaints_open || 0) + Number(counts.service_requests_open || 0) + Number(counts.tasks_pending || 0) + Number(counts.tasks_in_progress || 0)} open assignments`
+                      ? `${Number(counts.complaints_open || 0) + Number(counts.tasks_pending || 0) + Number(counts.tasks_in_progress || 0)} open assignments`
                       : "Assignment data unavailable"}
                 </small>
               </div>
@@ -935,9 +916,7 @@ function StaffDashboard() {
                   <div className="activity-icon">
                     {activity.activity_type === "Complaint"
                       ? "🛠️"
-                      : activity.activity_type === "Service Request"
-                        ? "📋"
-                        : "✅"}
+                      : "✅"}
                   </div>
                   <div className="activity-content">
                     <strong>{activity.title}</strong>

@@ -24,11 +24,6 @@ FROM visitors
 JOIN residents ON residents.id = visitors.resident_id
 WHERE residents.user_type = 'Resident';
 
-DELETE service_requests
-FROM service_requests
-JOIN residents ON residents.id = service_requests.resident_id
-WHERE residents.user_type = 'Resident';
-
 DELETE facility_bookings
 FROM facility_bookings
 JOIN residents ON residents.id = facility_bookings.resident_id
