@@ -13,7 +13,7 @@ function MyProfile() {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const token = sessionStorage.getItem("token");
+        const token = localStorage.getItem("token");
 
         if (!token) {
           setError("Please login again.");
@@ -68,7 +68,7 @@ function MyProfile() {
     setSaving(true);
 
     try {
-      const token = sessionStorage.getItem("token");
+      const token = localStorage.getItem("token");
       const response = await fetch("http://localhost:5000/api/resident/profile", {
         method: "PUT",
         headers: {
@@ -88,11 +88,11 @@ function MyProfile() {
         phone: data.phone || "",
       });
 
-      const storedUser = JSON.parse(sessionStorage.getItem("user") || "{}");
+      const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
       if (storedUser.user) storedUser.user = { ...storedUser.user, ...data };
       else if (storedUser.data?.user) storedUser.data.user = { ...storedUser.data.user, ...data };
       else Object.assign(storedUser, data);
-      sessionStorage.setItem("user", JSON.stringify(storedUser));
+      localStorage.setItem("user", JSON.stringify(storedUser));
       window.dispatchEvent(new Event("resident-profile-updated"));
 
       setIsEditing(false);

@@ -5,7 +5,7 @@ import { useStaffDepartment } from "../hooks/useStaffDepartment";
 
 const readStoredUser = () => {
   try {
-    return JSON.parse(sessionStorage.getItem("user") || "{}") || {};
+    return JSON.parse(localStorage.getItem("user") || "{}") || {};
   } catch {
     return {};
   }
@@ -21,12 +21,12 @@ function StaffWorkspaceLayout() {
   const initials = `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase() || "S";
 
   const handleLogout = () => {
-    sessionStorage.removeItem("token");
-    sessionStorage.removeItem("adminToken");
-    sessionStorage.removeItem("staffToken");
-    sessionStorage.removeItem("residentToken");
-    sessionStorage.removeItem("user");
-    sessionStorage.removeItem("staff");
+    localStorage.removeItem("token");
+    localStorage.removeItem("adminToken");
+    localStorage.removeItem("staffToken");
+    localStorage.removeItem("residentToken");
+    localStorage.removeItem("user");
+    localStorage.removeItem("staff");
     navigate("/login");
   };
 

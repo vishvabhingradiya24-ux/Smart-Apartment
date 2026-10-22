@@ -21,7 +21,7 @@ import "../../css/resident/resident_dashboard.css";
 
 const readResidentUser = () => {
   try {
-    const storedUser = sessionStorage.getItem("user");
+    const storedUser = localStorage.getItem("user");
     if (storedUser) {
       const parsedUser = JSON.parse(storedUser);
       return parsedUser?.user || parsedUser?.data?.user || parsedUser || {};
@@ -89,14 +89,14 @@ function ResidentLayout() {
   }, []);
 
   const handleLogout = () => {
-    sessionStorage.removeItem("token");
-    sessionStorage.removeItem("adminToken");
-    sessionStorage.removeItem("staffToken");
-    sessionStorage.removeItem("residentToken");
-    sessionStorage.removeItem("user");
-    sessionStorage.removeItem("loggedInUser");
-    sessionStorage.removeItem("authUser");
-    sessionStorage.removeItem("currentUser");
+    localStorage.removeItem("token");
+    localStorage.removeItem("adminToken");
+    localStorage.removeItem("staffToken");
+    localStorage.removeItem("residentToken");
+    localStorage.removeItem("user");
+    localStorage.removeItem("loggedInUser");
+    localStorage.removeItem("authUser");
+    localStorage.removeItem("currentUser");
 
     navigate("/login");
   };
