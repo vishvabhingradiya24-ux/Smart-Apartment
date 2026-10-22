@@ -109,6 +109,15 @@
   --staff-success-light: #e8f3ef;
 }
 
+.staff-workspace-route .sx-report-add-btn {
+  background: #157461;
+  box-shadow: 0 6px 16px rgba(21, 116, 97, .2);
+}
+
+.staff-workspace-route .sx-report-add-btn:hover:not(:disabled) {
+  background: #105e4f;
+}
+
 .staff-workspace-route .modern-staff-layout .header-title h1,
 .staff-workspace-route .modern-staff-layout .section-header h2,
 .staff-workspace-route .modern-staff-layout .service-card h3,

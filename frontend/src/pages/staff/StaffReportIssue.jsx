@@ -55,6 +55,7 @@ function StaffReportIssue() {
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
+  const [showForm, setShowForm] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -108,6 +109,7 @@ function StaffReportIssue() {
       setMessage(data.message);
       setForm(blankForm());
       setReloadKey((key) => key + 1);
+      setShowForm(false);
     } catch (err) {
       setError(err.message || "Unable to send the report.");
     } finally {
@@ -128,81 +130,23 @@ function StaffReportIssue() {
       <section className="sx-card">
         <div className="sx-card-head">
           <div>
-            <h2>{isSecurity ? "New incident" : "New issue"}</h2>
-            <p>Your supervisor is notified as soon as you send this.</p>
+            <h2>{isSecurity ? "Incident reports" : "Issue reports"}</h2>
+            <p>Report an issue to your supervisor for follow-up.</p>
           </div>
+          <button
+            type="button"
+            className="sx-btn sx-btn-primary sx-report-add-btn"
+            onClick={() => {
+              setError("");
+              setShowForm(true);
+            }}
+          >
+            Add Report &amp; Issue
+          </button>
         </div>
 
         {message && <p className="sx-alert sx-alert-success">{message}</p>}
         {error && <p className="sx-alert sx-alert-error">{error}</p>}
-
-        <form onSubmit={submit}>
-          <div className="sx-grid-2">
-            <div className="sx-field sx-field-wide">
-              <label htmlFor="report-title">Title</label>
-              <input
-                id="report-title"
-                value={form.title}
-                maxLength={150}
-                placeholder={isSecurity ? "For example: Unknown person at the gate" : "For example: Sparking switchboard"}
-                onChange={(event) => setForm({ ...form, title: event.target.value })}
-              />
-            </div>
-
-            <div className="sx-field sx-field-wide">
-              <label htmlFor="report-description">What happened?</label>
-              <textarea
-                id="report-description"
-                value={form.description}
-                maxLength={2000}
-                onChange={(event) => setForm({ ...form, description: event.target.value })}
-              />
-            </div>
-
-            <div className="sx-field">
-              <label htmlFor="report-location">Location</label>
-              <input
-                id="report-location"
-                value={form.location}
-                maxLength={150}
-                placeholder="Block, floor or area"
-                onChange={(event) => setForm({ ...form, location: event.target.value })}
-              />
-            </div>
-
-            <div className="sx-field">
-              <label htmlFor="report-time">Date and time</label>
-              <input
-                id="report-time"
-                type="datetime-local"
-                value={form.occurred_at}
-                max={nowForInput()}
-                onChange={(event) => setForm({ ...form, occurred_at: event.target.value })}
-              />
-            </div>
-
-            <div className="sx-field">
-              <label htmlFor="report-severity">How serious is it?</label>
-              <select
-                id="report-severity"
-                value={form.severity}
-                onChange={(event) => setForm({ ...form, severity: event.target.value })}
-              >
-                {SEVERITIES.map((severity) => (
-                  <option key={severity} value={severity}>
-                    {severity}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div className="sx-modal-actions">
-            <button type="submit" className="sx-btn sx-btn-primary" disabled={sending}>
-              {sending ? "Sending..." : "Send Report"}
-            </button>
-          </div>
-        </form>
       </section>
 
       <section className="sx-card">
@@ -259,6 +203,103 @@ function StaffReportIssue() {
           </div>
         )}
       </section>
+
+      {showForm && (
+        <div
+          className="sx-modal-backdrop"
+          role="presentation"
+          onClick={(event) => {
+            if (event.target === event.currentTarget && !sending) setShowForm(false);
+          }}
+        >
+          <form
+            className="sx-modal sx-report-modal"
+            onSubmit={submit}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="report-form-title"
+          >
+            <h3 id="report-form-title">{isSecurity ? "New incident report" : "Report an issue"}</h3>
+            <p>Your supervisor is notified as soon as you send this.</p>
+
+            {error && <p className="sx-alert sx-alert-error">{error}</p>}
+
+            <div className="sx-grid-2">
+              <div className="sx-field sx-field-wide">
+                <label htmlFor="report-title">Title</label>
+                <input
+                  id="report-title"
+                  value={form.title}
+                  maxLength={150}
+                  placeholder={isSecurity ? "For example: Unknown person at the gate" : "For example: Sparking switchboard"}
+                  onChange={(event) => setForm({ ...form, title: event.target.value })}
+                />
+              </div>
+
+              <div className="sx-field sx-field-wide">
+                <label htmlFor="report-description">What happened?</label>
+                <textarea
+                  id="report-description"
+                  value={form.description}
+                  maxLength={2000}
+                  onChange={(event) => setForm({ ...form, description: event.target.value })}
+                />
+              </div>
+
+              <div className="sx-field">
+                <label htmlFor="report-location">Location</label>
+                <input
+                  id="report-location"
+                  value={form.location}
+                  maxLength={150}
+                  placeholder="Block, floor or area"
+                  onChange={(event) => setForm({ ...form, location: event.target.value })}
+                />
+              </div>
+
+              <div className="sx-field">
+                <label htmlFor="report-time">Date and time</label>
+                <input
+                  id="report-time"
+                  type="datetime-local"
+                  value={form.occurred_at}
+                  max={nowForInput()}
+                  onChange={(event) => setForm({ ...form, occurred_at: event.target.value })}
+                />
+              </div>
+
+              <div className="sx-field">
+                <label htmlFor="report-severity">How serious is it?</label>
+                <select
+                  id="report-severity"
+                  value={form.severity}
+                  onChange={(event) => setForm({ ...form, severity: event.target.value })}
+                >
+                  {SEVERITIES.map((severity) => (
+                    <option key={severity} value={severity}>
+                      {severity}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="sx-modal-actions">
+              <button
+                type="button"
+                className="sx-btn sx-btn-ghost"
+                onClick={() => setShowForm(false)}
+                disabled={sending}
+              >
+                Cancel
+              </button>
+              <button type="submit" className="sx-btn sx-btn-primary" disabled={sending}>
+                {sending ? "Sending..." : "Send Report"}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
     </StaffLayout>
   );
 }

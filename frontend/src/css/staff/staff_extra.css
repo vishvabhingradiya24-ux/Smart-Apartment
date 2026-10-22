@@ -319,6 +319,10 @@
   box-shadow: 0 24px 60px rgba(9, 40, 54, 0.3);
 }
 
+.sx-report-modal {
+  width: min(720px, 100%);
+}
+
 .sx-modal h3 {
   margin: 0 0 4px;
   font-size: 18px;
