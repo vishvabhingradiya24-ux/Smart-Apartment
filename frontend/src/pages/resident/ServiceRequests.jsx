@@ -8,6 +8,7 @@ const ServiceRequests = () => {
 
   const [serviceType, setServiceType] = useState("");
   const [description, setDescription] = useState("");
+  const [showForm, setShowForm] = useState(false);
 
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -102,6 +103,7 @@ const ServiceRequests = () => {
 
       setServiceType("");
       setDescription("");
+      setShowForm(false);
 
       await fetchRequests();
     } catch (error) {
@@ -164,7 +166,17 @@ const ServiceRequests = () => {
             from one place.
           </p>
         </div>
-
+        <button
+          type="button"
+          className="sr-add-request-btn"
+          onClick={() => {
+            setErrorMessage("");
+            setShowForm(true);
+          }}
+        >
+          <span aria-hidden="true">+</span>
+          Add Service Request
+        </button>
       </section>
 
 
@@ -252,19 +264,44 @@ const ServiceRequests = () => {
       </section>
 
 
-      <section className="sr-request-area">
+      <section className={`sr-request-area${showForm ? "" : " sr-request-area--closed"}`}>
 
-        <div className="sr-form-card">
+        {showForm && (
+          <div
+            className="sr-modal-overlay"
+            onMouseDown={(event) => {
+              if (event.target === event.currentTarget && !submitting) setShowForm(false);
+            }}
+          >
+            <section
+              className="sr-form-modal"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="sr-form-title"
+            >
+              <div className="sr-form-card">
 
-          <div className="sr-section-heading">
-            <div className="sr-heading-icon">
-              +
+          <div className="sr-form-card-header">
+            <div className="sr-section-heading">
+              <div className="sr-heading-icon">
+                +
+              </div>
+
+              <div>
+                <span>NEW REQUEST</span>
+                <h2 id="sr-form-title">Request a Service</h2>
+              </div>
             </div>
 
-            <div>
-              <span>NEW REQUEST</span>
-              <h2>Request a Service</h2>
-            </div>
+            <button
+              type="button"
+              className="sr-close-form-btn"
+              aria-label="Close service request form"
+              onClick={() => setShowForm(false)}
+              disabled={submitting}
+            >
+              ×
+            </button>
           </div>
 
           <p className="sr-form-intro">
@@ -272,6 +309,7 @@ const ServiceRequests = () => {
             service you need and our staff can take it forward.
           </p>
 
+          {errorMessage && <p className="sr-modal-error" role="alert">{errorMessage}</p>}
 
           <form onSubmit={handleSubmit}>
 
@@ -356,7 +394,10 @@ const ServiceRequests = () => {
 
           </form>
 
-        </div>
+              </div>
+            </section>
+          </div>
+        )}
 
 
         <div className="sr-process-card">
@@ -445,15 +486,6 @@ const ServiceRequests = () => {
               current status.
             </p>
           </div>
-
-          <button
-            type="button"
-            className="sr-refresh-btn"
-            onClick={fetchRequests}
-            disabled={loading}
-          >
-            ↻ Refresh
-          </button>
 
         </div>
 

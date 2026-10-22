@@ -1110,3 +1110,219 @@
   .resident-emergency-copy p { font-size: 12px; }
   .resident-emergency-call { gap: 5px; min-height: 38px; padding: 0 9px; font-size: 14px; }
 }
+
+/* Keep resident page titles and cards consistent with the admin accent treatment. */
+.resident-layout :is(
+  .profile-topbar,
+  .flat-topbar,
+  .payment-header,
+  .complaints-page-header,
+  .sr-page-header,
+  .resident-visitors-top,
+  .facilities-page .facilities-header,
+  .notice-page .notice-header,
+  .resident-notifications-header,
+  .resident-polls-header,
+  .resident-emergency-header
+) {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin: 0 0 22px;
+  padding: 24px 26px;
+  border: 0;
+  border-radius: 10px;
+  background: linear-gradient(110deg, #182a2b 0%, #157461 100%);
+}
+
+.resident-layout :is(
+  .profile-topbar,
+  .flat-topbar,
+  .payment-header,
+  .complaints-page-header,
+  .sr-page-header,
+  .resident-visitors-top,
+  .facilities-page .facilities-header,
+  .notice-page .notice-header,
+  .resident-notifications-header,
+  .resident-polls-header,
+  .resident-emergency-header
+) :is(h1, h2, p) {
+  color: #fff;
+}
+
+.resident-layout :is(
+  .profile-topbar,
+  .flat-topbar,
+  .payment-header,
+  .complaints-page-header,
+  .sr-page-header,
+  .resident-visitors-top,
+  .facilities-page .facilities-header,
+  .notice-page .notice-header,
+  .resident-notifications-header,
+  .resident-polls-header,
+  .resident-emergency-header
+) h1 {
+  margin: 0;
+  line-height: 1.2;
+}
+
+.resident-layout :is(
+  .profile-topbar,
+  .flat-topbar,
+  .payment-header,
+  .complaints-page-header,
+  .sr-page-header,
+  .resident-visitors-top,
+  .facilities-page .facilities-header,
+  .notice-page .notice-header,
+  .resident-notifications-header,
+  .resident-polls-header,
+  .resident-emergency-header
+) p {
+  margin: 7px 0 0;
+  line-height: 1.5;
+}
+
+.resident-layout :is(
+  .profile-topbar,
+  .flat-topbar,
+  .payment-header,
+  .complaints-page-header,
+  .sr-page-header,
+  .resident-visitors-top,
+  .facilities-page .facilities-header,
+  .notice-page .notice-header,
+  .resident-notifications-header,
+  .resident-polls-header,
+  .resident-emergency-header
+) :is(
+  .profile-overline,
+  .flat-overline,
+  .payment-overline,
+  .complaints-eyebrow,
+  .sr-eyebrow,
+  .resident-visitors-eyebrow,
+  .facilities-overline,
+  .notice-overline,
+  .resident-notifications-eyebrow,
+  .resident-polls-overline,
+  .resident-emergency-eyebrow
+) {
+  color: #c9e1d7;
+}
+
+.resident-layout :is(
+  .profile-main-card,
+  .profile-stat,
+  .info-card,
+  .profile-security-card,
+  .flat-quick-card,
+  .flat-card,
+  .flat-member-card,
+  .resident-summary,
+  .payment-error-card,
+  .summary-card,
+  .current-payment-card,
+  .history-row,
+  .complaints-overview,
+  .complaints-stat,
+  .complaint-form-card,
+  .complaint-card,
+  .sr-overview,
+  .sr-stat,
+  .sr-form-card,
+  .sr-process-card,
+  .sr-history-card,
+  .sr-request,
+  .resident-visitors-overview,
+  .resident-visitors-stat,
+  .resident-visitors-history,
+  .resident-visitor-card,
+  .facility-summary,
+  .facility-state,
+  .facility-card,
+  .booking-empty,
+  .booking-history-card,
+  .notice-card,
+  .notice-state,
+  .resident-notifications-summary,
+  .resident-notifications-state,
+  .resident-notification-card,
+  .resident-polls-empty,
+  .resident-emergency-card
+) {
+  position: relative;
+  overflow: hidden;
+}
+
+.resident-layout :is(
+  .profile-main-card,
+  .profile-stat,
+  .info-card,
+  .profile-security-card,
+  .flat-quick-card,
+  .flat-card,
+  .flat-member-card,
+  .resident-summary,
+  .payment-error-card,
+  .summary-card,
+  .current-payment-card,
+  .history-row,
+  .complaints-overview,
+  .complaints-stat,
+  .complaint-form-card,
+  .complaint-card,
+  .sr-overview,
+  .sr-stat,
+  .sr-form-card,
+  .sr-process-card,
+  .sr-history-card,
+  .sr-request,
+  .resident-visitors-overview,
+  .resident-visitors-stat,
+  .resident-visitors-history,
+  .resident-visitor-card,
+  .facility-summary,
+  .facility-state,
+  .facility-card,
+  .booking-empty,
+  .booking-history-card,
+  .notice-card,
+  .notice-state,
+  .resident-notifications-summary,
+  .resident-notifications-state,
+  .resident-notification-card,
+  .resident-polls-empty,
+  .resident-emergency-card
+)::before {
+  position: absolute;
+  z-index: 1;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: #157461;
+  content: "";
+  pointer-events: none;
+}
+
+@media (max-width: 700px) {
+  .resident-layout :is(
+    .profile-topbar,
+    .flat-topbar,
+    .payment-header,
+    .complaints-page-header,
+    .sr-page-header,
+    .resident-visitors-top,
+    .facilities-page .facilities-header,
+    .notice-page .notice-header,
+    .resident-notifications-header,
+    .resident-polls-header,
+    .resident-emergency-header
+  ) {
+      align-items: flex-start;
+      padding: 18px 20px;
+    }
+}

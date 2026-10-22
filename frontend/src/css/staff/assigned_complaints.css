@@ -80,6 +80,8 @@ input {
   display: flex;
 
   min-height: 100vh;
+  width: 100%;
+  overflow-x: clip;
 
   background:
     radial-gradient(
@@ -930,19 +932,34 @@ input {
 
 .complaints-table-scroll {
   width: 100%;
-
-  overflow-x: auto;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 .complaints-table {
   width: 100%;
-
-  min-width: 1000px;
+  min-width: 0;
+  table-layout: fixed;
 
   border-collapse: collapse;
 
   text-align: left;
 }
+
+.complaints-table th:nth-child(1),
+.complaints-table td:nth-child(1) { width: 24%; }
+.complaints-table th:nth-child(2),
+.complaints-table td:nth-child(2) { width: 18%; }
+.complaints-table th:nth-child(3),
+.complaints-table td:nth-child(3) { width: 13%; }
+.complaints-table th:nth-child(4),
+.complaints-table td:nth-child(4) { width: 10%; }
+.complaints-table th:nth-child(5),
+.complaints-table td:nth-child(5) { width: 13%; }
+.complaints-table th:nth-child(6),
+.complaints-table td:nth-child(6) { width: 10%; }
+.complaints-table th:nth-child(7),
+.complaints-table td:nth-child(7) { width: 12%; }
 
 .complaints-table th {
   padding: 13px 17px;
@@ -961,11 +978,13 @@ input {
 }
 
 .complaints-table td {
-  padding: 14px 17px;
+  min-width: 0;
+  padding: 12px 8px;
 
   border-bottom: 1px solid #edf3f5;
 
   vertical-align: middle;
+  overflow-wrap: anywhere;
 }
 
 .complaints-table tbody tr {
@@ -1247,7 +1266,8 @@ input {
 
   cursor: pointer;
 
-  white-space: nowrap;
+  white-space: normal;
+  text-align: left;
 
   transition: 0.2s ease;
 }

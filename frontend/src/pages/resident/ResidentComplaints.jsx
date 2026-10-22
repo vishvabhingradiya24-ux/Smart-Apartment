@@ -408,9 +408,19 @@ function ResidentComplaints() {
 
 
       {showForm && (
-        <section className="complaint-form-section">
+        <section
+          className="complaint-form-section complaint-form-overlay"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget && !submitting) closeComplaintForm();
+          }}
+        >
 
-          <div className="complaint-form-card">
+          <div
+            className="complaint-form-card"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="complaint-form-title"
+          >
 
             <div className="complaint-form-header">
 
@@ -426,7 +436,7 @@ function ResidentComplaints() {
                     NEW COMPLAINT
                   </span>
 
-                  <h2>
+                  <h2 id="complaint-form-title">
                     Report an Issue
                   </h2>
 
@@ -439,6 +449,8 @@ function ResidentComplaints() {
                 type="button"
                 className="complaint-close-btn"
                 onClick={closeComplaintForm}
+                disabled={submitting}
+                aria-label="Close complaint form"
               >
                 ×
               </button>
@@ -452,6 +464,7 @@ function ResidentComplaints() {
               team for review.
             </p>
 
+            {errorMessage && <p className="complaint-modal-error" role="alert">{errorMessage}</p>}
 
             <form onSubmit={handleSubmit}>
 
@@ -624,15 +637,6 @@ function ResidentComplaints() {
 
             </span>
 
-            <button
-              type="button"
-              className="complaints-refresh-btn"
-              onClick={fetchComplaints}
-              disabled={loading}
-            >
-              ↻ Refresh
-            </button>
-
           </div>
 
         </div>
@@ -666,13 +670,6 @@ function ResidentComplaints() {
               When you submit a complaint,
               it will appear here.
             </p>
-
-            <button
-              type="button"
-              onClick={openComplaintForm}
-            >
-              + Report an Issue
-            </button>
 
           </div>
 

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { staffMenuFor } from "../constants/staffMenu";
+import { staffSidebarMenuFor } from "../constants/staffMenu";
 import { useStaffDepartment } from "../hooks/useStaffDepartment";
 
 // A few staff routes have a second URL.
@@ -63,7 +63,7 @@ function StaffNav({ onNavigate, variant = "default" }) {
 
   return (
     <nav className={complaintsStyle ? "complaints-sidebar-nav" : "sidebar-nav"}>
-      {staffMenuFor(department).map((item) => {
+      {staffSidebarMenuFor(department).map((item) => {
         const buttonClass = complaintsStyle ? "complaints-nav-btn" : "nav-btn";
         const badge =
           item.key === "notifications" && unread > 0 ? (

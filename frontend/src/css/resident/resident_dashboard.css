@@ -1827,3 +1827,197 @@
   .resident-dashboard-content .residence-content { padding: 23px; }
   .resident-dashboard-content .residence-content h2 { font-size: 22px; }
 }
+
+.resident-layout .facilities-page .facilities-header {
+  min-height: 0;
+  margin-bottom: 22px;
+  padding: 24px 26px;
+  border: 0;
+  border-radius: 10px;
+  background: linear-gradient(120deg, #183b36 0%, #14584d 65%, #087c68 100%);
+}
+
+.resident-layout .facilities-page .facilities-header h1 { color: #fff; }
+.resident-layout .facilities-page .facilities-header p { color: #d8e9e2; }
+.resident-layout .facilities-page .facilities-overline { color: #c9e1d7; }
+.resident-layout .facilities-page .facilities-label { color: #087c68; }
+.resident-layout .facilities-page .facilities-intro {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+.resident-layout .facilities-page .facilities-intro :is(h2, p) { color: #20332f; }
+.resident-layout .facilities-page .facility-summary {
+  border-color: #dfe7e1;
+  border-radius: 10px;
+  box-shadow: 0 3px 10px rgba(22, 50, 42, .035);
+}
+.resident-layout .facilities-page .facility-summary strong { color: #087c68; }
+.resident-layout .facilities-page .facility-card:hover { border-color: #a7c8bb; }
+.resident-layout .facilities-page .facility-icon,
+.resident-layout .facilities-page .booking-empty-icon,
+.resident-layout .facilities-page .booking-history-icon,
+.resident-layout .facilities-page .availability-facility-icon {
+  background: #e1f1e9;
+  color: #087c68;
+}
+.resident-layout .facilities-page .facility-card-body h3,
+.resident-layout .facilities-page .facility-charge-box strong,
+.resident-layout .facilities-page .booking-history-title h3,
+.resident-layout .facilities-page .booking-details-grid strong,
+.resident-layout .facilities-page .booking-charge-details strong,
+.resident-layout .facilities-page .availability-facility-info strong,
+.resident-layout .facilities-page .selected-facility-charge strong {
+  color: #20332f;
+}
+.resident-layout .facilities-page .facility-number { color: #c6d8d0; }
+.resident-layout .facilities-page .book-button:not(:disabled),
+.resident-layout .facilities-page .booking-modal-header {
+  background: #087c68;
+}
+.resident-layout .facilities-page .book-button:hover:not(:disabled),
+.resident-layout .facilities-page .availability-main-button:hover:not(:disabled),
+.resident-layout .facilities-page .continue-booking-button:hover,
+.resident-layout .facilities-page .submit-booking-button:hover:not(:disabled) {
+  background: #065f52;
+}
+.resident-layout .facilities-page .availability-main-button,
+.resident-layout .facilities-page .continue-booking-button,
+.resident-layout .facilities-page .submit-booking-button {
+  border-color: #087c68;
+  background: #087c68;
+}
+.resident-layout .facilities-page .availability-main-button:hover:not(:disabled),
+.resident-layout .facilities-page .continue-booking-button:hover,
+.resident-layout .facilities-page .submit-booking-button:hover:not(:disabled) {
+  border-color: #065f52;
+  background: #065f52;
+}
+.resident-layout .facilities-page .booking-overlay { background: rgba(17, 44, 39, .62); }
+.resident-layout .facilities-page .booking-modal-header > div > span { color: #c9e1d7; }
+.resident-layout .facilities-page .booking-modal-header p { color: #d8e9e2; }
+.resident-layout .facilities-page .booking-status.status-completed {
+  background: #e1f1e9;
+  color: #087c68;
+}
+.resident-layout .facilities-page .booking-charge-details .booking-total,
+.resident-layout .facilities-page .selected-facility-charge,
+.resident-layout .facilities-page .booking-price-summary .price-total,
+.resident-layout .facilities-page .booking-confirmed-slot {
+  border-color: #cce5d8;
+  background: #e1f1e9;
+}
+.resident-layout .facilities-page .booking-total strong { color: #087c68; }
+.resident-layout .facilities-page .booking-confirmed-slot button {
+  border-color: #a7c8bb;
+  color: #087c68;
+}
+.resident-layout .facilities-page .addon-item.selected {
+  border-color: #8fbfaa;
+  background: #f1f8f4;
+}
+.resident-layout .facilities-page .addon-check input { accent-color: #087c68; }
+.resident-layout .facilities-page .booking-status.status-assigned {
+  background: #e1f1e9;
+  color: #087c68;
+}
+.resident-layout .facilities-page .booking-modal :is(input, select, textarea):focus {
+  border-color: #087c68;
+  accent-color: #087c68;
+  outline-color: #c6e8d8;
+  box-shadow: 0 0 0 3px rgba(8, 124, 104, .1);
+}
+
+.resident-layout .notice-page .notice-header {
+  margin-bottom: 22px;
+  padding: 24px 26px;
+  border: 0;
+  border-radius: 10px;
+  background: linear-gradient(120deg, #183b36 0%, #14584d 65%, #087c68 100%);
+}
+.resident-layout .notice-page .notice-overline,
+.resident-layout .notice-page .notice-eyebrow { color: #c9e1d7; }
+.resident-layout .notice-page .notice-header h1,
+.resident-layout .notice-page .notice-header p { color: #fff; }
+.resident-layout .notice-page .notice-section-heading h2 { color: #20332f; }
+.resident-layout .notice-page .notice-count,
+.resident-layout .notice-page .notice-type,
+.resident-layout .notice-page .notice-state-icon {
+  background: #e1f1e9;
+  color: #087c68;
+}
+.resident-layout .notice-page .notice-card { border-radius: 10px; }
+.resident-layout .notice-page .notice-card h3 { color: #20332f; }
+.resident-layout .notice-page .notice-loader {
+  border-color: #dce5df;
+  border-top-color: #087c68;
+}
+.resident-layout .notice-page .notice-retry-button {
+  border-color: #087c68;
+  background: #087c68;
+  color: #fff;
+}
+.resident-layout .notice-page .notice-retry-button:hover { background: #065f52; }
+
+.resident-layout .resident-polls-page {
+  min-height: 0;
+  padding: 0;
+  background: transparent;
+  color: #20332f;
+}
+.resident-layout .resident-polls-header {
+  margin-bottom: 22px;
+  padding: 24px 26px;
+  border-radius: 10px;
+  background: linear-gradient(120deg, #183b36 0%, #14584d 65%, #087c68 100%);
+}
+.resident-layout .resident-polls-overline { color: #c9e1d7; }
+.resident-layout .resident-polls-header h1,
+.resident-layout .resident-polls-header p { color: #fff; }
+.resident-layout .resident-polls-empty {
+  display: flex;
+  min-height: 260px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 34px;
+  border: 1px solid #dfe7e1;
+  border-radius: 10px;
+  background: #fff;
+  text-align: center;
+  box-shadow: 0 3px 10px rgba(22, 50, 42, .035);
+}
+.resident-layout .resident-polls-empty-icon {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 14px;
+  place-items: center;
+  border-radius: 12px;
+  background: #e1f1e9;
+  color: #087c68;
+  font-size: 21px;
+}
+.resident-layout .resident-polls-empty > span {
+  color: #087c68;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.3px;
+}
+.resident-layout .resident-polls-empty h2 {
+  margin: 7px 0;
+  color: #20332f;
+  font-size: 20px;
+}
+.resident-layout .resident-polls-empty p {
+  max-width: 480px;
+  margin: 0;
+  color: #6d7c75;
+  line-height: 1.6;
+}
+
+@media (max-width: 600px) {
+  .resident-layout .facilities-page .facilities-header,
+  .resident-layout .notice-page .notice-header,
+  .resident-layout .resident-polls-header { padding: 20px; }
+}

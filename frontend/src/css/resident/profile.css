@@ -754,6 +754,141 @@
   border-top-color: #087c79;
 }
 
+.profile-edit-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(16, 27, 39, 0.58);
+}
+
+.profile-edit-modal {
+  width: min(560px, 100%);
+  max-height: min(90vh, 760px);
+  overflow-y: auto;
+  padding: 26px;
+  border: 1px solid #dce5ec;
+  border-radius: 17px;
+  background: #ffffff;
+  box-shadow: 0 24px 70px rgba(13, 27, 40, 0.25);
+}
+
+.profile-edit-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 22px;
+}
+
+.profile-edit-modal-header span {
+  color: #087c79;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1.4px;
+}
+
+.profile-edit-modal-header h2 {
+  margin: 5px 0;
+  color: #182230;
+  font-size: 22px;
+}
+
+.profile-edit-modal-header p {
+  margin: 0;
+  color: #718096;
+  font-size: 12px;
+}
+
+.profile-edit-close {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  border: 1px solid #dce5ec;
+  border-radius: 9px;
+  background: #ffffff;
+  color: #526272;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.profile-edit-close:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.profile-edit-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.profile-edit-fields label {
+  display: grid;
+  gap: 7px;
+  color: #526272;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.profile-edit-fields .profile-edit-field-full {
+  grid-column: 1 / -1;
+}
+
+.profile-edit-fields input {
+  width: 100%;
+  min-height: 42px;
+  box-sizing: border-box;
+  padding: 0 12px;
+  border: 1px solid #dce5ec;
+  border-radius: 8px;
+  outline: none;
+  background: #fbfcfd;
+  color: #182230;
+  font: inherit;
+  font-size: 13px;
+}
+
+.profile-edit-fields input:focus {
+  border-color: #087c79;
+  box-shadow: 0 0 0 3px rgba(8, 124, 121, 0.1);
+}
+
+.profile-edit-error {
+  margin: 14px 0 0;
+  color: #b33b3b;
+  font-size: 12px;
+}
+
+.profile-edit-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.profile-edit-modal-actions button {
+  min-height: 40px;
+  padding: 0 16px;
+}
+
+@media (max-width: 520px) {
+  .profile-edit-modal {
+    padding: 21px;
+  }
+
+  .profile-edit-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-edit-fields .profile-edit-field-full {
+    grid-column: auto;
+  }
+}
+
 /* =========================================================
    RESPONSIVE
 ========================================================= */

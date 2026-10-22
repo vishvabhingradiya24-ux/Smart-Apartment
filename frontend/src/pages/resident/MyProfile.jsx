@@ -93,6 +93,7 @@ function MyProfile() {
       else if (storedUser.data?.user) storedUser.data.user = { ...storedUser.data.user, ...data };
       else Object.assign(storedUser, data);
       localStorage.setItem("user", JSON.stringify(storedUser));
+      window.dispatchEvent(new Event("resident-profile-updated"));
 
       setIsEditing(false);
       setSuccess("Your profile has been updated.");
@@ -223,22 +224,19 @@ function MyProfile() {
             </div>
 
             <div className="profile-edit-actions">
-              {isEditing ? (
-                <>
-                  <button type="button" className="profile-cancel-btn" onClick={() => {
-                    setFormData({ first_name: user.first_name || "", last_name: user.last_name || "", email: user.email || "", phone: user.phone || "" });
-                    setIsEditing(false);
-                    setError("");
-                  }} disabled={saving}>Cancel</button>
-                  <button type="submit" form="resident-profile-form" className="profile-save-btn" disabled={saving}>
-                    {saving ? "Saving..." : "Save Changes"}
-                  </button>
-                </>
-              ) : (
-                <button type="button" className="profile-save-btn" onClick={() => { setSuccess(""); setIsEditing(true); }}>
-                  Edit Profile
-                </button>
-              )}
+              <button type="button" className="profile-save-btn" onClick={() => {
+                setSuccess("");
+                setError("");
+                setFormData({
+                  first_name: user.first_name || "",
+                  last_name: user.last_name || "",
+                  email: user.email || "",
+                  phone: user.phone || "",
+                });
+                setIsEditing(true);
+              }}>
+                Edit Profile
+              </button>
             </div>
 
             <div className="profile-divider"></div>
@@ -324,7 +322,7 @@ function MyProfile() {
             </div>
 
 
-            <form id="resident-profile-form" className="info-fields" onSubmit={handleProfileSubmit}>
+            <div className="info-fields">
 
               <div className="info-field">
 
@@ -332,7 +330,7 @@ function MyProfile() {
                   First Name
                 </label>
 
-                {isEditing ? <input name="first_name" value={formData.first_name} onChange={handleProfileChange} required maxLength={80} /> : <div>{user?.first_name || "Not available"}</div>}
+                <div>{user?.first_name || "Not available"}</div>
 
               </div>
 
@@ -343,7 +341,7 @@ function MyProfile() {
                   Last Name
                 </label>
 
-                {isEditing ? <input name="last_name" value={formData.last_name} onChange={handleProfileChange} required maxLength={80} /> : <div>{user?.last_name || "Not available"}</div>}
+                <div>{user?.last_name || "Not available"}</div>
 
               </div>
 
@@ -354,7 +352,7 @@ function MyProfile() {
                   Email Address
                 </label>
 
-                {isEditing ? <input name="email" type="email" value={formData.email} onChange={handleProfileChange} required maxLength={254} /> : <div>{user?.email || "Not available"}</div>}
+                <div>{user?.email || "Not available"}</div>
 
               </div>
 
@@ -365,7 +363,7 @@ function MyProfile() {
                   Phone Number
                 </label>
 
-                {isEditing ? <input name="phone" type="tel" value={formData.phone} onChange={handleProfileChange} required maxLength={20} /> : <div>{user?.phone || "Not available"}</div>}
+                <div>{user?.phone || "Not available"}</div>
 
               </div>
 
@@ -383,7 +381,7 @@ function MyProfile() {
 
               </div>
 
-            </form>
+            </div>
 
           </div>
 
@@ -519,6 +517,83 @@ function MyProfile() {
         </div>
 
       </div>
+
+      {isEditing && (
+        <div className="profile-edit-overlay" role="presentation">
+          <section
+            className="profile-edit-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="profile-edit-title"
+          >
+            <div className="profile-edit-modal-header">
+              <div>
+                <span>PERSONAL DETAILS</span>
+                <h2 id="profile-edit-title">Edit Profile</h2>
+                <p>Update your details and save them to your account.</p>
+              </div>
+              <button
+                type="button"
+                className="profile-edit-close"
+                aria-label="Close edit profile form"
+                onClick={() => {
+                  setIsEditing(false);
+                  setError("");
+                }}
+                disabled={saving}
+              >
+                ×
+              </button>
+            </div>
+
+            <form id="resident-profile-form" onSubmit={handleProfileSubmit}>
+              <div className="profile-edit-fields">
+                <label>
+                  First Name
+                  <input name="first_name" value={formData.first_name} onChange={handleProfileChange} required maxLength={80} />
+                </label>
+                <label>
+                  Last Name
+                  <input name="last_name" value={formData.last_name} onChange={handleProfileChange} required maxLength={80} />
+                </label>
+                <label className="profile-edit-field-full">
+                  Email Address
+                  <input name="email" type="email" value={formData.email} onChange={handleProfileChange} required maxLength={254} />
+                </label>
+                <label>
+                  Phone Number
+                  <input name="phone" type="tel" value={formData.phone} onChange={handleProfileChange} required maxLength={20} />
+                </label>
+              </div>
+
+              {error && <p className="profile-edit-error" role="alert">{error}</p>}
+
+              <div className="profile-edit-modal-actions">
+                <button
+                  type="button"
+                  className="profile-cancel-btn"
+                  onClick={() => {
+                    setFormData({
+                      first_name: user.first_name || "",
+                      last_name: user.last_name || "",
+                      email: user.email || "",
+                      phone: user.phone || "",
+                    });
+                    setIsEditing(false);
+                    setError("");
+                  }}
+                  disabled={saving}
+                >
+                  Cancel
+                </button>
+                <button type="submit" className="profile-save-btn" disabled={saving}>
+                  {saving ? "Saving..." : "Save Changes"}
+                </button>
+              </div>
+            </form>
+          </section>
+        </div>
+      )}
 
     </div>
   );

@@ -1,0 +1,282 @@
+.staff-workspace-layout {
+  --sidebar-width: 248px;
+  position: relative;
+  min-height: 100vh;
+  background: #f3f6f5;
+}
+
+.staff-workspace-layout > .staff-workspace-sidebar {
+  position: fixed;
+  z-index: 1100;
+  top: 0;
+  left: 0;
+  display: flex;
+  width: var(--sidebar-width);
+  height: 100vh;
+  flex-direction: column;
+  box-sizing: border-box;
+  border-right-color: rgba(255, 255, 255, .1);
+  background: #123746;
+  color: #fff;
+}
+
+.staff-workspace-sidebar .brand-icon,
+.staff-workspace-sidebar .avatar-circle {
+  background: #d9f5ef;
+  color: #123746;
+}
+
+.staff-workspace-sidebar .brand-info h3,
+.staff-workspace-sidebar .user-details strong { color: #fff; }
+
+.staff-workspace-sidebar .brand-info span,
+.staff-workspace-sidebar .sidebar-section-title,
+.staff-workspace-sidebar .user-details small { color: #b8d0d5; }
+
+.staff-workspace-sidebar .sidebar-nav::-webkit-scrollbar-thumb {
+  background: #426575;
+}
+
+.staff-workspace-sidebar .nav-btn { color: #d2e0e4; }
+.staff-workspace-sidebar .nav-btn:hover { background: rgba(255,255,255,.09); color: #fff; }
+.staff-workspace-sidebar .nav-btn.active { background: #fff; color: #123746; }
+.staff-workspace-sidebar .nav-icon { background: rgba(255,255,255,.12); }
+.staff-workspace-sidebar .nav-btn.active .nav-icon { background: #e8f7f3; }
+.staff-workspace-sidebar .sidebar-footer { border-top-color: rgba(255,255,255,.12); }
+.staff-workspace-sidebar .logout-btn {
+  border-color: rgba(255,255,255,.12);
+  background: rgba(255,255,255,.04);
+  color: #d5dfeb;
+}
+
+.staff-workspace-layout > .staff-workspace-sidebar .sidebar-nav {
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.staff-workspace-layout > .staff-workspace-sidebar .nav-btn {
+  display: flex;
+  min-height: 44px;
+  flex: 0 0 auto;
+}
+
+.staff-workspace-layout > .staff-workspace-sidebar .sidebar-footer {
+  flex: 0 0 auto;
+}
+
+.staff-workspace-main {
+  min-width: 0;
+  min-height: 100vh;
+  margin-left: var(--sidebar-width);
+}
+
+.staff-workspace-route > .modern-staff-layout,
+.staff-workspace-route > .staff-complaints-layout {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: 100vh;
+  overflow: visible;
+  background: transparent;
+}
+
+.staff-workspace-route .modern-staff-layout > .modern-sidebar,
+.staff-workspace-route .staff-complaints-layout > .complaints-sidebar,
+.staff-workspace-route .staff-mobile-overlay {
+  display: none !important;
+}
+
+.staff-workspace-route .modern-main-content,
+.staff-workspace-route .complaints-main {
+  width: 100%;
+  min-width: 0;
+  min-height: 100vh;
+  margin: 0;
+}
+
+.staff-workspace-route .mobile-menu-btn {
+  display: none !important;
+}
+
+.staff-workspace-route > .modern-staff-layout {
+  --staff-primary: #157461;
+  --staff-primary-dark: #105e4f;
+  --staff-primary-hover: #105e4f;
+  --staff-primary-light: #e8f3ef;
+  --staff-success: #157461;
+  --staff-success-light: #e8f3ef;
+}
+
+.staff-workspace-route .modern-staff-layout .header-title h1,
+.staff-workspace-route .modern-staff-layout .section-header h2,
+.staff-workspace-route .modern-staff-layout .service-card h3,
+.staff-workspace-route .modern-staff-layout .table-header h2,
+.staff-workspace-route .modern-staff-layout .panel-header h2 {
+  color: #202d35;
+}
+
+.staff-workspace-route .modern-staff-layout .staff-welcome-banner {
+  background-image:
+    linear-gradient(90deg, rgba(24, 42, 43, .96) 0%, rgba(24, 42, 43, .84) 47%, rgba(16, 94, 79, .48) 100%),
+    url("../assets/staff-community.jpg");
+}
+
+.staff-workspace-route .modern-staff-layout .stats-grid .stat-card .stat-icon,
+.staff-workspace-route .modern-staff-layout .service-card .card-icon,
+.staff-workspace-route .modern-staff-layout .welcome-user-avatar,
+.staff-workspace-route .modern-staff-layout .activity-icon,
+.staff-workspace-route .modern-staff-layout .panel-avatar {
+  background: #e8f3ef;
+  color: #105e4f;
+}
+
+.staff-workspace-route .modern-staff-layout .stat-card:is(.blue, .orange, .green, .purple) .stat-icon {
+  background: #e8f3ef;
+  color: #105e4f;
+}
+
+.staff-workspace-route .modern-staff-layout .service-card .category-tag,
+.staff-workspace-route .modern-staff-layout .section-kicker {
+  color: #157461;
+}
+
+.staff-workspace-menu-toggle,
+.staff-workspace-overlay {
+  display: none;
+}
+
+/* Match the Admin dashboard's narrow green card accent across Staff pages. */
+.staff-workspace-route :is(
+  .stat-card,
+  .dashboard-panel,
+  .service-card,
+  .activity-panel,
+  .activity-card,
+  .activity-item,
+  .complaint-stat-card,
+  .complaints-table-wrapper,
+  .complaints-error-panel,
+  .complaints-hero,
+  .table-container,
+  .empty-state,
+  .dashboard-data-error,
+  .dashboard-data-empty,
+  .no-services-found,
+  .welcome-user-card,
+  .work-status-row,
+  .availability-status,
+  .profile-card,
+  .profile-hero,
+  .account-status,
+  .summary-box,
+  .staff-page-intro,
+  .sx-card,
+  .sx-table-wrap,
+  .sx-empty,
+  .visitor-card,
+  .visitor-stat-card,
+  .notification-card,
+  .notification-item,
+  .report-card,
+  .inventory-card,
+  .task-card,
+  .service-request-card,
+  .sx-card,
+  .sx-table-wrap
+) {
+  position: relative;
+  overflow: hidden;
+}
+
+.staff-workspace-route :is(
+  .stat-card,
+  .dashboard-panel,
+  .service-card,
+  .activity-panel,
+  .activity-card,
+  .activity-item,
+  .complaint-stat-card,
+  .complaints-table-wrapper,
+  .complaints-error-panel,
+  .complaints-hero,
+  .table-container,
+  .empty-state,
+  .dashboard-data-error,
+  .dashboard-data-empty,
+  .no-services-found,
+  .welcome-user-card,
+  .work-status-row,
+  .availability-status,
+  .profile-card,
+  .profile-hero,
+  .account-status,
+  .summary-box,
+  .staff-page-intro,
+  .sx-card,
+  .sx-table-wrap,
+  .sx-empty,
+  .visitor-card,
+  .visitor-stat-card,
+  .notification-card,
+  .notification-item,
+  .report-card,
+  .inventory-card,
+  .task-card,
+  .service-request-card,
+  .sx-card,
+  .sx-table-wrap
+)::before {
+  position: absolute;
+  z-index: 1;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: #157461;
+  content: "";
+  pointer-events: none;
+}
+
+@media (max-width: 900px) {
+  .staff-workspace-layout > .staff-workspace-sidebar {
+    transform: translateX(-100%);
+    transition: transform .25s ease;
+  }
+
+  .staff-workspace-layout > .staff-workspace-sidebar.is-open {
+    transform: translateX(0);
+  }
+
+  .staff-workspace-main {
+    margin-left: 0;
+  }
+
+  .staff-workspace-menu-toggle {
+    position: sticky;
+    z-index: 500;
+    top: 0;
+    display: inline-flex;
+    min-height: 42px;
+    align-items: center;
+    gap: 8px;
+    margin: 10px 16px 0;
+    padding: 0 13px;
+    border: 1px solid #dfe7e4;
+    border-radius: 8px;
+    background: #fff;
+    color: #202d35;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 650;
+    cursor: pointer;
+  }
+
+  .staff-workspace-overlay {
+    position: fixed;
+    z-index: 1090;
+    inset: 0;
+    display: block;
+    border: 0;
+    background: rgba(10, 25, 27, .48);
+  }
+}

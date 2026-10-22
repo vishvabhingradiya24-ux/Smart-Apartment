@@ -429,6 +429,18 @@
   margin-bottom: 23px;
 }
 
+.complaint-form-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1500;
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  padding: 20px;
+  margin: 0;
+  background: rgba(16, 27, 39, 0.62);
+}
+
 
 .complaint-form-card {
   width: 100%;
@@ -443,6 +455,19 @@
   background: #ffffff;
 
   box-shadow: 0 6px 20px rgba(6, 75, 112, 0.05);
+}
+
+.complaint-form-overlay .complaint-form-card {
+  width: min(760px, 100%);
+  max-height: min(90vh, 820px);
+  overflow-y: auto;
+  box-shadow: 0 24px 70px rgba(13, 27, 40, 0.28);
+}
+
+.complaint-modal-error {
+  margin: 0 0 15px;
+  color: #b33b3b;
+  font-size: 12px;
 }
 
 

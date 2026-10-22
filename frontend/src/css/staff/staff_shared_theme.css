@@ -51,6 +51,13 @@
 }
 .modern-staff-layout .logout-btn:hover { background: rgba(255, 255, 255, .11); }
 .modern-staff-layout .modern-main-content { background: #f6f7f9; }
+.modern-staff-layout .sidebar-nav,
+.staff-complaints-layout .complaints-sidebar-nav {
+  min-height: 0;
+  overscroll-behavior: contain;
+}
+.modern-staff-layout .nav-btn,
+.staff-complaints-layout .complaints-nav-btn { flex: 0 0 auto; }
 
 .staff-complaints-layout .complaints-sidebar {
   background: #123746;

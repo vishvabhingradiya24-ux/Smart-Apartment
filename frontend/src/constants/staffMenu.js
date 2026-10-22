@@ -34,7 +34,6 @@ const TECHNICAL_STAFF = [
   "complaints",
   "requests",
   "tasks",
-  "report",
   "assets",
   "history",
   "notifications",
@@ -84,31 +83,68 @@ const MENU_BY_DEPARTMENT = {
   ]
 };
 
-// A staff member who has not chosen a type yet (older accounts) gets a
-// short menu; an unknown type falls back to the general pages.
-const NO_TYPE_MENU = ["dashboard", "tasks", "history", "notifications", "profile"];
-
 const GENERAL_MENU = [
   "dashboard",
   "complaints",
   "requests",
   "tasks",
+  "report",
   "assets",
   "history",
   "notifications",
   "profile"
 ];
 
+const SECURITY_SIDEBAR_MENU = ["dashboard", "visitors", "notifications", "profile"];
+const STAFF_SIDEBAR_MENU = [
+  "dashboard",
+  "complaints",
+  "tasks",
+  "report",
+  "assets",
+  "history",
+  "notifications",
+  "profile"
+];
+
+export const staffSidebarMenuFor = (department) => {
+  const normalizedDepartment = String(department || "").trim().toLowerCase();
+  const keys =
+    normalizedDepartment === "security"
+      ? SECURITY_SIDEBAR_MENU
+      : STAFF_SIDEBAR_MENU;
+
+  return keys.map((key) => {
+    const item = { key, ...ITEMS[key] };
+
+    if (key === "complaints") {
+      return { ...item, label: "Assigned Complaints" };
+    }
+    if (key === "tasks") {
+      return { ...item, label: "Tasks" };
+    }
+    if (key === "report") {
+      return { ...item, label: "Report & Issue" };
+    }
+
+    return item;
+  });
+};
+
 export const staffMenuFor = (department) => {
-  const keys = department
-    ? MENU_BY_DEPARTMENT[department] || GENERAL_MENU
-    : NO_TYPE_MENU;
+  const normalizedDepartment = String(department || "").trim().toLowerCase();
+  const matchedDepartment = Object.keys(MENU_BY_DEPARTMENT).find(
+    (name) => name.toLowerCase() === normalizedDepartment
+  );
+  const keys = normalizedDepartment
+    ? MENU_BY_DEPARTMENT[matchedDepartment] || GENERAL_MENU
+    : GENERAL_MENU;
 
   return keys.map((key) => {
     const item = { key, ...ITEMS[key] };
 
     // Security files incident reports; everyone else reports issues.
-    if (key === "report" && department === "Security") {
+    if (key === "report" && matchedDepartment === "Security") {
       return { ...item, icon: "🚨", label: "Incident Report" };
     }
 

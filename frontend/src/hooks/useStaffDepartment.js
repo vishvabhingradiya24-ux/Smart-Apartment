@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 
 const readStoredDepartment = () => {
   try {
-    return JSON.parse(localStorage.getItem("user") || "{}")?.department || "";
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    return user?.department ?? user?.staff_type ?? user?.staffType ?? "";
   } catch {
     return "";
   }
@@ -27,7 +28,10 @@ export function useStaffDepartment() {
     })
       .then((response) => (response.ok ? response.json() : null))
       .then((data) => {
-        const fresh = data?.staff?.department;
+        const fresh =
+          data?.staff?.department ??
+          data?.staff?.staff_type ??
+          data?.staff?.staffType;
 
         if (fresh === undefined) return;
 

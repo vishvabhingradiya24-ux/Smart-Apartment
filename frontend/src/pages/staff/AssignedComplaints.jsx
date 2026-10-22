@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import StaffNav from "../../components/StaffNav";
+import { useStaffDepartment } from "../../hooks/useStaffDepartment";
 import "../../css/staff/assigned_complaints.css";
 import "../../css/staff/staff_shared_theme.css";
 
@@ -14,6 +15,7 @@ const isPendingStatus = (status) => {
 
 function StaffComplaints() {
   const navigate = useNavigate();
+  const department = useStaffDepartment();
 
   // ======================================================
   // LOGGED-IN STAFF
@@ -490,7 +492,7 @@ function StaffComplaints() {
 
             <div className="complaints-user-info">
               <strong>{fullName}</strong>
-              <small>Staff Member</small>
+              <small>{department || "Staff Member"}</small>
             </div>
 
           </div>
