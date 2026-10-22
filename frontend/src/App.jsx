@@ -82,6 +82,7 @@ import AdminTasks from "./pages/admin/AdminTasks";
 import AdminServiceRequests from "./pages/admin/AdminServiceRequests";
 import AdminAssets from "./pages/admin/AdminAssets";
 import AdminIncidents from "./pages/admin/AdminIncidents";
+import AdminPolls from "./pages/admin/AdminPolls";
 
 // Keep personal/project-wide CSS overrides last so they can override page styles.
 import "./css/admin_residents.css";
@@ -231,6 +232,14 @@ function App() {
           element={
             <AdminLayout>
               <Notices />
+            </AdminLayout>
+          }
+        />
+        <Route
+          path="/admin/polls"
+          element={
+            <AdminLayout>
+              <AdminPolls />
             </AdminLayout>
           }
         />

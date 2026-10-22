@@ -1,5 +1,5 @@
-
-import { useNavigate, useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
   Bell,
   BriefcaseBusiness,
@@ -14,14 +14,44 @@ import {
   Settings2,
   ShieldAlert,
   UsersRound,
+  Vote,
   Waves,
   Wrench,
 } from "lucide-react";
 import "../../css/admin.css";
 
+const readAdminUser = () => {
+  try {
+    return JSON.parse(sessionStorage.getItem("user") || "{}") || {};
+  } catch {
+    return {};
+  }
+};
+
+const getGreeting = () => {
+  const hour = Number(
+    new Intl.DateTimeFormat("en-IN", { timeZone: "Asia/Kolkata", hour: "numeric", hour12: false })
+      .formatToParts(new Date())
+      .find((part) => part.type === "hour")?.value || 0
+  );
+  if (hour >= 5 && hour < 12) return "Good Morning";
+  if (hour >= 12 && hour < 17) return "Good Afternoon";
+  return "Good Evening";
+};
+
 const AdminLayout = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [admin] = useState(readAdminUser);
+  const [greeting, setGreeting] = useState(getGreeting);
+
+  useEffect(() => {
+    const timer = setInterval(() => setGreeting(getGreeting()), 60000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const adminName = (admin.name || "").trim() || "Admin";
+  const adminInitial = adminName.charAt(0).toUpperCase();
 
   const menuItems = [
     {
@@ -83,6 +113,11 @@ const AdminLayout = ({ children }) => {
       label: "Notices",
       icon: Megaphone,
       path: "/admin/notices",
+    },
+    {
+      label: "Polls & Voting",
+      icon: Vote,
+      path: "/admin/polls",
     },
     {
       label: "Notifications",
@@ -149,7 +184,46 @@ const AdminLayout = ({ children }) => {
         </button>
       </aside>
 
-      <main className="admin-main">{children}</main>
+      <main className="admin-main">
+        <header className="admin-layout-header">
+          <div className="admin-layout-header-left">
+            <span className="admin-layout-header-label">ADMIN SPACE</span>
+            <h1>{greeting}, {adminName}</h1>
+            <p>Manage residents, staff, payments and community services from one place.</p>
+          </div>
+
+          <div className="admin-layout-header-right">
+            <Link
+              to="/admin/notifications"
+              className="admin-layout-header-bell"
+              aria-label="Notifications"
+              title="Notifications"
+            >
+              <Bell size={17} strokeWidth={1.8} aria-hidden="true" />
+            </Link>
+
+            <Link
+              to="/admin/settings?tab=profile"
+              className="admin-layout-header-profile"
+              aria-label="Open administrator profile"
+              title="Open administrator profile"
+            >
+              <span className="admin-layout-header-avatar">{adminInitial}</span>
+              <span className="admin-layout-header-user">
+                <strong>{adminName}</strong>
+                <small>Administrator</small>
+              </span>
+            </Link>
+          </div>
+        </header>
+
+        {children}
+
+        <footer className="admin-layout-footer">
+          <span>Smart Apartment</span>
+          <span>Residential Management System</span>
+        </footer>
+      </main>
     </div>
   );
 };

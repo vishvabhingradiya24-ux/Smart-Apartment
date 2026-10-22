@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Bell,
   Building2,
   ClipboardList,
   CreditCard,
@@ -17,13 +16,6 @@ import "../../css/admin_dashboard.css";
 const AdminDashboard = () => {
   const navigate = useNavigate();
 
-  const [admin] = useState(() => {
-    try {
-      return JSON.parse(sessionStorage.getItem("user") || "{}") || {};
-    } catch {
-      return {};
-    }
-  });
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -51,7 +43,6 @@ const AdminDashboard = () => {
     return () => controller.abort();
   }, []);
 
-  const adminName = admin.name || "Admin";
   const statsData = dashboard?.stats || {};
   const community = dashboard?.community || {};
   const recentActivities = dashboard?.recentActivities || [];
@@ -98,51 +89,7 @@ const AdminDashboard = () => {
   return (
     <div className="admin-dashboard-content">
 
-      {/* ================= HEADER ================= */}
-      <header className="admin-header">
-        <div className="admin-header-content">
-          <span className="admin-overline">
-            ADMIN PANEL 
-          </span>
-
-          <h1>Dashboard</h1>
-
-          <p>
-            Welcome back, {adminName}. Manage your society from one place.
-          </p>
-        </div>
-
-        <div className="admin-header-actions">
-
-          <button
-            className="admin-notification"
-            onClick={() => navigate("/admin/notifications")}
-            title="Notifications"
-          >
-            <Bell size={18} strokeWidth={1.8} aria-hidden="true" />
-            <span className="notification-dot"></span>
-          </button>
-
-          <button
-            type="button"
-            className="admin-header-profile"
-            onClick={() => navigate("/admin/settings?tab=profile")}
-            aria-label="Open administrator profile"
-            title="Open administrator profile"
-          >
-            <div className="admin-header-avatar">
-              {adminName.charAt(0).toUpperCase()}
-            </div>
-
-            <div>
-              <strong>{adminName}</strong>
-              <span>Administrator</span>
-            </div>
-          </button>
-
-        </div>
-      </header>
-
+      {/* Header and footer now come from AdminLayout. */}
       {error && (
         <div className="dashboard-load-error" role="alert">
           <span>{error}</span>
@@ -353,19 +300,6 @@ const AdminDashboard = () => {
         </div>
 
       </section>
-
-      {/* ================= FOOTER ================= */}
-      <footer className="admin-footer">
-
-        <span>
-          © 2026 Smart Apartment Management System
-        </span>
-
-        <span>
-          Admin Panel
-        </span>
-
-      </footer>
 
     </div>
   );

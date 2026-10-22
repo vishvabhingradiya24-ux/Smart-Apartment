@@ -45,6 +45,7 @@ const publicRoutes = require("./routes/publicRoutes");
 const securityRoutes = require("./routes/securityRoutes");
 const staffReportRoutes = require("./routes/staffReportRoutes");
 const supervisorRoutes = require("./routes/supervisorRoutes");
+const { residentPollRoutes, adminPollRoutes } = require("./routes/pollRoutes");
 
 
 
@@ -103,6 +104,10 @@ app.use(
   "/api/notices",
   noticeRoutes
 );
+
+// Polls & Voting
+app.use("/api/resident/polls", residentPollRoutes);
+app.use("/api/admin/polls", adminPollRoutes);
 
 // Public overview for the Home page (aggregate data only, no login needed)
 app.use("/api/public", publicRoutes);
