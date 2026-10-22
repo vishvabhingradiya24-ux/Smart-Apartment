@@ -2,8 +2,11 @@ import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "../../css/resident/residentNotifications.css";
 
+const VISITORS_API_URL = "http://localhost:5000/api/resident/visitors";
+
 function ResidentNotifications() {
   const [notices, setNotices] = useState([]);
+  const [visitorRequests, setVisitorRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -19,22 +22,49 @@ function ResidentNotifications() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || "Unable to load notifications.");
       setNotices(Array.isArray(data.data) ? data.data : Array.isArray(data) ? data : []);
+
+      const visitorsResponse = await fetch(VISITORS_API_URL, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+        },
+        signal,
+      });
+      const visitorsData = await visitorsResponse.json();
+      if (!visitorsResponse.ok) {
+        throw new Error(visitorsData.message || "Unable to load visitor requests.");
+      }
+      const visitors = Array.isArray(visitorsData.visitors) ? visitorsData.visitors : [];
+      setVisitorRequests(visitors.filter(
+        (visitor) => visitor.registered_by_staff_id === undefined || visitor.registered_by_staff_id != null
+      ));
+      setError("");
     } catch (err) {
       if (err.name === "AbortError") return;
       setError(err.message || "Unable to load notifications.");
       setNotices([]);
+      setVisitorRequests([]);
     } finally {
       if (!signal?.aborted) setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    const controller = new AbortController();
-    const load = async () => {
-      await loadNotifications(controller.signal);
+    let controller = new AbortController();
+    const load = async (signal) => {
+      await loadNotifications(signal);
     };
-    load();
-    return () => controller.abort();
+    load(controller.signal);
+    const refreshTimer = window.setInterval(() => {
+      controller.abort();
+      controller = new AbortController();
+      loadNotifications(controller.signal);
+    }, 30000);
+
+    return () => {
+      window.clearInterval(refreshTimer);
+      controller.abort();
+    };
   }, [loadNotifications]);
 
   const formatDate = (value) => {
@@ -51,15 +81,18 @@ function ResidentNotifications() {
         <div>
           <span className="resident-notifications-eyebrow">RESIDENT UPDATES</span>
           <h1>Notifications</h1>
-          <p>Stay up to date with announcements from your apartment management.</p>
+          <p>Stay up to date with apartment announcements and visitor approval requests.</p>
         </div>
       </header>
 
       <div className="resident-notifications-summary">
         <span className="resident-notifications-summary-icon">🔔</span>
         <div>
-          <strong>{notices.length} current update{notices.length === 1 ? "" : "s"}</strong>
-          <p>Active announcements and notices for residents</p>
+          <strong>
+            {notices.length} current update{notices.length === 1 ? "" : "s"}
+            {visitorRequests.length > 0 && ` · ${visitorRequests.length} visitor request${visitorRequests.length === 1 ? "" : "s"}`}
+          </strong>
+          <p>Active announcements and visitor requests with their approval status</p>
         </div>
       </div>
 
@@ -71,14 +104,36 @@ function ResidentNotifications() {
           <p>{error}</p>
           <button type="button" onClick={() => loadNotifications()}>Try again</button>
         </div>
-      ) : notices.length === 0 ? (
+      ) : notices.length === 0 && visitorRequests.length === 0 ? (
         <div className="resident-notifications-state">
           <span>🔔</span>
           <strong>You’re all caught up</strong>
-          <p>New apartment announcements will appear here.</p>
+          <p>New apartment announcements and visitor requests will appear here.</p>
         </div>
       ) : (
         <div className="resident-notifications-list">
+          {visitorRequests.map((visitor) => (
+            <article className="resident-notification-card visitor-request-notification" key={`visitor-${visitor.visitor_id}`}>
+              <div className="resident-notification-icon">🚪</div>
+              <div className="resident-notification-content">
+                <div className="resident-notification-meta">
+                  <span>
+                    {visitor.status === "Pending" ? "Visitor approval required" : `Visitor ${visitor.status.toLowerCase()}`}
+                  </span>
+                  <time>{formatDate(visitor.created_at || visitor.visit_date)}</time>
+                </div>
+                <h2>
+                  {visitor.status === "Pending"
+                    ? `${visitor.visitor_name} is waiting for your approval`
+                    : `Visitor request for ${visitor.visitor_name}`}
+                </h2>
+                <p>{visitor.purpose} · Visit time {String(visitor.expected_time || "").slice(0, 5) || "not specified"}</p>
+                <Link className="visitor-request-link" to="/resident/visitors">
+                  {visitor.status === "Pending" ? "Review visitor request" : "View visitor records"}
+                </Link>
+              </div>
+            </article>
+          ))}
           {notices.map((notice) => (
             <article className="resident-notification-card" key={notice.notice_id}>
               <div className="resident-notification-icon">{notice.notice_type === "Event" ? "📅" : "📣"}</div>

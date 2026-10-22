@@ -1,13 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
-import "../../css/staff/staff_profile.css";
-import "../../css/staff/staff_shared_theme.css";
-import { useNavigate } from "react-router-dom";
+import "../../css/resident/profile.css";
+import "./staffProfile.css";
 import { STAFF_DEPARTMENTS } from "../../constants/staffDepartments";
-import StaffNav from "../../components/StaffNav";
 
 function StaffProfile() {
-  const navigate = useNavigate();
-
   const [staff, setStaff] = useState(() => {
     try {
       return JSON.parse(sessionStorage.getItem("user") || "{}");
@@ -15,60 +11,51 @@ function StaffProfile() {
       return {};
     }
   });
-
-  const firstName = staff?.first_name || staff?.name || "Staff";
-  const lastName = staff?.last_name || "";
-
-  const fullName = `${firstName} ${lastName}`.trim();
-
-  const initials =
-    `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase() || "S";
-
+  const [profileData, setProfileData] = useState({
+    first_name: staff?.first_name || staff?.name || "Staff",
+    last_name: staff?.last_name || "",
+    email: staff?.email || "",
+    phone: staff?.phone || staff?.mobile || "",
+    department: staff?.department || "",
+  });
   const [showEditModal, setShowEditModal] = useState(false);
-  const [editForm, setEditForm] = useState({ first_name: "", last_name: "", email: "", phone: "", department: "" });
+  const [editForm, setEditForm] = useState({
+    first_name: "",
+    last_name: "",
+    email: "",
+    phone: "",
+    department: "",
+  });
   const [editError, setEditError] = useState("");
   const [savingProfile, setSavingProfile] = useState(false);
   const [workSummary, setWorkSummary] = useState(null);
   const [summaryLoading, setSummaryLoading] = useState(true);
   const [summaryError, setSummaryError] = useState("");
-
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
-  const [profileData, setProfileData] = useState({
-    first_name: staff?.first_name || firstName,
-    last_name: staff?.last_name || lastName,
-    email: staff?.email || "",
-    phone: staff?.phone || staff?.mobile || "",
-    department: staff?.department || "",
-    employee_id: staff?.id ? `STF-${String(staff.id).padStart(3, "0")}` : "",
-    joining_date: "",
-  });
-
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
     newPassword: "",
     confirmPassword: "",
   });
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const fullName = `${profileData.first_name} ${profileData.last_name}`.trim();
+  const initials = `${profileData.first_name.charAt(0)}${profileData.last_name.charAt(0)}`.toUpperCase() || "S";
 
   const fetchWorkSummary = useCallback(async (signal) => {
     setSummaryLoading(true);
     setSummaryError("");
     try {
       const token = sessionStorage.getItem("token");
-      if (!token) {
-        throw new Error("Please sign in again to load your work summary.");
-      }
+      if (!token) throw new Error("Please sign in again to load your work summary.");
 
       const response = await fetch("http://localhost:5000/api/staff/dashboard", {
         headers: { Authorization: `Bearer ${token}` },
         signal,
       });
       const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.message || "Unable to load work summary.");
-      }
+      if (!response.ok) throw new Error(data.message || "Unable to load work summary.");
 
       setWorkSummary(data.counts);
       if (data.staff) {
@@ -78,6 +65,7 @@ function StaffProfile() {
           last_name: data.staff.last_name || currentProfile.last_name,
           department: data.staff.department || "",
         }));
+        setStaff((currentStaff) => ({ ...currentStaff, ...data.staff }));
       }
     } catch (error) {
       if (error.name === "AbortError") return;
@@ -90,9 +78,7 @@ function StaffProfile() {
 
   useEffect(() => {
     const controller = new AbortController();
-    const loadWorkSummary = async () => {
-      await fetchWorkSummary(controller.signal);
-    };
+    const loadWorkSummary = async () => fetchWorkSummary(controller.signal);
     loadWorkSummary();
     return () => controller.abort();
   }, [fetchWorkSummary]);
@@ -107,6 +93,7 @@ function StaffProfile() {
         });
         const data = await response.json();
         if (!response.ok) throw new Error(data.message || "Unable to load profile.");
+
         setProfileData((current) => ({ ...current, ...data.profile }));
         setStaff((current) => ({ ...current, ...data.profile }));
       } catch (error) {
@@ -116,30 +103,6 @@ function StaffProfile() {
     loadProfile();
     return () => controller.abort();
   }, []);
-
-  const handleNavigation = (path) => {
-    navigate(path);
-  };
-
-  const handleLogout = () => {
-    sessionStorage.removeItem("token");
-    sessionStorage.removeItem("adminToken");
-    sessionStorage.removeItem("staffToken");
-    sessionStorage.removeItem("residentToken");
-    sessionStorage.removeItem("user");
-    sessionStorage.removeItem("staff");
-
-    navigate("/login");
-  };
-
-  const handlePasswordChange = (e) => {
-    const { name, value } = e.target;
-
-    setPasswordData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
 
   const openEditModal = () => {
     setEditForm({
@@ -153,8 +116,18 @@ function StaffProfile() {
     setShowEditModal(true);
   };
 
-  const handleSaveProfile = async (e) => {
-    e.preventDefault();
+  const handleEditFormChange = (event) => {
+    const { name, value } = event.target;
+    setEditForm((current) => ({ ...current, [name]: value }));
+  };
+
+  const handlePasswordChange = (event) => {
+    const { name, value } = event.target;
+    setPasswordData((current) => ({ ...current, [name]: value }));
+  };
+
+  const handleSaveProfile = async (event) => {
+    event.preventDefault();
     setEditError("");
 
     const form = {
@@ -174,6 +147,10 @@ function StaffProfile() {
     }
     if (!/^[0-9]{10}$/.test(form.phone)) {
       setEditError("Enter a phone number with exactly 10 digits.");
+      return;
+    }
+    if (!staff?.department && !STAFF_DEPARTMENTS.includes(form.department)) {
+      setEditError("Please select a valid staff department.");
       return;
     }
 
@@ -202,23 +179,16 @@ function StaffProfile() {
     }
   };
 
-  const handleChangePassword = async (e) => {
-    e.preventDefault();
-
-    if (
-      !passwordData.currentPassword ||
-      !passwordData.newPassword ||
-      !passwordData.confirmPassword
-    ) {
+  const handleChangePassword = async (event) => {
+    event.preventDefault();
+    if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
       alert("Please fill all password fields.");
       return;
     }
-
     if (passwordData.newPassword.length < 6) {
       alert("New password must contain at least 6 characters.");
       return;
     }
-
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       alert("New password and confirm password do not match.");
       return;
@@ -236,555 +206,208 @@ function StaffProfile() {
           new_password: passwordData.newPassword,
         }),
       });
-
       const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Unable to change password.");
-      }
-
+      if (!response.ok) throw new Error(data.message || "Unable to change password.");
       alert("Password changed successfully!");
-
-      setPasswordData({
-        currentPassword: "",
-        newPassword: "",
-        confirmPassword: "",
-      });
+      setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
     } catch (error) {
       alert(error.message || "Unable to change password.");
     }
   };
 
   return (
-    <div className="modern-staff-layout">
-
-      {/* ================= SIDEBAR ================= */}
-
-      <aside className="modern-sidebar">
-
-        <div className="brand-header">
-
-          <div className="brand-icon">
-            🏢
-          </div>
-
-          <div className="brand-info">
-            <h3>Smart Apartment</h3>
-            <span>Staff Portal</span>
-          </div>
-
+    <div className="profile-page staff-profile-page">
+      <header className="profile-topbar">
+        <div>
+          <span className="profile-overline">STAFF SPACE</span>
+          <h1>My Profile</h1>
+          <p>View your personal information, role, work activity and account security.</p>
         </div>
-
-        <div className="sidebar-section-title">
-          MAIN MENU
-        </div>
-                <StaffNav onNavigate={handleNavigation} />
-
-        {/* SIDEBAR FOOTER */}
-
-        <div className="sidebar-footer">
-
-          <div className="user-profile-summary">
-
-            <div className="avatar-circle">
-              {initials}
-            </div>
-
-            <div className="user-details">
-              <strong>{fullName}</strong>
-              <small>{profileData.department || "Staff Member"}</small>
-            </div>
-
-          </div>
-
-          <button
-            className="logout-btn"
-            onClick={handleLogout}
-          >
-            🚪 Logout
+        <div className="staff-profile-actions">
+          <button type="button" className="profile-save-btn" onClick={openEditModal}>
+            Edit Profile
           </button>
-
         </div>
+      </header>
 
-      </aside>
-
-      {/* ================= MAIN CONTENT ================= */}
-
-      <main className="modern-main-content">
-
-        {/* HEADER */}
-
-        <header className="top-header">
-
-          <div className="header-title">
-
-            <span className="badge-tag">
-              STAFF PROFILE
-            </span>
-
-            <h1>
-              My Profile
-            </h1>
-
-            <p>
-              View and manage your personal and staff information.
-            </p>
-
-          </div>
-
-          <div className="header-actions">
-
-          </div>
-
-        </header>
-
-
-        {showEditModal && (
-          <div className="staff-edit-backdrop" role="presentation" onMouseDown={(e) => { if (e.target === e.currentTarget && !savingProfile) setShowEditModal(false); }}>
-            <form className="staff-edit-modal" onSubmit={handleSaveProfile} role="dialog" aria-modal="true" aria-label="Edit profile">
-              <div className="staff-edit-header">
-                <h2>Edit Profile</h2>
-                <button type="button" onClick={() => setShowEditModal(false)} disabled={savingProfile} aria-label="Close">×</button>
-              </div>
-              <div className="staff-edit-grid">
-                <label>First name
-                  <input required maxLength="100" value={editForm.first_name} onChange={(e) => setEditForm({ ...editForm, first_name: e.target.value })} />
-                </label>
-                <label>Last name
-                  <input required maxLength="100" value={editForm.last_name} onChange={(e) => setEditForm({ ...editForm, last_name: e.target.value })} />
-                </label>
-                <label className="full">Email address
-                  <input required type="email" value={editForm.email} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} />
-                </label>
-                <label className="full">Phone number
-                  <input required inputMode="numeric" maxLength="10" value={editForm.phone} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value.replace(/\D/g, "") })} />
-                </label>
-                {!profileData.department && (
-                  <label className="full">Staff type
-                    <select required value={editForm.department} onChange={(e) => setEditForm({ ...editForm, department: e.target.value })}>
-                      <option value="">Select staff type</option>
-                      {STAFF_DEPARTMENTS.map((department) => <option key={department} value={department}>{department}</option>)}
-                    </select>
-                    <small>Choose once. After that only the admin can change it.</small>
-                  </label>
-                )}
-              </div>
-              {editError && <p className="staff-edit-error" role="alert">{editError}</p>}
-              <div className="staff-edit-actions">
-                <button type="button" className="cancel-btn" onClick={() => setShowEditModal(false)} disabled={savingProfile}>Cancel</button>
-                <button type="submit" className="save-btn" disabled={savingProfile}>{savingProfile ? "Saving..." : "Save changes"}</button>
-              </div>
-            </form>
-          </div>
-        )}
-
-        <div className="profile-content-grid">
-
-          {/* PERSONAL INFORMATION */}
-
-          <section className="profile-card">
-
-            <div className="card-header">
-
+      <div className="profile-container">
+        <section className="profile-main-card">
+          <div className="profile-cover"><div className="cover-pattern" /></div>
+          <div className="profile-card-content">
+            <div className="profile-avatar">{initials}</div>
+            <div className="profile-heading">
               <div>
-                <h2>Personal Information</h2>
-
-                <p>
-                  Your basic contact and personal details.
-                </p>
+                <h2>{fullName || "Staff"}</h2>
+                <p>{profileData.email || "Email not available"}</p>
               </div>
-
-              <button type="button" className="edit-profile-btn" onClick={openEditModal}>Edit Profile</button>
-
+              <span className="resident-badge">
+                <span className="badge-dot" />
+                {profileData.department || "Staff Member"}
+              </span>
             </div>
-
-            <div className="profile-form-grid">
-
-              <div className="form-group">
-
-                <label>
-                  First Name
-                </label>
-
-                <input
-                  type="text"
-                  name="first_name"
-                  value={profileData.first_name}
-                  readOnly
-                />
-
+            <div className="profile-divider" />
+            <div className="profile-stats">
+              <div className="profile-stat">
+                <span>DEPARTMENT</span>
+                <strong>{profileData.department || "Not assigned"}</strong>
               </div>
-
-              <div className="form-group">
-
-                <label>
-                  Last Name
-                </label>
-
-                <input
-                  type="text"
-                  name="last_name"
-                  value={profileData.last_name}
-                  readOnly
-                />
-
+              <div className="profile-stat">
+                <span>ACCOUNT TYPE</span>
+                <strong>Staff</strong>
               </div>
-
-              <div className="form-group full-width">
-
-                <label>
-                  Email Address
-                </label>
-
-                <div className="input-with-icon">
-
-                  <span>✉️</span>
-
-                  <input
-                    type="email"
-                    name="email"
-                    value={profileData.email}
-                    readOnly
-                  />
-
-                </div>
-
+              <div className="profile-stat">
+                <span>ACCOUNT STATUS</span>
+                <strong>Active</strong>
               </div>
-
-              <div className="form-group">
-
-                <label>
-                  Phone Number
-                </label>
-
-                <div className="input-with-icon">
-
-                  <span>📞</span>
-
-                  <input
-                    type="text"
-                    name="phone"
-                    value={profileData.phone}
-                    readOnly
-                  />
-
-                </div>
-
-              </div>
-
-              <div className="form-group">
-
-                <label>
-                  Employee ID
-                </label>
-
-                <input
-                  type="text"
-                  value={profileData.employee_id}
-                  disabled
-                />
-
-              </div>
-
             </div>
+          </div>
+        </section>
 
+        <div className="profile-info-grid">
+          <section className="info-card">
+            <div className="info-card-header">
+              <div className="info-icon blue">👤</div>
+              <div><span>PERSONAL DETAILS</span><h3>Personal Information</h3></div>
+            </div>
+            <div className="info-fields">
+              <div className="info-field"><label>First Name</label><div>{profileData.first_name || "Not available"}</div></div>
+              <div className="info-field"><label>Last Name</label><div>{profileData.last_name || "Not available"}</div></div>
+              <div className="info-field full"><label>Email Address</label><div>{profileData.email || "Not available"}</div></div>
+              <div className="info-field"><label>Phone Number</label><div>{profileData.phone || "Not available"}</div></div>
+              <div className="info-field"><label>Account Type</label><div>Staff</div></div>
+            </div>
           </section>
 
-          {/* STAFF INFORMATION */}
-
-          <section className="profile-card">
-
-            <div className="card-header">
-
-              <div>
-                <h2>Staff Information</h2>
-
-                <p>
-                  Your role and department details.
-                </p>
-              </div>
-
-              <span className="card-header-icon">
-                🏢
-              </span>
-
+          <section className="info-card">
+            <div className="info-card-header">
+              <div className="info-icon green">🏢</div>
+              <div><span>STAFF DETAILS</span><h3>Work Information</h3></div>
             </div>
-
-            <div className="profile-form-grid">
-
-              <div className="form-group">
-
-                <label>
-                  Department
-                </label>
-
-                <input type="text" value={profileData.department || "Not set"} readOnly />
-
-                <small className="profile-hint">
-                  {profileData.department
-                    ? "Only the admin can change your staff type."
-                    : "Choose your staff type once from Edit Profile."}
-                </small>
-
-              </div>
-
-              <div className="form-group">
-
-                <label>
-                  Joining Date
-                </label>
-
-                <input
-                  type="text"
-                  value={
-                    profileData.joining_date
-                      ? new Date(profileData.joining_date).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })
-                      : "—"
-                  }
-                  readOnly
-                />
-
-              </div>
-
-              <div className="form-group">
-
-                <label>
-                  Account Status
-                </label>
-
-                <div className="account-status">
-                  <span className="status-dot"></span>
-                  Active
+            <div className="residence-profile">
+              <div className="residence-row">
+                <div className="residence-symbol">D</div>
+                <div><span>DEPARTMENT</span>
+                  <strong>{profileData.department || "Not assigned"}</strong>
                 </div>
-
               </div>
-
+              <div className="residence-row">
+                <div className="residence-symbol">S</div>
+                <div><span>ACCOUNT STATUS</span><strong>Active</strong></div>
+              </div>
+              {!staff?.department && (
+                <p className="staff-profile-hint">Choose your staff type once. After that, only the admin can change it.</p>
+              )}
             </div>
-
           </section>
 
-          {/* WORK SUMMARY */}
-
-          <section className="profile-card work-summary-card">
-
-            <div className="card-header">
-
-              <div>
-                <h2>Work Summary</h2>
-
-                <p>
-                  Your current staff activity overview.
-                </p>
-              </div>
-
-              <span className="card-header-icon">
-                📊
-              </span>
-
+          <section className="info-card staff-work-summary">
+            <div className="info-card-header">
+              <div className="info-icon green">📊</div>
+              <div><span>STAFF ACTIVITY</span><h3>Work Summary</h3></div>
             </div>
-
-            <div className="summary-grid">
-
-              <div className="summary-box">
-                <span className="summary-icon">
-                  🛠️
-                </span>
-
-                <div>
-                  <strong>{summaryLoading ? "—" : workSummary?.complaints_total ?? 0}</strong>
-                  <small>Assigned Complaints</small>
-                </div>
-              </div>
-
-              <div className="summary-box">
-                <span className="summary-icon">
-                  ✅
-                </span>
-
-                <div>
-                  <strong>{summaryLoading ? "—" : workSummary?.tasks_completed ?? 0}</strong>
-                  <small>Completed Tasks</small>
-                </div>
-              </div>
-
-              <div className="summary-box">
-                <span className="summary-icon">
-                  ⏳
-                </span>
-
-                <div>
-                  <strong>
-                    {summaryLoading
-                      ? "—"
-                      : Number(workSummary?.complaints_open || 0) +
-                        Number(workSummary?.tasks_pending || 0) +
-                        Number(workSummary?.tasks_in_progress || 0)}
-                  </strong>
-                  <small>Open Work Items</small>
-                </div>
-              </div>
-
-            </div>
-            {summaryError && (
-              <div className="profile-summary-error" role="alert">
-                <span>{summaryError}</span>
-                <button type="button" onClick={() => fetchWorkSummary()}>
-                  Retry
-                </button>
+            {summaryLoading ? (
+              <div className="staff-summary-state">Loading work summary...</div>
+            ) : (
+              <div className="staff-summary-grid">
+                <div className="profile-stat"><span>ASSIGNED COMPLAINTS</span><strong>{workSummary?.complaints_total ?? 0}</strong></div>
+                <div className="profile-stat"><span>SERVICE REQUESTS</span><strong>{workSummary?.service_requests_total ?? 0}</strong></div>
+                <div className="profile-stat"><span>COMPLETED TASKS</span><strong>{workSummary?.tasks_completed ?? 0}</strong></div>
+                <div className="profile-stat"><span>OPEN WORK ITEMS</span><strong>
+                  {Number(workSummary?.complaints_open || 0) +
+                    Number(workSummary?.service_requests_open || 0) +
+                    Number(workSummary?.tasks_pending || 0) +
+                    Number(workSummary?.tasks_in_progress || 0)}
+                </strong></div>
               </div>
             )}
-
+            {summaryError && (
+              <div className="staff-summary-error" role="alert">
+                <span>{summaryError}</span>
+                <button type="button" onClick={() => fetchWorkSummary()}>Retry</button>
+              </div>
+            )}
           </section>
-
-          {/* CHANGE PASSWORD */}
-
-          <section className="profile-card password-card">
-
-            <div className="card-header">
-
-              <div>
-                <h2>Change Password</h2>
-
-                <p>
-                  Update your account password regularly for better security.
-                </p>
-              </div>
-
-              <span className="card-header-icon">
-                🔐
-              </span>
-
-            </div>
-
-            <form
-              className="password-form"
-              onSubmit={handleChangePassword}
-            >
-
-              <div className="form-group full-width">
-
-                <label>
-                  Current Password
-                </label>
-
-                <div className="password-input">
-
-                  <input
-                    type={
-                      showCurrentPassword
-                        ? "text"
-                        : "password"
-                    }
-                    name="currentPassword"
-                    value={passwordData.currentPassword}
-                    onChange={handlePasswordChange}
-                    placeholder="Enter current password"
-                  />
-
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setShowCurrentPassword(
-                        !showCurrentPassword
-                      )
-                    }
-                  >
-                    {showCurrentPassword ? "🙈" : "👁️"}
-                  </button>
-
-                </div>
-
-              </div>
-
-              <div className="password-two-column">
-
-                <div className="form-group">
-
-                  <label>
-                    New Password
-                  </label>
-
-                  <div className="password-input">
-
-                    <input
-                      type={
-                        showNewPassword
-                          ? "text"
-                          : "password"
-                      }
-                      name="newPassword"
-                      value={passwordData.newPassword}
-                      onChange={handlePasswordChange}
-                      placeholder="Enter new password"
-                    />
-
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setShowNewPassword(
-                          !showNewPassword
-                        )
-                      }
-                    >
-                      {showNewPassword ? "🙈" : "👁️"}
-                    </button>
-
-                  </div>
-
-                </div>
-
-                <div className="form-group">
-
-                  <label>
-                    Confirm Password
-                  </label>
-
-                  <div className="password-input">
-
-                    <input
-                      type={
-                        showConfirmPassword
-                          ? "text"
-                          : "password"
-                      }
-                      name="confirmPassword"
-                      value={passwordData.confirmPassword}
-                      onChange={handlePasswordChange}
-                      placeholder="Confirm new password"
-                    />
-
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setShowConfirmPassword(
-                          !showConfirmPassword
-                        )
-                      }
-                    >
-                      {showConfirmPassword ? "🙈" : "👁️"}
-                    </button>
-
-                  </div>
-
-                </div>
-
-              </div>
-
-              <button
-                type="submit"
-                className="change-password-btn"
-              >
-                🔒 Update Password
-              </button>
-
-            </form>
-
-          </section>
-
         </div>
 
-      </main>
+        <section className="info-card staff-password-card">
+          <div className="info-card-header">
+            <div className="info-icon blue">🔐</div>
+            <div><span>ACCOUNT SECURITY</span><h3>Change Password</h3></div>
+          </div>
+          <form className="staff-password-form" onSubmit={handleChangePassword}>
+            <label>
+              Current Password
+              <input type={showCurrentPassword ? "text" : "password"} name="currentPassword" value={passwordData.currentPassword} onChange={handlePasswordChange} placeholder="Enter current password" required />
+              <button type="button" onClick={() => setShowCurrentPassword((shown) => !shown)}>{showCurrentPassword ? "Hide" : "Show"}</button>
+            </label>
+            <label>
+              New Password
+              <input type={showNewPassword ? "text" : "password"} name="newPassword" value={passwordData.newPassword} onChange={handlePasswordChange} placeholder="Enter new password" required />
+              <button type="button" onClick={() => setShowNewPassword((shown) => !shown)}>{showNewPassword ? "Hide" : "Show"}</button>
+            </label>
+            <label>
+              Confirm New Password
+              <input type={showConfirmPassword ? "text" : "password"} name="confirmPassword" value={passwordData.confirmPassword} onChange={handlePasswordChange} placeholder="Confirm new password" required />
+              <button type="button" onClick={() => setShowConfirmPassword((shown) => !shown)}>{showConfirmPassword ? "Hide" : "Show"}</button>
+            </label>
+            <button className="profile-save-btn staff-password-submit" type="submit">Update Password</button>
+          </form>
+        </section>
 
+        <section className="profile-security-card">
+          <div className="security-icon">✓</div>
+          <div>
+            <span>ACCOUNT STATUS</span>
+            <h3>Your account is active</h3>
+            <p>Your staff account is connected to the Smart Apartment management system.</p>
+          </div>
+          <div className="active-pill">Active</div>
+        </section>
+      </div>
+      {showEditModal && (
+        <div
+          className="staff-profile-edit-backdrop"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget && !savingProfile) setShowEditModal(false);
+          }}
+        >
+          <form className="staff-profile-edit-modal" onSubmit={handleSaveProfile} role="dialog" aria-modal="true" aria-label="Edit profile">
+            <div className="staff-profile-edit-header">
+              <h2>Edit Profile</h2>
+              <button type="button" onClick={() => setShowEditModal(false)} disabled={savingProfile} aria-label="Close">×</button>
+            </div>
+            <div className="staff-profile-edit-grid">
+              <label>First name
+                <input required maxLength="100" name="first_name" value={editForm.first_name} onChange={handleEditFormChange} />
+              </label>
+              <label>Last name
+                <input required maxLength="100" name="last_name" value={editForm.last_name} onChange={handleEditFormChange} />
+              </label>
+              <label className="full">Email address
+                <input required type="email" name="email" value={editForm.email} onChange={handleEditFormChange} />
+              </label>
+              <label className="full">Phone number
+                <input required inputMode="numeric" maxLength="10" name="phone" value={editForm.phone} onChange={(event) => setEditForm((current) => ({ ...current, phone: event.target.value.replace(/\D/g, "") }))} />
+              </label>
+              {!staff?.department && (
+                <label className="full">Staff type
+                  <select required name="department" value={editForm.department} onChange={handleEditFormChange}>
+                    <option value="">Select staff type</option>
+                    {STAFF_DEPARTMENTS.map((department) => <option key={department} value={department}>{department}</option>)}
+                  </select>
+                  <small>Choose once. After that only the admin can change it.</small>
+                </label>
+              )}
+            </div>
+            {editError && <p className="staff-profile-edit-error" role="alert">{editError}</p>}
+            <div className="staff-profile-edit-actions">
+              <button type="button" onClick={() => setShowEditModal(false)} disabled={savingProfile}>Cancel</button>
+              <button type="submit" disabled={savingProfile}>{savingProfile ? "Saving..." : "Save changes"}</button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   );
 }

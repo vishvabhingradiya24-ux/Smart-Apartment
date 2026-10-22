@@ -34,7 +34,9 @@ const emptyForm = {
 };
 
 function StaffVisitors() {
-  const [scope, setScope] = useState("today");
+  const [scope, setScope] = useState(() =>
+    new URLSearchParams(window.location.search).get("scope") === "expected" ? "expected" : "today"
+  );
   const [search, setSearch] = useState("");
   const [visitors, setVisitors] = useState([]);
   const [counts, setCounts] = useState({ today: 0, expected: 0, inside: 0 });
@@ -167,6 +169,12 @@ function StaffVisitors() {
   const flatLabel = (visitor) =>
     [visitor.block_wing, visitor.flat_number].filter(Boolean).join(" - ") || "-";
 
+  const formatPersonName = (value) =>
+    String(value || "").trim().toLocaleLowerCase("en-IN").replace(
+      /(^|[\s'-])(\p{L})/gu,
+      (_, separator, initial) => `${separator}${initial.toLocaleUpperCase("en-IN")}`
+    );
+
   return (
     <StaffLayout
       badge="SECURITY"
@@ -276,7 +284,7 @@ function StaffVisitors() {
                   return (
                     <tr key={visitor.visitor_id}>
                       <td>
-                        <strong>{visitor.visitor_name}</strong>
+                        <strong>{formatPersonName(visitor.visitor_name)}</strong>
                         <small>{visitor.contact_number}</small>
                       </td>
 
@@ -285,6 +293,7 @@ function StaffVisitors() {
                         <small>
                           {[visitor.resident_first_name, visitor.resident_last_name]
                             .filter(Boolean)
+                            .map(formatPersonName)
                             .join(" ")}
                         </small>
                       </td>

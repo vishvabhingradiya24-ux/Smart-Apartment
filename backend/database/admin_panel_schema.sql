@@ -379,6 +379,8 @@ CREATE TABLE IF NOT EXISTS visitors (
   visit_date DATE NOT NULL,
   expected_time TIME NOT NULL,
   status VARCHAR(30) NOT NULL DEFAULT 'Pending',
+  visitor_type VARCHAR(30) NULL,
+  registered_by_staff_id INT NULL,
   entry_time DATETIME NULL,
   exit_time DATETIME NULL,
   created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,

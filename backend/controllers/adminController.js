@@ -124,9 +124,9 @@ const getAdminDashboard = async (req, res) => {
        FROM payments`
     );
     const [visitorRows] = await pool.query(
-      `SELECT COUNT(*) AS visitors_today,
-              SUM(CASE WHEN entry_time IS NOT NULL AND DATE(entry_time) = CURDATE() THEN 1 ELSE 0 END) AS checked_in_today
-       FROM visitors WHERE DATE(visit_date) = CURDATE()`
+      `SELECT SUM(CASE WHEN DATE(entry_time) = CURDATE() THEN 1 ELSE 0 END) AS visitors_today,
+              SUM(CASE WHEN entry_time IS NOT NULL AND exit_time IS NULL THEN 1 ELSE 0 END) AS checked_in_today
+       FROM visitors WHERE entry_time IS NOT NULL`
     );
     const [staffRows] = await pool.query(`SELECT COUNT(*) AS active_staff FROM staff`);
     const [facilityRows] = await pool.query(
@@ -150,10 +150,11 @@ const getAdminDashboard = async (req, res) => {
        ORDER BY p.created_at DESC LIMIT 5`
     );
     const [visitors] = await pool.query(
-      `SELECT v.visitor_name, v.status, v.created_at AS activity_date,
+      `SELECT v.visitor_name, v.entry_time AS activity_date,
               r.block_wing, r.flat_number
        FROM visitors v LEFT JOIN residents r ON r.id = v.resident_id
-       ORDER BY v.created_at DESC LIMIT 5`
+       WHERE v.entry_time IS NOT NULL
+       ORDER BY v.entry_time DESC LIMIT 5`
     );
     const [tasks] = await pool.query(
       `SELECT t.task_name, t.status, t.created_at AS activity_date,
@@ -176,8 +177,8 @@ const getAdminDashboard = async (req, res) => {
         time: row.activity_date, status: row.status || "Pending", icon: "💳",
       })),
       ...visitors.map((row) => ({
-        type: "Visitor", description: `${row.visitor_name || "Visitor"}${row.flat_number ? ` for Flat ${row.block_wing || ""}-${row.flat_number}` : ""}`,
-        time: row.activity_date, status: row.status || "Pending", icon: "🚪",
+        type: "Visitor", description: `${row.visitor_name || "Visitor"} entered${row.flat_number ? ` for Flat ${row.block_wing || ""}-${row.flat_number}` : ""}`,
+        time: row.activity_date, status: "Entry recorded", icon: "🚪",
       })),
       ...tasks.map((row) => ({
         type: "Task", description: `${row.task_name || "Task"}${row.first_name ? ` assigned to ${row.first_name} ${row.last_name || ""}` : ""}`,
@@ -619,9 +620,9 @@ const getAdminSecurity = async (req, res) => {
        ORDER BY first_name ASC, last_name ASC`
     );
     const [visitorStats] = await pool.query(
-      `SELECT COUNT(*) AS visitors_today,
-              SUM(CASE WHEN entry_time IS NOT NULL AND DATE(entry_time) = CURDATE() THEN 1 ELSE 0 END) AS checked_in_today
-       FROM visitors WHERE DATE(visit_date) = CURDATE()`
+      `SELECT SUM(CASE WHEN DATE(entry_time) = CURDATE() THEN 1 ELSE 0 END) AS visitors_today,
+              SUM(CASE WHEN entry_time IS NOT NULL AND exit_time IS NULL THEN 1 ELSE 0 END) AS checked_in_today
+       FROM visitors WHERE entry_time IS NOT NULL`
     );
     res.status(200).json({
       guards,
@@ -663,6 +664,7 @@ const getAdminVisitors = async (req, res) => {
               r.id AS resident_id, r.first_name AS resident_first_name,
               r.last_name AS resident_last_name, r.block_wing, r.flat_number
        FROM visitors v LEFT JOIN residents r ON r.id = v.resident_id
+       WHERE v.entry_time IS NOT NULL
        ORDER BY v.visit_date DESC, v.expected_time DESC, v.visitor_id DESC`
     );
     res.status(200).json({ visitors });
@@ -694,10 +696,11 @@ const getAdminNotifications = async (req, res) => {
        ORDER BY c.complaint_date DESC LIMIT 10`
     );
     const [visitors] = await pool.query(
-      `SELECT v.visitor_id, v.visitor_name, v.status, v.purpose, v.created_at AS happened_at,
+      `SELECT v.visitor_id, v.visitor_name, v.purpose, v.entry_time AS happened_at,
               r.id AS resident_id, r.first_name, r.last_name, r.flat_number
        FROM visitors v LEFT JOIN residents r ON r.id = v.resident_id
-       ORDER BY v.created_at DESC LIMIT 10`
+       WHERE v.entry_time IS NOT NULL
+       ORDER BY v.entry_time DESC LIMIT 10`
     );
     const [tasks] = await pool.query(
       `SELECT t.task_id, t.task_name, t.status, t.created_at AS happened_at,
@@ -718,7 +721,7 @@ const getAdminNotifications = async (req, res) => {
       ...notices.map((item) => ({ id: `notice-${item.notice_id}`, title: item.title, message: item.description, type: item.notice_type || "Notice", date: item.happened_at, actorName: item.admin_name || "System", actorType: item.admin_name ? "Admin" : "System" })),
       ...payments.map((item) => ({ id: `payment-${item.id}`, title: `Payment ${item.status || "updated"}`, message: `₹${Number(item.amount || 0).toLocaleString("en-IN")}${item.first_name ? ` from ${item.first_name} ${item.last_name || ""}` : ""}`, type: "Payment", date: item.happened_at, userId: item.resident_id, actorName: [item.first_name, item.last_name].filter(Boolean).join(" ") || `Resident #${item.resident_id}`, actorType: "Resident" })),
       ...complaints.map((item) => ({ id: `complaint-${item.complaint_id}`, title: item.complaint_title || "Complaint update", message: `${item.status || "Pending"}${item.first_name ? ` · ${item.first_name} ${item.last_name || ""}${item.flat_number ? ` · Flat ${item.flat_number}` : ""}` : ""}`, type: "Complaint", date: item.happened_at, userId: item.resident_id, actorName: [item.first_name, item.last_name].filter(Boolean).join(" ") || `Resident #${item.resident_id}`, actorType: "Resident" })),
-      ...visitors.map((item) => ({ id: `visitor-${item.visitor_id}`, title: `${item.visitor_name || "Visitor"} · ${item.status || "Pending"}`, message: `${item.purpose || "Visitor request"}${item.first_name ? ` for ${item.first_name} ${item.last_name || ""}${item.flat_number ? ` · Flat ${item.flat_number}` : ""}` : ""}`, type: "Visitor", date: item.happened_at, userId: item.resident_id, actorName: [item.first_name, item.last_name].filter(Boolean).join(" ") || `Resident #${item.resident_id}`, actorType: "Resident" })),
+      ...visitors.map((item) => ({ id: `visitor-${item.visitor_id}`, title: `${item.visitor_name || "Visitor"} · Entry recorded`, message: `${item.purpose || "Visitor"}${item.first_name ? ` for ${item.first_name} ${item.last_name || ""}${item.flat_number ? ` · Flat ${item.flat_number}` : ""}` : ""}`, type: "Visitor", date: item.happened_at, userId: item.resident_id, actorName: [item.first_name, item.last_name].filter(Boolean).join(" ") || `Resident #${item.resident_id}`, actorType: "Resident" })),
       ...tasks.map((item) => ({ id: `task-${item.task_id}`, title: item.task_name || "Staff task", message: `${item.status || "Pending"}${item.first_name ? ` · Assigned to ${item.first_name} ${item.last_name || ""}` : ""}`, type: "Task", date: item.happened_at, actorName: [item.first_name, item.last_name].filter(Boolean).join(" ") || "Unassigned", actorType: "Staff" })),
       ...bookings.map((item) => ({ id: `booking-${item.booking_id}`, title: `${item.facility_name || "Facility"} booking · ${item.status || "Pending"}`, message: `${item.first_name ? `${item.first_name} ${item.last_name || ""}${item.flat_number ? ` · Flat ${item.flat_number}` : ""}` : "Resident booking request"}`, type: "Booking", date: item.happened_at, userId: item.resident_id, actorName: [item.first_name, item.last_name].filter(Boolean).join(" ") || `Resident #${item.resident_id}`, actorType: "Resident" })),
     ].sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0)).slice(0, 30);
@@ -745,7 +748,7 @@ const updateAdminNotificationReadState = async (req, res) => {
       notice: { table: "notices", idColumn: "notice_id" },
       payment: { table: "payments", idColumn: "id" },
       complaint: { table: "complaints", idColumn: "complaint_id" },
-      visitor: { table: "visitors", idColumn: "visitor_id" },
+      visitor: { table: "visitors", idColumn: "visitor_id", additionalCondition: " AND entry_time IS NOT NULL" },
       task: { table: "tasks", idColumn: "task_id" },
       booking: { table: "facility_bookings", idColumn: "booking_id" },
     })[match[1]];
@@ -755,7 +758,7 @@ const updateAdminNotificationReadState = async (req, res) => {
     }
 
     const [records] = await pool.query(
-      `SELECT 1 FROM ${source.table} WHERE ${source.idColumn} = ? LIMIT 1`,
+      `SELECT 1 FROM ${source.table} WHERE ${source.idColumn} = ?${source.additionalCondition || ""} LIMIT 1`,
       [Number(match[2])]
     );
     if (!records.length) return res.status(404).json({ message: "Notification activity not found" });

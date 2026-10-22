@@ -34,4 +34,18 @@ const notifySupervisors = async (payload, exceptStaffId = null) => {
   }
 };
 
-module.exports = { notifyStaff, notifySupervisors };
+const notifySecurity = async (payload) => {
+  try {
+    const [securityStaff] = await pool.query(
+      "SELECT id FROM staff WHERE department = 'Security'"
+    );
+
+    await Promise.all(
+      securityStaff.map((staff) => notifyStaff(staff.id, payload))
+    );
+  } catch (error) {
+    console.error("Security notification error:", error.message);
+  }
+};
+
+module.exports = { notifyStaff, notifySupervisors, notifySecurity };

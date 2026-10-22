@@ -2,14 +2,30 @@ import { useEffect, useState } from "react";
 import "../../css/resident/residentVisitors.css";
 
 const API_URL = "http://localhost:5000/api/resident/visitors";
+const VISITOR_TYPES = ["Guest", "Delivery", "Service", "Cab", "Other"];
+
+const getTodayDate = () => {
+  const today = new Date();
+  const offset = today.getTimezoneOffset();
+  return new Date(today.getTime() - offset * 60 * 1000).toISOString().slice(0, 10);
+};
 
 function ResidentVisitors() {
   const [visitors, setVisitors] = useState([]);
-
   const [loading, setLoading] = useState(true);
   const [updatingVisitorId, setUpdatingVisitorId] = useState(null);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [registering, setRegistering] = useState(false);
+  const [showVisitorForm, setShowVisitorForm] = useState(false);
+  const [visitorForm, setVisitorForm] = useState({
+    visitor_name: "",
+    contact_number: "",
+    visitor_type: "Guest",
+    purpose: "",
+    visit_date: getTodayDate(),
+    expected_time: "",
+  });
 
   const fetchVisitors = async () => {
       const token = sessionStorage.getItem("token");
@@ -74,6 +90,45 @@ function ResidentVisitors() {
       cancelled = true;
     };
   }, []);
+
+  const registerVisitor = async (event) => {
+    event.preventDefault();
+    setError("");
+    setSuccess("");
+    setRegistering(true);
+
+    try {
+      const token = sessionStorage.getItem("token");
+      if (!token) throw new Error("Session expired. Please login again.");
+
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(visitorForm),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Unable to register visitor.");
+
+      setVisitors((previous) => [data.visitor, ...previous]);
+      setVisitorForm({
+        visitor_name: "",
+        contact_number: "",
+        visitor_type: "Guest",
+        purpose: "",
+        visit_date: getTodayDate(),
+        expected_time: "",
+      });
+      setSuccess("Visitor registered. Security can see the approved visit in the expected visitors list.");
+      setShowVisitorForm(false);
+    } catch (err) {
+      setError(err.message || "Unable to register visitor.");
+    } finally {
+      setRegistering(false);
+    }
+  };
 
   const updateVisitorStatus = async (visitorId, status) => {
     setError("");
@@ -190,6 +245,23 @@ function ResidentVisitors() {
     (visitor) => visitor.status === "Completed"
   ).length;
 
+  const visitorGroups = [
+    {
+      key: "resident",
+      title: "Pre-registered by you",
+      description: "Visitors you registered in advance.",
+      emptyMessage: "You haven’t pre-registered any visitors yet.",
+      visitors: visitors.filter((visitor) => visitor.registered_by_staff_id == null),
+    },
+    {
+      key: "security",
+      title: "Requests added by Security",
+      description: "Visitors recorded by Security for your approval.",
+      emptyMessage: "There are no visitor requests from Security.",
+      visitors: visitors.filter((visitor) => visitor.registered_by_staff_id != null),
+    },
+  ];
+
   return (
     <div className="resident-visitors-page">
 
@@ -202,9 +274,18 @@ function ResidentVisitors() {
 
           <h1>Visitors</h1>
 
-          <p>Review visitor details and approve or reject pending requests.</p>
+          <p>Register your expected visitors in advance and review requests from Security.</p>
         </div>
-
+        <button
+          type="button"
+          className="resident-visitors-new"
+          onClick={() => {
+            setError("");
+            setShowVisitorForm(true);
+          }}
+        >
+          + Register visitor
+        </button>
       </section>
 
 
@@ -231,7 +312,7 @@ function ResidentVisitors() {
       )}
 
 
-      {error && (
+      {error && !showVisitorForm && (
         <div className="resident-visitors-alert error">
 
           <div className="resident-visitors-alert-icon">
@@ -250,6 +331,136 @@ function ResidentVisitors() {
             ×
           </button>
 
+        </div>
+      )}
+
+      {showVisitorForm && (
+        <div
+          className="resident-visitor-modal-backdrop"
+          role="presentation"
+          onClick={(event) => {
+            if (event.target === event.currentTarget && !registering) setShowVisitorForm(false);
+          }}
+        >
+          <section
+            className="resident-visitors-form-card resident-visitor-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="resident-visitor-form-title"
+          >
+          <div className="resident-visitors-form-header">
+            <div>
+              <span>PLAN A VISIT</span>
+              <h2 id="resident-visitor-form-title">Pre-register a visitor</h2>
+            </div>
+            <button
+              type="button"
+              className="resident-visitor-modal-close"
+              aria-label="Close visitor registration"
+              onClick={() => setShowVisitorForm(false)}
+              disabled={registering}
+            >
+              ×
+            </button>
+          </div>
+          {error && (
+            <div className="resident-visitors-alert error" role="alert">
+              <div className="resident-visitors-alert-icon">!</div>
+              <div>
+                <strong>Unable to register visitor</strong>
+                <p>{error}</p>
+              </div>
+              <button type="button" onClick={() => setError("")} aria-label="Dismiss error">×</button>
+            </div>
+          )}
+          <p className="resident-visitors-form-description">
+            Add the visitor’s details and expected arrival time. Security will be able to check the approved visit at the gate.
+          </p>
+
+          <form className="resident-visitors-form-grid" onSubmit={registerVisitor}>
+            <div className="resident-visitors-form-group">
+              <label htmlFor="resident-visitor-name">Visitor name</label>
+              <input
+                id="resident-visitor-name"
+                value={visitorForm.visitor_name}
+                onChange={(event) => setVisitorForm({ ...visitorForm, visitor_name: event.target.value })}
+                maxLength={100}
+                required
+              />
+            </div>
+            <div className="resident-visitors-form-group">
+              <label htmlFor="resident-visitor-contact">Contact number</label>
+              <input
+                id="resident-visitor-contact"
+                type="tel"
+                inputMode="numeric"
+                value={visitorForm.contact_number}
+                onChange={(event) => setVisitorForm({
+                  ...visitorForm,
+                  contact_number: event.target.value.replace(/\D/g, "").slice(0, 10),
+                })}
+                pattern="[0-9]{10}"
+                maxLength={10}
+                title="Enter a 10-digit phone number"
+                required
+              />
+            </div>
+            <div className="resident-visitors-form-group">
+              <label htmlFor="resident-visitor-type">Visitor type</label>
+              <select
+                id="resident-visitor-type"
+                value={visitorForm.visitor_type}
+                onChange={(event) => setVisitorForm({ ...visitorForm, visitor_type: event.target.value })}
+              >
+                {VISITOR_TYPES.map((type) => <option key={type} value={type}>{type}</option>)}
+              </select>
+            </div>
+            <div className="resident-visitors-form-group">
+              <label htmlFor="resident-visitor-purpose">Purpose of visit</label>
+              <input
+                id="resident-visitor-purpose"
+                value={visitorForm.purpose}
+                onChange={(event) => setVisitorForm({ ...visitorForm, purpose: event.target.value })}
+                maxLength={255}
+                required
+              />
+            </div>
+            <div className="resident-visitors-form-group">
+              <label htmlFor="resident-visitor-date">Visit date</label>
+              <input
+                id="resident-visitor-date"
+                type="date"
+                min={getTodayDate()}
+                value={visitorForm.visit_date}
+                onChange={(event) => setVisitorForm({ ...visitorForm, visit_date: event.target.value })}
+                required
+              />
+            </div>
+            <div className="resident-visitors-form-group">
+              <label htmlFor="resident-visitor-time">Expected arrival time</label>
+              <input
+                id="resident-visitor-time"
+                type="time"
+                value={visitorForm.expected_time}
+                onChange={(event) => setVisitorForm({ ...visitorForm, expected_time: event.target.value })}
+                required
+              />
+            </div>
+            <div className="resident-visitors-form-actions">
+              <button
+                className="resident-visitors-cancel"
+                type="button"
+                onClick={() => setShowVisitorForm(false)}
+                disabled={registering}
+              >
+                Cancel
+              </button>
+              <button className="resident-visitors-submit" type="submit" disabled={registering}>
+                {registering ? "Registering..." : "Register visitor"}
+              </button>
+            </div>
+          </form>
+          </section>
         </div>
       )}
 
@@ -293,13 +504,9 @@ function ResidentVisitors() {
         <div className="resident-visitors-history-header">
 
           <div>
-            <span>YOUR VISITORS</span>
-
-            <h2>Visitor History</h2>
-
-            <p>
-              Review the visitor information and decide on pending requests.
-            </p>
+            <span>VISITOR HISTORY</span>
+            <h2>Your visitors</h2>
+            <p>Your pre-registrations and requests recorded by Security are shown separately.</p>
           </div>
 
         </div>
@@ -315,27 +522,22 @@ function ResidentVisitors() {
 
           </div>
 
-        ) : visitors.length === 0 ? (
-
-          <div className="resident-visitors-empty">
-
-            <div className="resident-visitors-empty-icon">
-              ◉
-            </div>
-
-            <h3>No visitor requests</h3>
-
-            <p>
-              Visitor requests for your residence will appear here.
-            </p>
-
-          </div>
-
         ) : (
-
-          <div className="resident-visitors-list">
-
-            {visitors.map((visitor) => (
+          <div className="resident-visitors-groups">
+            {visitorGroups.map((group) => (
+              <section className="resident-visitors-group" key={group.key}>
+                <header className="resident-visitors-group-header">
+                  <div>
+                    <h3>{group.title}</h3>
+                    <p>{group.description}</p>
+                  </div>
+                  <span>{group.visitors.length}</span>
+                </header>
+                {group.visitors.length === 0 ? (
+                  <div className="resident-visitors-group-empty">{group.emptyMessage}</div>
+                ) : (
+                  <div className="resident-visitors-list">
+                    {group.visitors.map((visitor) => (
 
               <article
                 className="resident-visitor-card"
@@ -458,9 +660,11 @@ function ResidentVisitors() {
                 )}
 
               </article>
-
+                    ))}
+                  </div>
+                )}
+              </section>
             ))}
-
           </div>
 
         )}

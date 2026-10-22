@@ -7,7 +7,9 @@ const ICONS = {
   assignment: "📌",
   verification: "🔍",
   reopened: "↩️",
-  approved: "✅"
+  approved: "✅",
+  incident: "🚨",
+  visitor: "🚪"
 };
 
 const API = "http://localhost:5000/api/staff/notifications";
@@ -55,6 +57,14 @@ function StaffNotifications() {
     };
   }, [reloadKey]);
 
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      setReloadKey((key) => key + 1);
+    }, 30000);
+
+    return () => window.clearInterval(intervalId);
+  }, []);
+
   const tellMenu = () => window.dispatchEvent(new Event("staff-notifications-changed"));
 
   const openNotification = async (item) => {
@@ -77,7 +87,7 @@ function StaffNotifications() {
     <StaffLayout
       badge="NOTIFICATIONS"
       title="Notifications"
-      subtitle="New assignments and important updates about your work."
+      subtitle="New assignments, visitor pre-registrations, and important work updates."
       actions={
         <button
           type="button"
@@ -108,7 +118,7 @@ function StaffNotifications() {
         ) : notifications.length === 0 ? (
           <div className="sx-empty">
             <strong>No notifications yet</strong>
-            You will be notified here when work is assigned to you.
+            Security staff will be notified here about resident visitor pre-registrations, along with assignments and work updates.
           </div>
         ) : (
           <ul className="sx-list">
