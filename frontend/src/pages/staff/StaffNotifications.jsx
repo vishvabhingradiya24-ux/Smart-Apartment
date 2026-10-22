@@ -7,8 +7,7 @@ const ICONS = {
   assignment: "📌",
   verification: "🔍",
   reopened: "↩️",
-  approved: "✅",
-  incident: "🚨"
+  approved: "✅"
 };
 
 const API = "http://localhost:5000/api/staff/notifications";

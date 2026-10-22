@@ -195,16 +195,6 @@ function StaffDashboard() {
       path: "/staff/visitors",
     },
     {
-      id: 8,
-      icon: "📝",
-      title: staff.department === "Security" ? "Incident Report" : "Report an Issue",
-      description:
-        staff.department === "Security"
-          ? "Report suspicious activity or incidents to the Supervisor and Admin."
-          : "Report unsafe or complex issues to the supervisor.",
-      path: "/staff/report-issue",
-    },
-    {
       id: 9,
       icon: "👥",
       title: "Staff Overview",
@@ -243,14 +233,6 @@ function StaffDashboard() {
       description:
         "Daily work, staff-wise tasks, pending, completed and overdue work.",
       path: "/staff/supervisor/reports",
-    },
-    {
-      id: 14,
-      icon: "🚨",
-      title: "Incident Reports",
-      description:
-        "Incidents and issues reported by Security and other staff.",
-      path: "/staff/supervisor/incidents",
     },
   ];
 

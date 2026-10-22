@@ -38,11 +38,6 @@ const {
 const { getFacilityBookings, approveFacilityBooking, rejectFacilityBooking } = require("../controllers/adminBookingController");
 const authMiddleware = require("../middleware/authMiddleware");
 const requireAdmin = require("../middleware/requireAdmin");
-const { getIncidentReports, updateIncidentReport } = require("../controllers/adminIncidentController");
-const {
-  getAdminServiceRequests,
-  assignServiceRequestToStaff,
-} = require("../controllers/serviceRequestController");
 const { getAdminAssets, createAdminAsset } = require("../controllers/adminAssetController");
 
 router.post("/login", loginAdmin);
@@ -58,8 +53,6 @@ router.get("/staff", getAdminStaff);
 router.post("/staff", createAdminStaff);
 router.put("/staff/:id", updateAdminStaff);
 router.patch("/staff/:id/department", updateAdminStaffDepartment);
-router.get("/service-requests", getAdminServiceRequests);
-router.put("/service-requests/:id/assign", assignServiceRequestToStaff);
 router.get("/assets", getAdminAssets);
 router.post("/assets", createAdminAsset);
 router.get("/security", getAdminSecurity);
@@ -69,8 +62,6 @@ router.post("/payments", createAdminPayment);
 router.put("/payments/:id", updateAdminPayment);
 router.patch("/payments/:id/cancel", cancelAdminPayment);
 router.get("/visitors", getAdminVisitors);
-router.get("/incident-reports", getIncidentReports);
-router.put("/incident-reports/:id", updateIncidentReport);
 router.get("/facility-bookings", getFacilityBookings);
 router.put("/facility-bookings/:id/approve", approveFacilityBooking);
 router.put("/facility-bookings/:id/reject", rejectFacilityBooking);

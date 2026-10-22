@@ -2,17 +2,16 @@
 // It follows the "Staff Roles, Responsibilities and Role-Based Dashboard
 // Guide": every type sees the pages it needs and nothing else.
 //
-//   Maintenance, Electrical, Plumbing   complaints, requests, tasks, report an issue
+//   Maintenance, Electrical, Plumbing   complaints, requests, tasks
 //   Housekeeping                        cleaning complaints / requests and tasks
 //   Garden Maintenance                  tasks only
-//   Security                            visitors, incident reports, security complaints, tasks
+//   Security                            visitors, security complaints, tasks
 //   Facility Supervisor                 staff overview, task management, complaint
-//                                       monitoring, work verification, reports, incidents
+//                                       monitoring, work verification, reports
 
 const ITEMS = {
   dashboard: { path: "/staff/dashboard", icon: "📊", label: "Dashboard" },
   visitors: { path: "/staff/visitors", icon: "🚪", label: "Visitors" },
-  report: { path: "/staff/report-issue", icon: "📝", label: "Report an Issue" },
   complaints: { path: "/staff/complaints", icon: "🛠️", label: "Assigned Complaints" },
   requests: { path: "/staff/service-requests", icon: "📋", label: "Service Requests" },
   tasks: { path: "/staff/tasks", icon: "✅", label: "Tasks" },
@@ -25,8 +24,7 @@ const ITEMS = {
   svTasks: { path: "/staff/supervisor/tasks", icon: "🗂️", label: "Task Management" },
   svComplaints: { path: "/staff/supervisor/complaints", icon: "📡", label: "Complaint Monitoring" },
   svVerification: { path: "/staff/supervisor/verification", icon: "🔍", label: "Work Verification" },
-  svReports: { path: "/staff/supervisor/reports", icon: "📈", label: "Reports" },
-  svIncidents: { path: "/staff/supervisor/incidents", icon: "🚨", label: "Incident Reports" }
+  svReports: { path: "/staff/supervisor/reports", icon: "📈", label: "Reports" }
 };
 
 const TECHNICAL_STAFF = [
@@ -58,7 +56,6 @@ const MENU_BY_DEPARTMENT = {
   Security: [
     "dashboard",
     "visitors",
-    "report",
     "complaints",
     "tasks",
     "history",
@@ -72,7 +69,6 @@ const MENU_BY_DEPARTMENT = {
     "svComplaints",
     "svVerification",
     "svReports",
-    "svIncidents",
     "complaints",
     "requests",
     "tasks",
@@ -88,7 +84,6 @@ const GENERAL_MENU = [
   "complaints",
   "requests",
   "tasks",
-  "report",
   "assets",
   "history",
   "notifications",
@@ -100,7 +95,6 @@ const STAFF_SIDEBAR_MENU = [
   "dashboard",
   "complaints",
   "tasks",
-  "report",
   "assets",
   "history",
   "notifications",
@@ -123,9 +117,6 @@ export const staffSidebarMenuFor = (department) => {
     if (key === "tasks") {
       return { ...item, label: "Tasks" };
     }
-    if (key === "report") {
-      return { ...item, label: "Report & Issue" };
-    }
 
     return item;
   });
@@ -142,11 +133,6 @@ export const staffMenuFor = (department) => {
 
   return keys.map((key) => {
     const item = { key, ...ITEMS[key] };
-
-    // Security files incident reports; everyone else reports issues.
-    if (key === "report" && matchedDepartment === "Security") {
-      return { ...item, icon: "🚨", label: "Incident Report" };
-    }
 
     return item;
   });

@@ -1,6 +1,7 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { pool } = require("../config/db");
+const { syncMaintenanceDues } = require("../utils/maintenance");
 const { STAFF_DEPARTMENTS } = require("../constants/staffDepartments");
 const { getEmailError, getPhoneError } = require("../utils/validation");
 
@@ -636,10 +637,12 @@ const getAdminSecurity = async (req, res) => {
 const getAdminPayments = async (req, res) => {
   try {
     if (!requireAdmin(req, res)) return;
+    await syncMaintenanceDues();
     const [payments] = await pool.query(
       `SELECT p.id AS payment_id, p.resident_id, p.amount, p.billing_month,
               p.due_date, p.paid_date, p.status, p.payment_method,
               p.transaction_id, p.razorpay_order_id, p.created_at,
+              p.payment_type, p.penalty_amount,
               r.first_name, r.last_name, r.block_wing, r.flat_number
        FROM payments p LEFT JOIN residents r ON r.id = p.resident_id
        ORDER BY COALESCE(p.paid_date, p.created_at, p.due_date) DESC, p.id DESC`

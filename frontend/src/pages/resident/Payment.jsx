@@ -365,8 +365,15 @@ function Payment() {
                 </h3>
 
                 <p>
-                  Apartment maintenance charge
+                  {currentPayment.payment_type === "Maintenance"
+                    ? "Monthly maintenance charge - pay between the 1st and 10th"
+                    : "Apartment charge"}
                 </p>
+                {Number(currentPayment.penalty_amount) > 0 && (
+                  <p className="late-fee-note">
+                    Includes {formatAmount(currentPayment.penalty_amount)} late fee for missing the 10th due date.
+                  </p>
+                )}
 
               </div>
 
@@ -494,6 +501,9 @@ function Payment() {
 
                 <div className="amount-cell">
                   {formatAmount(payment.amount)}
+                  {Number(payment.penalty_amount) > 0 && (
+                    <small className="late-fee-note"> (incl. {formatAmount(payment.penalty_amount)} late fee)</small>
+                  )}
                 </div>
 
 

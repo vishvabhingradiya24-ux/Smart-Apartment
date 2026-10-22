@@ -43,7 +43,6 @@ const visitorRoutes = require("./routes/visitorRoutes");
 const noticeRoutes = require("./routes/noticeRoutes");
 const publicRoutes = require("./routes/publicRoutes");
 const securityRoutes = require("./routes/securityRoutes");
-const staffReportRoutes = require("./routes/staffReportRoutes");
 const supervisorRoutes = require("./routes/supervisorRoutes");
 const { residentPollRoutes, adminPollRoutes } = require("./routes/pollRoutes");
 
@@ -68,9 +67,6 @@ app.use("/api/staff", staffRoutes);
 
 // Security staff: visitors (entry / exit)
 app.use("/api/staff/security", securityRoutes);
-
-// Incident / issue reports sent by staff
-app.use("/api/staff/reports", staffReportRoutes);
 
 // Facility Supervisor tools
 app.use("/api/staff/supervisor", supervisorRoutes);

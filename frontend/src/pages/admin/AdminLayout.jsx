@@ -18,7 +18,6 @@ import {
   PackageOpen,
   Search,
   Settings2,
-  ShieldAlert,
   Sun,
   Sunrise,
   Sunset,
@@ -26,7 +25,6 @@ import {
   UsersRound,
   Vote,
   Waves,
-  Wrench,
 } from "lucide-react";
 import "../../css/admin.css";
 
@@ -34,9 +32,7 @@ const MENU_ITEMS = [
   { label: "Dashboard", icon: LayoutDashboard, path: "/admin" },
   { label: "Residents", icon: UsersRound, path: "/admin/residents" },
   { label: "Staff", icon: BriefcaseBusiness, path: "/admin/staff" },
-  { label: "Incident Reports", icon: ShieldAlert, path: "/admin/incident-reports" },
   { label: "Complaints", icon: ClipboardList, path: "/admin/complaints" },
-  { label: "Service Requests", icon: Wrench, path: "/admin/service-requests" },
   { label: "Tasks", icon: ClipboardList, path: "/admin/task" },
   { label: "Assets & Inventory", icon: PackageOpen, path: "/admin/assets" },
   { label: "Payments", icon: CreditCard, path: "/admin/payments" },

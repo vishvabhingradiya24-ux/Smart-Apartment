@@ -53,13 +53,11 @@ import StaffWorkHistory from "./pages/staff/StaffWorkHistory";
 import StaffProfile from "./pages/staff/StaffProfile";
 import StaffNotifications from "./pages/staff/StaffNotifications";
 import StaffVisitors from "./pages/staff/StaffVisitors";
-import StaffReportIssue from "./pages/staff/StaffReportIssue";
 import StaffSupervisorStaff from "./pages/staff/StaffSupervisorStaff";
 import StaffSupervisorTasks from "./pages/staff/StaffSupervisorTasks";
 import StaffSupervisorComplaints from "./pages/staff/StaffSupervisorComplaints";
 import StaffSupervisorVerification from "./pages/staff/StaffSupervisorVerification";
 import StaffSupervisorReports from "./pages/staff/StaffSupervisorReports";
-import StaffSupervisorIncidents from "./pages/staff/StaffSupervisorIncidents";
 import StaffWorkspaceLayout from "./components/StaffWorkspaceLayout";
 
 
@@ -80,9 +78,7 @@ import Notices from "./pages/admin/Notices";
 import Notifications from "./pages/admin/Notifications";
 import Settings from "./pages/admin/Settings";
 import AdminTasks from "./pages/admin/AdminTasks";
-import AdminServiceRequests from "./pages/admin/AdminServiceRequests";
 import AdminAssets from "./pages/admin/AdminAssets";
-import AdminIncidents from "./pages/admin/AdminIncidents";
 import AdminPolls from "./pages/admin/AdminPolls";
 
 // Keep personal/project-wide CSS overrides last so they can override page styles.
@@ -137,13 +133,11 @@ function App() {
           <Route path="profile" element={<StaffProfile />} />
           <Route path="notifications" element={<StaffNotifications />} />
           <Route path="visitors" element={<StaffVisitors />} />
-          <Route path="report-issue" element={<StaffReportIssue />} />
           <Route path="supervisor/staff" element={<StaffSupervisorStaff />} />
           <Route path="supervisor/tasks" element={<StaffSupervisorTasks />} />
           <Route path="supervisor/complaints" element={<StaffSupervisorComplaints />} />
           <Route path="supervisor/verification" element={<StaffSupervisorVerification />} />
           <Route path="supervisor/reports" element={<StaffSupervisorReports />} />
-          <Route path="supervisor/incidents" element={<StaffSupervisorIncidents />} />
         </Route>
 
 
@@ -181,14 +175,6 @@ function App() {
           }
         />
         <Route
-          path="/admin/service-requests"
-          element={
-            <AdminLayout>
-              <AdminServiceRequests />
-            </AdminLayout>
-          }
-        />
-        <Route
           path="/admin/assets"
           element={
             <AdminLayout>
@@ -201,14 +187,6 @@ function App() {
           element={
             <AdminLayout>
               <Payments />
-            </AdminLayout>
-          }
-        />
-        <Route
-          path="/admin/incident-reports"
-          element={
-            <AdminLayout>
-              <AdminIncidents />
             </AdminLayout>
           }
         />

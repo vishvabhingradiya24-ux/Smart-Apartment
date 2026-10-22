@@ -1,4 +1,5 @@
 const crypto = require("crypto");
+const { syncMaintenanceDues } = require("../utils/maintenance");
 const Razorpay = require("razorpay");
 
 const { pool } = require("../config/db");
@@ -21,6 +22,7 @@ const razorpay = new Razorpay({
 const getMyPayments = async (req, res) => {
   try {
     const residentId = req.user.id;
+    await syncMaintenanceDues();
 
     const [payments] = await pool.query(
       `SELECT
@@ -33,6 +35,8 @@ const getMyPayments = async (req, res) => {
         payment_method,
         transaction_id,
         razorpay_order_id,
+        payment_type,
+        penalty_amount,
         created_at
       FROM payments
       WHERE resident_id = ?
@@ -61,6 +65,7 @@ const getMyPayments = async (req, res) => {
 const getCurrentPayment = async (req, res) => {
   try {
     const residentId = req.user.id;
+    await syncMaintenanceDues();
 
     const [payments] = await pool.query(
       `SELECT
@@ -73,6 +78,8 @@ const getCurrentPayment = async (req, res) => {
         payment_method,
         transaction_id,
         razorpay_order_id,
+        payment_type,
+        penalty_amount,
         created_at
       FROM payments
       WHERE resident_id = ?
@@ -81,6 +88,7 @@ const getCurrentPayment = async (req, res) => {
           WHEN status = 'Pending' THEN 0
           ELSE 1
         END,
+        CASE WHEN status = 'Pending' THEN due_date END ASC,
         due_date DESC
       LIMIT 1`,
       [residentId]
@@ -113,6 +121,7 @@ const getCurrentPayment = async (req, res) => {
 const createPaymentOrder = async (req, res) => {
   try {
     const residentId = req.user.id;
+    await syncMaintenanceDues();
 
     // --------------------------------------
     // Get pending payment of logged-in resident
@@ -246,8 +255,8 @@ const verifyPayment = async (req, res) => {
       razorpay_order_id,
       razorpay_payment_id,
       razorpay_signature,
-      payment_id,
     } = req.body;
+    const payment_id = req.body.payment_id ?? req.body.paymentId;
 
     // --------------------------------------
     // Validate request

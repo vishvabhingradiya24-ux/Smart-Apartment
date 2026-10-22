@@ -8,9 +8,7 @@ const {
   getComplaints,
   getVerificationQueue,
   verifyTask,
-  getReports,
-  getIncidents,
-  updateIncident
+  getReports
 } = require("../controllers/supervisorController");
 const authMiddleware = require("../middleware/authMiddleware");
 const requireStaffDepartment = require("../middleware/requireStaffDepartment");
@@ -33,7 +31,5 @@ router.put("/tasks/:id/verify", verifyTask);
 
 router.get("/reports", getReports);
 
-router.get("/incidents", getIncidents);
-router.put("/incidents/:id", updateIncident);
 
 module.exports = router;

@@ -1,7 +1,7 @@
 USE `smart_apartment`;
 
 -- Staff role features: work notes, accepting work, supervisor verification,
--- staff notifications, security visitor tracking and incident reports.
+-- staff notifications and security visitor tracking.
 --
 -- Run this once on your own MySQL database (after admin_panel_schema.sql).
 -- It is safe to run more than once: columns and tables are only added when
@@ -113,20 +113,3 @@ CREATE TABLE IF NOT EXISTS staff_notifications (
     FOREIGN KEY (staff_id) REFERENCES staff (id) ON DELETE CASCADE
 );
 
--- Incident reports (Security) and issue reports (technical staff) sent to the
--- Facility Supervisor and Admin
-CREATE TABLE IF NOT EXISTS incident_reports (
-  report_id INT NOT NULL AUTO_INCREMENT,
-  reporter_staff_id INT NULL,
-  report_type VARCHAR(20) NOT NULL DEFAULT 'Incident',
-  title VARCHAR(150) NOT NULL,
-  description TEXT NOT NULL,
-  location VARCHAR(150) NULL,
-  occurred_at DATETIME NULL,
-  severity VARCHAR(20) NOT NULL DEFAULT 'Medium',
-  status VARCHAR(20) NOT NULL DEFAULT 'Open',
-  created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (report_id),
-  KEY idx_incident_reports_status (status, created_at)
-);

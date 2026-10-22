@@ -62,7 +62,7 @@ export const workSummary = (department) => {
   }
 
   if (department === "Security") {
-    return "visitor entry and exit, incident reports, Security complaints, plus tasks and other work given by the admin";
+    return "visitor entry and exit, Security complaints, plus tasks and other work given by the admin";
   }
 
   const complaints = matching(COMPLAINT_CATEGORY_DEPARTMENTS, department);
