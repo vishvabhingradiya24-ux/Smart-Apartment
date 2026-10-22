@@ -15,6 +15,8 @@ const Facilities = () => {
   const [facilities, setFacilities] = useState([]);
   const [addons, setAddons] = useState([]);
   const [bookings, setBookings] = useState([]);
+  const [payingBookingId, setPayingBookingId] = useState(null);
+  const [paymentError, setPaymentError] = useState("");
 
   const [selectedFacility, setSelectedFacility] = useState(null);
   const [selectedAddons, setSelectedAddons] = useState([]);
@@ -48,7 +50,7 @@ const Facilities = () => {
   const today = new Date().toISOString().split("T")[0];
 
   const selectedFacilityBookingCharge =
-    selectedFacility?.charge_period === "Per Booking"
+    !["Free", "Per Month"].includes(selectedFacility?.charge_period)
       ? Number(selectedFacility?.base_charge || 0)
       : 0;
 
@@ -420,6 +422,85 @@ const Facilities = () => {
     });
   };
 
+  const loadRazorpay = () =>
+    new Promise((resolve) => {
+      if (window.Razorpay) {
+        resolve(true);
+        return;
+      }
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+
+  const payForBooking = async (booking) => {
+    const authHeaders = {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    };
+    setPaymentError("");
+    setPayingBookingId(booking.booking_id);
+    try {
+      if (!(await loadRazorpay())) throw new Error("Unable to load payment gateway");
+
+      const orderResponse = await fetch(
+        "http://localhost:5000/api/resident/payments/create-order",
+        {
+          method: "POST",
+          headers: authHeaders,
+          body: JSON.stringify({ paymentId: booking.payment_id }),
+        }
+      );
+      const orderData = await orderResponse.json();
+      if (!orderResponse.ok) throw new Error(orderData.message || "Unable to create payment");
+
+      const razorpay = new window.Razorpay({
+        key: orderData.key,
+        amount: orderData.order.amount,
+        currency: orderData.order.currency,
+        name: "Smart Apartment",
+        description: `${booking.facility_name} booking #${booking.booking_id}`,
+        order_id: orderData.order.id,
+        theme: { color: "#087f69" },
+        handler: async (response) => {
+          try {
+            const verifyResponse = await fetch(
+              "http://localhost:5000/api/resident/payments/verify",
+              {
+                method: "POST",
+                headers: authHeaders,
+                body: JSON.stringify({
+                  paymentId: booking.payment_id,
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_signature: response.razorpay_signature,
+                }),
+              }
+            );
+            const verifyData = await verifyResponse.json();
+            if (!verifyResponse.ok) throw new Error(verifyData.message || "Payment verification failed");
+            await refreshBookings();
+          } catch (err) {
+            setPaymentError(err.message);
+          } finally {
+            setPayingBookingId(null);
+          }
+        },
+        modal: { ondismiss: () => setPayingBookingId(null) },
+      });
+      razorpay.on("payment.failed", (response) => {
+        setPaymentError(response.error?.description || "Payment failed. Please try again.");
+        setPayingBookingId(null);
+      });
+      razorpay.open();
+    } catch (err) {
+      setPaymentError(err.message || "Payment could not be started.");
+      setPayingBookingId(null);
+    }
+  };
+
   const getStatusClass = (status) => {
     switch (status) {
       case "Approved":
@@ -633,6 +714,38 @@ const Facilities = () => {
                       </strong>
                     </div>
                   </div>
+
+                  {booking.status === "Pending" && (
+                    <p className="booking-payment-note">Waiting for admin approval. Payment will be requested after approval.</p>
+                  )}
+                  {booking.status === "Approved" && booking.payment_status === "Pending" && (
+                    <p className="booking-payment-note">
+                      Approved. Pay ₹{Number(booking.total_amount || 0).toLocaleString("en-IN")} from the Payment page before{" "}
+                      {new Date(booking.payment_due_at).toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
+                      {" "}or the booking will be cancelled.
+                    </p>
+                  )}
+                  {booking.status === "Approved" && booking.payment_status === "Pending" && (
+                    <div className="booking-pay-row">
+                      <button
+                        type="button"
+                        className="booking-pay-btn"
+                        disabled={payingBookingId === booking.booking_id}
+                        onClick={() => payForBooking(booking)}
+                      >
+                        {payingBookingId === booking.booking_id
+                          ? "Processing..."
+                          : `Pay ₹${Number(booking.total_amount || 0).toLocaleString("en-IN")}`}
+                      </button>
+                      {paymentError && <span className="booking-pay-error" role="alert">{paymentError}</span>}
+                    </div>
+                  )}
+                  {booking.status === "Approved" && booking.payment_status === "Paid" && (
+                    <p className="booking-payment-note">Payment received. Your booking is confirmed.</p>
+                  )}
+                  {(booking.status === "Rejected" || booking.status === "Cancelled") && booking.admin_remarks && (
+                    <p className="booking-payment-note">{booking.admin_remarks}</p>
+                  )}
 
                   {booking.addons && booking.addons.length > 0 && (
                     <div className="booking-addons-history">

@@ -3,7 +3,10 @@ import { Building2, CalendarDays, Check, Search, Wrench } from "lucide-react";
 import AdminFormModal from "./AdminFormModal";
 import "../../css/amenities.css";
 
-const emptyFacility = { facility_name: "", description: "", location: "", base_charge: "0", charge_period: "Per Booking", availability_status: "Available" };
+const AMENITY_NAMES = ["Swimming Pool", "Fitness Gym", "Community Hall", "Garden & Kids Play Area", "Badminton Court", "Rooftop Terrace"];
+const CHARGE_PERIODS = ["Per Day", "Per Hour", "Per Month"];
+const STATUSES = ["Available", "Booked", "Maintenance"];
+const emptyFacility = { facility_name: "", description: "", location: "", base_charge: "0", charge_period: "Per Day", availability_status: "Available" };
 const emptyAddon = { addon_name: "", description: "", charge_type: "Fixed", price: "0", status: "Available" };
 
 const Amenities = () => {
@@ -59,12 +62,12 @@ const Amenities = () => {
     setFormType("facility");
     setEditingId(facility.facility_id);
     setForm({
-      facility_name: facility.facility_name || "",
+      facility_name: AMENITY_NAMES.includes(facility.facility_name) ? facility.facility_name : "",
       description: facility.description || "",
       location: facility.location || "",
       base_charge: String(facility.base_charge ?? 0),
-      charge_period: facility.charge_period || "Per Booking",
-      availability_status: facility.availability_status || "Available",
+      charge_period: CHARGE_PERIODS.includes(facility.charge_period) ? facility.charge_period : "Per Day",
+      availability_status: STATUSES.includes(facility.availability_status) ? facility.availability_status : "Available",
     });
     setError("");
   };
@@ -96,7 +99,7 @@ const Amenities = () => {
     const name = (isFacility ? form.facility_name : form.addon_name).trim();
     const amount = isFacility ? form.base_charge : form.price;
     if (!name) {
-      setError(`${isFacility ? "Amenity" : "Add-on"} name is required.`);
+      setError(`${isFacility ? "Select an amenity" : "Add-on name is required."}${isFacility ? "." : ""}`);
       return;
     }
     if (name.length > 150) {
@@ -120,7 +123,7 @@ const Amenities = () => {
         method: editingId ? "PUT" : "POST",
         body: JSON.stringify({
           ...form,
-          ...(isFacility ? { facility_name: name, base_charge: form.charge_period === "Free" ? "0" : amount } : { addon_name: name, price: amount }),
+          ...(isFacility ? { facility_name: name, base_charge: amount } : { addon_name: name, price: amount }),
           description: form.description.trim(),
           ...(isFacility ? { location: form.location.trim() } : {}),
         }),
@@ -141,7 +144,6 @@ const Amenities = () => {
     const matchesSearch = [
       amenity.facility_name,
       amenity.facility_id,
-      amenity.location,
       amenity.description,
     ].some((value) => String(value || "").toLowerCase().includes(search));
     const matchesStatus = statusFilter === "All" || (
@@ -175,15 +177,19 @@ const Amenities = () => {
     {formType && <AdminFormModal title={`${editingId ? "Edit" : "Add"} ${isFacilityForm ? "Amenity" : "Booking Add-on"}`} onClose={() => setFormType(null)} saving={saving}>
       <form className="admin-data-form amenity-admin-form" onSubmit={saveRecord}>
       <div className="admin-data-form-grid">
-        <label>{isFacilityForm ? "Amenity name" : "Add-on name"}
-          <input required maxLength="150" value={isFacilityForm ? form.facility_name : form.addon_name} onChange={(event) => setForm({ ...form, [isFacilityForm ? "facility_name" : "addon_name"]: event.target.value })} />
-        </label>
-        <label>Description<input value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} /></label>
+        {isFacilityForm ? <label>Amenity name
+          <select required value={form.facility_name} onChange={(event) => setForm({ ...form, facility_name: event.target.value })}>
+            <option value="">Select amenity</option>
+            {AMENITY_NAMES.map((name) => <option key={name}>{name}</option>)}
+          </select>
+        </label> : <label>Add-on name
+          <input required maxLength="150" value={form.addon_name} onChange={(event) => setForm({ ...form, addon_name: event.target.value })} />
+        </label>}
+        <label>{isFacilityForm ? "Amenity description" : "Description"}<input value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} /></label>
         {isFacilityForm ? <>
-          <label>Location<input value={form.location} onChange={(event) => setForm({ ...form, location: event.target.value })} /></label>
-          <label>Charge (₹)<input required min="0" max="99999999.99" step="0.01" type="number" value={form.base_charge} disabled={form.charge_period === "Free"} onChange={(event) => setForm({ ...form, base_charge: event.target.value })} /></label>
-          <label>Charge period<select value={form.charge_period} onChange={(event) => setForm({ ...form, charge_period: event.target.value, base_charge: event.target.value === "Free" ? "0" : form.base_charge })}><option>Per Booking</option><option>Free</option></select></label>
-          <label>Status<select value={form.availability_status} onChange={(event) => setForm({ ...form, availability_status: event.target.value })}><option>Available</option><option>Unavailable</option><option>Maintenance</option></select>{form.availability_status === "Maintenance" && <small>Temporarily unavailable while repair or service work is in progress.</small>}</label>
+          <label>Charge per<select value={form.charge_period} onChange={(event) => setForm({ ...form, charge_period: event.target.value })}>{CHARGE_PERIODS.map((p) => <option key={p}>{p}</option>)}</select></label>
+          <label>Charges (₹)<input required min="0" max="99999999.99" step="0.01" type="number" value={form.base_charge} onChange={(event) => setForm({ ...form, base_charge: event.target.value })} /></label>
+          <label>Status<select value={form.availability_status} onChange={(event) => setForm({ ...form, availability_status: event.target.value })}>{STATUSES.map((st) => <option key={st}>{st}</option>)}</select>{form.availability_status === "Maintenance" && <small>Temporarily unavailable while repair or service work is in progress.</small>}</label>
         </> : <>
           <label>Charge type<select value={form.charge_type} onChange={(event) => setForm({ ...form, charge_type: event.target.value })}><option>Fixed</option><option>Per Item</option><option>Per Person</option></select></label>
           <label>Price (₹)<input required min="0" max="99999999.99" step="0.01" type="number" value={form.price} onChange={(event) => setForm({ ...form, price: event.target.value })} /></label>
@@ -198,22 +204,21 @@ const Amenities = () => {
     {error && !formType && <p className="page-error" role="alert">{error}</p>}
 
     <div className="amenity-toolbar">
-      <div className="amenity-search"><Search size={16} aria-hidden="true" /><input placeholder="Search amenity, ID or location..." value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} /></div>
+      <div className="amenity-search"><Search size={16} aria-hidden="true" /><input placeholder="Search amenity or ID..." value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} /></div>
       <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)} className="amenity-filter"><option>All</option><option>Available</option><option>Unavailable</option></select>
     </div>
 
     <div className="amenities-card"><div className="amenities-card-header"><div><h2>Society Amenities</h2><p>Bookings shows the number of resident bookings; 0 means none have been made.</p></div><span className="record-count">{filteredAmenities.length} Records</span></div>
-      <div className="amenities-table-wrapper"><table className="amenities-table"><thead><tr><th>Amenity ID</th><th>Amenity</th><th>Description</th><th>Location</th><th>Charge</th><th>Status</th><th>Bookings</th><th>Actions</th></tr></thead><tbody>
-        {loading ? <tr><td colSpan="8">Loading amenities…</td></tr> : filteredAmenities.length ? filteredAmenities.map((amenity) => <tr key={amenity.facility_id}>
+      <div className="amenities-table-wrapper"><table className="amenities-table"><thead><tr><th>Amenity ID</th><th>Amenity</th><th>Description</th><th>Charge</th><th>Status</th><th>Bookings</th><th>Actions</th></tr></thead><tbody>
+        {loading ? <tr><td colSpan="7">Loading amenities…</td></tr> : filteredAmenities.length ? filteredAmenities.map((amenity) => <tr key={amenity.facility_id}>
           <td><span className="amenity-id">AM{amenity.facility_id}</span></td>
           <td><div className="amenity-name-cell"><div className="amenity-avatar">🏠</div><strong>{amenity.facility_name}</strong></div></td>
           <td><span className="amenity-description">{amenity.description || "—"}</span></td>
-          <td><span className="location-text">{amenity.location || "—"}</span></td>
-          <td>₹{Number(amenity.base_charge || 0).toLocaleString("en-IN")} / {amenity.charge_period}</td>
+                    <td>₹{Number(amenity.base_charge || 0).toLocaleString("en-IN")} / {amenity.charge_period}</td>
           <td><span className={`amenity-status ${amenity.availability_status.toLowerCase()}`}>{amenity.availability_status}</span></td>
           <td><strong className="booking-count">{Number(amenity.total_bookings || 0)}</strong>{Number(amenity.open_bookings || 0) > 0 && <small> · {Number(amenity.open_bookings)} open</small>}</td>
           <td><button className="admin-row-action" type="button" onClick={() => openEditFacility(amenity)}>Edit</button></td>
-        </tr>) : <tr><td colSpan="8" className="no-amenities">{error ? "Amenities could not be loaded." : "No amenities found."}</td></tr>}
+        </tr>) : <tr><td colSpan="7" className="no-amenities">{error ? "Amenities could not be loaded." : "No amenities found."}</td></tr>}
       </tbody></table></div>
     </div>
 

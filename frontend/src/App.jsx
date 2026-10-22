@@ -75,6 +75,7 @@ import Complaints from "./pages/admin/Complaints";
 import Payments from "./pages/admin/Payments";
 import Visitors from "./pages/admin/Visitors";
 import Amenities from "./pages/admin/Amenities";
+import FacilityBookings from "./pages/admin/FacilityBookings";
 import Notices from "./pages/admin/Notices";
 import Notifications from "./pages/admin/Notifications";
 import Settings from "./pages/admin/Settings";
@@ -215,6 +216,14 @@ function App() {
           element={
             <AdminLayout>
               <Visitors />
+            </AdminLayout>
+          }
+        />
+        <Route
+          path="/admin/facility-bookings"
+          element={
+            <AdminLayout>
+              <FacilityBookings />
             </AdminLayout>
           }
         />

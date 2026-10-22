@@ -35,6 +35,7 @@ const {
   createAdminAmenityAddon,
   updateAdminAmenityAddon,
 } = require("../controllers/adminController");
+const { getFacilityBookings, approveFacilityBooking, rejectFacilityBooking } = require("../controllers/adminBookingController");
 const authMiddleware = require("../middleware/authMiddleware");
 const requireAdmin = require("../middleware/requireAdmin");
 const { getIncidentReports, updateIncidentReport } = require("../controllers/adminIncidentController");
@@ -70,6 +71,9 @@ router.patch("/payments/:id/cancel", cancelAdminPayment);
 router.get("/visitors", getAdminVisitors);
 router.get("/incident-reports", getIncidentReports);
 router.put("/incident-reports/:id", updateIncidentReport);
+router.get("/facility-bookings", getFacilityBookings);
+router.put("/facility-bookings/:id/approve", approveFacilityBooking);
+router.put("/facility-bookings/:id/reject", rejectFacilityBooking);
 router.get("/amenities", getAdminAmenities);
 router.post("/amenities", createAdminAmenity);
 router.put("/amenities/:id", updateAdminAmenity);

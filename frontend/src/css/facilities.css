@@ -1265,4 +1265,10 @@
   .submit-booking-button {
     width: 100%;
   }
-}
+}.booking-payment-note { margin: 10px 0 0; padding: 9px 12px; border-radius: 8px; background: #f2f7f6; color: #17324f; font-size: 13px; }
+
+.booking-pay-row { display: flex; align-items: center; gap: 12px; margin-top: 10px; flex-wrap: wrap; }
+.booking-pay-btn { min-height: 38px; padding: 0 20px; border: 0; border-radius: 8px; background: #087f69; color: #fff; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+.booking-pay-btn:hover:not(:disabled) { background: #066b59; }
+.booking-pay-btn:disabled { opacity: .6; cursor: not-allowed; }
+.booking-pay-error { color: #b42318; font-size: 13px; }

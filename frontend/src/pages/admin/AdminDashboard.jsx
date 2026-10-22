@@ -93,6 +93,13 @@ const AdminDashboard = () => {
       change: `${statsData.checkedInToday ?? 0} checked in today`,
       path: "/admin/visitors",
     },
+    {
+      title: "Facility Bookings",
+      value: statsData.pendingBookings ?? "—",
+      icon: Waves,
+      change: "Pending approval",
+      path: "/admin/facility-bookings",
+    },
   ];
 
   return (

@@ -132,6 +132,10 @@ const getAdminDashboard = async (req, res) => {
       `SELECT COUNT(*) AS active_amenities FROM facilities WHERE availability_status = 'Available'`
     );
 
+    const [bookingRows] = await pool.query(
+      `SELECT COUNT(*) AS pending_bookings FROM facility_bookings WHERE status = 'Pending'`
+    );
+
     const [complaints] = await pool.query(
       `SELECT c.complaint_title AS title, c.status, c.complaint_date AS activity_date,
               r.block_wing, r.flat_number
@@ -191,6 +195,7 @@ const getAdminDashboard = async (req, res) => {
         pendingComplaints: Number(complaintRows[0].pending_complaints || 0),
         paidTotal: Number(paymentRows[0].paid_total || 0),
         pendingPayments: Number(paymentRows[0].pending_payments || 0),
+        pendingBookings: Number(bookingRows[0].pending_bookings || 0),
         visitorsToday: Number(visitorRows[0].visitors_today || 0),
         checkedInToday: Number(visitorRows[0].checked_in_today || 0),
       },
@@ -1079,16 +1084,59 @@ const cancelAdminPayment = async (req, res) => {
   }
 };
 
+const AMENITY_NAMES = ["Swimming Pool", "Fitness Gym", "Community Hall", "Garden & Kids Play Area", "Badminton Court", "Rooftop Terrace"];
+const AMENITY_PERIODS = ["Per Day", "Per Hour", "Per Month"];
+const AMENITY_STATUSES = ["Available", "Booked", "Maintenance"];
+const COMMUNITY_HALL_ADDONS = [
+  ["Air Conditioning (AC)", 500, "Fixed"],
+  ["Extra Chairs", 10, "Per Item"],
+  ["Extra Tables", 50, "Per Item"],
+  ["Sound System", 300, "Fixed"],
+  ["Projector & Screen", 500, "Fixed"],
+  ["Decoration Setup", 1000, "Fixed"],
+  ["Cleaning Service", 300, "Fixed"],
+  ["Generator Backup", 500, "Fixed"],
+  ["Stage Setup", 700, "Fixed"],
+  ["Catering Setup Area", 500, "Fixed"],
+];
+
+let amenitySetupDone = false;
+const ensureAmenitySetup = async () => {
+  if (amenitySetupDone) return;
+  await pool.query(
+    `CREATE TABLE IF NOT EXISTS facility_selected_addons (
+       facility_id INT NOT NULL,
+       addon_id INT NOT NULL,
+       PRIMARY KEY (facility_id, addon_id),
+       CONSTRAINT fk_fsa_facility FOREIGN KEY (facility_id) REFERENCES facilities(facility_id) ON DELETE CASCADE,
+       CONSTRAINT fk_fsa_addon FOREIGN KEY (addon_id) REFERENCES facility_addons(addon_id) ON DELETE CASCADE
+     )`
+  );
+  for (const [name, price, type] of COMMUNITY_HALL_ADDONS) {
+    const [rows] = await pool.query("SELECT addon_id FROM facility_addons WHERE addon_name = ? LIMIT 1", [name]);
+    if (!rows.length) {
+      await pool.query(
+        "INSERT INTO facility_addons (addon_name, charge_type, price, status) VALUES (?, ?, ?, 'Available')",
+        [name, type, price]
+      );
+    }
+  }
+  amenitySetupDone = true;
+};
+
 const getAdminAmenities = async (req, res) => {
   try {
     if (!requireAdmin(req, res)) return;
+    await ensureAmenitySetup();
     const [amenities] = await pool.query(
       `SELECT f.facility_id, f.facility_name, f.description, f.location,
               f.availability_status, f.base_charge, f.charge_period,
-              COUNT(fb.booking_id) AS total_bookings,
-              SUM(CASE WHEN fb.status IN ('Pending', 'Approved') THEN 1 ELSE 0 END) AS open_bookings
+              COUNT(DISTINCT fb.booking_id) AS total_bookings,
+              COUNT(DISTINCT CASE WHEN fb.status IN ('Pending', 'Approved') THEN fb.booking_id END) AS open_bookings,
+              GROUP_CONCAT(DISTINCT fsa.addon_id) AS selected_addon_ids
        FROM facilities f
        LEFT JOIN facility_bookings fb ON fb.facility_id = f.facility_id
+       LEFT JOIN facility_selected_addons fsa ON fsa.facility_id = f.facility_id
        GROUP BY f.facility_id, f.facility_name, f.description, f.location,
                 f.availability_status, f.base_charge, f.charge_period
        ORDER BY f.facility_name ASC`
@@ -1097,7 +1145,13 @@ const getAdminAmenities = async (req, res) => {
       `SELECT addon_id, addon_name, description, charge_type, price, status
        FROM facility_addons ORDER BY addon_name ASC`
     );
-    res.status(200).json({ amenities, addons });
+    res.status(200).json({
+      amenities: amenities.map((a) => ({
+        ...a,
+        selected_addon_ids: a.selected_addon_ids ? a.selected_addon_ids.split(",").map(Number) : [],
+      })),
+      addons,
+    });
   } catch (error) {
     console.error("Get Admin Amenities Error:", error);
     res.status(500).json({ message: "Unable to fetch amenities" });
@@ -1106,22 +1160,34 @@ const getAdminAmenities = async (req, res) => {
 
 const validateFacility = (body) => {
   const baseCharge = Number(body.base_charge);
-  if (!body.facility_name?.trim() || !Number.isFinite(baseCharge) || !isValidMoney(body.base_charge, true) ||
-      !["Available", "Unavailable", "Maintenance"].includes(body.availability_status) ||
-      !["Per Booking", "Free"].includes(body.charge_period)) return null;
+  if (!AMENITY_NAMES.includes(body.facility_name) || !Number.isFinite(baseCharge) || !isValidMoney(body.base_charge, true) ||
+      !AMENITY_STATUSES.includes(body.availability_status) ||
+      !AMENITY_PERIODS.includes(body.charge_period)) return null;
+  const ids = body.facility_name === "Community Hall" && Array.isArray(body.addon_ids)
+    ? [...new Set(body.addon_ids.map(Number).filter(Number.isInteger))]
+    : [];
   return {
-    name: body.facility_name.trim(),
+    name: body.facility_name,
     description: body.description?.trim() || null,
     location: body.location?.trim() || null,
     status: body.availability_status,
-    charge: body.charge_period === "Free" ? 0 : baseCharge,
+    charge: baseCharge,
     period: body.charge_period,
+    addonIds: ids,
   };
+};
+
+const saveFacilityAddons = async (facilityId, addonIds) => {
+  await pool.query("DELETE FROM facility_selected_addons WHERE facility_id = ?", [facilityId]);
+  for (const id of addonIds) {
+    await pool.query("INSERT IGNORE INTO facility_selected_addons (facility_id, addon_id) SELECT ?, addon_id FROM facility_addons WHERE addon_id = ?", [facilityId, id]);
+  }
 };
 
 const createAdminAmenity = async (req, res) => {
   try {
     if (!requireAdmin(req, res)) return;
+    await ensureAmenitySetup();
     const facility = validateFacility(req.body);
     if (!facility) return res.status(400).json({ message: "Enter valid facility details" });
     const [result] = await pool.query(
@@ -1129,6 +1195,7 @@ const createAdminAmenity = async (req, res) => {
        VALUES (?, ?, ?, ?, ?, ?)`,
       [facility.name, facility.description, facility.location, facility.status, facility.charge, facility.period]
     );
+    await saveFacilityAddons(result.insertId, facility.addonIds);
     res.status(201).json({ message: "Amenity created", facilityId: result.insertId });
   } catch (error) {
     console.error("Create Admin Amenity Error:", error);
@@ -1139,6 +1206,7 @@ const createAdminAmenity = async (req, res) => {
 const updateAdminAmenity = async (req, res) => {
   try {
     if (!requireAdmin(req, res)) return;
+    await ensureAmenitySetup();
     const facility = validateFacility(req.body);
     if (!facility) return res.status(400).json({ message: "Enter valid facility details" });
     const [amenities] = await pool.query("SELECT facility_id FROM facilities WHERE facility_id = ? LIMIT 1", [req.params.id]);
@@ -1150,6 +1218,7 @@ const updateAdminAmenity = async (req, res) => {
        WHERE facility_id = ?`,
       [facility.name, facility.description, facility.location, facility.status, facility.charge, facility.period, req.params.id]
     );
+    await saveFacilityAddons(req.params.id, facility.addonIds);
     res.status(200).json({ message: "Amenity updated" });
   } catch (error) {
     console.error("Update Admin Amenity Error:", error);

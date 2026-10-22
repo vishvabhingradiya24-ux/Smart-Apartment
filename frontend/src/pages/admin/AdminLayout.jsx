@@ -5,6 +5,7 @@ import {
   BriefcaseBusiness,
   Building2,
   ClipboardList,
+  CalendarCheck,
   CreditCard,
   DoorOpen,
   LayoutDashboard,
@@ -78,6 +79,11 @@ const AdminLayout = ({ children }) => {
       label: "Amenities",
       icon: Waves,
       path: "/admin/amenities",
+    },
+    {
+      label: "Facility Bookings",
+      icon: CalendarCheck,
+      path: "/admin/facility-bookings",
     },
     {
       label: "Notices",

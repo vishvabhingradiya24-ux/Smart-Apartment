@@ -1,4 +1,5 @@
 const { pool } = require("../config/db");
+const { expireUnpaidBookings } = require("../utils/facilityBookings");
 
 // ==========================================
 // GET ALL FACILITIES
@@ -50,6 +51,7 @@ const getFacilities = async (req, res) => {
 const getMyBookings = async (req, res) => {
   try {
     const residentId = req.user.id;
+    await expireUnpaidBookings();
 
     const [bookings] = await pool.query(
       `
@@ -70,10 +72,15 @@ const getMyBookings = async (req, res) => {
         fb.additional_charge,
         fb.total_amount,
         fb.status,
-        fb.created_at
+        fb.created_at,
+        fb.payment_id,
+        fb.payment_due_at,
+        fb.admin_remarks,
+        p.status AS payment_status
       FROM facility_bookings fb
       INNER JOIN facilities f
         ON fb.facility_id = f.facility_id
+      LEFT JOIN payments p ON p.id = fb.payment_id
       WHERE fb.resident_id = ?
       ORDER BY fb.booking_date DESC, fb.start_time DESC
       `,
@@ -120,6 +127,7 @@ const getMyBookings = async (req, res) => {
 // ==========================================
 const checkAvailability = async (req, res) => {
   try {
+    await expireUnpaidBookings();
     const {
       facility_id,
       booking_date,
@@ -199,7 +207,7 @@ const checkAvailability = async (req, res) => {
     }
 
     const bookingCharge =
-      facility[0].charge_period === "Per Booking"
+      !["Free", "Per Month"].includes(facility[0].charge_period)
         ? Number(facility[0].base_charge)
         : 0;
 
@@ -226,6 +234,7 @@ const createBooking = async (req, res) => {
   let connection;
 
   try {
+    await expireUnpaidBookings();
     const residentId = req.user.id;
 
     const {
@@ -329,7 +338,7 @@ const createBooking = async (req, res) => {
     // CALCULATE FACILITY CHARGE
     // ==========================================
     const facilityCharge =
-      facility[0].charge_period === "Per Booking"
+      !["Free", "Per Month"].includes(facility[0].charge_period)
         ? Number(facility[0].base_charge)
         : 0;
 
