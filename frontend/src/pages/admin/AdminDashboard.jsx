@@ -40,7 +40,13 @@ const AdminDashboard = () => {
       }
     };
     loadDashboard();
-    return () => controller.abort();
+    const refreshTimer = window.setInterval(loadDashboard, 30000);
+    window.addEventListener("focus", loadDashboard);
+    return () => {
+      controller.abort();
+      window.clearInterval(refreshTimer);
+      window.removeEventListener("focus", loadDashboard);
+    };
   }, []);
 
   const statsData = dashboard?.stats || {};

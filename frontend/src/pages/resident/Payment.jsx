@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { downloadPaymentReceipt } from "../../utils/paymentReceipt";
 import "../../css/resident/payment.css";
 
 function Payment() {
@@ -130,7 +131,10 @@ function Payment() {
       const orderData = await orderResponse.json();
 
       if (!orderResponse.ok) {
-        throw new Error(orderData.message || "Unable to create payment");
+        const orderError = orderData.message === "Unable to create payment order"
+          ? "Razorpay could not authenticate. Check that the Test Mode key ID and secret in backend/.env match, then restart the backend."
+          : orderData.message || "Unable to create payment";
+        throw new Error(orderError);
       }
 
       const options = {
@@ -478,6 +482,7 @@ function Payment() {
               <span>Paid Date</span>
               <span>Method</span>
               <span>Status</span>
+              <span>Receipt</span>
             </div>
 
 
@@ -532,6 +537,18 @@ function Payment() {
                   >
                     {payment.status}
                   </span>
+                </div>
+
+                <div>
+                  {payment.status === "Paid" && (
+                    <button
+                      className="receipt-download-btn"
+                      type="button"
+                      onClick={() => downloadPaymentReceipt(payment)}
+                    >
+                      Download
+                    </button>
+                  )}
                 </div>
 
               </div>

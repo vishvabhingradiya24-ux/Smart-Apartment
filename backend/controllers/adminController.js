@@ -1,7 +1,7 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { pool } = require("../config/db");
-const { syncMaintenanceDues } = require("../utils/maintenance");
+const { ensureMaintenanceSchema, syncMaintenanceDues } = require("../utils/maintenance");
 const { STAFF_DEPARTMENTS } = require("../constants/staffDepartments");
 const { getEmailError, getPhoneError } = require("../utils/validation");
 
@@ -106,6 +106,8 @@ const getAdminDashboard = async (req, res) => {
       return res.status(403).json({ message: "Admin access required" });
     }
 
+    await ensureMaintenanceSchema();
+
     const [residentRows] = await pool.query(
       `SELECT COUNT(*) AS total_residents,
               COUNT(DISTINCT CONCAT_WS('-', block_wing, flat_number)) AS total_flats
@@ -144,10 +146,11 @@ const getAdminDashboard = async (req, res) => {
        ORDER BY c.complaint_date DESC LIMIT 5`
     );
     const [payments] = await pool.query(
-      `SELECT p.amount, p.status, p.created_at AS activity_date,
+      `SELECT p.amount, p.status, p.payment_type,
+              COALESCE(p.paid_date, p.created_at) AS activity_date,
               r.block_wing, r.flat_number
        FROM payments p LEFT JOIN residents r ON r.id = p.resident_id
-       ORDER BY p.created_at DESC LIMIT 5`
+       ORDER BY COALESCE(p.paid_date, p.created_at) DESC, p.id DESC LIMIT 5`
     );
     const [visitors] = await pool.query(
       `SELECT v.visitor_name, v.entry_time AS activity_date,
@@ -644,8 +647,24 @@ const getAdminPayments = async (req, res) => {
               p.due_date, p.paid_date, p.status, p.payment_method,
               p.transaction_id, p.razorpay_order_id, p.created_at,
               p.payment_type, p.penalty_amount,
-              r.first_name, r.last_name, r.block_wing, r.flat_number
-       FROM payments p LEFT JOIN residents r ON r.id = p.resident_id
+              r.first_name, r.last_name, r.email, r.phone, r.block_wing, r.flat_number,
+              fb.booking_id, f.facility_name,
+              fb.booking_date AS facility_booking_date,
+              fb.start_time AS facility_start_time,
+              fb.end_time AS facility_end_time,
+              fb.purpose AS facility_booking_purpose,
+              fb.facility_charge, fb.additional_charge,
+              (SELECT GROUP_CONCAT(
+                CONCAT(fa.addon_name, ' x ', ba.quantity)
+                ORDER BY ba.booking_addon_id SEPARATOR ', '
+              )
+               FROM booking_addons ba
+               INNER JOIN facility_addons fa ON fa.addon_id = ba.addon_id
+               WHERE ba.booking_id = fb.booking_id) AS facility_addons
+       FROM payments p
+       LEFT JOIN residents r ON r.id = p.resident_id
+       LEFT JOIN facility_bookings fb ON fb.payment_id = p.id
+       LEFT JOIN facilities f ON f.facility_id = fb.facility_id
        ORDER BY COALESCE(p.paid_date, p.created_at, p.due_date) DESC, p.id DESC`
     );
     res.status(200).json({ payments });
@@ -677,6 +696,7 @@ const getAdminVisitors = async (req, res) => {
 const getAdminNotifications = async (req, res) => {
   try {
     if (!requireAdmin(req, res)) return;
+    await ensureMaintenanceSchema();
     const [notices] = await pool.query(
       `SELECT n.notice_id, n.title, n.description, n.notice_type, n.publish_date AS happened_at,
               a.name AS admin_name
@@ -684,10 +704,11 @@ const getAdminNotifications = async (req, res) => {
        ORDER BY n.publish_date DESC LIMIT 10`
     );
     const [payments] = await pool.query(
-      `SELECT p.id, p.amount, p.status, p.created_at AS happened_at,
+      `SELECT p.id, p.amount, p.status, p.payment_type,
+              COALESCE(p.paid_date, p.created_at) AS happened_at,
               r.id AS resident_id, r.first_name, r.last_name
        FROM payments p LEFT JOIN residents r ON r.id = p.resident_id
-       ORDER BY p.created_at DESC LIMIT 10`
+       ORDER BY COALESCE(p.paid_date, p.created_at) DESC, p.id DESC LIMIT 10`
     );
     const [complaints] = await pool.query(
       `SELECT c.complaint_id, c.complaint_title, c.status, c.complaint_date AS happened_at,

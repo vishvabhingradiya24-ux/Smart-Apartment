@@ -26,21 +26,45 @@ const getMyPayments = async (req, res) => {
 
     const [payments] = await pool.query(
       `SELECT
-        id,
-        amount,
-        billing_month,
-        due_date,
-        paid_date,
-        status,
-        payment_method,
-        transaction_id,
-        razorpay_order_id,
-        payment_type,
-        penalty_amount,
-        created_at
-      FROM payments
-      WHERE resident_id = ?
-      ORDER BY due_date DESC`,
+        p.id,
+        p.amount,
+        p.billing_month,
+        p.due_date,
+        p.paid_date,
+        p.status,
+        p.payment_method,
+        p.transaction_id,
+        p.razorpay_order_id,
+        p.payment_type,
+        p.penalty_amount,
+        p.created_at,
+        r.first_name,
+        r.last_name,
+        r.email,
+        r.phone,
+        r.block_wing,
+        r.flat_number,
+        fb.booking_id,
+        f.facility_name,
+        fb.booking_date AS facility_booking_date,
+        fb.start_time AS facility_start_time,
+        fb.end_time AS facility_end_time,
+        fb.purpose AS facility_booking_purpose,
+        fb.facility_charge,
+        fb.additional_charge,
+        (SELECT GROUP_CONCAT(
+          CONCAT(fa.addon_name, ' x ', ba.quantity)
+          ORDER BY ba.booking_addon_id SEPARATOR ', '
+        )
+         FROM booking_addons ba
+         INNER JOIN facility_addons fa ON fa.addon_id = ba.addon_id
+         WHERE ba.booking_id = fb.booking_id) AS facility_addons
+      FROM payments p
+      LEFT JOIN residents r ON r.id = p.resident_id
+      LEFT JOIN facility_bookings fb ON fb.payment_id = p.id
+      LEFT JOIN facilities f ON f.facility_id = fb.facility_id
+      WHERE p.resident_id = ?
+      ORDER BY COALESCE(p.paid_date, p.due_date, p.created_at) DESC`,
       [residentId]
     );
 
@@ -123,6 +147,12 @@ const createPaymentOrder = async (req, res) => {
     const residentId = req.user.id;
     await syncMaintenanceDues();
 
+    if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+      return res.status(503).json({
+        message: "Online payments are not configured",
+      });
+    }
+
     // --------------------------------------
     // Get pending payment of logged-in resident
     // --------------------------------------
@@ -133,7 +163,8 @@ const createPaymentOrder = async (req, res) => {
         amount,
         billing_month,
         due_date,
-        status
+        status,
+        razorpay_order_id
       FROM payments
       WHERE id = ?
       AND resident_id = ?
@@ -174,6 +205,30 @@ const createPaymentOrder = async (req, res) => {
     // Razorpay amount is in paise
     const amountInPaise = Math.round(amount * 100);
 
+    if (payment.razorpay_order_id) {
+      const existingOrder = await razorpay.orders.fetch(payment.razorpay_order_id);
+      if (Number(existingOrder.amount) !== amountInPaise || existingOrder.status === "paid") {
+        return res.status(409).json({
+          message: "This payment order is no longer available. Please refresh and try again.",
+        });
+      }
+
+      return res.status(200).json({
+        message: "Payment order is ready",
+        order: {
+          id: existingOrder.id,
+          amount: existingOrder.amount,
+          currency: existingOrder.currency,
+        },
+        payment: {
+          id: payment.id,
+          amount: payment.amount,
+          billing_month: payment.billing_month,
+        },
+        key: process.env.RAZORPAY_KEY_ID,
+      });
+    }
+
     // --------------------------------------
     // Create Razorpay order
     // --------------------------------------
@@ -210,6 +265,37 @@ const createPaymentOrder = async (req, res) => {
     );
 
     if (!updateResult.affectedRows) {
+      const [currentPayments] = await pool.query(
+        `SELECT razorpay_order_id, status
+         FROM payments
+         WHERE id = ? AND resident_id = ?
+         LIMIT 1`,
+        [payment.id, residentId]
+      );
+
+      if (
+        currentPayments[0]?.status === "Pending" &&
+        currentPayments[0]?.razorpay_order_id
+      ) {
+        const existingOrder = await razorpay.orders.fetch(currentPayments[0].razorpay_order_id);
+        if (Number(existingOrder.amount) === amountInPaise && existingOrder.status !== "paid") {
+          return res.status(200).json({
+            message: "Payment order is ready",
+            order: {
+              id: existingOrder.id,
+              amount: existingOrder.amount,
+              currency: existingOrder.currency,
+            },
+            payment: {
+              id: payment.id,
+              amount: payment.amount,
+              billing_month: payment.billing_month,
+            },
+            key: process.env.RAZORPAY_KEY_ID,
+          });
+        }
+      }
+
       return res.status(409).json({
         message: "This payment changed and is no longer available for checkout",
       });
@@ -234,10 +320,22 @@ const createPaymentOrder = async (req, res) => {
     });
 
   } catch (error) {
-    console.error("Create Payment Order Error:", error);
+    const razorpayError = error.error || {};
+    const authenticationFailed =
+      error.statusCode === 401 ||
+      razorpayError.description === "Authentication failed";
+    const message = authenticationFailed
+      ? "Razorpay authentication failed. Check that RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in backend/.env are a matching pair from Razorpay Test Mode, then restart the backend."
+      : "Unable to create payment order. Check the backend logs and try again.";
 
-    res.status(500).json({
-      message: "Unable to create payment order",
+    console.error("Create Payment Order Error:", {
+      statusCode: error.statusCode || null,
+      code: razorpayError.code || error.code || null,
+      description: razorpayError.description || error.message || "Unknown error",
+    });
+
+    res.status(authenticationFailed ? 502 : 500).json({
+      message,
     });
   }
 };
@@ -270,6 +368,12 @@ const verifyPayment = async (req, res) => {
     ) {
       return res.status(400).json({
         message: "Incomplete payment verification data",
+      });
+    }
+
+    if (!process.env.RAZORPAY_KEY_SECRET) {
+      return res.status(503).json({
+        message: "Online payments are not configured",
       });
     }
 
@@ -351,10 +455,16 @@ const verifyPayment = async (req, res) => {
     // Fetch Razorpay payment details
     // --------------------------------------
 
-    const razorpayPayment =
+    let razorpayPayment =
       await razorpay.payments.fetch(
         razorpay_payment_id
       );
+
+    if (razorpayPayment.order_id !== razorpay_order_id) {
+      return res.status(400).json({
+        message: "Payment does not belong to this order",
+      });
+    }
 
     // --------------------------------------
     // Verify amount
@@ -364,8 +474,8 @@ const verifyPayment = async (req, res) => {
       Math.round(Number(payment.amount) * 100);
 
     if (
-      Number(razorpayPayment.amount) !==
-      expectedAmount
+      Number(razorpayPayment.amount) !== expectedAmount ||
+      razorpayPayment.currency !== "INR"
     ) {
       return res.status(400).json({
         message: "Payment amount verification failed",
@@ -376,10 +486,15 @@ const verifyPayment = async (req, res) => {
     // Verify payment status
     // --------------------------------------
 
-    if (
-      razorpayPayment.status !== "captured" &&
-      razorpayPayment.status !== "authorized"
-    ) {
+    if (razorpayPayment.status === "authorized") {
+      razorpayPayment = await razorpay.payments.capture(
+        razorpay_payment_id,
+        expectedAmount,
+        "INR"
+      );
+    }
+
+    if (razorpayPayment.status !== "captured") {
       return res.status(400).json({
         message: "Payment was not successfully captured",
       });

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Check, Clock3, CreditCard, ReceiptText, Search, Wallet } from "lucide-react";
 import AdminFormModal from "./AdminFormModal";
+import { downloadPaymentReceipt } from "../../utils/paymentReceipt";
 import "../../css/payments.css";
 
 const emptyForm = { resident_id: "", amount: "", billing_month: "", due_date: "" };
@@ -213,12 +214,16 @@ const Payments = () => {
             <td>{formatDate(payment.paid_date || payment.due_date || payment.created_at)}</td>
             <td><span className="transaction-id">{payment.transaction_id || "—"}</span></td>
             <td><span className={`payment-status ${status === "Success" ? "status-success" : status === "Cancelled" ? "status-cancelled" : "status-pending"}`}>{status === "Success" ? "✓" : status === "Cancelled" ? "⊘" : "⏳"} {status}</span></td>
-            <td>{payment.status === "Pending" && !payment.razorpay_order_id && <div className="payment-record-actions">
+            <td>{payment.status === "Paid" ? <button
+              className="admin-row-action"
+              type="button"
+              onClick={() => downloadPaymentReceipt(payment, payment)}
+            >Download Receipt</button> : payment.status === "Pending" && !payment.razorpay_order_id ? <div className="payment-record-actions">
               <button className="admin-row-action" type="button" onClick={() => openEdit(payment)}>Edit</button>
               <button className="admin-row-action payment-remove-action" type="button" disabled={removingId === payment.payment_id} onClick={() => removePayment(payment)}>
                 {removingId === payment.payment_id ? "Removing…" : "Remove"}
               </button>
-            </div>}{payment.status === "Pending" && payment.razorpay_order_id && <span className="payment-checkout-note">Checkout started</span>}</td>
+            </div> : payment.status === "Pending" && <span className="payment-checkout-note">Checkout started</span>}</td>
           </tr>;
         }) : <tr><td colSpan="9" className="no-payment-data">{error ? "Payment records could not be loaded." : "No payments found."}</td></tr>}</tbody>
       </table></div>

@@ -1,5 +1,6 @@
 const { pool } = require("../config/db");
 const { PAYMENT_WINDOW_DAYS, expireUnpaidBookings } = require("../utils/facilityBookings");
+const { ensureMaintenanceSchema } = require("../utils/maintenance");
 
 const getFacilityBookings = async (req, res) => {
   try {
@@ -37,6 +38,7 @@ const approveFacilityBooking = async (req, res) => {
   let connection;
   try {
     await expireUnpaidBookings();
+    await ensureMaintenanceSchema();
     connection = await pool.getConnection();
     await connection.beginTransaction();
 
@@ -71,8 +73,8 @@ const approveFacilityBooking = async (req, res) => {
     if (amount > 0) {
       dueAt = new Date(Date.now() + PAYMENT_WINDOW_DAYS * 24 * 60 * 60 * 1000);
       const [payment] = await connection.query(
-        `INSERT INTO payments (resident_id, amount, billing_month, due_date, status)
-         VALUES (?, ?, ?, ?, 'Pending')`,
+        `INSERT INTO payments (resident_id, amount, billing_month, due_date, status, payment_type)
+         VALUES (?, ?, ?, ?, 'Pending', 'Amenity')`,
         [booking.resident_id, amount, `Facility Booking #${booking.booking_id}`, dueAt]
       );
       paymentId = payment.insertId;
