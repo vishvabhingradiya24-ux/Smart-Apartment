@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/apiBase.js";
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ArrowLeft, MailCheck, ShieldCheck } from "lucide-react";
@@ -55,7 +56,7 @@ function VerifyOTP() {
 
     try {
       const response = await fetch(
-        "http://localhost:5000/api/resident/verify-otp",
+        API_BASE_URL + "/api/resident/verify-otp",
         {
           method: "POST",
           headers: {

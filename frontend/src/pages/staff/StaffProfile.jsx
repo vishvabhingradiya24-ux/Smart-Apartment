@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/apiBase.js";
 import { useCallback, useEffect, useState } from "react";
 import "../../css/resident/profile.css";
 import "./staffProfile.css";
@@ -50,7 +51,7 @@ function StaffProfile() {
       const token = sessionStorage.getItem("token");
       if (!token) throw new Error("Please sign in again to load your work summary.");
 
-      const response = await fetch("http://localhost:5000/api/staff/dashboard", {
+      const response = await fetch(API_BASE_URL + "/api/staff/dashboard", {
         headers: { Authorization: `Bearer ${token}` },
         signal,
       });
@@ -87,7 +88,7 @@ function StaffProfile() {
     const controller = new AbortController();
     const loadProfile = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/staff/profile", {
+        const response = await fetch(API_BASE_URL + "/api/staff/profile", {
           headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` },
           signal: controller.signal,
         });
@@ -156,7 +157,7 @@ function StaffProfile() {
 
     setSavingProfile(true);
     try {
-      const response = await fetch("http://localhost:5000/api/staff/profile", {
+      const response = await fetch(API_BASE_URL + "/api/staff/profile", {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${sessionStorage.getItem("token")}`,
@@ -195,7 +196,7 @@ function StaffProfile() {
     }
 
     try {
-      const response = await fetch("http://localhost:5000/api/staff/change-password", {
+      const response = await fetch(API_BASE_URL + "/api/staff/change-password", {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${sessionStorage.getItem("token")}`,

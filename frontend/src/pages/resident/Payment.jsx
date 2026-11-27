@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/apiBase.js";
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { downloadPaymentReceipt } from "../../utils/paymentReceipt";
@@ -19,13 +20,13 @@ function Payment() {
       }
 
       const [allResponse, currentResponse] = await Promise.all([
-        fetch("http://localhost:5000/api/resident/payments", {
+        fetch(API_BASE_URL + "/api/resident/payments", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }),
 
-        fetch("http://localhost:5000/api/resident/payments/current", {
+        fetch(API_BASE_URL + "/api/resident/payments/current", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -115,7 +116,7 @@ function Payment() {
       }
 
       const orderResponse = await fetch(
-        "http://localhost:5000/api/resident/payments/create-order",
+        API_BASE_URL + "/api/resident/payments/create-order",
         {
           method: "POST",
           headers: {
@@ -152,7 +153,7 @@ function Payment() {
         handler: async function (response) {
           try {
             const verifyResponse = await fetch(
-              "http://localhost:5000/api/resident/payments/verify",
+              API_BASE_URL + "/api/resident/payments/verify",
               {
                 method: "POST",
                 headers: {

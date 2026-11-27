@@ -197,7 +197,7 @@
 
 .sa-hero {
   position: relative;
-  padding: 150px 0 96px;
+  padding: 150px 0 80px;
   overflow: hidden;
   background:
     radial-gradient(900px 520px at 88% 8%, rgba(26, 140, 117, 0.2), transparent 62%),
@@ -451,13 +451,13 @@
 ===================================================== */
 
 .sa-section {
-  padding: 104px 0;
+  padding: 84px 0;
   scroll-margin-top: 70px;
 }
 
 .sa-section-head {
   max-width: 640px;
-  margin: 0 auto 58px;
+  margin: 0 auto 44px;
   text-align: center;
 }
 
@@ -504,6 +504,14 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 22px;
+}
+
+.sa-service-grid {
+  row-gap: 20px;
+}
+
+.sa-service-grid .sa-service {
+  min-height: 190px;
 }
 
 /* Reveal wrapper around a card, so the scroll animation and the
@@ -632,7 +640,7 @@
 .sa-about-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 72px;
+  gap: 56px;
   align-items: center;
 }
 
@@ -1118,7 +1126,7 @@
 .sa-cta {
   position: relative;
   overflow: hidden;
-  padding: 72px 64px;
+  padding: 60px 64px;
   border-radius: 34px;
   background:
     linear-gradient(90deg, rgba(15, 31, 32, 0.94) 0%, rgba(17, 44, 39, 0.78) 48%, rgba(17, 44, 39, 0.35) 100%),
@@ -1154,7 +1162,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 14px;
-  margin-top: 34px;
+  margin-top: 28px;
 }
 
 /* =====================================================
@@ -1162,7 +1170,7 @@
 ===================================================== */
 
 .sa-footer {
-  padding: 72px 0 0;
+  padding: 56px 0 0;
   background: var(--sa-night-1);
   color: rgba(255, 255, 255, 0.7);
 }
@@ -1170,8 +1178,8 @@
 .sa-footer-grid {
   display: grid;
   grid-template-columns: 1.4fr 1fr 1.2fr;
-  gap: 48px;
-  padding-bottom: 52px;
+  gap: 40px;
+  padding-bottom: 40px;
 }
 
 .sa-footer-brand p {
@@ -1304,7 +1312,7 @@
   }
 
   .sa-cta {
-    padding: 52px 30px;
+    padding: 44px 30px;
   }
 
   .sa-footer-grid {
@@ -1322,12 +1330,16 @@
   }
 
   .sa-section {
-    padding: 72px 0;
+    padding: 60px 0;
   }
 
   .sa-feature-grid,
   .sa-facility-grid {
     grid-template-columns: 1fr;
+  }
+
+  .sa-service-grid .sa-service {
+    min-height: 0;
   }
 
   .sa-facility {

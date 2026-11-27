@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/apiBase.js";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -13,7 +14,7 @@ import {
 import "../../css/resident/resident_dashboard.css";
 import "../../css/resident/resident_shared.css";
 
-const API = "http://localhost:5000/api";
+const API = API_BASE_URL + "/api";
 
 const formatDate = (value) => {
   const date = new Date(String(value).length <= 10 ? `${value}T00:00:00` : value);

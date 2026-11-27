@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import StaffNav from "./StaffNav";
 import { useStaffDepartment } from "../hooks/useStaffDepartment";
+import useStaffUnreadNotifications from "../hooks/useStaffUnreadNotifications";
 
 const readStoredUser = () => {
   try {
@@ -25,6 +26,7 @@ const getGreeting = () => {
 function StaffWorkspaceLayout() {
   const navigate = useNavigate();
   const department = useStaffDepartment();
+  const unreadNotifications = useStaffUnreadNotifications();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const staff = readStoredUser();
   const firstName = staff.first_name || staff.name || "Staff";
@@ -67,7 +69,7 @@ function StaffWorkspaceLayout() {
         </div>
 
         <div className="sidebar-section-title">MAIN MENU</div>
-        <StaffNav onNavigate={(path) => {
+        <StaffNav unreadCount={unreadNotifications} onNavigate={(path) => {
           navigate(path);
           closeSidebar();
         }} />
@@ -103,7 +105,19 @@ function StaffWorkspaceLayout() {
             <p>Everything you need to manage your work, tasks and requests in one place.</p>
           </div>
           <div className="staff-workspace-header-right">
-            <Link to="/staff/notifications" className="staff-workspace-header-bell" aria-label="Notifications">🔔</Link>
+            <Link
+              to="/staff/notifications"
+              className="staff-workspace-header-bell"
+              aria-label={unreadNotifications ? `Notifications, ${unreadNotifications} unread` : "Notifications"}
+              title={unreadNotifications ? `${unreadNotifications} unread` : "Notifications"}
+            >
+              🔔
+              {unreadNotifications > 0 && (
+                <span className="staff-workspace-header-badge" aria-hidden="true">
+                  {unreadNotifications > 99 ? "99+" : unreadNotifications}
+                </span>
+              )}
+            </Link>
             <Link to="/staff/profile" className="staff-workspace-header-profile">
               <span className="staff-workspace-header-avatar">{initials}</span>
               <span className="staff-workspace-header-user">

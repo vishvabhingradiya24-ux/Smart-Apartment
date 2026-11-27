@@ -1,8 +1,9 @@
+import { API_BASE_URL } from "../../utils/apiBase.js";
 import { useCallback, useEffect, useState } from "react";
 import { ArrowRight, Check, CheckCircle2, Clock3, Info, Lock, Vote } from "lucide-react";
 import "../../css/resident/resident_shared.css";
 
-const API = "http://localhost:5000/api/resident/polls";
+const API = API_BASE_URL + "/api/resident/polls";
 
 const formatDate = (value) => {
   const date = new Date(`${value}T00:00:00`);

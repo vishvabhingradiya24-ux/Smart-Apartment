@@ -1092,6 +1092,7 @@
 .admin-staff-create-form select { min-height: 40px; padding: 0 11px; border: 1px solid #dce5ed; border-radius: 8px; background: #fff; color: #17324f; font: inherit; font-size: 13px; }
 .admin-staff-create-form input:focus,
 .admin-staff-create-form select:focus { outline: 2px solid #cfe8e1; border-color: #087f69; }
+.admin-staff-form-hint { grid-column: 1 / -1; margin: -4px 0 0; color: #71849a; font-size: 12px; line-height: 1.5; }
 .admin-resident-password-control { display: flex; gap: 8px; }
 .admin-resident-password-control input { flex: 1; min-width: 0; }
 .admin-resident-password-toggle { min-width: 58px; padding: 0 10px; border: 1px solid #dce5ed; border-radius: 8px; background: #f5f8fa; color: #36536f; font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; }

@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/apiBase.js";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { NavLink, Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
@@ -26,9 +27,11 @@ import {
 } from "lucide-react";
 import "../../css/resident/resident_dashboard.css";
 import "../../css/resident/resident_header.css";
+import { buildResidentNotificationItems } from "../../utils/residentNotifications.js";
 
-const API = "http://localhost:5000/api";
+const API = API_BASE_URL + "/api";
 const IST = "Asia/Kolkata";
+const NOTIFICATION_REFRESH_MS = 30000;
 
 const MENU_ITEMS = [
   { label: "Dashboard", icon: LayoutDashboard, path: "/resident" },
@@ -83,7 +86,11 @@ function ResidentLayout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [user, setUser] = useState(readResidentUser);
   const [clock, setClock] = useState(readClock);
-  const [attention, setAttention] = useState(0);
+  const [notificationItems, setNotificationItems] = useState([]);
+  const [notificationReadIds, setNotificationReadIds] = useState(() => new Set());
+  const [notificationLoading, setNotificationLoading] = useState(true);
+  const [notificationError, setNotificationError] = useState("");
+  const [notificationWarning, setNotificationWarning] = useState("");
 
   const [jumpQuery, setJumpQuery] = useState("");
   const [jumpOpen, setJumpOpen] = useState(false);
@@ -123,50 +130,116 @@ function ResidentLayout() {
     return () => clearInterval(timer);
   }, []);
 
-  // The bell counts what needs the resident: visitors to approve, polls to vote
-  // in and a payment that is due. Each source is optional, so failures stay silent.
-  useEffect(() => {
-    let cancelled = false;
+  const notifications = useMemo(
+    () => notificationItems.map((item) => ({
+      ...item,
+      isRead: notificationReadIds.has(item.id),
+    })),
+    [notificationItems, notificationReadIds]
+  );
+  const unreadNotificationCount = notifications.filter((item) => !item.isRead).length;
 
-    const loadAttention = async () => {
-      const token = sessionStorage.getItem("token");
-      if (!token) return;
+  const loadNotifications = useCallback(async (signal) => {
+    if (signal?.aborted) return;
 
+    const token = sessionStorage.getItem("token");
+    if (!token) {
+      setNotificationError("Your session has expired. Please log in again.");
+      setNotificationLoading(false);
+      return;
+    }
+
+    try {
       const headers = { Authorization: `Bearer ${token}`, Accept: "application/json" };
       const read = async (path) => {
-        const response = await fetch(`${API}${path}`, { headers });
-        if (!response.ok) throw new Error(`Request failed (${response.status})`);
-        return response.json();
+        const response = await fetch(`${API}${path}`, { headers, signal });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || "Unable to load notifications.");
+        return data;
       };
 
-      const [visitors, polls, payment] = await Promise.allSettled([
-        read("/resident/visitors"),
+      const [noticeResult, pollResult, visitorResult, readStateResult] = await Promise.allSettled([
+        read("/notices/active"),
         read("/resident/polls"),
-        read("/resident/payments/current"),
+        read("/resident/visitors"),
+        read("/resident/notifications/read-state"),
       ]);
+      if (signal?.aborted) return;
 
-      if (cancelled) return;
+      const feedResults = [noticeResult, pollResult, visitorResult];
+      const failedFeed = feedResults.find((result) => result.status === "rejected");
+      if (failedFeed) throw failedFeed.reason;
 
-      let count = 0;
-      if (visitors.status === "fulfilled") {
-        count += (visitors.value.visitors || []).filter((visitor) => visitor.status === "Pending").length;
+      const nextItems = buildResidentNotificationItems({
+        notices: Array.isArray(noticeResult.value.data) ? noticeResult.value.data : [],
+        polls: Array.isArray(pollResult.value.polls) ? pollResult.value.polls : [],
+        visitors: Array.isArray(visitorResult.value.visitors) ? visitorResult.value.visitors : [],
+      });
+      setNotificationItems(nextItems);
+      if (readStateResult.status === "fulfilled") {
+        setNotificationReadIds((current) => new Set([
+          ...current,
+          ...(Array.isArray(readStateResult.value.readIds) ? readStateResult.value.readIds : []),
+        ]));
+        setNotificationWarning("");
+      } else {
+        console.error("Load Resident Notification Read State Error:", readStateResult.reason);
+        setNotificationWarning(
+          nextItems.length
+            ? "Read status can't sync right now. Restart the backend to enable saved read status."
+            : ""
+        );
       }
-      if (polls.status === "fulfilled") {
-        count += (polls.value.polls || []).filter((poll) => poll.status === "Active" && poll.my_vote_option_id === null).length;
+      setNotificationError("");
+    } catch (error) {
+      if (error.name !== "AbortError" && !signal?.aborted) {
+        console.error("Load Resident Notifications Error:", error);
+        setNotificationError("Notifications couldn't be loaded right now. Please try again.");
       }
-      if (payment.status === "fulfilled" && payment.value.payment?.status === "Pending") count += 1;
+    } finally {
+      if (!signal?.aborted) setNotificationLoading(false);
+    }
+  }, []);
 
-      setAttention(count);
-    };
-
-    loadAttention();
-    const timer = setInterval(loadAttention, 60000);
+  useEffect(() => {
+    let controller = new AbortController();
+    Promise.resolve().then(() => loadNotifications(controller.signal));
+    const timer = setInterval(() => {
+      controller.abort();
+      controller = new AbortController();
+      loadNotifications(controller.signal);
+    }, NOTIFICATION_REFRESH_MS);
 
     return () => {
-      cancelled = true;
+      controller.abort();
       clearInterval(timer);
     };
-  }, [location.pathname]);
+  }, [loadNotifications]);
+
+  const markNotificationRead = useCallback(async (id) => {
+    const token = sessionStorage.getItem("token");
+    if (!token) throw new Error("Your session has expired. Please log in again.");
+
+    const response = await fetch(
+      `${API}/resident/notifications/${encodeURIComponent(id)}/read`,
+      {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ isRead: true }),
+      }
+    );
+    const data = await response.json();
+    if (!response.ok) {
+      console.error("Update Resident Notification Read State Error:", data.message || response.status);
+      throw new Error("Read status couldn't be saved. Please try again.");
+    }
+
+    setNotificationReadIds((current) => new Set([...current, id]));
+  }, []);
 
   // Ctrl/Cmd + K jumps to the page search.
   useEffect(() => {
@@ -417,11 +490,11 @@ function ResidentLayout() {
             <Link
               to="/resident/notifications"
               className="rh-bell"
-              aria-label={attention ? `Notifications, ${attention} need your attention` : "Notifications"}
-              title={attention ? `${attention} need your attention` : "Notifications"}
+              aria-label={unreadNotificationCount ? `Notifications, ${unreadNotificationCount} unread` : "Notifications"}
+              title={unreadNotificationCount ? `${unreadNotificationCount} unread` : "Notifications"}
             >
               <Bell size={18} strokeWidth={1.8} aria-hidden="true" />
-              {attention > 0 && <span className="rh-badge">{attention > 9 ? "9+" : attention}</span>}
+              {unreadNotificationCount > 0 && <span className="rh-badge">{unreadNotificationCount > 9 ? "9+" : unreadNotificationCount}</span>}
             </Link>
 
             <div className="rh-profile-menu" ref={profileRef}>
@@ -451,7 +524,7 @@ function ResidentLayout() {
                   </Link>
                   <Link to="/resident/notifications" role="menuitem" onClick={() => setProfileOpen(false)}>
                     <Bell size={16} aria-hidden="true" /> Notifications
-                    {attention > 0 && <span className="rh-dropdown-count">{attention}</span>}
+                    {unreadNotificationCount > 0 && <span className="rh-dropdown-count">{unreadNotificationCount}</span>}
                   </Link>
                   <button type="button" role="menuitem" className="is-danger" onClick={handleLogout}>
                     <LogOut size={16} aria-hidden="true" /> Logout
@@ -464,7 +537,14 @@ function ResidentLayout() {
 
 
         <div className="resident-content">
-          <Outlet />
+          <Outlet context={{
+            notifications,
+            notificationLoading,
+            notificationError,
+            notificationWarning,
+            loadNotifications,
+            markNotificationRead,
+          }} />
         </div>
 
 

@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/apiBase.js";
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Bell, Building2, Database, Eye, EyeOff, HardDrive, Shield, UserRound } from "lucide-react";
@@ -37,7 +38,7 @@ const Settings = () => {
   const [success, setSuccess] = useState("");
   const token = sessionStorage.getItem("token");
 
-  const request = useCallback((url, options = {}) => fetch(`http://localhost:5000${url}`, {
+  const request = useCallback((url, options = {}) => fetch(`${API_BASE_URL}${url}`, {
     ...options,
     headers: {
       Authorization: `Bearer ${token}`,

@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/apiBase.js";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import "../../css/staff/staff_maintenance.css";
 import "../../css/staff/staff_shared_theme.css";
@@ -35,7 +36,7 @@ function StaffMaintenance() {
     try {
       const token = sessionStorage.getItem("token");
       if (!token) throw new Error("Please log in again to view assigned maintenance work.");
-      const response = await fetch("http://localhost:5000/api/staff/tasks", {
+      const response = await fetch(API_BASE_URL + "/api/staff/tasks", {
         headers: { Authorization: `Bearer ${token}` }, signal,
       });
       const data = await response.json();
@@ -112,7 +113,7 @@ function StaffMaintenance() {
 
   const updateMaintenance = async (id, changes) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/staff/tasks/${id}/status`, {
+      const response = await fetch(`${API_BASE_URL}/api/staff/tasks/${id}/status`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${sessionStorage.getItem("token")}`,

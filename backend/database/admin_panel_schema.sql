@@ -31,6 +31,16 @@ CREATE TABLE IF NOT EXISTS residents (
   UNIQUE KEY uq_residents_email (email)
 ) ENGINE=InnoDB;
 
+CREATE TABLE IF NOT EXISTS resident_notification_reads (
+  resident_id INT NOT NULL,
+  notification_id VARCHAR(100) NOT NULL,
+  read_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (resident_id, notification_id),
+  CONSTRAINT fk_resident_notification_reads_resident
+    FOREIGN KEY (resident_id) REFERENCES residents(id)
+    ON DELETE CASCADE
+) ENGINE=InnoDB;
+
 CREATE TABLE IF NOT EXISTS staff (
   id INT NOT NULL AUTO_INCREMENT,
   first_name VARCHAR(100) NOT NULL,

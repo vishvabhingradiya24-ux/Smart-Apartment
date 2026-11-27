@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/apiBase.js";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Check, Clock3, DoorOpen, Search, UsersRound } from "lucide-react";
 import "../../css/visitors.css";
@@ -14,7 +15,7 @@ const Visitors = () => {
   const [error, setError] = useState("");
   const token = sessionStorage.getItem("token");
 
-  const request = useCallback((url) => fetch(`http://localhost:5000${url}`, {
+  const request = useCallback((url) => fetch(`${API_BASE_URL}${url}`, {
     headers: { Authorization: `Bearer ${token}` },
   }), [token]);
 

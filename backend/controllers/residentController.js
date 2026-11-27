@@ -5,6 +5,160 @@ const transporter = require("../config/email");
 const { getEmailError, getPhoneError } = require("../utils/validation");
 require("dotenv").config();
 
+let passwordResetSchemaReady = false;
+let passwordResetSchemaPromise = null;
+
+const ensurePasswordResetSchema = async () => {
+  if (passwordResetSchemaReady) return;
+  if (passwordResetSchemaPromise) return passwordResetSchemaPromise;
+
+  passwordResetSchemaPromise = (async () => {
+    const columns = [
+      ["reset_otp_hash", "VARCHAR(255) NULL"],
+      ["reset_otp_expires_at", "DATETIME NULL"],
+      ["reset_otp_attempts", "INT NOT NULL DEFAULT 0"],
+    ];
+
+    for (const [column, definition] of columns) {
+      const [existing] = await pool.query(
+        `SELECT 1
+         FROM information_schema.columns
+         WHERE table_schema = DATABASE()
+           AND table_name = 'residents'
+           AND column_name = ?
+         LIMIT 1`,
+        [column]
+      );
+
+      if (!existing.length) {
+        await pool.query(`ALTER TABLE residents ADD COLUMN ${column} ${definition}`);
+      }
+    }
+
+    passwordResetSchemaReady = true;
+  })();
+
+  try {
+    await passwordResetSchemaPromise;
+  } finally {
+    passwordResetSchemaPromise = null;
+  }
+};
+
+let residentNotificationReadSchemaReady = false;
+let residentNotificationReadSchemaPromise = null;
+
+const ensureResidentNotificationReadSchema = async () => {
+  if (residentNotificationReadSchemaReady) return;
+  if (residentNotificationReadSchemaPromise) return residentNotificationReadSchemaPromise;
+
+  residentNotificationReadSchemaPromise = (async () => {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS resident_notification_reads (
+        resident_id INT NOT NULL,
+        notification_id VARCHAR(100) NOT NULL,
+        read_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (resident_id, notification_id),
+        CONSTRAINT fk_resident_notification_reads_resident
+          FOREIGN KEY (resident_id) REFERENCES residents(id)
+          ON DELETE CASCADE
+      ) ENGINE=InnoDB
+    `);
+    residentNotificationReadSchemaReady = true;
+  })();
+
+  try {
+    await residentNotificationReadSchemaPromise;
+  } finally {
+    residentNotificationReadSchemaPromise = null;
+  }
+};
+
+const isResidentUser = (req, res) => {
+  const residentId = Number(req.user?.id);
+  if (
+    req.user?.user_type !== "Resident" ||
+    !Number.isSafeInteger(residentId) ||
+    residentId <= 0
+  ) {
+    res.status(403).json({ message: "Only residents can access notification read status" });
+    return false;
+  }
+
+  return true;
+};
+
+const getMyNotificationReadState = async (req, res) => {
+  try {
+    if (!isResidentUser(req, res)) return;
+
+    await ensureResidentNotificationReadSchema();
+    const [rows] = await pool.query(
+      "SELECT notification_id FROM resident_notification_reads WHERE resident_id = ?",
+      [req.user.id]
+    );
+
+    res.status(200).json({ readIds: rows.map((row) => row.notification_id) });
+  } catch (error) {
+    console.error("Get Resident Notification Read State Error:", error);
+    res.status(500).json({ message: "Unable to fetch notification read status" });
+  }
+};
+
+const updateResidentNotificationReadState = async (req, res) => {
+  try {
+    if (!isResidentUser(req, res)) return;
+
+    const match = /^(notice|poll|visitor)-([1-9]\d*)$/.exec(req.params.id || "");
+    const isRead = req.body?.isRead;
+    if (!match || !Number.isSafeInteger(Number(match[2])) || isRead !== true) {
+      return res.status(400).json({ message: "Invalid notification read status request" });
+    }
+
+    const [, type, rawId] = match;
+    const notificationId = Number(rawId);
+    let records;
+
+    if (type === "notice") {
+      [records] = await pool.query(
+        `SELECT notice_id FROM notices
+         WHERE notice_id = ? AND status = 'Active'
+           AND (expiry_date IS NULL OR expiry_date >= NOW())
+           AND publish_date <= NOW()
+         LIMIT 1`,
+        [notificationId]
+      );
+    } else if (type === "poll") {
+      [records] = await pool.query(
+        `SELECT poll_id FROM polls
+         WHERE poll_id = ? AND status = 'Active' AND end_date >= CURDATE()
+         LIMIT 1`,
+        [notificationId]
+      );
+    } else {
+      [records] = await pool.query(
+        "SELECT visitor_id FROM visitors WHERE visitor_id = ? AND resident_id = ? LIMIT 1",
+        [notificationId, req.user.id]
+      );
+    }
+
+    if (!records.length) return res.status(404).json({ message: "Notification not found" });
+
+    await ensureResidentNotificationReadSchema();
+    await pool.query(
+      `INSERT INTO resident_notification_reads (resident_id, notification_id)
+       VALUES (?, ?)
+       ON DUPLICATE KEY UPDATE read_at = CURRENT_TIMESTAMP`,
+      [req.user.id, req.params.id]
+    );
+
+    res.status(200).json({ message: "Notification marked as read", isRead: true });
+  } catch (error) {
+    console.error("Update Resident Notification Read State Error:", error);
+    res.status(500).json({ message: "Unable to update notification read status" });
+  }
+};
+
 
 // ==============================
 // REGISTER RESIDENT / USER
@@ -272,12 +426,21 @@ const loginResident = async (req, res) => {
 // ==============================
 
 const forgotPassword = async (req, res) => {
+  let failureStage = "database";
   try {
     const { email } = req.body;
 
     if (!email) {
       return res.status(400).json({
         message: "Email is required"
+      });
+    }
+
+    await ensurePasswordResetSchema();
+
+    if (!transporter || !process.env.EMAIL_USER) {
+      return res.status(503).json({
+        message: "Password reset email is not configured. Set EMAIL_USER and EMAIL_PASS in backend/.env, then restart the backend.",
       });
     }
 
@@ -314,14 +477,10 @@ const forgotPassword = async (req, res) => {
       [otpHash, expiresAt, users[0].id]
     );
 
-    console.log(
-      "Sending OTP email to:",
-      email
-    );
-
-    const mailInfo =
+    failureStage = "email";
+    try {
       await transporter.sendMail({
-        from: process.env.EMAIL_USER,
+        from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
         to: email,
         subject:
           "Smart Apartment - Password Reset OTP",
@@ -355,26 +514,16 @@ const forgotPassword = async (req, res) => {
           </div>
         `
       });
-
-    console.log(
-      "EMAIL SENT:",
-      mailInfo.messageId
-    );
-
-    console.log(
-      "EMAIL RESPONSE:",
-      mailInfo.response
-    );
-
-    console.log(
-      "EMAIL ACCEPTED:",
-      mailInfo.accepted
-    );
-
-    console.log(
-      "EMAIL REJECTED:",
-      mailInfo.rejected
-    );
+    } catch (error) {
+      await pool.query(
+        `UPDATE residents
+         SET reset_otp_hash = NULL, reset_otp_expires_at = NULL, reset_otp_attempts = 0
+         WHERE id = ?`,
+        [users[0].id]
+      );
+      error.emailDeliveryFailure = true;
+      throw error;
+    }
 
     res.status(200).json({
       message:
@@ -382,14 +531,17 @@ const forgotPassword = async (req, res) => {
     });
 
   } catch (error) {
-    console.error(
-      "Forgot Password Error:",
-      error
-    );
+    console.error("Forgot Password Email Error:", {
+      stage: failureStage,
+      code: error.code || null,
+      responseCode: error.responseCode || null,
+      message: error.message || "Email delivery failed",
+    });
 
-    res.status(500).json({
-      message:
-        "Unable to send OTP"
+    res.status(failureStage === "email" ? 502 : 500).json({
+      message: failureStage === "email"
+        ? "Unable to deliver OTP email. Check the email settings in backend/.env and try again."
+        : "Unable to process the password reset request. Please try again.",
     });
   }
 };
@@ -401,6 +553,8 @@ const forgotPassword = async (req, res) => {
 
 const verifyOTP = async (req, res) => {
   try {
+    await ensurePasswordResetSchema();
+
     const {
       email,
       otp
@@ -514,6 +668,8 @@ const verifyOTP = async (req, res) => {
 
 const resetPassword = async (req, res) => {
   try {
+    await ensurePasswordResetSchema();
+
     const {
       email,
       resetToken,
@@ -757,5 +913,7 @@ module.exports = {
   resetPassword,
   getResidents,
   getMyProfile,
-  updateMyProfile
+  updateMyProfile,
+  getMyNotificationReadState,
+  updateResidentNotificationReadState
 };

@@ -1,7 +1,8 @@
+import { API_BASE_URL } from "../../utils/apiBase.js";
 import { useEffect, useMemo, useState } from "react";
 import "../../css/facilities.css";
 
-const API_URL = "http://localhost:5000/api/resident/facilities";
+const API_URL = API_BASE_URL + "/api/resident/facilities";
 
 const facilityIcons = {
   "Swimming Pool": "🏊",
@@ -446,7 +447,7 @@ const Facilities = () => {
       if (!(await loadRazorpay())) throw new Error("Unable to load payment gateway");
 
       const orderResponse = await fetch(
-        "http://localhost:5000/api/resident/payments/create-order",
+        API_BASE_URL + "/api/resident/payments/create-order",
         {
           method: "POST",
           headers: authHeaders,
@@ -467,7 +468,7 @@ const Facilities = () => {
         handler: async (response) => {
           try {
             const verifyResponse = await fetch(
-              "http://localhost:5000/api/resident/payments/verify",
+              API_BASE_URL + "/api/resident/payments/verify",
               {
                 method: "POST",
                 headers: authHeaders,
@@ -536,24 +537,25 @@ const Facilities = () => {
             <p>Explore facilities and book your preferred slot.</p>
           </div>
         </div>
-
+        <a className="facilities-dashboard-button" href="#booking-history">
+          My bookings <span aria-hidden="true">↘</span>
+        </a>
       </header>
 
       <main className="facilities-content">
         {pageError && <div className="facility-error">{pageError}</div>}
 
-        <section className="facilities-intro">
-          <div>
-            <span className="facilities-label">SOCIETY FACILITIES</span>
-            <h2>Available Facilities</h2>
-            <p>Click Book Now to select your date and time.</p>
+        <section className="facility-catalog" id="facility-list">
+          <div className="facility-catalog-heading">
+            <div>
+              <span className="facilities-label">SPACES TO EXPLORE</span>
+              <h2>Choose a facility</h2>
+              <p>Check availability and select a date to get started.</p>
+            </div>
+            <span className="facility-count-chip">
+              {loadingFacilities ? "Loading spaces" : `${facilities.length} spaces`}
+            </span>
           </div>
-
-          <div className="facility-summary">
-            <strong>{facilities.length}</strong>
-            <span>Facilities</span>
-          </div>
-        </section>
 
         {loadingFacilities ? (
           <div className="facility-state">Loading facilities...</div>
@@ -574,9 +576,15 @@ const Facilities = () => {
                     <div className="facility-icon">
                       {facilityIcons[facility.facility_name] || "🏢"}
                     </div>
-                    <span className="facility-number">
-                      {String(index + 1).padStart(2, "0")}
-                    </span>
+                    <div className="facility-card-markers">
+                      <span className={`facility-availability ${isAvailable ? "available" : "unavailable"}`}>
+                        <span aria-hidden="true" />
+                        {isAvailable ? "Available" : "Unavailable"}
+                      </span>
+                      <span className="facility-number">
+                        {String(index + 1).padStart(2, "0")}
+                      </span>
+                    </div>
                   </div>
 
                   <div className="facility-card-body">
@@ -615,8 +623,9 @@ const Facilities = () => {
             })}
           </section>
         )}
+        </section>
 
-        <section className="booking-history-section">
+        <section className="booking-history-section" id="booking-history">
           <div className="section-heading-row">
             <span className="facilities-label">YOUR ACTIVITY</span>
             <h2>Booking History</h2>

@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/apiBase.js";
 import { useEffect, useMemo, useState } from "react";
 import { CalendarClock, Info, Megaphone, Sparkles } from "lucide-react";
 import "../../css/resident/resident_shared.css";
@@ -53,7 +54,7 @@ function Notices() {
         }
 
         const response = await fetch(
-          "http://localhost:5000/api/notices/active",
+          API_BASE_URL + "/api/notices/active",
           {
             method: "GET",
             headers: {

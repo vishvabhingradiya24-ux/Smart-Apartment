@@ -1,9 +1,10 @@
+import { API_BASE_URL } from "../../utils/apiBase.js";
 import { useEffect, useState } from "react";
 import StaffLayout from "../../components/StaffLayout";
 import { useStaffDepartment } from "../../hooks/useStaffDepartment";
 import { formatDateTime } from "../../utils/time";
 
-const API = "http://localhost:5000/api/staff/reports";
+const API = API_BASE_URL + "/api/staff/reports";
 
 const SEVERITIES = ["Low", "Medium", "High", "Critical"];
 

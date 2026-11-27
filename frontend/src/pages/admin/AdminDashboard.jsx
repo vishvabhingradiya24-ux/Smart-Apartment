@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/apiBase.js";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -26,7 +27,7 @@ const AdminDashboard = () => {
       try {
         const token = sessionStorage.getItem("token");
         if (!token) throw new Error("Admin session expired. Please log in again.");
-        const response = await fetch("http://localhost:5000/api/admin/dashboard", {
+        const response = await fetch(API_BASE_URL + "/api/admin/dashboard", {
           headers: { Authorization: `Bearer ${token}` },
           signal: controller.signal,
         });
@@ -135,7 +136,7 @@ const AdminDashboard = () => {
       </section>
 
       {/* ================= STATISTICS ================= */}
-      <section className="admin-section">
+      <section className="admin-section admin-stats-section">
 
         <div className="admin-section-header">
 
@@ -191,7 +192,7 @@ const AdminDashboard = () => {
       </section>
 
       {/* ================= RECENT ACTIVITY ================= */}
-      <section className="admin-section">
+      <section className="admin-section admin-activity-section">
 
         <div className="admin-section-header activity-header">
 
@@ -255,7 +256,7 @@ const AdminDashboard = () => {
       </section>
 
       {/* ================= COMMUNITY OVERVIEW ================= */}
-      <section className="admin-overview">
+      <section className="admin-overview admin-community-section">
 
         <div className="overview-header">
 

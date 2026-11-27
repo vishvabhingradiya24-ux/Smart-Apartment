@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/apiBase.js";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "../../css/resident/flatDetails.css";
@@ -19,7 +20,7 @@ function FlatDetails() {
         }
 
         const response = await fetch(
-          "http://localhost:5000/api/resident/profile",
+          API_BASE_URL + "/api/resident/profile",
           {
             headers: {
               Authorization: `Bearer ${token}`,

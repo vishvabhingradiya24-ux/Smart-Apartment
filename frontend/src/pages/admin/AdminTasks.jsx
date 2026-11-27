@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/apiBase.js";
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Check, ClipboardList, Clock3, RotateCw, Search } from "lucide-react";
@@ -36,7 +37,7 @@ const AdminTask = () => {
       const token = sessionStorage.getItem("token");
 
       const response = await fetch(
-        "http://localhost:5000/api/admin/tasks",
+        API_BASE_URL + "/api/admin/tasks",
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -72,7 +73,7 @@ const AdminTask = () => {
       }
 
       const response = await fetch(
-        "http://localhost:5000/api/admin/staff",
+        API_BASE_URL + "/api/admin/staff",
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -137,7 +138,7 @@ const AdminTask = () => {
       const token = sessionStorage.getItem("token");
 
       const response = await fetch(
-        "http://localhost:5000/api/admin/tasks",
+        API_BASE_URL + "/api/admin/tasks",
         {
           method: "POST",
 

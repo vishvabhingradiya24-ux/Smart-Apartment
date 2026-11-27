@@ -1,34 +1,35 @@
+import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 // ==========================================
 // MAIN PAGES
 // ==========================================
 
-import Home from "./pages/Home";
+const Home = lazy(() => import("./pages/Home"));
 
 // ==========================================
 // AUTH PAGES
 // ==========================================
 
-import Login from "./pages/auth/Login";
-import Register from "./pages/auth/Register";
-import ForgotPassword from "./pages/auth/ForgotPassword";
-import VerifyOTP from "./pages/auth/VerifyOTP";
-import ResetPassword from "./pages/auth/ResetPassword";
+const Login = lazy(() => import("./pages/auth/Login"));
+const Register = lazy(() => import("./pages/auth/Register"));
+const ForgotPassword = lazy(() => import("./pages/auth/ForgotPassword"));
+const VerifyOTP = lazy(() => import("./pages/auth/VerifyOTP"));
+const ResetPassword = lazy(() => import("./pages/auth/ResetPassword"));
 
 // ==========================================
 // RESIDENT PAGES
 // ==========================================
 
-import ResidentDashboard from "./pages/resident/ResidentDashboard";
-import MyProfile from "./pages/resident/MyProfile";
-import ResidentComplaints from "./pages/resident/ResidentComplaints";
-import Payment from "./pages/resident/Payment";
-import ResidentVisitors from "./pages/resident/ResidentVisitors";
-import Facilities from "./pages/resident/Facilities";
-import ResidentNotices from "./pages/resident/Notices";
-import ResidentNotifications from "./pages/resident/ResidentNotifications";
-import ResidentPolls from "./pages/resident/residentPolls";
+const ResidentDashboard = lazy(() => import("./pages/resident/ResidentDashboard"));
+const MyProfile = lazy(() => import("./pages/resident/MyProfile"));
+const ResidentComplaints = lazy(() => import("./pages/resident/ResidentComplaints"));
+const Payment = lazy(() => import("./pages/resident/Payment"));
+const ResidentVisitors = lazy(() => import("./pages/resident/ResidentVisitors"));
+const Facilities = lazy(() => import("./pages/resident/Facilities"));
+const ResidentNotices = lazy(() => import("./pages/resident/Notices"));
+const ResidentNotifications = lazy(() => import("./pages/resident/ResidentNotifications"));
+const ResidentPolls = lazy(() => import("./pages/resident/residentPolls"));
 import ResidentLayout from "./pages/resident/ResidentLayout";
 
 // ==========================================
@@ -41,20 +42,20 @@ import "./css/global.css";
 // STAFF
 // ==========================================
 
-import StaffDashboard from "./pages/staff/StaffDashboard";
-import AssignedComplaints from "./pages/staff/AssignedComplaints";
-import StaffTasks from "./pages/staff/StaffTasks";
-import StaffMaintenance from "./pages/staff/StaffMaintenance";
-import StaffInventory from "./pages/staff/StaffInventory";
-import StaffWorkHistory from "./pages/staff/StaffWorkHistory";
-import StaffProfile from "./pages/staff/StaffProfile";
-import StaffNotifications from "./pages/staff/StaffNotifications";
-import StaffVisitors from "./pages/staff/StaffVisitors";
-import StaffSupervisorStaff from "./pages/staff/StaffSupervisorStaff";
-import StaffSupervisorTasks from "./pages/staff/StaffSupervisorTasks";
-import StaffSupervisorComplaints from "./pages/staff/StaffSupervisorComplaints";
-import StaffSupervisorVerification from "./pages/staff/StaffSupervisorVerification";
-import StaffSupervisorReports from "./pages/staff/StaffSupervisorReports";
+const StaffDashboard = lazy(() => import("./pages/staff/StaffDashboard"));
+const AssignedComplaints = lazy(() => import("./pages/staff/AssignedComplaints"));
+const StaffTasks = lazy(() => import("./pages/staff/StaffTasks"));
+const StaffMaintenance = lazy(() => import("./pages/staff/StaffMaintenance"));
+const StaffInventory = lazy(() => import("./pages/staff/StaffInventory"));
+const StaffWorkHistory = lazy(() => import("./pages/staff/StaffWorkHistory"));
+const StaffProfile = lazy(() => import("./pages/staff/StaffProfile"));
+const StaffNotifications = lazy(() => import("./pages/staff/StaffNotifications"));
+const StaffVisitors = lazy(() => import("./pages/staff/StaffVisitors"));
+const StaffSupervisorStaff = lazy(() => import("./pages/staff/StaffSupervisorStaff"));
+const StaffSupervisorTasks = lazy(() => import("./pages/staff/StaffSupervisorTasks"));
+const StaffSupervisorComplaints = lazy(() => import("./pages/staff/StaffSupervisorComplaints"));
+const StaffSupervisorVerification = lazy(() => import("./pages/staff/StaffSupervisorVerification"));
+const StaffSupervisorReports = lazy(() => import("./pages/staff/StaffSupervisorReports"));
 import StaffWorkspaceLayout from "./components/StaffWorkspaceLayout";
 
 
@@ -62,21 +63,21 @@ import StaffWorkspaceLayout from "./components/StaffWorkspaceLayout";
 // ADMIN PAGES
 // ==========================================
 
-import AdminDashboard from "./pages/admin/AdminDashboard";
-import Residents from "./pages/admin/Residents";
+const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
+const Residents = lazy(() => import("./pages/admin/Residents"));
 import AdminLayout from "./pages/admin/AdminLayout";
-import Staff from "./pages/admin/Staff";
-import Complaints from "./pages/admin/Complaints";
-import Payments from "./pages/admin/Payments";
-import Visitors from "./pages/admin/Visitors";
-import Amenities from "./pages/admin/Amenities";
-import FacilityBookings from "./pages/admin/FacilityBookings";
-import Notices from "./pages/admin/Notices";
-import Notifications from "./pages/admin/Notifications";
-import Settings from "./pages/admin/Settings";
-import AdminTasks from "./pages/admin/AdminTasks";
-import AdminAssets from "./pages/admin/AdminAssets";
-import AdminPolls from "./pages/admin/AdminPolls";
+const Staff = lazy(() => import("./pages/admin/Staff"));
+const Complaints = lazy(() => import("./pages/admin/Complaints"));
+const Payments = lazy(() => import("./pages/admin/Payments"));
+const Visitors = lazy(() => import("./pages/admin/Visitors"));
+const Amenities = lazy(() => import("./pages/admin/Amenities"));
+const FacilityBookings = lazy(() => import("./pages/admin/FacilityBookings"));
+const Notices = lazy(() => import("./pages/admin/Notices"));
+const Notifications = lazy(() => import("./pages/admin/Notifications"));
+const Settings = lazy(() => import("./pages/admin/Settings"));
+const AdminTasks = lazy(() => import("./pages/admin/AdminTasks"));
+const AdminAssets = lazy(() => import("./pages/admin/AdminAssets"));
+const AdminPolls = lazy(() => import("./pages/admin/AdminPolls"));
 
 // Keep personal/project-wide CSS overrides last so they can override page styles.
 import "./css/admin_residents.css";
@@ -87,9 +88,8 @@ import "./css/staff_workspace.css";
 
 function App() {
   return (
-
-    <h2>mulsha</h2>,
     <BrowserRouter>
+      <Suspense fallback={<div className="route-loading" role="status">Loading page…</div>}>
       <Routes>
         {/* PUBLIC */}
         <Route path="/" element={<Home />} />
@@ -253,6 +253,7 @@ function App() {
   }
 />
       </Routes>
+      </Suspense>
     </BrowserRouter>
   );
 }

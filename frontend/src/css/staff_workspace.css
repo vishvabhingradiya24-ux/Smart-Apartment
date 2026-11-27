@@ -3,6 +3,11 @@
   position: relative;
   min-height: 100vh;
   background: #f3f6f5;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.staff-workspace-layout :is(button, input, select, textarea) {
+  font-family: inherit;
 }
 
 .staff-workspace-layout > .staff-workspace-sidebar {
@@ -15,9 +20,52 @@
   height: 100vh;
   flex-direction: column;
   box-sizing: border-box;
+  padding: 24px 16px;
   border-right-color: rgba(255, 255, 255, .1);
   background: #123746;
   color: #fff;
+}
+
+.staff-workspace-sidebar .brand-header {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, .1);
+}
+
+.staff-workspace-sidebar .brand-icon {
+  flex: 0 0 auto;
+  padding: 8px;
+  border-radius: 10px;
+  font-size: 24px;
+}
+
+.staff-workspace-sidebar .brand-info h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.staff-workspace-sidebar .brand-info span {
+  display: block;
+  font-size: 12px;
+}
+
+.staff-workspace-sidebar .sidebar-section-title {
+  flex: 0 0 auto;
+  margin-bottom: 12px;
+  padding-left: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .8px;
+}
+
+.staff-workspace-sidebar .sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .staff-workspace-sidebar .brand-icon,
@@ -38,15 +86,98 @@
 }
 
 .staff-workspace-sidebar .nav-btn { color: #d2e0e4; }
+.staff-workspace-sidebar .nav-btn {
+  width: 100%;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: all .2s ease;
+}
 .staff-workspace-sidebar .nav-btn:hover { background: rgba(255,255,255,.09); color: #fff; }
-.staff-workspace-sidebar .nav-btn.active { background: #fff; color: #123746; }
-.staff-workspace-sidebar .nav-icon { background: rgba(255,255,255,.12); }
+.staff-workspace-sidebar .nav-btn.active {
+  background: #fff;
+  color: #123746;
+  font-weight: 600;
+}
+.staff-workspace-sidebar .nav-icon {
+  display: flex;
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-size: 16px;
+  text-align: center;
+  background: rgba(255,255,255,.12);
+}
 .staff-workspace-sidebar .nav-btn.active .nav-icon { background: #e8f7f3; }
-.staff-workspace-sidebar .sidebar-footer { border-top-color: rgba(255,255,255,.12); }
+.staff-workspace-sidebar .nav-badge {
+  min-width: 20px;
+  margin-left: auto;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: #e5484d;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  text-align: center;
+}
+.staff-workspace-sidebar .sidebar-footer {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255,255,255,.12);
+}
+.staff-workspace-sidebar .user-profile-summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.staff-workspace-sidebar .avatar-circle {
+  display: flex;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 14px;
+  font-weight: 600;
+}
+.staff-workspace-sidebar .user-details {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+.staff-workspace-sidebar .user-details strong {
+  overflow: hidden;
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.staff-workspace-sidebar .user-details small {
+  font-size: 11px;
+}
 .staff-workspace-sidebar .logout-btn {
-  border-color: rgba(255,255,255,.12);
+  width: 100%;
+  padding: 8px;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 6px;
   background: rgba(255,255,255,.04);
   color: #d5dfeb;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
 }
 
 .staff-workspace-layout > .staff-workspace-sidebar .sidebar-nav {
@@ -374,6 +505,7 @@
 }
 
 .staff-workspace-header-bell {
+  position: relative;
   display: flex;
   width: 40px;
   height: 40px;
@@ -383,6 +515,25 @@
 }
 
 .staff-workspace-header-bell:hover { background: #f2f4f6; }
+
+.staff-workspace-header-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  display: flex;
+  min-width: 18px;
+  height: 18px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  border: 2px solid #fff;
+  border-radius: 999px;
+  background: #e5484d;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+}
 
 .staff-workspace-header-profile {
   display: flex;

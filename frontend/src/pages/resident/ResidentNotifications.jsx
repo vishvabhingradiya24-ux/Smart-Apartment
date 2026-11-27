@@ -1,11 +1,9 @@
-import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Fragment, useMemo, useState } from "react";
+import { Link, useOutletContext } from "react-router-dom";
 import { Bell, BellRing, DoorOpen, Info, Megaphone, Sparkles, Vote } from "lucide-react";
 import "../../css/resident/resident_shared.css";
 
-const API = "http://localhost:5000/api";
 const DAY = 24 * 60 * 60 * 1000;
-const REFRESH_MS = 30000;
 
 const FILTERS = [
   { key: "all", label: "All" },
@@ -16,146 +14,36 @@ const FILTERS = [
 
 const TYPE_ICON = { notice: Megaphone, poll: Vote, visitor: DoorOpen };
 
-const toTime = (value) => {
-  const time = value ? new Date(value).getTime() : NaN;
-  return Number.isNaN(time) ? 0 : time;
-};
-
 const formatWhen = (time) =>
   time
     ? new Date(time).toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })
     : "";
 
-const formatDay = (value) => {
-  const date = new Date(`${String(value).slice(0, 10)}T00:00:00`);
-  return Number.isNaN(date.getTime())
-    ? "soon"
-    : date.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
-};
-
-// Visitor requests added by Security (and older records without that field) need
-// the resident's decision; visitors the resident registered themselves do not.
-const isSecurityRequest = (visitor) =>
-  visitor.registered_by_staff_id === undefined || visitor.registered_by_staff_id != null;
-
-// Turns the three data sources into one list of updates.
-const buildItems = ({ notices, polls, visitors }) => [
-  ...notices.map((notice) => ({
-    id: `notice-${notice.notice_id}`,
-    type: "notice",
-    label: notice.notice_type || "Notice",
-    title: notice.title,
-    message: notice.description,
-    time: toTime(notice.publish_date),
-    by: notice.posted_by_name,
-    link: "/resident/notices",
-    action: "Open notice",
-    attention: false,
-  })),
-  ...polls
-    .filter((poll) => poll.status === "Active" && poll.my_vote_option_id === null)
-    .map((poll) => ({
-      id: `poll-${poll.poll_id}`,
-      type: "poll",
-      label: "Poll",
-      title: `Vote needed: ${poll.question}`,
-      message: `Voting ends on ${formatDay(poll.end_date)}. Choose an answer before then.`,
-      time: toTime(poll.created_at),
-      link: "/resident/polls",
-      action: "Vote now",
-      attention: true,
-    })),
-  ...visitors.filter(isSecurityRequest).map((visitor) => {
-    const pending = visitor.status === "Pending";
-    const name = visitor.visitor_name || "A visitor";
-    const time = visitor.expected_time ? String(visitor.expected_time).slice(0, 5) : "";
-    const details = [visitor.purpose, time && `Visit time ${time}`].filter(Boolean).join(" · ");
-
-    return {
-      id: `visitor-${visitor.visitor_id}`,
-      type: "visitor",
-      label: pending ? "Visitor approval" : `Visitor ${String(visitor.status || "").toLowerCase()}`,
-      title: pending ? `${name} is waiting for your approval` : `Visitor request for ${name}`,
-      message: details || (pending ? "Approve or reject this visitor request." : ""),
-      time: toTime(visitor.created_at || visitor.visit_date),
-      link: "/resident/visitors",
-      action: pending ? "Review" : "View visitors",
-      attention: pending,
-    };
-  }),
-];
-
 function ResidentNotifications() {
-  const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const {
+    notifications: items,
+    notificationLoading: loading,
+    notificationError: error,
+    notificationWarning,
+    loadNotifications,
+    markNotificationRead,
+  } = useOutletContext();
   const [filter, setFilter] = useState("all");
   const [now] = useState(() => Date.now());
+  const [markingId, setMarkingId] = useState("");
+  const [actionError, setActionError] = useState("");
 
-  const loadNotifications = useCallback(async (signal) => {
+  const handleMarkRead = async (id) => {
+    setMarkingId(id);
+    setActionError("");
     try {
-      const token = sessionStorage.getItem("token");
-      if (!token) throw new Error("Your session has expired. Please log in again.");
-
-      const headers = { Authorization: `Bearer ${token}`, Accept: "application/json" };
-      const read = async (path) => {
-        const response = await fetch(`${API}${path}`, { headers, signal });
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.message || "Unable to load notifications.");
-        return data;
-      };
-
-      const [noticeResult, pollResult, visitorResult] = await Promise.allSettled([
-        read("/notices/active"),
-        read("/resident/polls"),
-        read("/resident/visitors"),
-      ]);
-
-      if (signal?.aborted) return;
-
-      // Notices are the main feed, so a failure there is an error; polls and visitors are extras.
-      if (noticeResult.status === "rejected") throw noticeResult.reason;
-
-      const noticeData = noticeResult.value;
-
-      setItems(
-        buildItems({
-          notices: Array.isArray(noticeData.data) ? noticeData.data : Array.isArray(noticeData) ? noticeData : [],
-          polls: pollResult.status === "fulfilled" ? pollResult.value.polls || [] : [],
-          visitors: visitorResult.status === "fulfilled" ? visitorResult.value.visitors || [] : [],
-        })
-      );
-      setError("");
+      await markNotificationRead(id);
     } catch (err) {
-      if (err.name === "AbortError") return;
-      setError(err.message || "Unable to load notifications.");
-      setItems([]);
+      setActionError(err.message || "Unable to update notification status.");
     } finally {
-      if (!signal?.aborted) setLoading(false);
+      setMarkingId("");
     }
-  }, []);
-
-  // Load once, then refresh every 30 seconds so new visitor requests show up.
-  useEffect(() => {
-    let controller = new AbortController();
-
-    const load = async () => {
-      await loadNotifications(controller.signal);
-    };
-
-    load();
-
-    const refreshTimer = window.setInterval(() => {
-      controller.abort();
-      controller = new AbortController();
-      loadNotifications(controller.signal);
-    }, REFRESH_MS);
-
-    return () => {
-      window.clearInterval(refreshTimer);
-      controller.abort();
-    };
-  }, [loadNotifications]);
+  };
 
   const counts = useMemo(
     () => ({
@@ -239,6 +127,9 @@ function ResidentNotifications() {
           </div>
         )}
 
+        {actionError && <p className="rp-notification-error" role="alert">{actionError}</p>}
+        {notificationWarning && <p className="rp-notification-warning" role="status">{notificationWarning}</p>}
+
         {loading ? (
           <div className="rp-loading">
             <span className="rp-spinner" aria-hidden="true" />
@@ -254,10 +145,10 @@ function ResidentNotifications() {
         ) : visible.length === 0 ? (
           <div className="rp-empty">
             <span className="rp-empty-icon" aria-hidden="true"><Bell size={24} strokeWidth={1.7} /></span>
-            <h3>{items.length === 0 ? "You’re all caught up" : "Nothing in this list"}</h3>
+            <h3>{items.length === 0 ? "No notifications right now" : "Nothing in this list"}</h3>
             <p>
               {items.length === 0
-                ? "New announcements, polls and visitor requests will appear here."
+                ? "You’re all caught up. New announcements, polls and visitor requests will appear here."
                 : "Try another filter to see the rest of your updates."}
             </p>
           </div>
@@ -273,13 +164,16 @@ function ResidentNotifications() {
                 <Fragment key={item.id}>
                   {showGroup && <p className="rp-feed-group">{group}</p>}
 
-                  <article className={`rp-feed-item${item.attention ? " is-warn" : ""}`}>
+                  <article className={`rp-feed-item${item.attention ? " is-warn" : ""}${item.isRead ? " is-read" : ""}`}>
                     <span className="rp-feed-icon" aria-hidden="true"><Icon size={20} strokeWidth={1.7} /></span>
 
                     <div className="rp-feed-body">
                       <div className="rp-feed-meta">
                         <span className={`rp-pill${item.attention ? " is-warn" : ""}`}>{item.label}</span>
-                        {isNew && !item.attention && <span className="rp-pill is-warn">New</span>}
+                        <span className={`rp-pill${item.isRead ? " is-muted" : " is-unread"}`}>
+                          {item.isRead ? "Read" : "Unread"}
+                        </span>
+                        {isNew && !item.attention && !item.isRead && <span className="rp-pill is-warn">New</span>}
                         {item.time > 0 && <time>{formatWhen(item.time)}</time>}
                         {item.by && <span>· Posted by {item.by}</span>}
                       </div>
@@ -288,9 +182,31 @@ function ResidentNotifications() {
                       {item.message && <p>{item.message}</p>}
                     </div>
 
-                    <Link to={item.link} className={`rp-btn rp-feed-action${item.attention ? "" : " is-ghost"}`}>
-                      {item.action}
-                    </Link>
+                    <div className="rp-feed-actions">
+                      {!item.isRead && (
+                        <button
+                          type="button"
+                          className="rp-mark-read"
+                          onClick={() => handleMarkRead(item.id)}
+                          disabled={markingId === item.id}
+                        >
+                          {markingId === item.id ? "Saving..." : "Mark as read"}
+                        </button>
+                      )}
+                      <Link
+                        to={item.link}
+                        className={`rp-btn rp-feed-action${item.attention ? "" : " is-ghost"}`}
+                        onClick={() => {
+                          if (!item.isRead) {
+                            markNotificationRead(item.id).catch((err) => {
+                              console.error("Mark Resident Notification Read Error:", err);
+                            });
+                          }
+                        }}
+                      >
+                        {item.action}
+                      </Link>
+                    </div>
                   </article>
                 </Fragment>
               );

@@ -7,87 +7,6 @@ const { notifySupervisors } = require("../utils/staffNotifications");
 
 require("dotenv").config();
 
-const registerStaff = async (req, res) => {
-  try {
-    const {
-      first_name,
-      last_name,
-      email,
-      phone,
-      department,
-      password
-    } = req.body;
-
-    if (
-      !first_name ||
-      !last_name ||
-      !email ||
-      !phone ||
-      !department ||
-      !password
-    ) {
-      return res.status(400).json({
-        message: "All fields are required"
-      });
-    }
-
-    if (!STAFF_DEPARTMENTS.includes(department)) {
-      return res.status(400).json({
-        message: "Please select a valid staff type"
-      });
-    }
-
-    const emailError = getEmailError(email);
-    if (emailError) {
-      return res.status(400).json({ message: emailError });
-    }
-
-    const phoneError = getPhoneError(phone);
-    if (phoneError) {
-      return res.status(400).json({ message: phoneError });
-    }
-
-    const [existingStaff] = await pool.query(
-      "SELECT id FROM staff WHERE email = ?",
-      [email]
-    );
-
-    if (existingStaff.length > 0) {
-      return res.status(409).json({
-        message: "Staff email already registered"
-      });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const [result] = await pool.query(
-      `INSERT INTO staff
-      (first_name, last_name, email, phone, department, password)
-      VALUES (?, ?, ?, ?, ?, ?)`,
-      [
-        first_name,
-        last_name,
-        email,
-        phone,
-        department,
-        hashedPassword
-      ]
-    );
-
-    res.status(201).json({
-      message: "Staff registered successfully",
-      staffId: result.insertId
-    });
-
-  } catch (error) {
-    console.error("Staff Registration Error:", error);
-
-    res.status(500).json({
-      message: "Staff registration failed"
-    });
-  }
-};
-
 const loginStaff = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -860,7 +779,6 @@ module.exports = {
   markStaffNotificationRead,
   markAllStaffNotificationsRead,
   changeStaffPassword,
-  registerStaff,
   loginStaff,
   getStaffDashboard,
   updateStaffDepartment,

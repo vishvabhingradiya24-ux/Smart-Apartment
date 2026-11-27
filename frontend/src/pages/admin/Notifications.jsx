@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/apiBase.js";
 import { useEffect, useMemo, useState } from "react";
 import {
   Bell,
@@ -30,7 +31,7 @@ const Notifications = () => {
   useEffect(() => {
     const loadNotifications = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/admin/notifications", {
+        const response = await fetch(API_BASE_URL + "/api/admin/notifications", {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await response.json();
@@ -65,24 +66,30 @@ const Notifications = () => {
     return <Icon size={16} strokeWidth={1.8} aria-hidden="true" />;
   };
 
-  const toggleRead = async (notification) => {
-    const isRead = !notification.isRead;
+  const markRead = async (notification) => {
+    if (notification.isRead) return;
     setUpdatingId(notification.id);
     setError("");
     try {
-      const response = await fetch(`http://localhost:5000/api/admin/notifications/${encodeURIComponent(notification.id)}/read`, {
+      const response = await fetch(`${API_BASE_URL}/api/admin/notifications/${encodeURIComponent(notification.id)}/read`, {
         method: "PATCH",
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ isRead }),
+        body: JSON.stringify({ isRead: true }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || "Notification status could not be updated");
+      const nextIsRead = Boolean(data.isRead);
       setNotifications((current) => current.map((item) =>
-        item.id === notification.id ? { ...item, isRead: data.isRead } : item
+        item.id === notification.id ? { ...item, isRead: nextIsRead } : item
       ));
+      if (notification.isRead !== nextIsRead) {
+        window.dispatchEvent(new CustomEvent("admin-notifications-changed", {
+          detail: { unreadDelta: nextIsRead ? -1 : 1 },
+        }));
+      }
     } catch (err) {
       setError(err.message || "Notification status could not be updated");
     } finally {
@@ -122,7 +129,7 @@ const Notifications = () => {
                 <td><span className={`notification-type-badge type-${String(item.type || "activity").toLowerCase()}`}>{item.type}</span></td>
                 <td className="notification-date">{formatDate(item.date)}</td>
                 <td className="notification-time">{formatTime(item.date)}</td>
-                <td><button className={`notification-read-button ${item.isRead ? "is-read" : ""}`} type="button" disabled={updatingId === item.id} onClick={() => toggleRead(item)}>{updatingId === item.id ? "Saving…" : item.isRead ? "Mark unread" : "Mark read"}</button></td>
+                <td><button className={`notification-read-button ${item.isRead ? "is-read" : ""}`} type="button" disabled={item.isRead || updatingId === item.id} onClick={() => markRead(item)}>{updatingId === item.id ? "Saving…" : item.isRead ? "Read" : "Mark read"}</button></td>
                 <td><div className="notification-actor-name">{item.actorName || "—"}</div><div className="notification-actor-type">{item.actorType || "—"}</div></td>
               </tr>)}
           </tbody>

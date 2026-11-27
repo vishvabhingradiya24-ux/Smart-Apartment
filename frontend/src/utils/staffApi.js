@@ -1,6 +1,7 @@
+import { API_BASE_URL } from "./apiBase.js";
 import { useCallback, useEffect, useState } from "react";
 
-const BASE = "http://localhost:5000/api/staff";
+const BASE = API_BASE_URL + "/api/staff";
 
 // Calls the staff API with the saved login token. Returns the parsed JSON
 // or throws an Error carrying the server's message.

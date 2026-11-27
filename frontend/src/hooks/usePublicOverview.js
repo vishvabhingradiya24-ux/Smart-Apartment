@@ -1,6 +1,7 @@
+import { API_BASE_URL } from "../utils/apiBase.js";
 import { useEffect, useState } from "react";
 
-const OVERVIEW_URL = "http://localhost:5000/api/public/overview";
+const OVERVIEW_URL = API_BASE_URL + "/api/public/overview";
 
 // Loads the public, aggregate society data shown on the Home page.
 // While loading, or if the server is unreachable, `data` stays null so the

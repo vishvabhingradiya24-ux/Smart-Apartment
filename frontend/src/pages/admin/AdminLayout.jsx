@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/apiBase.js";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
@@ -83,6 +84,7 @@ const AdminLayout = ({ children }) => {
   const [admin] = useState(readAdminUser);
   const [clock, setClock] = useState(readClock);
   const [unread, setUnread] = useState(0);
+  const notificationUpdateVersion = useRef(0);
 
   const [jumpQuery, setJumpQuery] = useState("");
   const [jumpOpen, setJumpOpen] = useState(false);
@@ -110,25 +112,37 @@ const AdminLayout = ({ children }) => {
     const loadUnread = async () => {
       const token = sessionStorage.getItem("token");
       if (!token) return;
+      const requestVersion = notificationUpdateVersion.current;
 
       try {
-        const response = await fetch("http://localhost:5000/api/admin/notifications", {
+        const response = await fetch(API_BASE_URL + "/api/admin/notifications", {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!response.ok) return;
         const data = await response.json();
-        if (!cancelled) setUnread((data.notifications || []).filter((item) => !item.isRead).length);
+        if (!cancelled && requestVersion === notificationUpdateVersion.current) {
+          setUnread((data.notifications || []).filter((item) => !item.isRead).length);
+        }
       } catch {
         /* the badge is only a convenience */
       }
     };
 
+    const handleNotificationChange = (event) => {
+      const unreadDelta = Number(event.detail?.unreadDelta);
+      if (!Number.isFinite(unreadDelta)) return;
+      notificationUpdateVersion.current += 1;
+      setUnread((current) => Math.max(0, current + unreadDelta));
+    };
+
     loadUnread();
     const timer = setInterval(loadUnread, 60000);
+    window.addEventListener("admin-notifications-changed", handleNotificationChange);
 
     return () => {
       cancelled = true;
       clearInterval(timer);
+      window.removeEventListener("admin-notifications-changed", handleNotificationChange);
     };
   }, [location.pathname]);
 

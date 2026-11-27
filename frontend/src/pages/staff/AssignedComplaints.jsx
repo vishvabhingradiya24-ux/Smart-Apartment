@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/apiBase.js";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import StaffNav from "../../components/StaffNav";
@@ -70,7 +71,7 @@ function StaffComplaints() {
 
 
       const response = await fetch(
-        "http://localhost:5000/api/resident/complaints/staff/assigned",
+        API_BASE_URL + "/api/resident/complaints/staff/assigned",
         {
           method: "GET",
           cache: "no-store",
@@ -223,7 +224,7 @@ function StaffComplaints() {
       const token = sessionStorage.getItem("token");
 
       const response = await fetch(
-        `http://localhost:5000/api/resident/complaints/staff/${selectedComplaint.complaintId}/status`,
+        `${API_BASE_URL}/api/resident/complaints/staff/${selectedComplaint.complaintId}/status`,
         {
           method: "PUT",
           headers: {
@@ -269,7 +270,7 @@ function StaffComplaints() {
       setUpdatingStatus(true);
 
       const response = await fetch(
-        `http://localhost:5000/api/resident/complaints/staff/${selectedComplaint.complaintId}/accept`,
+        `${API_BASE_URL}/api/resident/complaints/staff/${selectedComplaint.complaintId}/accept`,
         {
           method: "PUT",
           headers: {
@@ -521,17 +522,6 @@ function StaffComplaints() {
         <header className="complaints-header">
 
           <div className="complaints-header-left">
-
-            <button
-              className="complaints-back-btn"
-              onClick={() =>
-                handleNavigation("/staff/dashboard")
-              }
-            >
-              ←
-            </button>
-
-
             <div>
 
               <span className="complaints-badge">
@@ -1047,16 +1037,6 @@ function StaffComplaints() {
                             : "Try changing your search or filter."
                           }
                         </p>
-                        {complaints.length === 0 && (
-                          <button
-                            type="button"
-                            className="complaints-empty-tasks-btn"
-                            onClick={() => navigate("/staff/tasks")}
-                          >
-                            View My Tasks
-                          </button>
-                        )}
-
                       </td>
 
                     </tr>

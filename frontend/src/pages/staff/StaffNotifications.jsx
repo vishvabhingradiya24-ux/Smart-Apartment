@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/apiBase.js";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import StaffLayout from "../../components/StaffLayout";
@@ -12,7 +13,7 @@ const ICONS = {
   visitor: "🚪"
 };
 
-const API = "http://localhost:5000/api/staff/notifications";
+const API = API_BASE_URL + "/api/staff/notifications";
 
 function StaffNotifications() {
   const navigate = useNavigate();
@@ -21,6 +22,8 @@ function StaffNotifications() {
   const [unread, setUnread] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [updatingId, setUpdatingId] = useState(null);
+  const [markingAll, setMarkingAll] = useState(false);
 
   const [reloadKey, setReloadKey] = useState(0);
 
@@ -65,12 +68,29 @@ function StaffNotifications() {
     return () => window.clearInterval(intervalId);
   }, []);
 
-  const tellMenu = () => window.dispatchEvent(new Event("staff-notifications-changed"));
+  const tellMenu = (detail) => window.dispatchEvent(new CustomEvent("staff-notifications-changed", { detail }));
 
   const openNotification = async (item) => {
+    if (markingAll || updatingId !== null) return;
     if (!item.is_read) {
-      await fetch(`${API}/${item.id}/read`, { method: "PUT", headers: headers() }).catch(() => {});
-      tellMenu();
+      setUpdatingId(item.id);
+      setError("");
+      try {
+        const response = await fetch(`${API}/${item.id}/read`, { method: "PUT", headers: headers() });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || "Unable to mark notification as read.");
+
+        setNotifications((current) => current.map((notification) =>
+          notification.id === item.id ? { ...notification, is_read: 1 } : notification
+        ));
+        setUnread((current) => Math.max(0, current - 1));
+        tellMenu({ unreadDelta: -1 });
+      } catch (err) {
+        setError(err.message || "Unable to mark notification as read.");
+        return;
+      } finally {
+        setUpdatingId(null);
+      }
     }
 
     if (item.link) navigate(item.link);
@@ -78,9 +98,22 @@ function StaffNotifications() {
   };
 
   const markAllRead = async () => {
-    await fetch(`${API}/read-all`, { method: "PUT", headers: headers() }).catch(() => {});
-    tellMenu();
-    reload();
+    if (markingAll || unread === 0) return;
+    setMarkingAll(true);
+    setError("");
+    try {
+      const response = await fetch(`${API}/read-all`, { method: "PUT", headers: headers() });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Unable to mark notifications as read.");
+
+      setNotifications((current) => current.map((notification) => ({ ...notification, is_read: 1 })));
+      setUnread(0);
+      tellMenu({ unreadCount: 0 });
+    } catch (err) {
+      setError(err.message || "Unable to mark notifications as read.");
+    } finally {
+      setMarkingAll(false);
+    }
   };
 
   return (
@@ -93,9 +126,9 @@ function StaffNotifications() {
           type="button"
           className="sx-btn sx-btn-ghost"
           onClick={markAllRead}
-          disabled={unread === 0}
+          disabled={unread === 0 || markingAll || updatingId !== null}
         >
-          Mark all as read
+          {markingAll ? "Saving..." : "Mark all as read"}
         </button>
       }
     >
@@ -127,6 +160,7 @@ function StaffNotifications() {
                 <button
                   type="button"
                   className={`sx-notification ${item.is_read ? "" : "is-unread"}`.trim()}
+                  disabled={updatingId !== null || markingAll}
                   onClick={() => openNotification(item)}
                 >
                   <span className="sx-notification-icon" aria-hidden="true">

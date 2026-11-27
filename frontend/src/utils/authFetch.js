@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "./apiBase.js";
 // Keeps the Admin, Staff and Resident sessions apart.
 //
 // Every role used to save its login token under the same "token" key, so
@@ -6,7 +7,7 @@
 // and every API call automatically sends the token of the role whose
 // section (/admin, /staff, /resident) the page belongs to.
 
-const API_BASE = "http://localhost:5000/api";
+const API_BASE = API_BASE_URL + "/api";
 
 const ROLE_TOKEN_KEYS = {
   admin: "adminToken",

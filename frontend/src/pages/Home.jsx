@@ -113,6 +113,8 @@ const DEPARTMENT_LOOKS = {
   "Facility Supervisor": { icon: ClipboardCheck, tone: "blue" }
 };
 
+const SERVICE_TEAMS = STAFF_DEPARTMENTS.filter((name) => name !== "Facility Supervisor");
+
 const FOLLOW_CURSOR = (event) => {
   const rect = event.currentTarget.getBoundingClientRect();
 
@@ -548,8 +550,8 @@ function Home() {
             </p>
           </Reveal>
 
-          <div className="sa-feature-grid">
-            {STAFF_DEPARTMENTS.map((name, index) => {
+          <div className="sa-feature-grid sa-service-grid">
+            {SERVICE_TEAMS.map((name, index) => {
               const { icon: Icon, tone } = DEPARTMENT_LOOKS[name];
               const count = departmentCounts.has(name) ? departmentCounts.get(name) : null;
 

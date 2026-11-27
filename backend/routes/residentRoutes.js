@@ -46,4 +46,17 @@ router.put(
   authMiddleware,
   residentController.updateMyProfile
 );
+
+router.get(
+  "/notifications/read-state",
+  authMiddleware,
+  residentController.getMyNotificationReadState
+);
+
+router.put(
+  "/notifications/:id/read",
+  authMiddleware,
+  residentController.updateResidentNotificationReadState
+);
+
 module.exports = router;

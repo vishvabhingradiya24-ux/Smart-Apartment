@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/apiBase.js";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -110,7 +111,7 @@ function Login() {
       let requestBody = {};
 
       if (formData.user_type === "resident") {
-        loginURL = "http://localhost:5000/api/resident/login";
+        loginURL = API_BASE_URL + "/api/resident/login";
 
         requestBody = {
           email: formData.email,
@@ -119,7 +120,7 @@ function Login() {
       }
 
       if (formData.user_type === "staff") {
-        loginURL = "http://localhost:5000/api/staff/login";
+        loginURL = API_BASE_URL + "/api/staff/login";
 
         requestBody = {
           email: formData.email,
@@ -128,7 +129,7 @@ function Login() {
       }
 
       if (formData.user_type === "admin") {
-        loginURL = "http://localhost:5000/api/admin/login";
+        loginURL = API_BASE_URL + "/api/admin/login";
 
         requestBody = {
           email: formData.email,
@@ -236,12 +237,14 @@ function Login() {
       perks={PERKS}
       title="Welcome back"
       subtitle="Log in to continue to your Smart Apartment account."
-      footer={
+      footer={formData.user_type === "resident" ? (
         <>
           Don&apos;t have an account?
           <Link to="/register">Create an account</Link>
         </>
-      }
+      ) : formData.user_type === "staff" ? (
+        <>Staff accounts are created by your administrator.</>
+      ) : null}
     >
       <form onSubmit={handleLogin} noValidate>
         <RoleTabs

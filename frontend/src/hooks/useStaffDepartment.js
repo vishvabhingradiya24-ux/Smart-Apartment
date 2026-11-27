@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../utils/apiBase.js";
 import { useEffect, useState } from "react";
 
 const readStoredDepartment = () => {
@@ -22,7 +23,7 @@ export function useStaffDepartment() {
 
     const controller = new AbortController();
 
-    fetch("http://localhost:5000/api/staff/dashboard", {
+    fetch(API_BASE_URL + "/api/staff/dashboard", {
       headers: { Authorization: `Bearer ${token}` },
       signal: controller.signal
     })

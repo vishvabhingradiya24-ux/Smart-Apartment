@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/apiBase.js";
 import { useEffect, useState } from "react";
 import "../../css/resident/profile.css";
 
@@ -22,7 +23,7 @@ function MyProfile() {
         }
 
         const response = await fetch(
-          "http://localhost:5000/api/resident/profile",
+          API_BASE_URL + "/api/resident/profile",
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -69,7 +70,7 @@ function MyProfile() {
 
     try {
       const token = sessionStorage.getItem("token");
-      const response = await fetch("http://localhost:5000/api/resident/profile", {
+      const response = await fetch(API_BASE_URL + "/api/resident/profile", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

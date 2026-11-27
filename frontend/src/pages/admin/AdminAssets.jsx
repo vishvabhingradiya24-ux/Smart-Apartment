@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/apiBase.js";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Boxes, PackagePlus, Search } from "lucide-react";
 import AdminFormModal from "./AdminFormModal";
@@ -34,7 +35,7 @@ const AdminAssets = () => {
       const token = sessionStorage.getItem("token");
       if (!token) throw new Error("Admin session expired. Please log in again.");
 
-      const response = await fetch("http://localhost:5000/api/admin/assets", {
+      const response = await fetch(API_BASE_URL + "/api/admin/assets", {
         headers: { Authorization: `Bearer ${token}` },
         signal,
       });
@@ -69,7 +70,7 @@ const AdminAssets = () => {
       const token = sessionStorage.getItem("token");
       if (!token) throw new Error("Admin session expired. Please log in again.");
 
-      const response = await fetch("http://localhost:5000/api/admin/assets", {
+      const response = await fetch(API_BASE_URL + "/api/admin/assets", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,

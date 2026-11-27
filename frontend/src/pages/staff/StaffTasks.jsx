@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/apiBase.js";
 
 import {
   useCallback,
@@ -25,6 +26,7 @@ function StaffTasks() {
         : "Start Work";
 
   const [notesTask, setNotesTask] = useState(null);
+  const [viewingTask, setViewingTask] = useState(null);
   const [verificationEnabled, setVerificationEnabled] = useState(false);
   const [acceptingId, setAcceptingId] = useState(null);
 
@@ -57,6 +59,17 @@ function StaffTasks() {
   const [error, setError] = useState("");
   const [updatingTaskId, setUpdatingTaskId] = useState(null);
 
+  useEffect(() => {
+    if (!viewingTask) return undefined;
+
+    const closeOnEscape = (event) => {
+      if (event.key === "Escape") setViewingTask(null);
+    };
+
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [viewingTask]);
+
   // ================= FETCH TASKS =================
 
   
@@ -73,7 +86,7 @@ function StaffTasks() {
       }
 
       const response = await fetch(
-        "http://localhost:5000/api/staff/tasks",
+        API_BASE_URL + "/api/staff/tasks",
         {
           method: "GET",
           headers: {
@@ -288,7 +301,7 @@ function StaffTasks() {
       }
 
       const response = await fetch(
-        `http://localhost:5000/api/staff/tasks/${taskId}/status`,
+        `${API_BASE_URL}/api/staff/tasks/${taskId}/status`,
         {
           method: "PUT",
 
@@ -370,7 +383,7 @@ function StaffTasks() {
 
     try {
       const response = await fetch(
-        `http://localhost:5000/api/staff/tasks/${taskId}/accept`,
+        `${API_BASE_URL}/api/staff/tasks/${taskId}/accept`,
         {
           method: "PUT",
           headers: {
@@ -396,25 +409,7 @@ function StaffTasks() {
   // ================= VIEW TASK =================
 
   const handleViewTask = (task) => {
-    alert(
-      `Task Details\n\n` +
-        `Task ID: ${task.id}\n` +
-        `Task Name: ${task.title}\n` +
-        `Description: ${task.description}\n` +
-        `Priority: ${task.priority}\n` +
-        `Status: ${task.status}\n` +
-        `Due Date: ${task.dueDate}\n` +
-        `Location: ${task.location || "-"}\n` +
-        `Accepted: ${task.acceptedAt ? new Date(task.acceptedAt).toLocaleString() : "Not yet"}\n` +
-        `Work Notes: ${task.workNotes || "-"}\n` +
-        (task.status === "Completed"
-          ? `Verification: ${task.verifiedAt ? "Approved by supervisor" : "Waiting for supervisor"}\n`
-          : "") +
-        (task.verificationNote
-          ? `Supervisor Note: ${task.verificationNote}\n`
-          : "") +
-        `Created Date: ${task.createdDate}`
-    );
+    setViewingTask(task);
   };
 
   // ================= RESET =================
@@ -1036,6 +1031,94 @@ function StaffTasks() {
             if (done) setNotesTask(null);
           }}
         />
+      )}
+
+      {viewingTask && (
+        <div
+          className="staff-task-details-backdrop"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setViewingTask(null);
+          }}
+        >
+          <section
+            className="staff-task-details-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="staff-task-details-title"
+          >
+            <header className="staff-task-details-header">
+              <div>
+                <span>ASSIGNED TASK · #{viewingTask.id}</span>
+                <h2 id="staff-task-details-title">{viewingTask.title}</h2>
+              </div>
+              <button
+                type="button"
+                aria-label="Close task details"
+                onClick={() => setViewingTask(null)}
+                autoFocus
+              >
+                ×
+              </button>
+            </header>
+
+            <dl className="staff-task-details-grid">
+              <div>
+                <dt>Status</dt>
+                <dd>
+                  <span className={`status-select ${String(viewingTask.status).toLowerCase().replace(/\s+/g, "-")}`}>
+                    {viewingTask.status}
+                  </span>
+                </dd>
+              </div>
+              <div>
+                <dt>Priority</dt>
+                <dd>
+                  <span className={`priority-pill ${String(viewingTask.priority).toLowerCase()}`}>
+                    {viewingTask.priority}
+                  </span>
+                </dd>
+              </div>
+              <div><dt>Due date</dt><dd>{viewingTask.dueDate}</dd></div>
+              <div><dt>Location</dt><dd>{viewingTask.location || "Not specified"}</dd></div>
+              <div><dt>Assigned to</dt><dd>{viewingTask.assignedTo || "Not assigned"}</dd></div>
+              <div>
+                <dt>Accepted</dt>
+                <dd>{viewingTask.acceptedAt ? new Date(viewingTask.acceptedAt).toLocaleString() : "Not yet"}</dd>
+              </div>
+              <div><dt>Assigned date</dt><dd>{viewingTask.assignedDate}</dd></div>
+              <div><dt>Created date</dt><dd>{viewingTask.createdDate}</dd></div>
+              <div><dt>Completed date</dt><dd>{viewingTask.completedDate || "Not completed"}</dd></div>
+              <div>
+                <dt>Verification</dt>
+                <dd>
+                  {viewingTask.verifiedAt
+                    ? `Approved ${new Date(viewingTask.verifiedAt).toLocaleDateString()}`
+                    : viewingTask.status === "Completed" && verificationEnabled
+                      ? "Waiting for supervisor"
+                      : "Not required"}
+                </dd>
+              </div>
+            </dl>
+
+            <section className="staff-task-details-section">
+              <h3>Description</h3>
+              <p>{viewingTask.description || "No description provided."}</p>
+            </section>
+
+            <section className="staff-task-details-section">
+              <h3>Work notes</h3>
+              <p>{viewingTask.workNotes || "No work notes added."}</p>
+            </section>
+
+            {viewingTask.verificationNote && (
+              <section className="staff-task-details-section is-warning">
+                <h3>Supervisor note</h3>
+                <p>{viewingTask.verificationNote}</p>
+              </section>
+            )}
+          </section>
+        </div>
       )}
 
     </div>

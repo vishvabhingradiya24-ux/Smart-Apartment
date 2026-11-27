@@ -481,17 +481,35 @@ const createAdminStaff = async (req, res) => {
   try {
     if (!requireAdmin(req, res)) return;
 
-    const { first_name, last_name, email, phone, department, password } = req.body;
+    const firstName = typeof req.body.first_name === "string" ? req.body.first_name.trim() : "";
+    const lastName = typeof req.body.last_name === "string" ? req.body.last_name.trim() : "";
+    const email = typeof req.body.email === "string" ? req.body.email.trim().toLowerCase() : "";
+    const phone = typeof req.body.phone === "string" ? req.body.phone.trim() : "";
+    const { department, password } = req.body;
+    const namePattern = /^[\p{L}\p{M}][\p{L}\p{M} .'-]*$/u;
 
     if (
-      !first_name?.trim() ||
-      !last_name?.trim() ||
-      !email?.trim() ||
-      !phone?.trim() ||
-      !STAFF_DEPARTMENTS.includes(department) ||
-      !password
+      !namePattern.test(firstName) ||
+      !namePattern.test(lastName) ||
+      firstName.length > 100 ||
+      lastName.length > 100
     ) {
-      return res.status(400).json({ message: "All fields and a valid department are required" });
+      return res.status(400).json({ message: "Enter valid first and last names up to 100 characters" });
+    }
+
+    const emailError = getEmailError(email);
+    if (emailError || email.length > 150) {
+      return res.status(400).json({ message: emailError || "Email must be no more than 150 characters" });
+    }
+    const phoneError = getPhoneError(phone);
+    if (phoneError) {
+      return res.status(400).json({ message: phoneError });
+    }
+    if (!STAFF_DEPARTMENTS.includes(department)) {
+      return res.status(400).json({ message: "Select a valid staff department" });
+    }
+    if (typeof password !== "string") {
+      return res.status(400).json({ message: "A password is required" });
     }
 
     if (
@@ -517,10 +535,10 @@ const createAdminStaff = async (req, res) => {
       `INSERT INTO staff (first_name, last_name, email, phone, department, password)
        VALUES (?, ?, ?, ?, ?, ?)`,
       [
-        first_name.trim(),
-        last_name.trim(),
+        firstName,
+        lastName,
         normalizedEmail,
-        phone.trim(),
+        phone,
         department,
         hashedPassword,
       ]
@@ -774,7 +792,7 @@ const updateAdminNotificationReadState = async (req, res) => {
       booking: { table: "facility_bookings", idColumn: "booking_id" },
     })[match[1]];
     const isRead = req.body?.isRead;
-    if (!source || !Number.isSafeInteger(Number(match[2])) || ![true, false].includes(isRead)) {
+    if (!source || !Number.isSafeInteger(Number(match[2])) || isRead !== true) {
       return res.status(400).json({ message: "Invalid notification read status request" });
     }
 
@@ -784,19 +802,12 @@ const updateAdminNotificationReadState = async (req, res) => {
     );
     if (!records.length) return res.status(404).json({ message: "Notification activity not found" });
 
-    if (isRead) {
-      await pool.query(
-        `INSERT INTO admin_notification_reads (admin_id, notification_id)
-         VALUES (?, ?)
-         ON DUPLICATE KEY UPDATE read_at = CURRENT_TIMESTAMP`,
-        [req.user.id, req.params.id]
-      );
-    } else {
-      await pool.query(
-        "DELETE FROM admin_notification_reads WHERE admin_id = ? AND notification_id = ?",
-        [req.user.id, req.params.id]
-      );
-    }
+    await pool.query(
+      `INSERT INTO admin_notification_reads (admin_id, notification_id)
+       VALUES (?, ?)
+       ON DUPLICATE KEY UPDATE read_at = CURRENT_TIMESTAMP`,
+      [req.user.id, req.params.id]
+    );
 
     res.status(200).json({ message: `Notification marked as ${isRead ? "read" : "unread"}`, isRead });
   } catch (error) {

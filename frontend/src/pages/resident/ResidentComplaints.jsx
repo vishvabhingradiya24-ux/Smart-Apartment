@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/apiBase.js";
 import { useCallback, useEffect, useState } from "react";
 import "../../css/resident/residentComplaints.css";
 
@@ -24,7 +25,7 @@ function ResidentComplaints() {
       }
 
       const response = await fetch(
-        "http://localhost:5000/api/resident/complaints/my",
+        API_BASE_URL + "/api/resident/complaints/my",
         {
           method: "GET",
           headers: {
@@ -117,7 +118,7 @@ function ResidentComplaints() {
       setSubmitting(true);
 
       const response = await fetch(
-        "http://localhost:5000/api/resident/complaints",
+        API_BASE_URL + "/api/resident/complaints",
         {
           method: "POST",
           headers: {

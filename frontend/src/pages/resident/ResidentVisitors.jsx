@@ -1,8 +1,9 @@
+import { API_BASE_URL } from "../../utils/apiBase.js";
 import { useEffect, useMemo, useState } from "react";
 import { CheckCircle2, Clock3, DoorOpen, Info, Plus, UsersRound, X } from "lucide-react";
 import "../../css/resident/resident_shared.css";
 
-const API_URL = "http://localhost:5000/api/resident/visitors";
+const API_URL = API_BASE_URL + "/api/resident/visitors";
 const VISITOR_TYPES = ["Guest", "Delivery", "Service", "Cab", "Other"];
 
 const FILTERS = ["All", "Pending", "Approved", "Rejected", "Completed"];

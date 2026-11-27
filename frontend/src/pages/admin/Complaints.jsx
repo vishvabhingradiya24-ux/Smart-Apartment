@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/apiBase.js";
 import { useEffect, useState } from "react";
 import { Check, ClipboardList, Clock3, Eye, Search, Wrench } from "lucide-react";
 import {
@@ -37,7 +38,7 @@ const [assigning, setAssigning] = useState(false);
       }
 
       const response = await fetch(
-        "http://localhost:5000/api/resident/complaints/admin/all",
+        API_BASE_URL + "/api/resident/complaints/admin/all",
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -119,7 +120,7 @@ assignedTo:
       }
 
       const response = await fetch(
-        "http://localhost:5000/api/staff/all",
+        API_BASE_URL + "/api/staff/all",
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -248,7 +249,7 @@ const handleConfirmAssign = async () => {
     const token = sessionStorage.getItem("token");
 
     const response = await fetch(
-     `http://localhost:5000/api/resident/complaints/admin/${selectedComplaint.id
+     `${API_BASE_URL}/api/resident/complaints/admin/${selectedComplaint.id
   .replace("C", "")
   .replace(/^0+/, "")}/assign`,
       {

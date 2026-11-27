@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/apiBase.js";
 
 import { useCallback, useEffect, useState } from "react";
 import "../../css/staff/staff_dashboard.css";
@@ -58,7 +59,7 @@ function StaffDashboard() {
       throw new Error("Login session expired. Please sign in again.");
     }
 
-      const response = await fetch("http://localhost:5000/api/staff/dashboard", {
+      const response = await fetch(API_BASE_URL + "/api/staff/dashboard", {
         headers: { Authorization: `Bearer ${token}` },
         signal,
       });

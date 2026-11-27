@@ -3,7 +3,6 @@ const express = require("express");
 const router = express.Router();
 
 const {
-  registerStaff,
   loginStaff,
   getStaffDashboard,
   updateStaffDepartment,
@@ -22,8 +21,6 @@ const {
   changeStaffPassword
 } = require("../controllers/staffController");
 const authMiddleware = require("../middleware/authMiddleware");
-
-router.post("/register", registerStaff);
 
 router.post("/login", loginStaff);
 

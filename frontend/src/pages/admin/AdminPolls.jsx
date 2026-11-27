@@ -1,10 +1,11 @@
+import { API_BASE_URL } from "../../utils/apiBase.js";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { CheckCircle2, Lock, LockOpen, Pencil, Plus, Trash2, Users, Vote, X } from "lucide-react";
 import AdminFormModal from "./AdminFormModal";
 import "../../css/notices.css";
 import "../../css/admin_polls.css";
 
-const API = "http://localhost:5000/api/admin/polls";
+const API = API_BASE_URL + "/api/admin/polls";
 
 const MAX_OPTIONS = 6;
 

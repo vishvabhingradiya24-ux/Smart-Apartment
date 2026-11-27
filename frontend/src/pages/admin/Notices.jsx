@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/apiBase.js";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Check, FileText, FolderOpen, Megaphone, Pencil, Search, Trash2 } from "lucide-react";
 import AdminFormModal from "./AdminFormModal";
@@ -17,7 +18,7 @@ const Notices = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const token = sessionStorage.getItem("token");
-  const request = useCallback((url, options = {}) => fetch(`http://localhost:5000${url}`, { ...options, headers: { Authorization: `Bearer ${token}`, ...(options.body ? { "Content-Type": "application/json" } : {}), ...options.headers } }), [token]);
+  const request = useCallback((url, options = {}) => fetch(`${API_BASE_URL}${url}`, { ...options, headers: { Authorization: `Bearer ${token}`, ...(options.body ? { "Content-Type": "application/json" } : {}), ...options.headers } }), [token]);
 
   const loadNotices = useCallback(async () => {
     try {

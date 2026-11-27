@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { staffSidebarMenuFor } from "../constants/staffMenu";
 import { useStaffDepartment } from "../hooks/useStaffDepartment";
+import useStaffUnreadNotifications from "../hooks/useStaffUnreadNotifications";
 
 // A few staff routes have a second URL.
 const ALIASES = {
@@ -9,53 +9,13 @@ const ALIASES = {
   "/staff/inventory": "/staff/assets"
 };
 
-// Number of unread notifications, refreshed every minute and whenever
-// the notifications page tells us it changed.
-function useUnreadNotifications() {
-  const [unread, setUnread] = useState(0);
-
-  useEffect(() => {
-    const token = sessionStorage.getItem("token");
-
-    if (!token) return undefined;
-
-    let cancelled = false;
-
-    const load = () => {
-      fetch("http://localhost:5000/api/staff/notifications", {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-        .then((response) => (response.ok ? response.json() : null))
-        .then((data) => {
-          if (!cancelled && data) setUnread(Number(data.unread) || 0);
-        })
-        .catch(() => {
-          // The badge is optional; ignore network errors.
-        });
-    };
-
-    load();
-
-    const timer = setInterval(load, 60000);
-
-    window.addEventListener("staff-notifications-changed", load);
-
-    return () => {
-      cancelled = true;
-      clearInterval(timer);
-      window.removeEventListener("staff-notifications-changed", load);
-    };
-  }, []);
-
-  return unread;
-}
-
 // Sidebar menu for every staff page. The items depend on the staff type
 // (see constants/staffMenu.js). `variant="complaints"` keeps the markup and
 // class names of the Assigned Complaints page.
-function StaffNav({ onNavigate, variant = "default" }) {
+function StaffNav({ onNavigate, variant = "default", unreadCount }) {
   const department = useStaffDepartment();
-  const unread = useUnreadNotifications();
+  const ownUnread = useStaffUnreadNotifications(unreadCount === undefined);
+  const unread = unreadCount ?? ownUnread;
   const { pathname } = useLocation();
 
   const current = ALIASES[pathname] || pathname;

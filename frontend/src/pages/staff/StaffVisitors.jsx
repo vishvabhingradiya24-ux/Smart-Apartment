@@ -1,8 +1,9 @@
+import { API_BASE_URL } from "../../utils/apiBase.js";
 import { useEffect, useState } from "react";
 import StaffLayout from "../../components/StaffLayout";
 import { formatDate, formatDateTime } from "../../utils/time";
 
-const API = "http://localhost:5000/api/staff/security";
+const API = API_BASE_URL + "/api/staff/security";
 
 const SCOPES = [
   { key: "today", label: "Today" },

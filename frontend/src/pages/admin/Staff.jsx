@@ -1,6 +1,7 @@
+import { API_BASE_URL } from "../../utils/apiBase.js";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { CalendarDays, Search, UsersRound } from "lucide-react";
+import { CalendarDays, Plus, Search, UsersRound } from "lucide-react";
 import AdminFormModal from "./AdminFormModal";
 import { STAFF_DEPARTMENTS } from "../../constants/staffDepartments";
 import "../../css/admin.css";
@@ -11,6 +12,15 @@ const formatDate = (value) => {
   return Number.isNaN(date.getTime()) ? "—" : date.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
 };
 
+const EMPTY_CREATE_FORM = {
+  first_name: "",
+  last_name: "",
+  email: "",
+  phone: "",
+  department: "",
+  password: "",
+};
+
 const Staff = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
@@ -18,6 +28,10 @@ const Staff = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [createForm, setCreateForm] = useState(EMPTY_CREATE_FORM);
+  const [creatingStaff, setCreatingStaff] = useState(false);
+  const [createError, setCreateError] = useState("");
   const [editingStaff, setEditingStaff] = useState(null);
   const [editForm, setEditForm] = useState({ first_name: "", last_name: "", email: "", phone: "", department: "" });
   const [savingEdit, setSavingEdit] = useState(false);
@@ -25,7 +39,7 @@ const Staff = () => {
 
   const fetchStaff = useCallback(async (signal) => {
     try {
-      const response = await fetch("http://localhost:5000/api/admin/staff", {
+      const response = await fetch(API_BASE_URL + "/api/admin/staff", {
         headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` }, signal,
       });
       const data = await response.json();
@@ -69,6 +83,50 @@ const Staff = () => {
     return !Number.isNaN(date.getTime()) && date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
   }).length;
 
+  const createStaff = async (event) => {
+    event.preventDefault();
+    setCreatingStaff(true);
+    setCreateError("");
+    setSuccessMessage("");
+    try {
+      const newStaff = {
+        first_name: createForm.first_name.trim(),
+        last_name: createForm.last_name.trim(),
+        email: createForm.email.trim().toLowerCase(),
+        phone: createForm.phone.trim(),
+        department: createForm.department,
+        password: createForm.password,
+      };
+      const response = await fetch(`${API_BASE_URL}/api/admin/staff`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newStaff),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Unable to add staff member.");
+
+      setStaffList((current) => [{
+        id: data.staffId,
+        first_name: newStaff.first_name,
+        last_name: newStaff.last_name,
+        email: newStaff.email,
+        phone: newStaff.phone,
+        department: newStaff.department,
+        created_at: new Date().toISOString(),
+      }, ...current]);
+      setCreateForm(EMPTY_CREATE_FORM);
+      setShowCreateForm(false);
+      setSuccessMessage(data.message || "Staff member added successfully.");
+    } catch (err) {
+      setCreateError(err.message || "Unable to add staff member.");
+    } finally {
+      setCreatingStaff(false);
+    }
+  };
+
   const openEditForm = (person) => {
     setEditingStaff(person);
     setEditForm({
@@ -94,7 +152,7 @@ const Staff = () => {
         email: editForm.email.trim(),
         phone: editForm.phone.trim(),
       };
-      const response = await fetch(`http://localhost:5000/api/admin/staff/${editingStaff.id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/admin/staff/${editingStaff.id}`, {
         method: "PUT",
         headers: {
           Authorization: `******"token")}`,
@@ -121,9 +179,57 @@ const Staff = () => {
     <div className="admin-records-page admin-staff-page">
       <header className="admin-records-header">
         <div><span className="admin-records-eyebrow">STAFF MANAGEMENT</span><h1>Staff Members</h1><p>Staff directory from your database, including contact details.</p></div>
+        <div className="admin-records-header-actions">
+          <button type="button" className="admin-records-refresh" onClick={() => {
+            setCreateError("");
+            setSuccessMessage("");
+            setShowCreateForm(true);
+          }}>
+            <Plus size={16} aria-hidden="true" /> Add Staff
+          </button>
+        </div>
       </header>
 
       {successMessage && <p className="admin-staff-success" role="status">{successMessage}</p>}
+      {showCreateForm && (
+        <AdminFormModal title="Add Staff Member" onClose={() => setShowCreateForm(false)} saving={creatingStaff}>
+          <form className="admin-staff-create-form" onSubmit={createStaff}>
+            <label>
+              First name
+              <input required maxLength={100} autoComplete="given-name" value={createForm.first_name} onChange={(event) => setCreateForm({ ...createForm, first_name: event.target.value })} />
+            </label>
+            <label>
+              Department
+              <select required value={createForm.department} onChange={(event) => setCreateForm({ ...createForm, department: event.target.value })}>
+                <option value="" disabled>Select department</option>
+                {STAFF_DEPARTMENTS.map((department) => <option key={department} value={department}>{department}</option>)}
+              </select>
+            </label>
+            <label>
+              Last name
+              <input required maxLength={100} autoComplete="family-name" value={createForm.last_name} onChange={(event) => setCreateForm({ ...createForm, last_name: event.target.value })} />
+            </label>
+            <label>
+              Email
+              <input type="email" required maxLength={150} pattern="[^A-Z]*" title="Email must not contain uppercase letters." autoComplete="email" value={createForm.email} onChange={(event) => setCreateForm({ ...createForm, email: event.target.value })} />
+            </label>
+            <label>
+              Phone
+              <input type="tel" required inputMode="numeric" pattern="[0-9]{10}" minLength={10} maxLength={10} autoComplete="tel" value={createForm.phone} onChange={(event) => setCreateForm({ ...createForm, phone: event.target.value })} />
+            </label>
+            <label>
+              Initial password
+              <input type="password" required minLength={5} maxLength={72} autoComplete="new-password" value={createForm.password} onChange={(event) => setCreateForm({ ...createForm, password: event.target.value })} />
+            </label>
+            <p className="admin-staff-form-hint">Use at least 5 characters, including 3 digits and 1 special character. Share this initial password with the staff member so they can log in.</p>
+            {createError && <p className="admin-staff-form-error" role="alert">{createError}</p>}
+            <div className="admin-staff-form-actions">
+              <button type="button" className="admin-records-secondary" onClick={() => setShowCreateForm(false)} disabled={creatingStaff}>Cancel</button>
+              <button type="submit" className="admin-records-secondary" disabled={creatingStaff}>{creatingStaff ? "Adding..." : "Add Staff"}</button>
+            </div>
+          </form>
+        </AdminFormModal>
+      )}
       {editingStaff && (
         <AdminFormModal title="Edit Staff Member" onClose={() => setEditingStaff(null)} saving={savingEdit}>
           <form className="admin-staff-create-form" onSubmit={saveStaffEdit}>

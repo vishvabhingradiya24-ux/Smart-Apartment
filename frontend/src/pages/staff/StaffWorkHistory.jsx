@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/apiBase.js";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import "../../css/staff/staff_work_history.css";
 import "../../css/staff/staff_shared_theme.css";
@@ -46,7 +47,7 @@ function StaffWorkHistory() {
     setLoading(true);
     setError("");
     try {
-      const response = await fetch("http://localhost:5000/api/staff/work-history", {
+      const response = await fetch(API_BASE_URL + "/api/staff/work-history", {
         headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` }, signal,
       });
       const data = await response.json();

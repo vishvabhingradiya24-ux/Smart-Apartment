@@ -1,19 +1,17 @@
+import { API_BASE_URL } from "../../utils/apiBase.js";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
-  Briefcase,
   CalendarDays,
   Check,
   CreditCard,
-  HardHat,
   Home,
   KeyRound,
   Lock,
   Mail,
   Phone,
   ShieldCheck,
-  User,
-  Users
+  User
 } from "lucide-react";
 import AuthLayout from "../../components/auth/AuthLayout";
 import {
@@ -21,21 +19,14 @@ import {
   AuthButton,
   AuthField,
   AuthSelect,
-  PasswordStrength,
-  RoleTabs
+  PasswordStrength
 } from "../../components/auth/AuthKit";
-import { STAFF_DEPARTMENTS } from "../../constants/staffDepartments";
 import { getEmailError, getPhoneError } from "../../utils/validation";
 
 const WING_OPTIONS = ["A", "B", "C", "D"];
 const FLAT_NUMBER_OPTIONS = Array.from({ length: 5 }, (_, floorIndex) =>
   [1, 2, 3, 4].map((unit) => String((floorIndex + 1) * 100 + unit))
 ).flat();
-
-const ROLES = [
-  { value: "Resident", label: "Resident", icon: Users },
-  { value: "Staff", label: "Staff", icon: HardHat }
-];
 
 const PERKS = [
   {
@@ -63,8 +54,6 @@ const Register = () => {
     last_name: "",
     email: "",
     phone: "",
-    user_type: "Resident",
-    department: "",
     block_wing: "",
     flat_number: "",
     ownership_type: "",
@@ -126,17 +115,6 @@ const Register = () => {
     setTouched((prev) => ({ ...prev, [name]: true }));
   };
 
-  const handleUserTypeChange = (userType) => {
-    setFormData((prev) => ({
-      ...prev,
-      user_type: userType,
-      department: "",
-      block_wing: "",
-      flat_number: "",
-      ownership_type: ""
-    }));
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -160,14 +138,6 @@ const Register = () => {
 
     const phone = String(
       formValues.get("phone") || ""
-    ).trim();
-
-    const user_type = String(
-      formValues.get("user_type") || ""
-    ).trim();
-
-    const department = String(
-      formValues.get("department") || ""
     ).trim();
 
     const block_wing = String(
@@ -220,7 +190,6 @@ const Register = () => {
       !last_name ||
       !email ||
       !phone ||
-      !user_type ||
       !password ||
       !confirm_password
     ) {
@@ -228,15 +197,8 @@ const Register = () => {
       return;
     }
 
-    if (user_type === "Resident") {
-      if (!block_wing || !flat_number || !ownership_type) {
-        setError("Please fill Block/Wing, Flat Number, and Owner/Rent status.");
-        return;
-      }
-    }
-
-    if (user_type === "Staff" && !STAFF_DEPARTMENTS.includes(department)) {
-      setError("Please select a valid staff department.");
+    if (!block_wing || !flat_number || !ownership_type) {
+      setError("Please fill Block/Wing, Flat Number, and Owner/Rent status.");
       return;
     }
 
@@ -260,40 +222,22 @@ const Register = () => {
     try {
       setLoading(true);
 
-      const isResident = user_type === "Resident";
-
-      const registerURL = isResident
-        ? "http://localhost:5000/api/resident/register"
-        : "http://localhost:5000/api/staff/register";
-
-      const requestBody = isResident
-        ? {
-            first_name,
-            last_name,
-            email,
-            phone,
-            user_type,
-            block_wing,
-            flat_number,
-            ownership_type,
-            password
-          }
-        : {
-            first_name,
-            last_name,
-            email,
-            phone,
-            user_type,
-            department,
-            password
-          };
-
-      const response = await fetch(registerURL, {
+      const response = await fetch(API_BASE_URL + "/api/resident/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify(requestBody)
+        body: JSON.stringify({
+          first_name,
+          last_name,
+          email,
+          phone,
+          user_type: "Resident",
+          block_wing,
+          flat_number,
+          ownership_type,
+          password
+        })
       });
 
       const data = await response.json();
@@ -342,15 +286,6 @@ const Register = () => {
       }
     >
       <form onSubmit={handleSubmit} noValidate>
-        <input type="hidden" name="user_type" value={formData.user_type} />
-
-        <RoleTabs
-          label="I am registering as"
-          value={formData.user_type}
-          options={ROLES}
-          onChange={handleUserTypeChange}
-        />
-
         <div className="au-section-title">Your details</div>
 
         <div className="au-row">
@@ -413,87 +348,61 @@ const Register = () => {
           valid={isValid("phone")}
         />
 
-        {formData.user_type === "Resident" && (
-          <div className="au-slide">
-            <div className="au-section-title">Flat details</div>
+        <div className="au-slide">
+          <div className="au-section-title">Flat details</div>
 
-            <div className="au-row">
-              <AuthSelect
-                label="Block / Wing"
-                icon={Home}
-                name="block_wing"
-                value={formData.block_wing}
-                onChange={handleChange}
-              >
-                <option value="" disabled>
-                  Select wing
-                </option>
-
-                {WING_OPTIONS.map((wing) => (
-                  <option key={wing} value={wing}>
-                    {wing} Wing
-                  </option>
-                ))}
-              </AuthSelect>
-
-              <AuthSelect
-                label="Flat number"
-                icon={KeyRound}
-                name="flat_number"
-                value={formData.flat_number}
-                onChange={handleChange}
-              >
-                <option value="" disabled>
-                  Select flat
-                </option>
-
-                {FLAT_NUMBER_OPTIONS.map((flatNumber) => (
-                  <option key={flatNumber} value={flatNumber}>
-                    {flatNumber}
-                  </option>
-                ))}
-              </AuthSelect>
-            </div>
-
+          <div className="au-row">
             <AuthSelect
-              label="Flat ownership"
+              label="Block / Wing"
               icon={Home}
-              name="ownership_type"
-              value={formData.ownership_type}
+              name="block_wing"
+              value={formData.block_wing}
               onChange={handleChange}
             >
               <option value="" disabled>
-                Select owner or rent
+                Select wing
               </option>
-              <option value="Owner">Owner</option>
-              <option value="Rent">Rent</option>
-            </AuthSelect>
-          </div>
-        )}
 
-        {formData.user_type === "Staff" && (
-          <div className="au-slide">
-            <div className="au-section-title">Work details</div>
+              {WING_OPTIONS.map((wing) => (
+                <option key={wing} value={wing}>
+                  {wing} Wing
+                </option>
+              ))}
+            </AuthSelect>
 
             <AuthSelect
-              label="Staff type / Department"
-              icon={Briefcase}
-              name="department"
-              value={formData.department}
+              label="Flat number"
+              icon={KeyRound}
+              name="flat_number"
+              value={formData.flat_number}
               onChange={handleChange}
             >
               <option value="" disabled>
-                Select staff type / department
+                Select flat
               </option>
 
-              {STAFF_DEPARTMENTS.map((department) => (
-                <option key={department} value={department}>
-                  {department}
+              {FLAT_NUMBER_OPTIONS.map((flatNumber) => (
+                <option key={flatNumber} value={flatNumber}>
+                  {flatNumber}
                 </option>
               ))}
             </AuthSelect>
           </div>
-        )}
+
+          <AuthSelect
+            label="Flat ownership"
+            icon={Home}
+            name="ownership_type"
+            value={formData.ownership_type}
+            onChange={handleChange}
+          >
+            <option value="" disabled>
+              Select owner or rent
+            </option>
+            <option value="Owner">Owner</option>
+            <option value="Rent">Rent</option>
+          </AuthSelect>
+        </div>
 
         <div className="au-section-title">Security</div>
 

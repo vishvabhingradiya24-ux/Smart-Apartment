@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/apiBase.js";
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ArrowLeft, Lock, ShieldCheck } from "lucide-react";
@@ -87,15 +88,16 @@ function ResetPassword() {
 
     try {
       const response = await fetch(
-        "http://localhost:5000/api/resident/reset-password",
+        API_BASE_URL + "/api/resident/reset-password",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
+            email,
             resetToken,
-            password
+            newPassword: password
           })
         }
       );

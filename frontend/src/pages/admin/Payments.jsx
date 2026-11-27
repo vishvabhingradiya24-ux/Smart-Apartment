@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/apiBase.js";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Check, Clock3, CreditCard, ReceiptText, Search, Wallet } from "lucide-react";
 import AdminFormModal from "./AdminFormModal";
@@ -22,7 +23,7 @@ const Payments = () => {
   const [error, setError] = useState("");
   const token = sessionStorage.getItem("token");
 
-  const request = useCallback((url, options = {}) => fetch(`http://localhost:5000${url}`, {
+  const request = useCallback((url, options = {}) => fetch(`${API_BASE_URL}${url}`, {
     ...options,
     headers: {
       Authorization: `Bearer ${token}`,

@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/apiBase.js";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import "../../css/staff/staff_inventory.css";
 import "../../css/staff/staff_shared_theme.css";
@@ -33,7 +34,7 @@ function StaffAssets() {
 
   const fetchAssets = useCallback(async (signal) => {
     try {
-      const response = await fetch("http://localhost:5000/api/staff/assets", {
+      const response = await fetch(API_BASE_URL + "/api/staff/assets", {
         headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` }, signal,
       });
       const data = await response.json();
@@ -122,7 +123,7 @@ function StaffAssets() {
 
   const updateStatus = async (id, newStatus) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/staff/assets/${id}/status`, {
+      const response = await fetch(`${API_BASE_URL}/api/staff/assets/${id}/status`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${sessionStorage.getItem("token")}`,

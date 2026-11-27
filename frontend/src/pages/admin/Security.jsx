@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../utils/apiBase.js";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Check, DoorOpen, Search, Shield, UserRoundPlus } from "lucide-react";
 import "../../css/admin.css";
@@ -17,7 +18,7 @@ const Security = () => {
 
   const fetchSecurity = useCallback(async (signal) => {
     try {
-      const response = await fetch("http://localhost:5000/api/admin/security", {
+      const response = await fetch(API_BASE_URL + "/api/admin/security", {
         headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` }, signal,
       });
       const data = await response.json();

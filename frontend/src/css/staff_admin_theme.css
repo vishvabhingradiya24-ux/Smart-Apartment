@@ -167,8 +167,7 @@
 
 .modern-staff-layout .profile-pill,
 .modern-staff-layout .notification-btn,
-.staff-complaints-layout .complaints-profile,
-.staff-complaints-layout .complaints-back-btn {
+.staff-complaints-layout .complaints-profile {
   border-color: #e1e5e9;
   background: #ffffff;
   color: #344252;
@@ -177,8 +176,7 @@
 
 .modern-staff-layout .profile-pill:hover,
 .modern-staff-layout .notification-btn:hover,
-.staff-complaints-layout .complaints-profile:hover,
-.staff-complaints-layout .complaints-back-btn:hover {
+.staff-complaints-layout .complaints-profile:hover {
   border-color: #b8d3ca;
   background: #e8f3ef;
   box-shadow: 0 4px 12px rgba(31, 49, 44, .07);
